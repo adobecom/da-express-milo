@@ -14,7 +14,7 @@
       "id": "light-text-bubble",
       "category": "Cool",
       "styleName": "Light text bubble",
-      "fontSupported": "noto-sans",
+      "fontSupported": "source-han-sans-japanese",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -129,13 +129,14 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.3
     },
     {
       "id": "dark-text-bubble",
       "category": "Cool",
       "styleName": "Dark text bubble",
-      "fontSupported": "noto-sans",
+      "fontSupported": "source-han-sans-japanese",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -250,13 +251,14 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.3
     },
     {
       "id": "full-width",
       "category": "Cool",
       "styleName": "Full width",
-      "fontSupported": "noto-sans",
+      "fontSupported": "source-han-sans-japanese",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -371,7 +373,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.333
     },
     {
       "id": "diagonal-strikes",
@@ -492,7 +495,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.123
     },
     {
       "id": "acute-accents",
@@ -613,7 +617,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.411
     },
     {
       "id": "underline-with-dashes",
@@ -734,7 +739,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.889
     },
     {
       "id": "metal-umalauts",
@@ -855,7 +861,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.362
     },
     {
       "id": "bandaid",
@@ -976,7 +983,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.041
     },
     {
       "id": "strikethrough",
@@ -1097,7 +1105,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.123
     },
     {
       "id": "x-cross",
@@ -1218,7 +1227,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.561
     },
     {
       "id": "stroked",
@@ -1339,7 +1349,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.123
     },
     {
       "id": "lines-lines-lines",
@@ -1460,7 +1471,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.109
     },
     {
       "id": "shadow",
@@ -1581,7 +1593,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.123
     },
     {
       "id": "wavy",
@@ -1702,7 +1715,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.123
     },
     {
       "id": "double-underline",
@@ -1823,7 +1837,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.757
     },
     {
       "id": "music-bars",
@@ -1944,7 +1959,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.037
     },
     {
       "id": "all-the-way-up",
@@ -2065,7 +2081,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.111
     },
     {
       "id": "comet-tail",
@@ -2186,7 +2203,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 8.765
     },
     {
       "id": "hot",
@@ -2307,7 +2325,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.307
     },
     {
       "id": "weird-text",
@@ -2428,7 +2447,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 9.657
     },
     {
       "id": "right-direction-above",
@@ -2549,7 +2569,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.994
     },
     {
       "id": "right-direction-under",
@@ -2670,7 +2691,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.111
     },
     {
       "id": "stacked-above",
@@ -2791,7 +2813,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.796
     },
     {
       "id": "cross-it-under",
@@ -2912,7 +2935,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.041
     },
     {
       "id": "rain-on-top",
@@ -3033,7 +3057,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.895
     },
     {
       "id": "bubbles-on-top",
@@ -3154,7 +3179,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.105
     },
     {
       "id": "fading-effect",
@@ -3275,13 +3301,14 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.222
     },
     {
       "id": "weights",
       "category": "Symbol",
       "styleName": "Weights",
-      "fontSupported": "noto-sans",
+      "fontSupported": "gothic-a1",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -3396,7 +3423,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.222
     },
     {
       "id": "arrows",
@@ -3517,7 +3545,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.123
     },
     {
       "id": "cupido",
@@ -3638,7 +3667,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.128
     },
     {
       "id": "sparkles",
@@ -3759,7 +3789,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.123
     },
     {
       "id": "finish",
@@ -3880,7 +3911,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.133
     },
     {
       "id": "barcode",
@@ -4001,7 +4033,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.154
     }
   ]
 }

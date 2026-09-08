@@ -312,6 +312,12 @@ export async function decorateButtonsDeprecated(el, size) {
   if (!el.closest('.ax-columns') && !el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
   // DO NOT add any more exceptions above. We should be removing the exceptions and not adding more.
   el.querySelectorAll(':scope a:not(.con-button, .social-link)').forEach(($a) => {
+    // Mirrors decorateButtons' own #_button-<name> handling (milo's utils/decorate.js)
+    // since this deprecated path never calls it for these blocks.
+    [...$a.href.matchAll(/#_button-([a-zA-Z-]+)/g)].forEach((match) => {
+      $a.href = $a.href.replace(match[0], '');
+      $a.classList.add(match[1]);
+    });
     const originalHref = $a.href;
     const linkText = $a.textContent.trim();
     if ($a.children.length > 0) {

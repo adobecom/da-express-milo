@@ -17,6 +17,13 @@ import '../../scripts/color-shared/components/color-wheel-express/index.js';
 const ACTION_MENU_ID = 'action-menu-color-blindness';
 const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 
+// A palette is color-blind safe when no two colors conflict under any of the
+// simulated CVD types. Surfaced via the palette context so a theme saved from
+// here is tagged `colorblind-safe` (drives the libraries grid badge).
+function isColorBlindSafe(colors) {
+  return TYPE_ORDER.every((type) => getConflictPairs(colors, type).length === 0);
+}
+
 let layoutInstance = null;
 let controlsMenu = null;
 let stripRenderer = null;
@@ -68,7 +75,8 @@ export default async function decorate(block) {
     block.appendChild(section);
 
     const {
-      getResolvedPalette, getResolvedPaletteName, getBaseColor,
+      getResolvedPalette, getResolvedPaletteName, getResolvedPaletteTags,
+      getResolvedItemId, getResolvedLibraryId, getBaseColor,
     } = createColorPaletteParamApi();
     const paletteColors = getResolvedPalette();
     const baseColorHex = getBaseColor();
@@ -76,10 +84,21 @@ export default async function decorate(block) {
       ? paletteColors.findIndex((c) => c.toUpperCase() === baseColorHex.toUpperCase())
       : -1;
     const hasValidBaseColor = baseColorIndex >= 0;
+    const savedItemId = getResolvedItemId();
+    const savedLibraryId = getResolvedLibraryId();
+    const paletteName = getResolvedPaletteName() || '';
     const initialPalette = {
-      name: getResolvedPaletteName() || '',
+      name: paletteName,
       colors: paletteColors,
+      tags: getResolvedPaletteTags(),
+      accessibilityData: { colorBlindSafe: isColorBlindSafe(paletteColors) },
       ...(hasValidBaseColor && { baseColorIndex }),
+      ...(savedItemId && savedLibraryId && {
+        id: savedItemId,
+        libraryId: savedLibraryId,
+        savedColors: [...paletteColors],
+        savedName: paletteName,
+      }),
     };
 
     const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
@@ -114,6 +133,10 @@ export default async function decorate(block) {
         navLinks,
         controls,
         daaLh: 'color-blindness',
+        getName: () => initialPalette.name,
+        paletteTags: initialPalette.tags,
+        paletteId: initialPalette.id,
+        paletteLibraryId: initialPalette.libraryId,
       },
     });
 
@@ -182,6 +205,7 @@ export default async function decorate(block) {
       });
       conflicts.setConflicts(allPairs.length > 0);
       wheelEl.conflictPairs = allPairs;
+      return allPairs.length === 0;
     };
 
     const syncRailConflicts = () => {
@@ -202,7 +226,7 @@ export default async function decorate(block) {
         // computeAndSetConflictPairs was already called before stripRenderer.update().
         if (syncingFromController) return;
         const colors = (state.swatches || []).map((s) => s.hex);
-        computeAndSetConflictPairs(colors);
+        const cbSafe = computeAndSetConflictPairs(colors);
 
         const currentColors = (controller.getState()?.swatches || []).map((s) => s.hex);
         syncingFromRail = true;
@@ -214,7 +238,11 @@ export default async function decorate(block) {
           }
         });
         if (anyChanged) {
-          layoutInstance.context.set('palette', { ...initialPalette, colors });
+          layoutInstance.context.set('palette', {
+            ...initialPalette,
+            colors,
+            accessibilityData: { colorBlindSafe: cbSafe },
+          });
         }
         syncingFromRail = false;
       });
@@ -223,9 +251,12 @@ export default async function decorate(block) {
     controllerUnsubscribe = controller.subscribe((state) => {
       if (syncingFromRail) return;
       const colors = (state.swatches || []).map((s) => s.hex);
-      layoutInstance.context.set('palette', { ...initialPalette, colors });
-
-      computeAndSetConflictPairs(colors);
+      const cbSafe = computeAndSetConflictPairs(colors);
+      layoutInstance.context.set('palette', {
+        ...initialPalette,
+        colors,
+        accessibilityData: { colorBlindSafe: cbSafe },
+      });
 
       syncingFromController = true;
       stripRenderer?.update([{ ...initialPalette, colors }]);

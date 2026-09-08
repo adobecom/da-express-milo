@@ -91,6 +91,7 @@ const CONFIG = {
   faasCloseModalAfterSubmit: 'on',
   locales: {
     '': { ietf: 'en-US', tk: 'jdq5hay.css' },
+    ara: { ietf: 'ar', tk: 'cbp4pzm.css', dir: 'rtl' },
     br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
     // eslint-disable-next-line max-len
     // TODO check that this ietf is ok to use everywhere. It's different in the old project zh-Hans-CN
@@ -363,10 +364,33 @@ function preloadLCPImage(img) {
   }
 }());
 
+let fragmentLcpPreloaded = false;
+// eslint-disable-next-line import/prefer-default-export
+export function decorateAreaWithLCP(area = document, options = {}) {
+  const { fragmentLink } = options;
+  if (fragmentLink && !fragmentLcpPreloaded) {
+    const firstSection = document.querySelector('body > main > div:nth-child(1)');
+    if (firstSection?.querySelector('a.fragment') === fragmentLink) {
+      const section = area.querySelector('body > div') || area;
+      const images = section.querySelectorAll('img');
+      if (images.length) {
+        images.forEach(eagerLoad);
+        preloadLCPImage(images[0]);
+        fragmentLcpPreloaded = true;
+      }
+    }
+  }
+  decorateArea(area, options);
+}
+CONFIG.decorateArea = decorateAreaWithLCP;
+
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
   if (getMetadata('theme') !== 'doodlebug') {
     paths.push('/express/code/styles/styles.css');
+  }
+  if (getMetadata('font-styling')?.trim().toLowerCase() === 'jp') {
+    paths.push('/express/code/styles/font-styling-jp.css');
   }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {

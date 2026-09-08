@@ -2,7 +2,9 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
-import { createToolbar } from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
+import {
+  createToolbar, refreshLibraryButtonsStacking,
+} from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
 import { consumeSusiColorRedirect } from '../../../../express/code/scripts/color-shared/utils/susiRedirect.js';
 import { MOCK_PALETTE, MOCK_GRADIENT } from './mocks/palette.js';
 import { createMockGetLibraryContext } from './mocks/stubs.js';
@@ -694,5 +696,87 @@ describe('createToolbar', () => {
       changeListeners.forEach((cb) => cb({ matches: true }));
       expect(ctaBtn.textContent).to.equal('Mobile CTA');
     });
+  });
+});
+
+describe('refreshLibraryButtonsStacking', () => {
+  let rectStub;
+  let rafStub;
+
+  beforeEach(() => {
+    // getBoundingClientRect is stubbed on the prototype rather than the
+    // instance: measureNaturalGridItemHeight measures a cloneNode(true) of
+    // each button, and clones don't inherit instance-level sinon stubs.
+    // Keying the fake off dataset (which cloneNode does copy) and each
+    // call's own inline-size lets the same stub answer correctly for both
+    // the live button and its temporary clone.
+    rectStub = sinon.stub(Element.prototype, 'getBoundingClientRect').callsFake(function fakeRect() {
+      const isMaxContent = this.style.inlineSize === 'max-content';
+      const height = Number(isMaxContent ? this.dataset.natural : this.dataset.squeezed);
+      return { height };
+    });
+    // Real requestAnimationFrame is throttled/paused in backgrounded tabs,
+    // which this suite's tab can be when many test files run concurrently —
+    // that hung measureNaturalGridItemHeight's await past mocha's timeout.
+    // The decision logic under test doesn't depend on real frame timing, so
+    // resolve on the next microtask instead.
+    rafStub = sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      Promise.resolve().then(cb);
+      return 0;
+    });
+  });
+
+  afterEach(() => {
+    rectStub.restore();
+    rafStub.restore();
+    sinon.restore();
+    document.body.innerHTML = '';
+  });
+
+  function makeGroup() {
+    const group = document.createElement('div');
+    document.body.appendChild(group);
+    return group;
+  }
+
+  // A button whose live rendered height is `squeezedHeight` under its current
+  // (possibly wrap-constrained) width, but `naturalHeight` once
+  // measureNaturalGridItemHeight's clone sets inline-size: max-content to
+  // reveal the unwrapped single-line height. Appended to `group` since the
+  // measurement reads el.parentElement to place its measurement clone.
+  function makeButton(group, naturalHeight, squeezedHeight = naturalHeight) {
+    const el = document.createElement('div');
+    el.dataset.natural = String(naturalHeight);
+    el.dataset.squeezed = String(squeezedHeight);
+    group.appendChild(el);
+    return el;
+  }
+
+  it('does not stack when both buttons render at their natural single-line height', async () => {
+    const group = makeGroup();
+    await refreshLibraryButtonsStacking(group, makeButton(group, 40), makeButton(group, 40));
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.false;
+  });
+
+  it('stacks when either button wraps (rendered height exceeds its natural single-line height)', async () => {
+    const group = makeGroup();
+    await refreshLibraryButtonsStacking(group, makeButton(group, 40), makeButton(group, 40, 80));
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
+  });
+
+  it('un-stacks again once there is enough room (e.g. after a resize)', async () => {
+    const group = makeGroup();
+    const btnA = makeButton(group, 40);
+    const btnB = makeButton(group, 40, 80);
+    await refreshLibraryButtonsStacking(group, btnA, btnB);
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
+
+    btnB.dataset.squeezed = '40';
+    await refreshLibraryButtonsStacking(group, btnA, btnB);
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.false;
+  });
+
+  it('is a no-op when group or buttons are missing', async () => {
+    await refreshLibraryButtonsStacking(null, null, null);
   });
 });

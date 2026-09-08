@@ -81,7 +81,7 @@
  
 
 .gen-ai-cards .gen-ai-cards-heading-section h2 {
-  text-align: left;
+  text-align: start;
   margin-bottom: var(--spacing-100);
   font-size: var(--heading-font-size-m);
   line-height: 130%;
@@ -89,7 +89,7 @@
 }
 
 .gen-ai-cards .gen-ai-cards-heading-section p {
-  text-align: left;
+  text-align: start;
   margin: 0; 
 }
 
@@ -129,6 +129,11 @@
   scroll-padding-left: var(--spacing-350);
 }
 
+html[dir="rtl"] .gen-ai-cards.homepage .carousel-container {
+  scroll-padding-left: unset;
+  scroll-padding-right: var(--spacing-350);
+}
+
 .gen-ai-cards .card {
   height: 415px;
   box-sizing: border-box;
@@ -166,7 +171,7 @@
 }
 
 .gen-ai-cards .card .text-wrapper {
-  text-align: left;
+  text-align: start;
 }
 
 .gen-ai-cards .card .text-wrapper p {
@@ -317,11 +322,19 @@ main .gen-ai-cards.homepage .card .media-wrapper {
 }
 
 .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-child(2) {
-  margin-left: 20px;
+  margin-inline-start: 20px;
+}
+
+.gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-last-child(2) {
+  margin-inline-end: 20px;
 }
 
 .gen-ai-cards.homepage.v2 .carousel-container .carousel-element.card:nth-child(2) {
-  margin-left: 16px;
+  margin-inline-start: 16px;
+}
+
+.gen-ai-cards.homepage.v2 .carousel-container .carousel-element.card:nth-last-child(2) {
+  margin-inline-end: 16px;
 }
 
 .gen-ai-cards .card .gen-ai-input-form .gen-ai-submit {
@@ -398,10 +411,6 @@ main .gen-ai-cards.homepage .carousel-container .carousel-platform.right-fader:n
   mask-image: none;
 }
 
-main .gen-ai-cards.homepage .carousel-container .carousel-platform.left-fader {
-  padding-right: var(--spacing-350);
-}
-
 main .gen-ai-cards.homepage .carousel-container .carousel-fader-left {
   align-items: end;
   top: 45px;
@@ -415,6 +424,28 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right {
   top: 45px;
   right: 15px;
   pointer-events: none;
+}
+
+/* RTL: the widget's float/absolute-position math for the arrow icon assumes
+   ltr, so force it regardless of page direction to keep the icon centered
+   in its circle, then mirror the pair to the left (reading end). carousel-fader-left
+   always scrolls physically left and carousel-fader-right always scrolls physically
+   right (their names track scroll direction, not screen side), so carousel-fader-left
+   must stay the leftmost of the pair to keep its "<" pointing further left, away
+   from carousel-fader-right, instead of back toward it. */
+html[dir="rtl"] .gen-ai-cards .carousel-fader-left,
+html[dir="rtl"] .gen-ai-cards .carousel-fader-right {
+  direction: ltr;
+}
+
+html[dir="rtl"] main .gen-ai-cards.homepage .carousel-container .carousel-fader-left {
+  right: auto;
+  left: 15px;
+}
+
+html[dir="rtl"] main .gen-ai-cards.homepage .carousel-container .carousel-fader-right {
+  right: auto;
+  left: 42px;
 }
 
 .gen-ai-cards.homepage .gen-ai-cards-heading-section p {
@@ -432,7 +463,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right {
 
 .gen-ai-cards .gen-ai-cards-heading-section h2,
 .gen-ai-cards .gen-ai-cards-heading-section p {
-  text-align: left;
+  text-align: start;
   max-width: none;
 }
 
@@ -449,7 +480,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right {
 
 .gen-ai-cards.homepage.spotlight .gen-ai-cards-heading-section h2,
 .gen-ai-cards.homepage.spotlight .gen-ai-cards-heading-section p {
-  text-align: left;
+  text-align: start;
   max-width: none;
 }
 
@@ -498,6 +529,12 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   margin: 0px;
 }
 
+/* RTL: the prev/next chevrons point a fixed physical direction, but scrolling
+   forward moves toward the left instead of the right, so flip them to match. */
+html[dir="rtl"] .gen-ai-cards .gallery-control svg {
+  transform: rotate(180deg);
+}
+
 .gen-ai-cards .card .beta-tag {
   color: var(--Content-Accent-default, #5258E4);
   font-size: var(--font-size-beta);
@@ -526,7 +563,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
 
   .gen-ai-cards .gen-ai-cards-heading-section h3,
   .gen-ai-cards .gen-ai-cards-heading-section p {
-    text-align: left;
+    text-align: start;
   }
 
   .gen-ai-cards .gen-ai-cards-heading-section .gen-ai-cards-link {
@@ -556,16 +593,25 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
     --heading-max-width: 600px;
   }
 
-    .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-child(2) {
-    margin-left: var(--spacing-350);
+  .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-child(2) {
+    margin-inline-start: var(--spacing-350);
+  }
+
+  .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-last-child(2) {
+    margin-inline-end: var(--spacing-350);
   }
 
   .section:has(.gen-ai-cards.homepage.v2) {
     padding-top: var(--spacing-500);
     padding-bottom: var(--spacing-500);
   }
+
   .gen-ai-cards.homepage.v2 .carousel-container .carousel-element.card:nth-child(2) {
-    margin-left: var(--spacing-500);
+    margin-inline-start: var(--spacing-500);
+  }
+
+  .gen-ai-cards.homepage.v2 .carousel-container .carousel-element.card:nth-last-child(2) {
+    margin-inline-end: var(--spacing-500);
   }
 }
 
@@ -606,7 +652,11 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   }
 
   .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-child(2) {
-    margin-left: var(--spacing-300);
+    margin-inline-start: var(--spacing-300);
+  }
+
+  .gen-ai-cards.homepage .carousel-container .carousel-element.card:nth-last-child(2) {
+    margin-inline-end: var(--spacing-300);
   }
 
   .gen-ai-cards .carousel-container .carousel-fader-left,
@@ -627,7 +677,7 @@ main .gen-ai-cards.homepage .carousel-container .carousel-fader-right.arrow-hidd
   }
 
   .gen-ai-cards.homepage .card .text-wrapper {
-    text-align: left;
+    text-align: start;
   }
 
   main .gen-ai-cards.homepage .gen-ai-cards-heading {

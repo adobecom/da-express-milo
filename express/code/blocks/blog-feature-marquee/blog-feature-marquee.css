@@ -513,7 +513,7 @@ main .section .blog-feature-marquee p {
   }
 
   .blog-feature-marquee .blog-feature-marquee-content {
-    width: var(--ax-grid-4-col-width);
+    width: var(--ax-grid-6-col-width);
     flex-shrink: 0;
   }
 

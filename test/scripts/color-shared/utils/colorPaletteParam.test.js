@@ -5,6 +5,8 @@ import {
   createColorPaletteParamApi,
   PALETTE_PRESETS,
   PARAM_NAME,
+  PARAM_PALETTE_TAGS,
+  buildColorToolUrl,
   isValidHex,
   normalizeHex,
   pickRandomPalette,
@@ -216,6 +218,73 @@ describe('createColorPaletteParamApi', () => {
       api.setOnUrl(url, ['#FF0000', 'invalid', '#00FF00']);
       expect(url.searchParams.get('color-palette')).to.equal('FF0000,00FF00');
     });
+
+    it('sets palette name when provided', () => {
+      const url = new URL('https://example.test/page');
+      api.setOnUrl(url, ['#FF0000'], { name: 'My Theme' });
+      expect(url.searchParams.get('color-palette-name')).to.equal('My Theme');
+    });
+
+    it('sets comma-separated tags when provided', () => {
+      const url = new URL('https://example.test/page');
+      api.setOnUrl(url, ['#FF0000'], { name: 'My Theme', tags: ['Ocean', 'Blue'] });
+      expect(url.searchParams.get(PARAM_PALETTE_TAGS)).to.equal('Ocean,Blue');
+    });
+
+    it('filters empty tag strings', () => {
+      const url = new URL('https://example.test/page');
+      api.setOnUrl(url, ['#FF0000'], { tags: ['Ocean', '', '  ', 'Blue'] });
+      expect(url.searchParams.get(PARAM_PALETTE_TAGS)).to.equal('Ocean,Blue');
+    });
+
+    it('omits tags param when tags array is empty', () => {
+      const url = new URL('https://example.test/page');
+      api.setOnUrl(url, ['#FF0000'], { tags: [] });
+      expect(url.searchParams.has(PARAM_PALETTE_TAGS)).to.equal(false);
+    });
+  });
+
+  describe('getResolvedPaletteTags', () => {
+    it('parses comma-separated tags from URL', () => {
+      const tags = api.getResolvedPaletteTags(
+        'https://example.test/page?color-palette-tags=Ocean,Blue,Summer',
+      );
+      expect(tags).to.deep.equal(['Ocean', 'Blue', 'Summer']);
+    });
+
+    it('returns empty array when param is missing', () => {
+      expect(api.getResolvedPaletteTags('https://example.test/page')).to.deep.equal([]);
+    });
+
+    it('returns empty array for invalid URL', () => {
+      expect(api.getResolvedPaletteTags('not-a-url')).to.deep.equal([]);
+    });
+  });
+});
+
+describe('buildColorToolUrl', () => {
+  it('builds URL with palette, name, and tags', () => {
+    const result = buildColorToolUrl(
+      'https://example.test/create/color-accessibility',
+      {
+        colors: ['#FF0000', '#00FF00'],
+        name: 'My Theme',
+        tags: ['Ocean', 'Blue'],
+      },
+      'https://example.test/page',
+    );
+    const nextUrl = new URL(result);
+    expect(nextUrl.pathname).to.equal('/create/color-accessibility');
+    expect(nextUrl.searchParams.get('color-palette')).to.equal('FF0000,00FF00');
+    expect(nextUrl.searchParams.get('color-palette-name')).to.equal('My Theme');
+    expect(nextUrl.searchParams.get(PARAM_PALETTE_TAGS)).to.equal('Ocean,Blue');
+  });
+
+  it('returns null when colors are empty', () => {
+    expect(buildColorToolUrl('https://example.test/create/color-accessibility', {
+      colors: [],
+      name: 'My Theme',
+    })).to.equal(null);
   });
 });
 

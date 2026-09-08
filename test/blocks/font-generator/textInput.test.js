@@ -49,6 +49,28 @@ describe('font-generator/textInput', () => {
     expect(panel.querySelector('.text-wrapper').textContent).to.equal(DEFAULT_PLACEHOLDERS.tryThese);
   });
 
+  it('renders a visible label from the placeholder, associated with the textarea', () => {
+    const { panel } = createTextInput({ strings: DEFAULT_PLACEHOLDERS });
+    const label = panel.querySelector('label.preview-text-label');
+    const ta = panel.querySelector('textarea.label');
+    expect(label).to.exist;
+    expect(label.textContent).to.equal(DEFAULT_PLACEHOLDERS.previewTextLabel);
+    expect(ta.id).to.have.length.greaterThan(0);
+    expect(label.getAttribute('for')).to.equal(ta.id);
+  });
+
+  it('honours an authored preview-text label', () => {
+    const strings = { ...DEFAULT_PLACEHOLDERS, previewTextLabel: 'Texto de vista previa' };
+    const { panel } = createTextInput({ strings });
+    expect(panel.querySelector('label.preview-text-label').textContent).to.equal('Texto de vista previa');
+  });
+
+  it('gives each instance a unique input id', () => {
+    const a = createTextInput().panel.querySelector('textarea.label').id;
+    const b = createTextInput().panel.querySelector('textarea.label').id;
+    expect(a).to.not.equal(b);
+  });
+
   it('shows the initial character count', () => {
     const { panel } = createTextInput();
     expect(panel.querySelector('.character-count').textContent).to.equal('0/2,000');
@@ -108,6 +130,92 @@ describe('font-generator/textInput', () => {
     panel.remove();
   });
 
+  it('marks a clicked pill is-active and clears it from the previously active pill', () => {
+    const { panel } = createTextInput({ suggestions: ['One', 'Two'] });
+    document.body.append(panel);
+    const [first, second] = panel.querySelectorAll('.tag-pills');
+    first.click();
+    expect(first.classList.contains('is-active')).to.be.true;
+    second.click();
+    expect(first.classList.contains('is-active')).to.be.false;
+    expect(second.classList.contains('is-active')).to.be.true;
+    panel.remove();
+  });
+
+  it('clears the active pill when the preview text is edited directly', () => {
+    const { panel } = createTextInput({ suggestions: ['One'] });
+    document.body.append(panel);
+    const pill = panel.querySelector('.tag-pills');
+    pill.click();
+    expect(pill.classList.contains('is-active')).to.be.true;
+    const ta = panel.querySelector('textarea.label');
+    ta.value = 'Something else';
+    ta.dispatchEvent(new Event('input'));
+    expect(pill.classList.contains('is-active')).to.be.false;
+    panel.remove();
+  });
+
+  describe('suggestion pills — single tab stop with arrow-key nav', () => {
+    it('names the toolbar after the visible "try these" label', () => {
+      const { panel } = createTextInput({ strings: DEFAULT_PLACEHOLDERS, suggestions: ['One', 'Two'] });
+      const wrap = panel.querySelector('.tags-wrap');
+      const tryThese = panel.querySelector('.text-wrapper');
+      expect(wrap.getAttribute('role')).to.equal('toolbar');
+      expect(tryThese.id).to.have.length.greaterThan(0);
+      expect(wrap.getAttribute('aria-labelledby')).to.equal(tryThese.id);
+    });
+
+    it('makes only the first pill a tab stop', () => {
+      const { panel } = createTextInput({ suggestions: ['One', 'Two', 'Three'] });
+      const pills = panel.querySelectorAll('.tag-pills');
+      expect(pills[0].tabIndex).to.equal(0);
+      expect(pills[1].tabIndex).to.equal(-1);
+      expect(pills[2].tabIndex).to.equal(-1);
+    });
+
+    it('ArrowRight moves focus and the tab stop to the next pill', () => {
+      const { panel } = createTextInput({ suggestions: ['One', 'Two', 'Three'] });
+      document.body.append(panel);
+      const pills = panel.querySelectorAll('.tag-pills');
+      pills[0].focus();
+      pills[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(document.activeElement).to.equal(pills[1]);
+      expect(pills[0].tabIndex).to.equal(-1);
+      expect(pills[1].tabIndex).to.equal(0);
+      panel.remove();
+    });
+
+    it('ArrowLeft from the first pill wraps to the last', () => {
+      const { panel } = createTextInput({ suggestions: ['One', 'Two', 'Three'] });
+      document.body.append(panel);
+      const pills = panel.querySelectorAll('.tag-pills');
+      pills[0].focus();
+      pills[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+      expect(document.activeElement).to.equal(pills[2]);
+      panel.remove();
+    });
+
+    it('End moves focus to the last pill', () => {
+      const { panel } = createTextInput({ suggestions: ['One', 'Two', 'Three'] });
+      document.body.append(panel);
+      const pills = panel.querySelectorAll('.tag-pills');
+      pills[0].focus();
+      pills[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+      expect(document.activeElement).to.equal(pills[2]);
+      panel.remove();
+    });
+
+    it('Home moves focus back to the first pill', () => {
+      const { panel } = createTextInput({ suggestions: ['One', 'Two', 'Three'] });
+      document.body.append(panel);
+      const pills = panel.querySelectorAll('.tag-pills');
+      pills[2].focus();
+      pills[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+      expect(document.activeElement).to.equal(pills[0]);
+      panel.remove();
+    });
+  });
+
   it('updates the counter live as text is typed', () => {
     const { panel } = createTextInput();
     const ta = panel.querySelector('textarea.label');
@@ -122,6 +230,21 @@ describe('font-generator/textInput', () => {
     ta.value = 'a'.repeat(1234);
     ta.dispatchEvent(new Event('input'));
     expect(panel.querySelector('.character-count').textContent).to.equal('1,234/2,200');
+  });
+
+  it('activates the text field when typing after keyboard focus', () => {
+    const { panel } = createTextInput();
+    document.body.append(panel);
+    const field = panel.querySelector('.text-field');
+    const ta = panel.querySelector('textarea.label');
+    ta.focus();
+    expect(field.classList.contains('is-active')).to.be.false;
+    ta.value = 'Typed';
+    ta.dispatchEvent(new Event('input'));
+    expect(field.classList.contains('is-active')).to.be.true;
+    ta.dispatchEvent(new FocusEvent('blur', { bubbles: true, cancelable: true }));
+    expect(field.classList.contains('is-active')).to.be.false;
+    panel.remove();
   });
 
   it('debounced typing updates previewText in the store', () => {

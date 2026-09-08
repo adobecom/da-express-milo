@@ -118,7 +118,7 @@
   position: absolute;
   top: var(--spacing-200);
   right: var(--spacing-200);
-  background: var(--color-light-gray);
+  background: var(--color-white);
   border: none;
   padding: var(--spacing-100);
   cursor: pointer;
@@ -323,6 +323,20 @@ body.ax-color-modal-open {
 
   .ax-color-modal-content::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Palette/gradient modals render the floating toolbar flush to the content
+     edge, and this scroll container clips (overflow-x: hidden / overflow-y: auto).
+     Reserve a small gutter so the CTA / action button :focus-visible rings are
+     not clipped on the right and bottom; the negative margin keeps the content
+     visually flush (no layout shift). */
+  .ax-color-modal-content:has(.modal-palette-toolbar) {
+    width: auto;
+    box-sizing: border-box;
+    padding-inline: var(--spacing-100);
+    margin-inline: calc(-1 * var(--spacing-100));
+    padding-bottom: var(--spacing-100);
+    margin-bottom: calc(-1 * var(--spacing-100));
   }
 
   .ax-color-modal-actions {

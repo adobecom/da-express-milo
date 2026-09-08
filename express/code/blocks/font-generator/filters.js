@@ -1,6 +1,7 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
 import { getState, setState, subscribe, getCategories } from './state.js';
 import { createExpressAccordion } from '../../scripts/color-shared/spectrum/index.js';
+import { setDaaLL } from '../../scripts/utils/analytics.js';
 
 const ADOBE_FONTS_HREF = 'https://fonts.adobe.com';
 
@@ -14,9 +15,9 @@ export function createFontsIcon() {
 // ariaKey: placeholder key resolved at init time; announced by screen readers
 // data-category on the button always stays the raw category string for state matching.
 const CATEGORY_CONFIG = {
-  Cool: { label: 'ⓒⓞⓞⓛ', ariaKey: 'fg-cool' },
-  Glitch: { label: 'G̶̶l̶̶i̶̶t̶̶c̶̶h̶̶', ariaKey: 'fg-glitch' },
-  Symbol: { label: '❚█══Symbol══█❚', ariaKey: 'fg-symbol' },
+  Cool: { label: 'ⓒⓞⓞⓛ', ariaKey: 'font-generator-cool' },
+  Glitch: { label: 'G̶̶l̶̶i̶̶t̶̶c̶̶h̶̶', ariaKey: 'font-generator-glitch' },
+  Symbol: { label: '❚█══Symbol══█❚', ariaKey: 'font-generator-symbol' },
 };
 
 export async function fetchStrings(keyFallbackMap) {
@@ -47,6 +48,7 @@ export function buildPromo(btnClass, { title, cta } = {}) {
     target: '_blank',
     rel: 'noopener noreferrer',
   }, cta);
+  setDaaLL(link, cta);
 
   const promo = createTag('div', { class: 'fg-promo' });
   promo.append(left, link);
@@ -59,7 +61,7 @@ function buildFilterList(categories, strings) {
   const allBtn = createTag('button', {
     class: 'fg-filter-btn',
     'data-category': '',
-    'aria-label': strings['fg-all'],
+    'aria-label': strings['font-generator-all'],
   }, '𝓐𝓵𝓵');
   list.appendChild(allBtn);
 
@@ -109,23 +111,23 @@ export default async function init(els, { showCTA = true, onSelect } = {}) {
   const [categories, strings] = await Promise.all([
     Promise.resolve(getCategories()),
     fetchStrings({
-      'fg-all': 'All',
-      'fg-categories': 'Categories',
-      'fg-cool': 'Cool',
-      'fg-glitch': 'Glitch',
-      'fg-symbol': 'Symbol text',
-      'fg-promo-title': 'Looking for more fonts?',
-      'fg-promo-cta': 'Go to Adobe Fonts',
+      'font-generator-all': 'All',
+      'font-generator-categories': 'Categories',
+      'font-generator-cool': 'Cool',
+      'font-generator-glitch': 'Glitch',
+      'font-generator-symbol': 'Symbol',
+      'font-generator-promo-title': 'Looking for more fonts?',
+      'font-generator-promo-cta': 'Go to Adobe Fonts',
     }),
   ]);
-  const promoStrings = { title: strings['fg-promo-title'], cta: strings['fg-promo-cta'] };
+  const promoStrings = { title: strings['font-generator-promo-title'], cta: strings['font-generator-promo-cta'] };
 
   const cleanups = await Promise.all([...els].map(async (el) => {
     const filterList = buildFilterList(categories, strings);
     initArrowNav(filterList);
 
     const { element: accordion, destroy } = await createExpressAccordion({
-      label: strings['fg-categories'],
+      label: strings['font-generator-categories'],
       content: filterList,
       open: true,
       size: 's',

@@ -15,14 +15,10 @@ main .section .discover-cards {
 }
 
 .discover-cards .subtitle {
-    padding-bottom: var(--spacing-500);
-    margin: 0;
-}
-
-.discover-cards .sub-header {
     font-weight: 400;
     font-size: var(--ax-body-s-size);
     text-align: center;
+    padding-bottom: var(--spacing-500);
     margin: var(--spacing-350) 0 var(--spacing-100) 0;
     padding-left: var(--spacing-350);
     padding-right: var(--spacing-350);
@@ -129,6 +125,7 @@ main .section .discover-cards {
 .discover-cards .center-title {
     text-align: center;
     font-size: var(--heading-font-size-m);
+    font-weight: var(--heading-font-weight);
     padding: 0 var(--spacing-300) var(--spacing-300);
 }
 .discover-cards .gallery-control {
@@ -138,6 +135,7 @@ main .section .discover-cards {
     justify-content: flex-end;
     gap: var(--spacing-100);
     align-items: center;
+    max-width: 1700px;
 }
 .discover-cards.flip .gallery-control {
   padding-top: var(--spacing-600);
@@ -146,11 +144,12 @@ main .section .discover-cards {
     display: none;
 }
 .discover-cards .cards-container .card .text-content {
-    text-align: left;
+    text-align: start;
 }
 .discover-cards .cards-container .card .text-content .header {
-    text-align: left;
+    text-align: start;
     font-size: var(--ax-heading-l-size);
+    font-weight: var(--heading-font-weight);
     margin-top: 17px;
 }
 .discover-cards .cards-container .card .text-content .body {
@@ -163,27 +162,28 @@ main .section .discover-cards {
     height: 147px;
     margin-top: var(--spacing-80);
 }
-.discover-cards .card .button-container {
-    text-align: left;
-}
-.section .discover-cards .card .button-container a {
+  .discover-cards .card :is(.button-container, .action-area) {
+      text-align: start;
+  }
+
+  .section .discover-cards .card :is(.button-container, .action-area) a {
     background-color: var(--color-gray-800-variant);
     color: var(--color-white);
     border: none;
     margin-top: var(--spacing-500);
-    margin-left: 0;
+    margin-inline-start: 0;
 }
 
 .discover-cards .cards-container.gallery {
-    scroll-padding-left: var(--spacing-350);
+    scroll-padding-inline-start: var(--spacing-350);
 }
 .discover-cards .cards-container .card:first-child {
-    margin-left: var(--spacing-350);
+    margin-inline-start: var(--spacing-350);
 }
 
 @media (min-width: 600px) {
   .discover-cards .center-title {
-        padding-bottom: var(--spacing-100);
+        padding-bottom: var(--spacing-500);
         font-size: var(--heading-font-size-l);
     }
 
@@ -206,7 +206,7 @@ main .section .discover-cards {
         width: auto;
     }
     .discover-cards .cards-container .card .text-content {
-        text-align: left;
+        text-align: start;
         width: 351px;
         margin-left: auto;
         margin-right: auto;
@@ -219,10 +219,10 @@ main .section .discover-cards {
         height: 198px;
     }
     .discover-cards .cards-container.gallery {
-        scroll-padding-left: 60px;
+        scroll-padding-inline-start: 60px;
     }
     .discover-cards .cards-container .card:first-child {
-        margin-left: 60px;
+        margin-inline-start: var(--spacing-300);
     }
     .discover-cards.flip .center-title {
       font-size: var(--heading-font-size-m);
@@ -232,10 +232,8 @@ main .section .discover-cards {
       padding-bottom: var(--spacing-800);
     }
     .discover-cards.flip .cards-container.gallery {
-      padding-left: var(--spacing-500);
-      padding-right: var(--spacing-500);
-      scroll-padding-left: var(--spacing-500);
-      scroll-padding-right: var(--spacing-500);
+      padding-inline: var(--spacing-500);
+      scroll-padding-inline: var(--spacing-500);
       justify-content: center;
     }
     .section:has(.discover-cards.v2) {
@@ -254,11 +252,14 @@ main .section .discover-cards {
     .discover-cards .cards-container {
         margin: auto;
     }
+    .discover-cards .gallery-control {
+        margin: 0 auto;
+    }
     .discover-cards .cards-container.gallery {
-        scroll-padding-left: 100px;
+        scroll-padding-inline-start: 100px;
     }
     .discover-cards .cards-container .card:first-child {
-        margin-left: 100px;
+        margin-inline-start: 100px;
     }
 }
 
@@ -341,6 +342,10 @@ main .section .discover-cards {
     stroke: var(--color-gray-300);
 }
 
+html[dir="rtl"] .discover-cards .gallery-control button {
+  transform: scaleX(-1);
+}
+
 .discover-cards.flip .flip-card-inner {
   position: relative;
   width: 100%;
@@ -371,6 +376,7 @@ main .section .discover-cards {
   grid-area: 1 / 1;
   min-width: 0;
   overflow: hidden;
+  transition: opacity 0s linear 175ms;
 }
 .discover-cards.flip .flip-card-back {
   width: 100%;
@@ -379,6 +385,22 @@ main .section .discover-cards {
   transform: rotateY(180deg);
   position: relative;
   overflow: visible;
+  opacity: 0;
+}
+
+/*
+ * Safari and Firefox ignore backface-visibility on grid items, so the away-facing
+ * face bleeds through the visible one. Hide it with opacity instead (opacity never
+ * affects the grid's track sizing, so the card can't collapse mid-flip the way a
+ * visibility toggle makes it in Safari). The transition delay swaps the faces at the
+ * 175ms midpoint of the 350ms rotation so the flip animation is preserved.
+ */
+.discover-cards.flip .card.is-flipped .flip-card-front {
+  opacity: 0;
+}
+
+.discover-cards.flip .card.is-flipped .flip-card-back {
+  opacity: 1;
 }
 
 .discover-cards.flip .flip-card-back .scrollable-content {

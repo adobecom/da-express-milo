@@ -11,6 +11,7 @@ class FontGeneratorBlock {
     // Text input (preview input + suggestions)
     this.textInput = this.sideCol.locator('.font-generator-text-input');
     this.textarea = this.textInput.locator('textarea.label');
+    this.suggestionsToolbar = this.textInput.locator('.tags-wrap');
     this.suggestionPills = this.textInput.locator('.tag-pills');
 
     // Desktop-inline filters — visible >=1200px, inside the sticky sidebar.
@@ -43,6 +44,21 @@ class FontGeneratorBlock {
     this.fontCardGrid = this.mainCol.locator('.font-card-grid');
     this.fontCards = this.fontCardGrid.locator('.font-card');
     this.loadMoreBtn = this.mainCol.locator('.font-card-load-more');
+
+    // Per-card interactive children — out of the normal tab order until
+    // their card is "entered" (see cardCopyBtn(n)/cardCta(n) below).
+    this.cardCopyBtn = this.fontCards.first().locator('.font-card-copy-btn');
+    this.cardCta = this.fontCards.first().locator('.font-card-cta');
+  }
+
+  // nth card's copy button / CTA link — used to verify Enter-to-enter and
+  // Tab-cycle behavior on a specific cell rather than always the first.
+  cardCopyBtnAt(nth) {
+    return this.fontCards.nth(nth).locator('.font-card-copy-btn');
+  }
+
+  cardCtaAt(nth) {
+    return this.fontCards.nth(nth).locator('.font-card-cta');
   }
 
   // Target a category filter by its stable data-category value. The visible

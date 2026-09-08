@@ -1,14 +1,17 @@
-const { expect, test } = require('@playwright/test');
-const { features } = require('./faqv2.spec.cjs');
-const Faqv2 = require('./faqv2.page.cjs');
-const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
+import { expect, test } from '@playwright/test';
+import WebUtil from '../../libs/webutil.cjs';
+import { features } from './faqv2.spec.cjs';
+import Faqv2 from './faqv2.page.cjs';
+import { runAccessibilityTest } from '../../libs/accessibility.cjs';
 
+let webUtil;
 let faqv2;
 
 const miloLibs = process.env.MILO_LIBS || '';
 
 test.describe('Express FAQv2 Block test suite', () => {
   test.beforeEach(async ({ page }) => {
+    webUtil = new WebUtil(page);
     faqv2 = new Faqv2(page);
   });
 
@@ -79,12 +82,9 @@ test.describe('Express FAQv2 Block test suite', () => {
     });
 
     await test.step('Verify analytics attributes', async () => {
-      // Get the actual section number from the page
-      const sectionDaalh = await faqv2.section.getAttribute('daa-lh');
-      expect(sectionDaalh).toMatch(/^s\d+$/);
-
-      const blockDaalh = await faqv2.faqv2.getAttribute('daa-lh');
-      expect(blockDaalh).toMatch(/^b\d+\|faqv2$/);
+      // Web-first assertions auto-retry until Milo's lazy analytics instrumentation runs
+      await expect(faqv2.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
+      await expect(faqv2.faqv2).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('faqv2', 1));
     });
 
     await test.step('Verify accessibility', async () => {
@@ -146,12 +146,9 @@ test.describe('Express FAQv2 Block test suite', () => {
     });
 
     await test.step('Verify analytics attributes', async () => {
-      // Get the actual section number from the page
-      const sectionDaalh = await faqv2.section.getAttribute('daa-lh');
-      expect(sectionDaalh).toMatch(/^s\d+$/);
-
-      const blockDaalh = await faqv2.faqv2.getAttribute('daa-lh');
-      expect(blockDaalh).toMatch(/^b\d+\|faqv2$/);
+      // Web-first assertions auto-retry until Milo's lazy analytics instrumentation runs
+      await expect(faqv2.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
+      await expect(faqv2.faqv2).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('faqv2', 1));
     });
 
     await test.step('Verify accessibility', async () => {
@@ -206,12 +203,9 @@ test.describe('Express FAQv2 Block test suite', () => {
     });
 
     await test.step('Verify analytics attributes', async () => {
-      // Get the actual section number from the page
-      const sectionDaalh = await faqv2.section.getAttribute('daa-lh');
-      expect(sectionDaalh).toMatch(/^s\d+$/);
-
-      const blockDaalh = await faqv2.faqv2.getAttribute('daa-lh');
-      expect(blockDaalh).toMatch(/^b\d+\|faqv2$/);
+      // Web-first assertions auto-retry until Milo's lazy analytics instrumentation runs
+      await expect(faqv2.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
+      await expect(faqv2.faqv2).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('faqv2', 1));
     });
 
     await test.step('Verify accessibility', async () => {
@@ -254,12 +248,9 @@ test.describe('Express FAQv2 Block test suite', () => {
       const hasContent = await page.locator('.faqv2-wrapper').count() > 0;
 
       if (!isHidden && hasContent) {
-        // Get the actual section number from the page
-        const sectionDaalh = await faqv2.section.getAttribute('daa-lh');
-        expect(sectionDaalh).toMatch(/^s\d+$/);
-
-        const blockDaalh = await faqv2.faqv2.getAttribute('daa-lh');
-        expect(blockDaalh).toMatch(/^b\d+\|faqv2$/);
+        // Web-first assertions auto-retry until Milo's lazy analytics instrumentation runs
+        await expect(faqv2.section).toHaveAttribute('daa-lh', await webUtil.getSectionDaalh(1));
+        await expect(faqv2.faqv2).toHaveAttribute('daa-lh', await webUtil.getBlockDaalh('faqv2', 1));
       } else {
         console.log('Block is hidden or has no content - skipping analytics check');
       }

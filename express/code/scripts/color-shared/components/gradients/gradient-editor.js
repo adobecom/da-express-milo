@@ -309,6 +309,9 @@ export function createGradientEditor(initialGradient, options = {}) {
           targetEl: handle,
           content: copyLabel,
           placement: 'bottom',
+          // Copy handle is an action trigger: dismiss the tooltip on activation so
+          // a tap-shown tooltip doesn't linger after the copy toast (mobile/tablet).
+          dismissOnActivate: true,
         }).then((tooltipController) => {
           if (!tooltipController) return;
           const prev = handleTooltipControllers.get(handle);

@@ -85,6 +85,7 @@ function buildAccordion(block, rows, stepsContent) {
 
 export default function decorate(block) {
   const rows = Array.from(block.children);
+  let hasBackgroundImage = false;
 
   if (block.children[1].querySelector('img, a')) {
     const backgroundRow = block.children[0];
@@ -95,8 +96,11 @@ export default function decorate(block) {
 
     if (backgroundURL) {
       block.style.setProperty('--background-image', `url('${backgroundURL}')`);
+      hasBackgroundImage = true;
     }
   }
+
+  block.classList.toggle('no-background-image', !hasBackgroundImage);
 
   const stepsContent = createTag('div', { class: 'steps-content' });
   const mediaData = rows.shift();

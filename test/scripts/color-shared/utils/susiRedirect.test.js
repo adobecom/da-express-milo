@@ -4,6 +4,7 @@ import sinon from 'sinon';
 import {
   setSusiColorRedirect,
   consumeSusiColorRedirect,
+  buildLibrariesSignInRedirectUrl,
   buildColorSignInRedirectUrl,
 } from '../../../../express/code/scripts/color-shared/utils/susiRedirect.js';
 
@@ -56,6 +57,17 @@ describe('consumeSusiColorRedirect', () => {
     consumeSusiColorRedirect();
     const second = consumeSusiColorRedirect();
     expect(second).to.be.null;
+  });
+});
+
+describe('buildLibrariesSignInRedirectUrl', () => {
+  it('returns the current page URL', () => {
+    window.history.replaceState({}, '', '/create/colors/libraries?q=brand');
+
+    const result = buildLibrariesSignInRedirectUrl();
+    const url = new URL(result);
+    expect(url.pathname).to.equal('/create/colors/libraries');
+    expect(url.searchParams.get('q')).to.equal('brand');
   });
 });
 

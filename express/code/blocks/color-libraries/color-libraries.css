@@ -1,0 +1,203 @@
+@import '../../scripts/color-shared/color-tokens.css';
+@import '../../scripts/color-shared/palettes/palettes.css';
+@import '../../scripts/color-shared/styles/color-card.css';
+@import '../../scripts/color-shared/components/strips/color-strip.css';
+@import '../../scripts/color-shared/components/gradients/gradient-strip.css';
+@import '../../scripts/color-shared/components/libraries/libraries.css';
+
+.color-explore.color-explore--libraries {
+  position: relative;
+  width: 100%;
+
+  /* Cap the whole block (header + summary) at the same content width and center
+     it. Summary caps at --block-wd-max-width internally; matching the wrapper to
+     it keeps the header from growing wider than the summary on >1440px screens. */
+  max-width: var(--block-wd-max-width);
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.color-explore.color-explore--libraries sp-theme {
+  display: block;
+}
+
+.color-explore.color-explore--libraries .color-explore-container {
+  width: 100%;
+  max-width: var(--block-wd-max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-300);
+  box-sizing: border-box;
+}
+
+.color-explore.color-explore--libraries.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.color-libraries-error {
+  padding: var(--spacing-700) var(--spacing-400);
+  text-align: center;
+  color: var(--Alias-content-typography-Detail);
+  font-size: var(--typography-body-s);
+  line-height: 1.3;
+}
+
+/* Signed-out state: give the block a real height so the sign-in region fills the
+   viewport below the global nav (otherwise it collapses to the short skeleton
+   height and the backdrop/card get cropped). The block sits after the header in
+   flow, so subtracting the nav height fills exactly down to the viewport bottom. */
+.color-explore.color-explore--libraries.color-libraries--signin {
+  min-height: calc(100vh - var(--global-height-nav, 0px));
+  min-height: calc(100svh - var(--global-height-nav, 0px));
+}
+
+/* Inline sign-in overlay for signed-out users. Rendered inside the block (not a
+   full-screen milo modal) so the popup and its backdrop stay within the libraries
+   area — the page nav and footer remain visible, matching the Figma. The overlay
+   fills the block, which sits behind it showing the skeleton chrome. Mobile-first:
+   the smallest backdrop asset is the base, wider assets layer on via min-width. */
+.color-libraries-signin-overlay {
+  position: absolute;
+
+  /* Full-bleed: span the whole viewport width so the backdrop covers the entire
+     screen width, while top/bottom keep the height within the block's area (so
+     the page nav + footer stay uncovered). The block is centred in the viewport,
+     so left:50% + translateX(-50%) aligns the 100vw layer to the viewport. */
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--spacing-500) var(--spacing-400);
+  background-image: url('libraries-bg-images/768px.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+@media (min-width: 1024px) {
+  .color-libraries-signin-overlay {
+    background-image: url('libraries-bg-images/1024px.png');
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-libraries-signin-overlay {
+    background-image: url('libraries-bg-images/1200px.png');
+  }
+}
+
+@media (min-width: 1440px) {
+  .color-libraries-signin-overlay {
+    background-image: url('libraries-bg-images/1440px.png');
+  }
+}
+
+@media (min-width: 1679px) {
+  .color-libraries-signin-overlay {
+    background-image: url('libraries-bg-images/1679px.png');
+  }
+}
+
+@media (min-width: 1920px) {
+  .color-libraries-signin-overlay {
+    background-image: url('libraries-bg-images/1920px.png');
+  }
+}
+
+/* White SUSI card centered on the backdrop. */
+.color-libraries-signin-card {
+  width: 370px;
+  min-width: 0;
+  min-height: var(--susi-min-height, 462px);
+  max-width: 100%;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: var(--color-white, #fff);
+  box-shadow: 0 4px 24px rgb(0 0 0 / 16%);
+}
+
+/* Neutralize the loaded fragment's section/fragment wrappers so only the card
+   chrome shows around the authored SUSI block. */
+.color-libraries-signin-card .section,
+.color-libraries-signin-card .fragment {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Mirror the PROD SUSI modal's logo spacing (.dialog-modal .susi-light
+   .express-logo) so the inline card matches triggerSignInFlow's modal. */
+.color-libraries-signin-card .susi-light .express-logo {
+  padding-top: var(--spacing-500);
+}
+
+/* Mobile: the sign-in card becomes the block's own content — no floating card,
+   no full-screen backdrop, no forced viewport height — with inline padding that
+   matches the logged-in libraries view. The skeleton chrome is hidden since the
+   card is the block content here. */
+@media (max-width: 679px) {
+  .color-explore.color-explore--libraries.color-libraries--signin {
+    min-height: 0;
+  }
+
+  .color-explore--libraries.color-libraries--signin > sp-theme {
+    display: none;
+  }
+
+  .color-libraries-signin-overlay {
+    position: static;
+    width: 100%;
+    padding: var(--spacing-500) var(--spacing-300);
+    transform: none;
+    background: none;
+  }
+
+  .color-libraries-signin-card {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+}
+
+.color-explore--libraries .ax-lib-items-grid.palettes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-400);
+  width: 100%;
+}
+
+.color-explore--libraries .ax-lib-items-grid .ax-lib-card {
+  max-width: none;
+  width: 100%;
+}
+
+@media (min-width: 680px) {
+  .color-explore.color-explore--libraries .color-explore-container {
+    padding: 0 var(--spacing-500);
+  }
+
+  .color-explore--libraries .ax-lib-items-grid.palettes-grid {
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-explore.color-explore--libraries .color-explore-container {
+    padding: 0 var(--spacing-600);
+  }
+
+  .color-explore--libraries .ax-lib-items-grid.palettes-grid {
+    grid-template-columns: repeat(3, minmax(280px, 1fr));
+  }
+}

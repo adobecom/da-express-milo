@@ -40,6 +40,7 @@ export async function createExpressTooltip(config) {
     delay = 300,
     disableAria = false,
     preserveLineBreaks = false,
+    dismissOnActivate = false,
   } = config;
 
   await loadTooltip();
@@ -99,15 +100,21 @@ export async function createExpressTooltip(config) {
     removeOutsideClickHandler = null;
   }
 
+  // Don't show while the trigger's popover is open so the tooltip never
+  // overlaps the menu it just launched.
+  const popoverOpen = () => targetEl.getAttribute('aria-expanded') === 'true';
+
   function show() {
+    if (popoverOpen()) return;
     clearTimeout(showTimer);
     showTimer = setTimeout(() => {
+      if (popoverOpen()) return;
       tooltip.setAttribute('open', '');
       visible = true;
     }, delay);
   }
 
-  if (isTouchDevice) {
+  if (isTouchDevice && !dismissOnActivate) {
     const blockTouchPointer = (e) => {
       if (e.pointerType === 'touch') e.stopImmediatePropagation();
     };
@@ -152,9 +159,16 @@ export async function createExpressTooltip(config) {
       }, 0);
     };
     targetEl.addEventListener('click', toggleTouch, { signal });
-  } else {
+  } else if (!isTouchDevice) {
     targetEl.addEventListener('pointerenter', show, { signal });
     targetEl.addEventListener('pointerleave', hide, { signal });
+  }
+
+  // Action triggers (buttons that run a command or open a popover) hide the
+  // tooltip on activation: on touch this prevents the tap-shown tooltip from
+  // lingering, and everywhere it clears the tooltip before its popover appears.
+  if (dismissOnActivate) {
+    targetEl.addEventListener('click', hide, { signal });
   }
 
   if (!isTouchDevice) {
@@ -177,6 +191,8 @@ export async function createExpressTooltip(config) {
 
   return {
     element: theme,
+
+    hide,
 
     setContent(text) {
       if (preserveLineBreaksNode) {

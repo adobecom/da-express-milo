@@ -31,6 +31,13 @@ const TOOLBAR_I18N_MAP = {
   urlCopiedToClipboard: 'color-toolbar-url-copied-to-clipboard',
   shareFailed: 'color-toolbar-share-failed',
   networkError: 'color-toolbar-network-error',
+  editTheme: 'color-toolbar-edit-theme',
+  editThemeAria: 'color-toolbar-edit-theme-aria',
+  saveChanges: 'color-toolbar-save-changes',
+  saveChangesAria: 'color-toolbar-save-changes-aria',
+  deleteTheme: 'color-toolbar-delete-theme',
+  deleteThemeAria: 'color-toolbar-delete-theme-aria',
+  saving: 'color-toolbar-saving',
 };
 
 const DRAWER_I18N_MAP = {
@@ -40,6 +47,10 @@ const DRAWER_I18N_MAP = {
   tags: 'color-drawer-tags',
   tagsPlaceholder: 'color-drawer-tags-placeholder',
   saveToLibrary: 'color-drawer-save-to-library',
+  makeCopy: 'color-drawer-make-copy',
+  saveChanges: 'color-drawer-save-changes',
+  changesSaved: 'color-drawer-changes-saved',
+  saveChangesFailed: 'color-drawer-save-changes-failed',
   signInToSave: 'color-drawer-sign-in-to-save',
   myLibrary: 'color-drawer-my-library',
   createNewLibrary: 'color-drawer-create-new-library',
@@ -67,6 +78,7 @@ const DRAWER_I18N_MAP = {
   libraryCreatedToast: 'color-drawer-library-created-toast',
   createLibraryFailedToast: 'color-drawer-create-library-failed-toast',
   viewInLibrary: 'color-drawer-view-in-library',
+  viewInLibraryHref: 'color-drawer-view-in-library-href',
 };
 
 async function loadI18nStrings() {
@@ -204,6 +216,9 @@ function setupStickyBehavior(wrapper, options = {}) {
  * @param {boolean} [options.editPaletteName=false]
  * @param {string}  [options.editPaletteLink=null]
  * @param {Object}  [options.palette] - Pre-built palette; skips Kuler fetch when provided
+ * @param {boolean} [options.inModal=false] - When true, skips the page footer /
+ *   banner-bg "hide on scroll" observers (the toolbar is mounted inline inside a
+ *   modal, where that behavior would incorrectly translate it off-screen).
  * @returns {Promise<{ toolbar, palette, getLibraryContext, wrapper, mount, setVariant, destroy }>}
  */
 // eslint-disable-next-line import/prefer-default-export
@@ -223,6 +238,13 @@ export async function initFloatingToolbar(container, options = {}) {
     palette: providedPalette = null,
     deps = {},
     daaLh = null,
+    inModal = false,
+    contentVariant = 'palette',
+    item = null,
+    toolHrefs = {},
+    librariesStrings = {},
+    libraryNameLabel = '',
+    libraryId,
   } = options;
 
   // 'raised' gives sticky visuals (band, shadow) without sticky positioning
@@ -240,6 +262,12 @@ export async function initFloatingToolbar(container, options = {}) {
     palette: finalPalette,
     type,
     variant,
+    contentVariant,
+    item,
+    toolHrefs,
+    librariesStrings,
+    nameLabel: libraryNameLabel,
+    libraryId,
     ctaText,
     mobileCTAText,
     showEdit,
@@ -375,7 +403,11 @@ export async function initFloatingToolbar(container, options = {}) {
     }
   };
 
-  if (typeof IntersectionObserver !== 'undefined') {
+  // In a modal the toolbar is mounted inline inside the dialog, so the page
+  // footer / banner-bg hide behavior (meant for the on-page sticky toolbar)
+  // must not run — otherwise a footer that is visible behind the modal applies
+  // `ax-toolbar-footer-hidden` (translateY(130%)) and shoves the toolbar down.
+  if (!inModal && typeof IntersectionObserver !== 'undefined') {
     const footer = document.querySelector('footer');
     if (footer) {
       footerIo = new IntersectionObserver((entries) => {

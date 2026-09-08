@@ -72,10 +72,17 @@ describe('font-generator/toolbar', () => {
     expect(count.textContent).to.equal(`${getState().activeFonts.length} ${DEFAULT_PLACEHOLDERS.fontCountLabel}`);
   });
 
-  it('updates the count when filters change', () => {
+  it('names the active category in the count when a filter is active', () => {
     setState({ activeFilters: ['bold'] });
     expect(result.toolbar.querySelector('.toolbar-count').textContent)
-      .to.equal(`1 ${DEFAULT_PLACEHOLDERS.fontCountLabel}`);
+      .to.equal(`1 bold ${DEFAULT_PLACEHOLDERS.fontCountLabel}`);
+  });
+
+  it('omits the category from the count once filters are cleared', () => {
+    setState({ activeFilters: ['bold'] });
+    setState({ activeFilters: [] });
+    expect(result.toolbar.querySelector('.toolbar-count').textContent)
+      .to.equal(`${getState().activeFonts.length} ${DEFAULT_PLACEHOLDERS.fontCountLabel}`);
   });
 
   it('reflects the current fontSize on the slider', () => {
@@ -100,6 +107,48 @@ describe('font-generator/toolbar', () => {
     clock.tick(100);
     expect(getState().fontSize).to.equal(40);
     clock.restore();
+  });
+
+  describe('layout button group — single tab stop with arrow-key nav', () => {
+    it('makes the active layout button the only tab stop', () => {
+      expect(result.toolbar.querySelector('[data-layout="grid"]').tabIndex).to.equal(0);
+      expect(result.toolbar.querySelector('[data-layout="list"]').tabIndex).to.equal(-1);
+    });
+
+    it('moves the tab stop when the layout changes', () => {
+      setState({ layout: 'list' });
+      expect(result.toolbar.querySelector('[data-layout="grid"]').tabIndex).to.equal(-1);
+      expect(result.toolbar.querySelector('[data-layout="list"]').tabIndex).to.equal(0);
+    });
+
+    it('ArrowRight moves focus from grid to list', () => {
+      document.body.append(result.toolbar);
+      const gridBtn = result.toolbar.querySelector('[data-layout="grid"]');
+      const listBtn = result.toolbar.querySelector('[data-layout="list"]');
+      gridBtn.focus();
+      gridBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(document.activeElement).to.equal(listBtn);
+      result.toolbar.remove();
+    });
+
+    it('ArrowLeft wraps from grid back to list', () => {
+      document.body.append(result.toolbar);
+      const gridBtn = result.toolbar.querySelector('[data-layout="grid"]');
+      const listBtn = result.toolbar.querySelector('[data-layout="list"]');
+      gridBtn.focus();
+      gridBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+      expect(document.activeElement).to.equal(listBtn);
+      result.toolbar.remove();
+    });
+
+    it('arrow-key focus move does not itself change the layout', () => {
+      document.body.append(result.toolbar);
+      const gridBtn = result.toolbar.querySelector('[data-layout="grid"]');
+      gridBtn.focus();
+      gridBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(getState().layout).to.equal('grid');
+      result.toolbar.remove();
+    });
   });
 
   it('honours custom string overrides', () => {
