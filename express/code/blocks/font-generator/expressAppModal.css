@@ -5,9 +5,11 @@
   --fg-app-modal-accent-hover: #2f52d6;
 
   top: auto;
+  left: var(--spacing-300, 16px);
+  right: var(--spacing-300, 16px);
   bottom: var(--spacing-300, 16px);
-  width: min(92vw, 375px);
-  min-width: min(92vw, 320px);
+  width: auto;
+  max-width: none;
   border-radius: var(--Radius-corner-radius-200, 16px);
   background: #000b1d;
   box-shadow:

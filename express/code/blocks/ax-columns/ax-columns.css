@@ -117,7 +117,7 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child:not(.v2) {
   padding-top: 60px;
 }
 
@@ -132,6 +132,36 @@ main .section .ax-columns.enterprise .column h2 {
   padding-top: 0;
 }
 
+/* Authorable variant: equal top & bottom vertical spacing.
+   32px (--spacing-500) on mobile/tablet, 64px (--spacing-800) on desktop (>=1200px).
+   Opt-in via the `v2` block class — self-contained so it does not rely on the
+   section spacing-variant override chain above. */
+.ax-columns.v2 {
+  --ax-columns-v2-spacing: var(--spacing-500);
+  max-width: 599px;
+  padding-top: var(--ax-columns-v2-spacing);
+  padding-bottom: var(--ax-columns-v2-spacing);
+}
+
+.ax-columns.v2 > div {
+   gap : 16px;
+} 
+
+.ax-columns.v2 .column {
+  padding-left: 0;
+  padding-right: 0;
+} 
+
+.ax-columns.v2 .column,
+.ax-columns.v2 .column.column-picture {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.ax-columns.v2 .column-picture img {
+  border-radius: 16px;
+}
+
 .ax-columns.top.center,
 .ax-columns.fullsize.center,
 .ax-columns.light,
@@ -141,7 +171,7 @@ main .section .ax-columns.enterprise .column h2 {
   padding-right: 0;
 }
 
-.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color, .v2)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
 .section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
@@ -390,8 +420,11 @@ main .section .ax-columns.enterprise .column h2 {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+.section .ax-columns:not(.v2)>div {
   padding: var(--spacing-600) 0;
 }
+
 
 .section .ax-columns.marquee>div {
   gap: var(--spacing-500);
@@ -546,7 +579,7 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns .column h4,
 .ax-columns .column h5,
 .ax-columns .column h6 {
-  text-align: left;
+  text-align: start;
 }
 
 .ax-columns.center .column,
@@ -1198,7 +1231,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .section .ax-columns>div {
     flex-direction: row;
-    text-align: left;
+    text-align: start;
     align-items: center;
   }
 
@@ -1463,6 +1496,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 @media (min-width: 1200px) {
   .section:has(.ax-columns)>.content {
     max-width: var(--block-lg-max-width);
+  }
+
+  .ax-columns.v2 {
+    --ax-columns-v2-spacing: var(--spacing-800);
+
   }
 
   .ax-columns.marquee .button-container.free-plan-container {
@@ -1899,4 +1937,67 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
     padding-top: 10px;
   }
+}
+
+/* Temporary styles for the Font Generator SEO page's ax-columns instance.
+   Not a long-term variant — remove once a permanent layout solution lands. */
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button,
+.section .ax-columns.temporary-font-generator-styles a.con-button {
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+  border-radius: 999px;
+  color: var(--color-white);
+}
+
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button:hover,
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button:active,
+.section .ax-columns.temporary-font-generator-styles a.con-button:hover,
+.section .ax-columns.temporary-font-generator-styles a.con-button:active {
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
+@media (max-width: 1199px) {
+  .section .ax-columns.temporary-font-generator-styles h3 {
+    font-size: var(--typography-headings-xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .ax-columns.temporary-font-generator-styles {
+    max-width: unset;
+    padding-left: var(--Grid-container-padding-side);
+    padding-right: var(--Grid-container-padding-side);
+    padding-top: var(--section-padding-xl);
+    padding-bottom: var(--section-padding-xl);
+  }
+
+  .section .ax-columns.temporary-font-generator-styles>div {
+    padding-top: 0;
+    padding-bottom: 0;
+    gap: var(--spacing-700);
+  }
+
+  .section .ax-columns.temporary-font-generator-styles .column {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .section>.ax-columns.temporary-font-generator-styles p.button-container,
+  .section>.ax-columns.temporary-font-generator-styles .con-button {
+    margin-top: var(--spacing-500);
+  }
+}
+
+main .ax-columns a.button.fill {
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+  border-radius: 999px;
+  color: var(--color-white);
+}
+
+main .ax-columns a.button.fill:any-link:hover,
+main .ax-columns a.button.fill:any-link:active {
+     background-color: var(--color-info-accent-hover);
+    border-color: var(--color-info-accent-hover);
 }

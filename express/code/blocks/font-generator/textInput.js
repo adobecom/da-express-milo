@@ -48,7 +48,7 @@ function buildSuggestionPill(text) {
   const tag = document.createElement('div');
   tag.className = 'tag-m';
   const content = document.createElement('div');
-  content.className = 'content';
+  content.className = 'tag-content';
   const container = document.createElement('div');
   container.className = 'text-container';
   const label = document.createElement('p');

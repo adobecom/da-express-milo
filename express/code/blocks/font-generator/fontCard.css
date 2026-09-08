@@ -135,6 +135,10 @@
      between every other line. Flat rather than scaled to --fc-line-height
      — a scaled value over-padded most cards. */
   padding-top: 5px;
+  /* Mirror at the bottom: line-clamp cuts overflow at the box edge, so a
+     descender on the last visible line (e.g. full-width "ｇ") lands right on
+     the clip boundary. This flat reserve keeps it from shaving. */
+  padding-bottom: 4px;
   color: var(--color-gray-950);
 }
 

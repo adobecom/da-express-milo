@@ -321,6 +321,20 @@ function addImagePreconnects(imageUrl) {
   }
 }
 
+// A CSS background is only discovered after style recalc, so the browser fetches it late
+// and at low priority. For the marquee variants that background is the LCP element, so
+// preload it explicitly. Same shape as banner-bg.js and search-marquee.js.
+function preloadBackgroundImage(imageUrl) {
+  if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
+
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = imageUrl;
+  link.fetchPriority = 'high';
+  document.head.appendChild(link);
+}
+
 function markVideoToGifImagesDecorative(scope) {
   if (!scope) return;
   scope.querySelectorAll('img[alt]').forEach((img) => {
@@ -348,6 +362,7 @@ export default async function decorate(block) {
   const rows = Array.from(block.children);
 
   // Handle background images for marquee and hero-animation-overlay variants
+  let bgPreloaded = false;
   if (block.classList.contains('marquee') || block.classList.contains('hero-animation-overlay')) {
     const background = rows.shift();
     const bgImg = background?.querySelector('img');
@@ -361,6 +376,10 @@ export default async function decorate(block) {
 
       // Set CSS variable for the optimized background image
       block.style.setProperty('--bg-image', `url("${optimizedImageUrl}")`);
+
+      // This background is the LCP element - give it a high priority preload
+      preloadBackgroundImage(optimizedImageUrl);
+      bgPreloaded = true;
 
       // Add preconnect immediately for background images
       addImagePreconnects(bgImg.src);
@@ -540,8 +559,10 @@ export default async function decorate(block) {
             addImagePreconnects(firstImg.src);
           }
 
-          // Handle preload for first image only
-          if (pictureCellCount === 1) {
+          // Handle preload for first image only. When a background image exists it is the
+          // LCP element and has already been preloaded above, so preloading this picture
+          // too would only compete with it for bandwidth.
+          if (pictureCellCount === 1 && !bgPreloaded) {
             const preloadImg = cell.querySelector('img');
             if (preloadImg?.src && !document.querySelector(`link[href="${preloadImg.src}"]`)) {
               const link = document.createElement('link');

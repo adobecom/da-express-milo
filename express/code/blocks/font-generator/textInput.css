@@ -346,7 +346,7 @@
   pointer-events: none;
 }
 
-.font-generator-text-input .content {
+.font-generator-text-input .tag-content {
   display: inline-flex;
   height: 32px;
   align-items: center;

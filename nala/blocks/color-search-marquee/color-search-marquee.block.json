@@ -1,0 +1,168 @@
+{
+  "block": "color-search-marquee",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-search-marquee-default",
+      "selector": "div.color-search-marquee",
+      "path": "/drafts/nala/blocks/color/color-search-marquee?martech=off",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Explore color palettes.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Discover endless inspiration for your next project with our color palettes.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-adobe-express-logo.express-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": "adobe-express-logo"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "input",
+              "selector": "input.ax-color-search-bar-input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Search for colors, moods, themes, etc.",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 0,
+              "text": "Summer",
+              "href": "?q=Summer",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 1,
+              "text": "Neutral Palette",
+              "href": "?q=Neutral%20Palette",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 2,
+              "text": "Primary colors",
+              "href": "?q=Primary%20colors",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 3,
+              "text": "Vaporwave",
+              "href": "?q=Vaporwave",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 4,
+              "text": "Spring",
+              "href": "?q=Spring",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 5,
+              "text": "Neutral Vintage",
+              "href": "?q=Neutral%20Vintage",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 6,
+              "text": "Synthwave",
+              "href": "?q=Synthwave",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 7,
+              "text": "Happy",
+              "href": "?q=Happy",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 8,
+              "text": "Luxury",
+              "href": "?q=Luxury",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.tag-pill",
+              "nth": 9,
+              "text": "Travel",
+              "href": "?q=Travel",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@color-search-marquee",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

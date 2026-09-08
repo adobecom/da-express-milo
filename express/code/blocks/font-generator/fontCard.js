@@ -19,6 +19,10 @@ const DEFAULT_LINE_HEIGHT = 1.1;
 
 let stylesInjected = false;
 
+// Monotonic per-page counter so each card's style-name span gets a unique id
+// for the CTA's aria-describedby reference.
+let cardInstanceId = 0;
+
 function injectStyles() {
   if (stylesInjected || document.querySelector(`link[href="${STYLESHEET_HREF}"]`)) return;
   stylesInjected = true;
@@ -111,7 +115,7 @@ function makeHoverOverlay(message) {
   return overlay;
 }
 
-function makeCtaLink(cardCta, styleName) {
+function makeCtaLink(cardCta, styleName, styleNameId) {
   const a = document.createElement('a');
   a.className = 'font-card-cta';
   a.href = cardCta.href;
@@ -122,6 +126,11 @@ function makeCtaLink(cardCta, styleName) {
   setDaaLL(a, `${cardCta.text} ${styleName}`);
   // Same rationale as the copy button — see initCellKeyboardNav.
   a.tabIndex = -1;
+  // The visible label is just the CTA text ("Design With Style"), which is
+  // ambiguous out of context. Describe it with the style name shown to the
+  // left of the CTA so screen readers announce e.g. "Design With Style,
+  // Light text bubble" without changing the button's accessible name.
+  if (styleNameId) a.setAttribute('aria-describedby', styleNameId);
 
   const icon = document.createElement('img');
   icon.src = '/express/code/icons/font-generator-external-link.svg';
@@ -234,7 +243,11 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   name.textContent = fontDef.styleName;
 
   footer.append(name);
-  if (cardCta) footer.append(makeCtaLink(cardCta, fontDef.styleName));
+  if (cardCta) {
+    cardInstanceId += 1;
+    name.id = `font-card-name-${cardInstanceId}`;
+    footer.append(makeCtaLink(cardCta, fontDef.styleName, name.id));
+  }
 
   card.append(body, footer);
   initCellKeyboardNav(card);

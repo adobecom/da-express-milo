@@ -19,11 +19,20 @@ module.exports = {
     },
     {
       tcid: '2',
-      name: '@icon-carousel widescreen left buffer',
+      name: '@icon-carousel desktop/widescreen left buffer',
       path: '/drafts/echen/icon-carousel',
       selector: '.icon-carousel',
-      data: { leftBuffer: '160px' },
+      data: { leftBuffer: '40px' },
       tags: '@icon-carousel @express @regression @t3',
+    },
+    {
+      tcid: '3',
+      name: '@icon-carousel inset scales on ultrawide',
+      path: '/drafts/echen/icon-carousel',
+      selector: '.icon-carousel',
+      // 1920px is one sample point on the scaling inset (see icon-carousel.css).
+      data: { viewportWidth: 1920, expectedInset: '160px' },
+      tags: '@icon-carousel @express @regression @t4',
     },
   ],
 };
