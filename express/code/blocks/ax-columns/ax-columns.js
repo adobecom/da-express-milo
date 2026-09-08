@@ -1,4 +1,6 @@
-import { getLibs, toClassName, getIconElementDeprecated } from '../../scripts/utils.js';
+import {
+  getLibs, toClassName, getIconElementDeprecated, decorateLegacyButtonFallbacks,
+} from '../../scripts/utils.js';
 
 import {
   addAnimationToggle,
@@ -369,12 +371,20 @@ export default async function decorate(block) {
   block.classList.add('s2');
   decorateSocialIcons(block);
   await decorateButtons(block, 'button-xxl');
+  // Milo's decorateButtons only matches `em a, strong a, p > a strong` — it
+  // has no equivalent for content authored the older Express way (a bare
+  // link alone in its own <p>/<div> auto-buttonizing, `#_button-<name>`
+  // hashes, `<u>`-stripping, `{{icon-name}}` CTA icons). Carry those
+  // conventions forward for existing content instead of silently dropping
+  // support for them.
+  decorateLegacyButtonFallbacks(block);
 
   // This block's CSS/JS is written against `.button-container` and `.xlarge`;
-  // bridge milo's output (`.con-button`, `.action-area`) back onto that
-  // existing contract instead of rewriting every rule. Idempotent and scoped
-  // to this block's already-decorated con-buttons.
-  block.querySelectorAll('a.con-button').forEach((btn) => {
+  // bridge milo's output (`.con-button`, `.action-area`) and the legacy
+  // fallback's output (`.button`) back onto that existing contract instead
+  // of rewriting every rule. Idempotent and scoped to this block's already-
+  // decorated buttons.
+  block.querySelectorAll('a.con-button, a.button').forEach((btn) => {
     btn.classList.add('xlarge');
     btn.closest('p, div')?.classList.add('button-container');
   });

@@ -303,14 +303,15 @@ export async function fixIcons(el = document) {
   });
 }
 
-// This was only added for the blocks premigration.
-// For new blocks they should only use the decorateButtons method from milo.
-export async function decorateButtonsDeprecated(el, size) {
-  const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
-  // eslint-disable-next-line max-len
-  // DO NOT add any more exceptions here. Authors must learn to author buttons the new milo way, even with old blocks
-  if (!el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
-  // DO NOT add any more exceptions above. We should be removing the exceptions and not adding more.
+// Content-compat shims predating this repo's adoption of milo's own
+// decorateButtons: bare-anchor auto-buttonize (a lone link alone in its own
+// <p>/<div> becomes a button, opt-out via `#_cls`), `#_button-<name>` hash
+// mirroring, `<u>`-stripping, and `{{icon-name}}` CTA-icon conversion. Milo's
+// decorateButtons has no equivalent for any of these — it only ever matches
+// `em a, strong a, p > a strong` — so any block moving off
+// decorateButtonsDeprecated (calling milo's decorateButtons directly) still
+// needs to call this too if its content relies on these conventions.
+export function decorateLegacyButtonFallbacks(el) {
   el.querySelectorAll(':scope a:not(.con-button, .social-link)').forEach(($a) => {
     // Mirrors decorateButtons' own #_button-<name> handling (milo's utils/decorate.js)
     // since this deprecated path never calls it for these blocks.
@@ -396,6 +397,17 @@ export async function decorateButtonsDeprecated(el, size) {
       window.lana?.log(`Ignoring button due to error: ${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
     }
   });
+}
+
+// This was only added for the blocks premigration.
+// For new blocks they should only use the decorateButtons method from milo.
+export async function decorateButtonsDeprecated(el, size) {
+  const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+  // eslint-disable-next-line max-len
+  // DO NOT add any more exceptions here. Authors must learn to author buttons the new milo way, even with old blocks
+  if (!el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
+  // DO NOT add any more exceptions above. We should be removing the exceptions and not adding more.
+  decorateLegacyButtonFallbacks(el);
 }
 
 export function addTempWrapperDeprecated($block, blockName) {
