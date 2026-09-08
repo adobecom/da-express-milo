@@ -129,14 +129,35 @@ Never use a single-class selector for `<p>` margins — it will lose silently.
   `&.is-open`.
 - Use `:is()` and `:has()` where they reduce duplication.
 - Selector chain depth ≤ 3.
-- **Shorthand first, logical properties for single-axis only**: use
-  `padding` / `margin` shorthand when all four sides (or both vertical +
-  horizontal pairs) have values — `padding: var(--spacing-900) var(--spacing-600)`
-  is cleaner than two declarations. Reach for individual logical properties
-  (`padding-block`, `padding-inline`, `margin-inline`, `inset-inline-start`,
-  etc.) only when setting **one axis** without touching the other, e.g.
-  `padding-inline: var(--spacing-500)` inside a breakpoint override where
-  block padding stays the same.
+- **Logical properties, not physical shorthand — this repo ships RTL
+  (Arabic, Hebrew, etc.) locales.** `padding` / `margin` shorthand
+  hardcodes physical sides (top/right/bottom/left) and does **not**
+  mirror when `dir="rtl"` flips the layout, so it silently breaks in
+  RTL locales. Use the logical equivalents instead:
+  - All four sides equal → `padding: var(--spacing-500)` is fine
+    (no left/right asymmetry to break).
+  - Block (vertical) + inline (horizontal) pair, e.g. the common
+    `padding: var(--spacing-900) var(--spacing-600)` case → write
+    `padding-block: var(--spacing-900); padding-inline: var(--spacing-600);`
+    instead. This is two declarations instead of one shorthand line,
+    but it mirrors correctly under RTL.
+  - Only one axis at a breakpoint override → use the single logical
+    property for that axis, e.g. `padding-inline: var(--spacing-500)`.
+  - Asymmetric single-side values → use `padding-inline-start` /
+    `padding-inline-end` / `padding-block-start` / `padding-block-end`,
+    never `padding-left` / `padding-right`.
+  Same logic applies to `margin`, `inset`, `border-width`, and
+  `border-color` — prefer `margin-inline`, `inset-inline-start`,
+  `border-inline-start-width`, etc. over their physical equivalents
+  whenever a side could differ from its mirror in RTL.
+- **Avoid `text-align: left` / `text-align: right`.** Use
+  `text-align: start` / `text-align: end` so alignment flips correctly
+  in RTL locales.
+- **Directional icons and transforms** (arrows, chevrons, carousel
+  controls) must flip in RTL. Don't hardcode a `transform: scaleX(-1)`
+  or directional icon choice — scope the mirrored state under
+  `[dir="rtl"]` (e.g. `:dir(rtl) .block-arrow { transform: scaleX(-1) }`)
+  so the icon points the correct direction in both writing modes.
 - No magic numbers — every value maps to a token or has an
   explanatory comment.
 - Scope block-level custom properties with a block-name prefix

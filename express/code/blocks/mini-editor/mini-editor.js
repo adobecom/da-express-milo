@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated, getMobileOperatingSystem } from '../../scripts/utils.js';
 import {
   trapFocus,
   handleEscapeClose,
@@ -7,13 +7,11 @@ import {
   announceToScreenReader,
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
-import MiniEditorCardExporter from '../../scripts/utils/mini-editor-card-export.js';
-import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
-import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
 import createMiniEditorModal from '../../scripts/widgets/mini-editor-modal/mini-editor-modal.js';
+import { loadButton, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import getCardBackgrounds from './mini-editor-background-loader.js';
-import getFontOptions from './mini-editor-fonts-loader.js';
+import getFontOptions, { loadWebFontOptions } from './mini-editor-fonts-loader.js';
 
 let createTag;
 let loadStyle;
@@ -46,6 +44,30 @@ function createSecureUid(prefix = 'mini-editor') {
   return `${prefix}-${Date.now().toString(36)}${uidCounter.toString(36)}`;
 }
 
+// Analytics, the express-toast component, and the card-export module (which
+// also spawns a canvas-rendering Worker — see mini-editor-card-export.js)
+// are only ever needed once a user actually copies, shares, or downloads
+// something — none of them are part of the card's own first paint. Dynamic
+// imports (rather than static top-level ones) so their JS isn't fetched on
+// every page load, only once one of those interactions actually happens.
+// Each import() is cached by the module system after the first call, so
+// there's no need for our own memoization here.
+
+async function track(props) {
+  const { default: trackMiniEditorExport } = await import('../../scripts/utils/mini-editor-analytics.js');
+  trackMiniEditorExport(props);
+}
+
+async function showToast(props) {
+  const { showExpressToast } = await import('../../scripts/color-shared/spectrum/components/express-toast.js');
+  return showExpressToast(props);
+}
+
+async function getCardExporter() {
+  const { default: MiniEditorCardExporter } = await import('../../scripts/utils/mini-editor-card-export.js');
+  return MiniEditorCardExporter;
+}
+
 /**
  * Copies the quote and, when present, its author (as "quote — author") so
  * pasted text always carries attribution instead of the quote alone. Shows
@@ -56,9 +78,7 @@ async function copyQuoteToClipboard(quote, author) {
   const text = author ? `${quote} — ${author}` : quote;
   try {
     await navigator.clipboard.writeText(text);
-    trackMiniEditorExport({
-      exportMethod: 'copy-clipboard',
-    });
+    track({ exportMethod: 'copy-clipboard' }).catch(() => {});
     showCopyToast('Quote copied to clipboard');
     return true;
   } catch {
@@ -78,17 +98,16 @@ async function downloadCard(block, editor) {
     }
     const model = editor?.getContentModel();
     if (!model) throw new Error('Mini-editor content model is unavailable');
-    await MiniEditorCardExporter.download(model);
-    trackMiniEditorExport({
-      exportMethod: 'download',
-    });
+    const exporter = await getCardExporter();
+    await exporter.download(model);
+    track({ exportMethod: 'download' }).catch(() => {});
   } catch (error) {
     window.lana?.log(`Mini-editor download failed: ${error?.message || error}`, {
       tags: 'mini-editor,download',
       severity: 'error',
     });
     const message = await replaceKey('mini-editor-download-failed', getConfig());
-    await showExpressToast({ message, variant: 'negative' });
+    await showToast({ message, variant: 'negative' });
   } finally {
     if (downloadButton) {
       downloadButton.disabled = false;
@@ -289,20 +308,64 @@ function wireLandmark(block, header) {
 }
 
 export default async function init(block) {
-  ({ createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`));
-  ({ replaceKey } = await import(`${getLibs()}/features/placeholders.js`));
+  const props = constructProps(block);
+  const quotes = getPageQuotes();
+
+  // Kicked off immediately, independent of the Milo util/placeholder
+  // imports below — getCardBackgrounds' template-service fetch is the real
+  // LCP-critical request (it resolves the .me-arc-card--center background)
+  // and is often the slowest single request on the page, so it shouldn't
+  // wait behind dynamic imports it has no dependency on. getFontOptions()
+  // itself resolves immediately with the bundled fallback fonts — see
+  // mini-editor-fonts-loader.js — the card never waits on the live Adobe
+  // Fonts kit before its first render.
+  const dataPromise = Promise.all([
+    getCardBackgrounds(props),
+    getFontOptions(),
+  ]);
+  // A rejection here (e.g. the template-service fetch failing) is still
+  // handled below, where dataPromise is awaited inside the try/catch — this
+  // just keeps the runtime from flagging it as unhandled during the window
+  // before that await, while the imports above are still in flight.
+  dataPromise.catch(() => {});
+
+  // Also kicked off immediately, in parallel with the (often slow)
+  // template-service fetch above rather than only being requested once it
+  // resolves: the Spectrum bundles the widget needs (theme/base/lit/icons/
+  // button via loadButton, tooltip/overlay via loadTooltip — see
+  // load-spectrum.js, which already loads all of these in parallel with
+  // each other), plus the live Adobe Fonts kit itself (loadWebFontOptions —
+  // see mini-editor-fonts-loader.js). Purely a prefetch for all three: each
+  // is memoized, and the real call sites below (mini-editor-widget.js for
+  // Spectrum, this file's own loadWebFontOptions() calls for fonts) don't
+  // await this — it just means the kit's network round trip (measured
+  // ~0.5-1.2s against the real Adobe Fonts CDN) runs concurrently with
+  // everything else instead of only starting once the card has already
+  // mounted, which is what was making the fallback-to-live font swap
+  // noticeable: the kit previously didn't even start loading until after
+  // first paint, so the whole round trip happened in full view.
+  Promise.all([loadButton(), loadTooltip(), loadWebFontOptions()]).catch(() => {});
+
+  [
+    { createTag, loadStyle, getConfig },
+    { replaceKey },
+  ] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/features/placeholders.js`),
+  ]);
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-editor-widget.css`);
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-modal/mini-editor-modal.css`);
 
-  const props = constructProps(block);
   block.innerHTML = '';
 
-  // Wraps the block's whole rendered output in Spectrum's own theme host so
-  // its design-token CSS custom properties (--spectrum-*) are actually
-  // defined for descendants — without it, the topActions icons (real
-  // Spectrum Web Components, see mini-editor-widget.js) fall back to
-  // unstyled defaults and don't match the intended look.
-  await import('../../scripts/widgets/spectrum/dist/theme.js');
+  // <sp-theme> is a Spectrum Web Component (see load-spectrum.js's prefetch
+  // above) that self-upgrades whenever its definition finishes registering —
+  // creating it here doesn't need to wait on that, same reasoning as the
+  // Spectrum prefetch itself. Wraps the block's whole rendered output so its
+  // design-token CSS custom properties (--spectrum-*) are actually defined
+  // for descendants — without it, the topActions icons (real Spectrum Web
+  // Components, see mini-editor-widget.js) fall back to unstyled defaults
+  // and don't match the intended look, until the upgrade completes.
   const themeHost = createTag('sp-theme', {
     system: 'spectrum-two', color: 'light', scale: 'medium', dir: 'ltr',
   });
@@ -312,16 +375,8 @@ export default async function init(block) {
   themeHost.append(header);
   decorateCta(header);
 
-  const quotes = getPageQuotes();
-
   try {
-    // Backgrounds and fonts load in parallel — the font loader owns its own
-    // source selection (Typekit vs fallback fonts); backgrounds always fetch
-    // from the template service.
-    const [cards, fontOptions] = await Promise.all([
-      getCardBackgrounds(props),
-      getFontOptions(),
-    ]);
+    const [cards, fontOptions] = await dataPromise;
     if (!cards.length || !quotes.length) {
       block.closest('.section')?.remove();
       return;
@@ -352,10 +407,16 @@ export default async function init(block) {
         const key = JSON.stringify(model);
         if (cachedModelKey !== key) {
           cachedModelKey = key;
-          cachedBlobPromise = MiniEditorCardExporter.createCardBlob(model).catch((error) => {
-            cachedModelKey = undefined;
-            throw error;
-          });
+          // getCardExporter()'s own dynamic import happens right here, at the
+          // same "share trigger opens" head start described above — not on
+          // page load — since createCardBlob is the slow step this cache
+          // exists to get ahead of.
+          cachedBlobPromise = getCardExporter()
+            .then((exporter) => exporter.createCardBlob(model))
+            .catch((error) => {
+              cachedModelKey = undefined;
+              throw error;
+            });
         }
         return cachedBlobPromise;
       };
@@ -398,35 +459,19 @@ export default async function init(block) {
         }
       };
 
+      const platformOS = getMobileOperatingSystem();
+      // Android Firefox doesn't support navigator.share with files and blocks the
+      // wa.me popup fallback, so the whole Share button is hidden there.
+      const isAndroidFirefox = platformOS === 'Android' && /firefox/i.test(navigator.userAgent);
+
       return [
         { type: 'edit', onClick: handleOpenInExpress },
-        {
+        ...(isAndroidFirefox ? [] : [{
           type: 'share',
           shareMenu: {
             heading: { key: 'mini-editor-share-image', fallback: 'Share image' },
             onOpen: () => { getCardBlobPromise().catch(() => {}); },
             actions: [
-              {
-                value: 'whatsapp',
-                type: 'custom',
-                label: { key: 'share-menu-whatsapp', fallback: 'WhatsApp' },
-                icon: () => createTag('sp-icon', {
-                  src: '/express/code/icons/S2_Icon_WhatsApp_20_N.svg',
-                  size: 'm',
-                }),
-                onSelect: async ({ share }, { strings }) => {
-                  if (share?.files?.length && navigator.canShare?.(share)) {
-                    try {
-                      await navigator.share(share);
-                      return;
-                    } catch (error) {
-                      if (error?.name === 'AbortError') return;
-                    }
-                  }
-                  const text = encodeURIComponent(`${strings.heading}: ${window.location.href}`);
-                  window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
-                },
-              },
               {
                 value: 'copy',
                 type: 'copy',
@@ -448,22 +493,19 @@ export default async function init(block) {
             ],
             onActionSelect: ({ action }) => {
               if (action?.value === 'copy') {
-                trackMiniEditorExport({
+                track({
                   exportMethod: 'copy-clipboard',
-                });
+                }).catch(() => {});
                 return;
               }
 
               const exportMethodByAction = {
-                whatsapp: 'direct-to-whatsapp',
                 more: 'more-options',
               };
               const exportMethod = exportMethodByAction[action?.value];
               if (!exportMethod) return;
 
-              trackMiniEditorExport({
-                exportMethod,
-              });
+              track({ exportMethod }).catch(() => {});
             },
             feedback: {
               failed: {
@@ -476,11 +518,11 @@ export default async function init(block) {
               if (variant === 'positive' && action.type === 'copy') {
                 await showCopyToast(message);
               } else {
-                await showExpressToast({ message, variant });
+                await showToast({ message, variant });
               }
             },
           },
-        },
+        }]),
         { type: 'download', onClick: () => downloadCard(block, getEditor()) },
       ];
     };
@@ -504,24 +546,49 @@ export default async function init(block) {
     themeHost.append(editor.stage);
     wireLandmark(block, header);
 
+    // The card above just mounted with the bundled fallback fonts (see
+    // getFontOptions/mini-editor-fonts-loader.js) so first paint never
+    // waited on the Adobe Fonts kit's network round trip. Load the live kit
+    // now, in the background, and swap it into the already-visible font
+    // control once it resolves — a no-op if the user already picked a font.
+    loadWebFontOptions().then((liveFontOptions) => {
+      editor.upgradeFontOptions(liveFontOptions);
+    }).catch(() => {});
+
     // "Create a design" on collapsible-rows' quotes (see collapsible-rows.js)
     // opens this modal — showing just the centre editor card, identically
     // across desktop/tablet/mobile — instead of scrolling to this inline
     // block. One modal per page regardless of how many mini-editor blocks
     // are authored (modalPromise, not a DOM query, so two blocks decorating
     // concurrently can't both build one), reusing this block's own fetched
-    // cards/fonts.
-    modalPromise ??= createMiniEditorModal({
-      fontOptions,
-      backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
-      topActionsFactory: buildTopActions,
-      a11y,
-      deps,
-    }).then((modal) => {
-      document.body.append(modal.el);
-      return modal;
-    });
-    await modalPromise;
+    // cards/fonts. Deliberately not awaited: this modal isn't needed for
+    // this block's own first paint (or ever, unless a collapsible-rows CTA
+    // on the page is clicked), so it builds in the background instead of
+    // holding up the section reveal — see decorate() below for why that
+    // matters. It awaits the live font kit itself (rather than reusing the
+    // fallback `fontOptions` above) since, unlike the inline card, it isn't
+    // on the critical path and can afford to just wait for the real fonts.
+    if (!modalPromise) {
+      modalPromise = loadWebFontOptions()
+        .catch(() => fontOptions)
+        .then((modalFontOptions) => createMiniEditorModal({
+          fontOptions: modalFontOptions,
+          backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
+          topActionsFactory: buildTopActions,
+          a11y,
+          deps,
+        }))
+        .then((modal) => {
+          document.body.append(modal.el);
+          return modal;
+        })
+        .catch((error) => {
+          window.lana?.log(`Mini-editor modal init error: ${error?.message || error}`, {
+            tags: 'mini-editor,modal',
+            severity: 'error',
+          });
+        });
+    }
   } catch (error) {
     window.lana?.log(`Error in mini-editor: ${error?.message || error}`, {
       tags: 'mini-editor',

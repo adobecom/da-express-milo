@@ -214,6 +214,9 @@ export default async function createShareMenuWidget({
     if (event.key === 'Escape') close({ restoreFocus: true });
   };
   const onFocusOut = (event) => {
+    // Keep the menu open while an action is in flight (e.g. the native share
+    // sheet steals focus on desktop) — closing here dismisses it prematurely.
+    if (pending) return;
     if (!wrapper.contains(event.relatedTarget)) close();
   };
 
