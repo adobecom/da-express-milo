@@ -1365,6 +1365,15 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
       font-size: var(--heading-font-size-l);
     }
 
+  /* Applies at every width ≥600px, tablet included. A duplicate
+     `.ax-columns.marquee .column p { font-size: var(--body-font-size-m) }`
+     used to sit in a narrower (600-899px) media block below this one — same
+     selector/specificity, so on stage (where it came first, always shadowed
+     by this rule) it was already dead code, but somewhere in the earlier
+     migration these two ended up in the opposite relative order, making the
+     narrower one win and silently shrinking marquee paragraph text on
+     tablet only (invisible at mobile or desktop). Removed the dead rule
+     instead of re-fighting the tie. */
   .ax-columns.marquee .column p {
       font-size: var(--body-font-size-l);
     }
@@ -1748,10 +1757,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.marquee .column {
       text-align: center;
-    }
-
-  .ax-columns.marquee .column p {
-      font-size: var(--body-font-size-m);
     }
 
 }
