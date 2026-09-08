@@ -139,7 +139,7 @@ describe('Columns', () => {
     const columns = document.querySelector('.ax-columns');
     await decorate(columns);
 
-    const button = columns.querySelector('.button');
+    const button = columns.querySelector('.con-button');
     expect(button.classList.contains('light')).to.be.true;
     expect(button.classList.contains('primary')).to.be.true;
   });
@@ -167,7 +167,7 @@ describe('Columns', () => {
     const columns = document.querySelector('.ax-columns');
     await decorate(columns);
 
-    const button = columns.querySelector('.button');
+    const button = columns.querySelector('.con-button');
     expect(button.classList.contains('dark')).to.be.true;
   });
 
