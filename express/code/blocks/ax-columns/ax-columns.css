@@ -191,6 +191,23 @@
   gap: 16px;
 }
 
+/* Restores stage's row-to-row spacing (`.ax-columns:not(.v2)>div { padding:
+   var(--spacing-600) 0 }`, unconditional at every viewport — 40px top +
+   40px bottom = 80px between rows), dropped when the v2-spacing-default
+   migration moved to block-level top/bottom padding instead. That works for
+   a single-row block (its own padding covers the top/bottom edge) but
+   leaves zero gap between rows in a multi-row block, since block-level
+   padding never touches the seam between interior rows. Scoped to
+   :not(:first-child)/:not(:last-child) so it only adds spacing at that
+   seam, not doubling up with the block's own outer edge padding. */
+.section .ax-columns>div:not(:first-child) {
+  padding-top: var(--spacing-600);
+}
+
+.section .ax-columns>div:not(:last-child) {
+  padding-bottom: var(--spacing-600);
+}
+
 .section .ax-columns a>p:empty {
   display: none;
 }
