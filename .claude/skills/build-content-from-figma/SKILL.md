@@ -96,6 +96,22 @@ Ask for:
 - **Repository** (e.g. `da-express-milo`)
 - **File path** (e.g. `drafts/methomas/my-page.html`)
 
+**If this page is for a new block** (a block name was just confirmed in
+1b) **and the block will get Nala tests**, flag the path choice instead
+of defaulting straight to a personal drafts folder — the `nala-test-generation`
+skill's canonical test-page root is `/drafts/nala/blocks/<block-name>`
+(see that skill), and authoring the content page there directly means
+the same page doubles as the nala test page, instead of ending up with
+two pages for one block (e.g. `/drafts/methomas/<block-name>` *and*
+`/drafts/nala/blocks/<block-name>`). Ask the developer:
+
+> This page is for the `<block-name>` block. Should it live at
+> `/drafts/nala/blocks/<block-name>` (so it can double as the Nala test
+> page later), or at a personal path like `/drafts/<ldap>/<block-name>`?
+
+Use whichever path the developer picks — never choose or switch the
+destination for them.
+
 The media folder is derived automatically in Phase 4c using the
 dot-prefixed shadow folder convention.
 

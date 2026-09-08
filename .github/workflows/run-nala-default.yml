@@ -17,17 +17,25 @@ permissions:
 
 jobs:
   run-nala-tests:
-    name: Running Nala E2E UI Tests
+    name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
-      # Don't cancel the other shards when one fails — we want the full picture.
+      # Don't cancel the other lanes when one fails — we want the full picture.
       fail-fast: false
       matrix:
-        node-version: [24.x]
-        # Split the suite across parallel runner jobs. Playwright's --shard
-        # deterministically partitions tests, so 4 shards ≈ 4x throughput.
-        shard: [1, 2, 3, 4]
+        # Lanes run as parallel runner jobs. The non-color suite is split across
+        # 4 shards (Playwright's --shard deterministically partitions tests). The
+        # heavy color-shared blocks are pulled OUT of the shards (each shard lane
+        # excludes @color) and run in their own serial lane (workers=1) so they
+        # never cluster on one shard and starve each other's decoration — the
+        # cause of the recurring color-block waitReady timeouts.
+        include:
+          - { lane_id: shard1, node: 24.x, shard: '1/4', exclude: '@color', grep: '', workers: '' }
+          - { lane_id: shard2, node: 24.x, shard: '2/4', exclude: '@color', grep: '', workers: '' }
+          - { lane_id: shard3, node: 24.x, shard: '3/4', exclude: '@color', grep: '', workers: '' }
+          - { lane_id: shard4, node: 24.x, shard: '4/4', exclude: '@color', grep: '', workers: '' }
+          - { lane_id: color, node: 24.x, shard: '', exclude: '', grep: '@color', workers: '1' }
 
     steps:
       - name: Checkout repository
@@ -35,10 +43,10 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Set up Node.js ${{ matrix.node-version }}
+      - name: Set up Node.js ${{ matrix.node }}
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ matrix.node }}
 
       - name: Cache node_modules
         uses: actions/cache@v4
@@ -46,13 +54,13 @@ jobs:
           path: |
             ~/.npm
             **/node_modules
-          key: npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          key: npm-${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/package-lock.json') }}
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ms-playwright-${{ runner.os }}-${{ matrix.node-version }}-chromium
+          key: ms-playwright-${{ runner.os }}-${{ matrix.node }}-chromium
 
       - name: Install dependencies
         run: npm ci --no-fund --prefer-offline
@@ -75,7 +83,12 @@ jobs:
           # PR gate: full cross-browser matrix, sharded across parallel jobs
           # so wall-clock stays low even with all three browsers.
           NALA_PROJECTS: --project=express-live-chromium --project=express-live-firefox --project=express-live-webkit
-          SHARD: ${{ matrix.shard }}/4
+          # Sharded lanes: SHARD set + exclude @color. Color lane: no shard,
+          # grep only @color, workers=1 (serial).
+          SHARD: ${{ matrix.shard }}
+          NALA_EXTRA_GREP_INVERT: ${{ matrix.exclude }}
+          NALA_GREP: ${{ matrix.grep }}
+          NALA_WORKERS: ${{ matrix.workers }}
           labels: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
           branch: ${{ github.event.pull_request.head.ref }}
           repoName: ${{ github.repository }}
@@ -92,7 +105,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nala-test-results-${{ github.run_number }}-shard${{ matrix.shard }}
+          name: nala-test-results-${{ github.run_number }}-${{ matrix.lane_id }}
           path: |
             test-results/
             test-html-results/
