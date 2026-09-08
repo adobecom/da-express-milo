@@ -876,55 +876,55 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--heading-font-size-l);
 }
 
-.section.color-column .ax-columns.color {
+.section.color-child .ax-columns.color {
   box-sizing: border-box;
   max-width: var(--block-lg-max-width);
   padding: 0 var(--spacing-500);
 }
 
 @media (min-width: 600px) and (max-width: 1199px) {
-  .section.color-column .ax-columns.color {
+  .section.color-child .ax-columns.color {
     padding-left: var(--spacing-400);
     padding-right: var(--spacing-400);
   }
 
-  .section.color-column .ax-columns.color > div {
+  .section.color-child .ax-columns.color > div {
     gap: var(--spacing-700);
   }
 }
 
 @media (min-width: 1200px) {
-  .section.color-column .ax-columns.color > div {
+  .section.color-child .ax-columns.color > div {
     gap: var(--spacing-800);
   }
 }
 
 @media (max-width: 599px) {
-  .section.color-column .ax-columns.color {
+  .section.color-child .ax-columns.color {
     padding-left: var(--spacing-300);
     padding-right: var(--spacing-300);
   }
 
-  .section.color-column .ax-columns.color .img-wrapper {
+  .section.color-child .ax-columns.color .img-wrapper {
     width: 100%;
   }
 }
 
-.section.color-column .ax-columns.color > div {
+.section.color-child .ax-columns.color > div {
   justify-content: space-between;
 }
 
-.section.color-column .ax-columns.color .column.text {
+.section.color-child .ax-columns.color .column.text {
   max-width: none;
   flex: 1;
 }
 
-.section.color-column .ax-columns.color h2,
-.section.color-column .ax-columns.color p {
+.section.color-child .ax-columns.color h2,
+.section.color-child .ax-columns.color p {
   text-align: left;
 }
 
-.section.color-column .ax-columns.color p {
+.section.color-child .ax-columns.color p {
   font-size: var(--body-font-size-l);
 }
 
