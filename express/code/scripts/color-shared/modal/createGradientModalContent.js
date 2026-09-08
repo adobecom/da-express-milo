@@ -146,7 +146,9 @@ export function createGradientModalContent(gradient, opts = {}) {
     swatchFeatures: {
       copy: true, copyFromHex: false, colorPicker: false, hexCode: true, baseColor: false,
     },
-    ...(Number.isFinite(opts.verticalMaxPerRow) ? { verticalMaxPerRow: opts.verticalMaxPerRow } : {}),
+    ...(Number.isFinite(opts.verticalMaxPerRow)
+      ? { verticalMaxPerRow: opts.verticalMaxPerRow }
+      : {}),
   });
   railAdapter.rail.colorMode = getPreferredColorMode();
   railWrap.appendChild(railAdapter.element);

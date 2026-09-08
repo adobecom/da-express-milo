@@ -128,6 +128,7 @@ describe('provider transforms', () => {
       description: 'Fallback path description',
       swatches: [{ hex: 'FF0000' }],
     });
+    // eslint-disable-next-line no-underscore-dangle
     expect(gradient._source).to.equal('kuler');
     expect(gradient.description).to.equal('Fallback path description');
   });

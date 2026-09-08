@@ -7,7 +7,7 @@ import {
   formatSwatchInMode,
   getClassName,
   getLinearGradientCSS,
-} from '../../../../../../express/code/libs/services/plugins/download/actions/helpers.js';
+} from '../../../../../express/code/libs/services/plugins/download/actions/helpers.js';
 
 // R217 G159 B89 — the same swatch used throughout the Color mode picker's own
 // manual QA this session, so expected values here can be cross-checked
@@ -66,7 +66,7 @@ describe('getClassName', () => {
 
 describe('escapeXmlAttr', () => {
   it('escapes &, \', and < so the result is safe inside a single-quoted XML attribute', () => {
-    expect(escapeXmlAttr(`Tom's & <Palette>`)).to.equal('Tom&apos;s &amp; &lt;Palette>');
+    expect(escapeXmlAttr("Tom's & <Palette>")).to.equal('Tom&apos;s &amp; &lt;Palette>');
   });
 });
 

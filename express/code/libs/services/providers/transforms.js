@@ -245,13 +245,14 @@ export function paletteToThemeData(palette) {
     const total = colorStops.length;
     return {
       name: palette.name || 'My Color Theme',
-      swatches: colorStops.map((stop, index) => ({
-        rgb: hexToNormalizedRGB(stop.color),
-        offset: Number.isFinite(Number(stop.position))
-          ? Number(stop.position)
-          : (total > 1 ? index / (total - 1) : 0),
-        midpoint: stop.midpoint ?? 0.5,
-      })),
+      swatches: colorStops.map((stop, index) => {
+        const defaultOffset = total > 1 ? index / (total - 1) : 0;
+        return {
+          rgb: hexToNormalizedRGB(stop.color),
+          offset: Number.isFinite(Number(stop.position)) ? Number(stop.position) : defaultOffset,
+          midpoint: stop.midpoint ?? 0.5,
+        };
+      }),
       colorMode: 'rgb',
     };
   }

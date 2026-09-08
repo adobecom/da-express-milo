@@ -85,6 +85,18 @@ export function getDownloadedImageName(description, mimeType) {
 // ── Color conversion / formatting helpers ───────────────────────────
 
 /**
+ * @param {Swatch} swatch
+ * @returns {{ r: number, g: number, b: number }}
+ */
+export function denormRGB(swatch) {
+  return {
+    r: Math.round(swatch.rgb.r * 255),
+    g: Math.round(swatch.rgb.g * 255),
+    b: Math.round(swatch.rgb.b * 255),
+  };
+}
+
+/**
  * Formats one swatch's color in the given UI-facing display mode, using the
  * same conversion + rounding (rgbToAllSpacesDenormalized) the Color mode
  * dropdown and swatch rail already use — so exported code always matches
@@ -138,18 +150,6 @@ export function escapeXmlAttr(value) {
     .replaceAll('&', '&amp;')
     .replaceAll("'", '&apos;')
     .replaceAll('<', '&lt;');
-}
-
-/**
- * @param {Swatch} swatch
- * @returns {{ r: number, g: number, b: number }}
- */
-export function denormRGB(swatch) {
-  return {
-    r: Math.round(swatch.rgb.r * 255),
-    g: Math.round(swatch.rgb.g * 255),
-    b: Math.round(swatch.rgb.b * 255),
-  };
 }
 
 // ── Validation helpers ──────────────────────────────────────────────
