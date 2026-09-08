@@ -887,6 +887,16 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-left: var(--spacing-400);
     padding-right: var(--spacing-400);
   }
+
+  .section.color-column .ax-columns.color > div {
+    gap: var(--spacing-700);
+  }
+}
+
+@media (min-width: 1200px) {
+  .section.color-column .ax-columns.color > div {
+    gap: var(--spacing-800);
+  }
 }
 
 @media (max-width: 599px) {
