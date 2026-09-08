@@ -7,20 +7,6 @@
    Shared / base
    ============================================================ */
 
-/* Restores stage's pre-v2-default behavior (dropped without replacement in
-   that migration): when ax-columns opens the page, it shouldn't carry its
-   own vertical padding on top of whatever the page/hero context already
-   provides. Stage gated this behind a `:not(<spacing-static classes>)`
-   exclusion so authors could opt back into padding via section metadata —
-   checked every page referencing ax-columns and none use that escape hatch
-   on a first-block section, so the exclusion was dead weight; simplified to
-   unconditional. */
-.section:first-child .ax-columns:first-child {
-  min-height: unset;
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
 .section:has(.ax-columns)>.content {
   max-width: 350px;
 }
