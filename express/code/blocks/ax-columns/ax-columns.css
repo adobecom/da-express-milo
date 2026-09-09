@@ -970,6 +970,38 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 /* ============================================================
+   Temporary: Font Generator SEO page
+   ============================================================ */
+
+.ax-columns.temporary-font-generator-styles {
+  max-width: unset;
+  padding-left: var(--Grid-container-padding-side);
+  padding-right: var(--Grid-container-padding-side);
+  padding-top: var(--section-padding-xl);
+  padding-bottom: var(--section-padding-xl);
+}
+
+.section .ax-columns.temporary-font-generator-styles>div {
+  padding-top: 0;
+  padding-bottom: 0;
+  gap: var(--spacing-700);
+}
+
+.section .ax-columns.temporary-font-generator-styles .column {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.section>.ax-columns.temporary-font-generator-styles p.button-container,
+.section>.ax-columns.temporary-font-generator-styles .con-button {
+  margin-top: var(--spacing-500);
+}
+
+.section .ax-columns.temporary-font-generator-styles h3 {
+  font-size: var(--typography-headings-xl);
+}
+
+/* ============================================================
    Shared utility (corner-overlay animation, brand icon, Japanese lang overrides, misc)
    ============================================================ */
 
@@ -1211,34 +1243,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .section .ax-columns.ax-columns.minimum-padding .column {
       padding: 0;
-    }
-
-  /* ============================================================
-     Temporary: Font Generator SEO page
-     ============================================================ */
-
-  .ax-columns.temporary-font-generator-styles {
-      max-width: unset;
-      padding-left: var(--Grid-container-padding-side);
-      padding-right: var(--Grid-container-padding-side);
-      padding-top: var(--section-padding-xl);
-      padding-bottom: var(--section-padding-xl);
-    }
-
-  .section .ax-columns.temporary-font-generator-styles>div {
-      padding-top: 0;
-      padding-bottom: 0;
-      gap: var(--spacing-700);
-    }
-
-  .section .ax-columns.temporary-font-generator-styles .column {
-      padding-left: 0;
-      padding-right: 0;
-    }
-
-  .section>.ax-columns.temporary-font-generator-styles p.button-container,
-    .section>.ax-columns.temporary-font-generator-styles .con-button {
-      margin-top: var(--spacing-500);
     }
 
   /* ============================================================
@@ -2109,14 +2113,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 @media (max-width: 1199px) {
-
-  /* ============================================================
-     Temporary: Font Generator SEO page
-     ============================================================ */
-
-  .section .ax-columns.temporary-font-generator-styles h3 {
-      font-size: var(--typography-headings-xl);
-    }
 
   /* stage pads every column 32px inline at all breakpoints; the v2 rewrite only
      kept that at desktop (the spacing-600 rule), so on mobile/tablet the stacked
