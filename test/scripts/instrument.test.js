@@ -133,7 +133,6 @@ describe('instrument mini-editor analytics', () => {
     expect(sdm.source).to.deep.equal({
       name: 'CCEX',
       client_id: 'projectx_webapp',
-      platform: TEST_PLATFORM,
     });
     expect(sdm.hz).to.deep.equal({
       source_platform_type: 'desktop-web',
@@ -156,11 +155,6 @@ describe('instrument mini-editor analytics', () => {
     expect(findProperty(custom, 'event.user_guid')).to.deep.equal({
       propertyName: 'event.user_guid',
       propertyValue: 'user-123',
-      propertyType: 'string',
-    });
-    expect(findProperty(custom, 'source.platform')).to.deep.equal({
-      propertyName: 'source.platform',
-      propertyValue: TEST_PLATFORM,
       propertyType: 'string',
     });
     expect(findProperty(custom, 'hz.device_name')).to.deep.equal({

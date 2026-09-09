@@ -5,6 +5,7 @@ const EXPORT_EVENT_NAME_AUTH = 'export-project-complete';
 const EXPORT_EVENT_NAME_UNAUTH = 'export-project-complete-unauth';
 const SOURCE_NAME = 'CCEX';
 const SOURCE_CLIENT_ID = 'projectx_webapp';
+const UI_LOCATION = 'seo-discover-page';
 
 function getPageNameFromPathname() {
   const pathSegments = window.location.pathname.replace(/^\//, '').split('/').filter(Boolean);
@@ -21,10 +22,6 @@ function getLanguage() {
 
 function getMiniEditorTaskName() {
   return getMetadata('messagetype')?.trim() || 'quote';
-}
-
-function getSourcePlatform() {
-  return window.navigator?.platform || 'unknown';
 }
 
 function addIfDefined(target, key, value) {
@@ -78,7 +75,7 @@ function toAttachedFormatForMiniEditor(properties) {
   });
 }
 
-export default async function trackMiniEditorExport({ exportMethod, uiLocation = 'seo-discover-page' } = {}) {
+export default async function trackMiniEditorExport({ exportMethod } = {}) {
   let userAccountType = 'unknown';
 
   if (!exportMethod) return;
@@ -99,7 +96,6 @@ export default async function trackMiniEditorExport({ exportMethod, uiLocation =
   const subtype = 'export-project';
   const category = 'WEB';
   const subcategory = 'document';
-  const sourcePlatform = getSourcePlatform();
   const mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID;
   const guid = generateGuid();
   const accessCountry = await getAccessCountry();
@@ -149,7 +145,6 @@ export default async function trackMiniEditorExport({ exportMethod, uiLocation =
     source: {
       name: SOURCE_NAME,
       client_id: SOURCE_CLIENT_ID,
-      platform: sourcePlatform,
     },
     hz: {
       source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
@@ -163,7 +158,7 @@ export default async function trackMiniEditorExport({ exportMethod, uiLocation =
     custom: {
       export_method: exportMethod,
       ui: {
-        location: uiLocation,
+        location: UI_LOCATION,
       },
       displayedLanguage: language,
       task: {
