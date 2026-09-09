@@ -236,6 +236,14 @@
     height: 826px;
 }
 
+.frictionless-quick-action-mobile .quick-action-container#audio-converter {
+    height: 826px;
+}
+
+.frictionless-quick-action-mobile .quick-action-container#video-to-audio {
+    height: 826px;
+}
+
 .frictionless-quick-action-mobile > div.hidden {
     visibility: hidden;
     position: absolute;
