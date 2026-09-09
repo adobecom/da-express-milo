@@ -1,0 +1,220 @@
+# Express-Milo Code Review Standards
+
+## CRITICAL: Complete Rule Application Required
+
+When conducting code reviews, you MUST check ALL of the following rules and provide the specific format outlined below.
+
+## Rules to Check (in priority order):
+
+### Priority 1 - Blocking Issues:
+1. **core-web-vitals-standards.mdc** - Performance requirements (LCP, FCP, INP, CLS)
+2. **aem-markup-sections-blocks.mdc** - Block structure, auto-blocking, author experience
+3. **dom-structure-preservation.mdc** - Never break existing DOM structure
+4. **dom-manipulation-best-practices.mdc** - createElement patterns, batching
+5. **event-handling-performance.mdc** - Memory management, cleanup patterns
+6. **Memory Rules** - No real URLs in tests, use mocks instead
+
+### Priority 2 - Performance Issues:
+7. **lighthouse-performance-troubleshooting.mdc** - LCP optimization, score debugging
+8. **lazy-loading-implementation.mdc** - IntersectionObserver requirements
+9. **image-optimization-requirements.mdc** - Responsive images, preloading
+10. **resource-loading-strategy.mdc** - Module loading, async patterns
+
+### Priority 3 - Quality Issues:
+11. **Accessibility Standards** - ARIA patterns, keyboard navigation
+12. **Error Handling** - Try/catch, lana logging
+13. **File Size Limits** - JS files < 300 lines, CSS files < 200 lines per module
+
+## Required Review Format:
+
+### Section Structure:
+```markdown
+## 🚨 **CRITICAL ISSUES** / 🔶 **MODERATE ISSUES** / ✅ **POSITIVE ASPECTS**
+
+### [Priority Level]. **[Issue Category] - [Brief Description]**
+
+**Issue Description:**
+[1-2 paragraph explanation of WHY this is a problem, what express-milo rule it violates, and the impact on performance/user experience/maintainability]
+
+**How it is now:**
+```[language]
+// [file path and line numbers]
+[actual code from the diff showing the problem]
+```
+
+**How it should be:**
+```[language]
+// [file path] - [description of the fix]
+[corrected code following express-milo patterns]
+```
+```
+
+### Required Checks by File Type:
+
+#### JavaScript Files (.js, .ts):
+- ✅ Uses createTag instead of innerHTML
+- ✅ Has event listener cleanup with tracked listeners
+- ✅ Uses IntersectionObserver for lazy loading (non-critical blocks)
+- ✅ Implements proper error handling with lana logging
+- ✅ Uses DocumentFragment for batched DOM operations
+- ✅ Has timeout fallbacks for reliability
+- ✅ File is under 300 lines (split into modules if larger)
+- ✅ Uses passive event listeners where appropriate
+- ✅ Implements proper ARIA patterns from existing express-milo examples
+
+#### CSS Files (.css):
+- ✅ File is under 200 lines per module
+- ✅ Uses CSS custom properties (variables)
+- ✅ Follows mobile-first responsive design
+- ✅ No inline styles that could cause CLS
+- ✅ Uses proper specificity (no !important)
+
+#### Test Files (.test.js):
+**CRITICAL MEMORY RULE: No real external or staging URLs - use mocks instead**
+
+**Required Test Structure:**
+- ✅ No real external URLs (use mocks) - **MEMORY RULE ENFORCEMENT**
+- ✅ No staging environment URLs (commerce-stg.adobe.com, etc.)
+- ✅ Proper test structure with describe/it blocks
+- ✅ Tests accessibility features (ARIA, keyboard nav)
+- ✅ Tests error conditions and edge cases
+- ✅ Uses proper assertions and expectations
+
+**Block Testing Standards:**
+```javascript
+// ✅ REQUIRED: Test block structure preservation
+describe('BlockName Structure', () => {
+  it('preserves author markup hierarchy', async () => {
+    const mockHTML = '<div><div><p>Content</p></div></div>';
+    const block = createBlockFromHTML(mockHTML);
+    await init(block);
+    expect(block.querySelector('p')).to.exist;
+  });
+  
+  it('enhances without breaking semantics', async () => {
+    const block = createTestBlock();
+    await init(block);
+    expect(block.getAttribute('aria-label')).to.exist;
+    expect(block.querySelector('h1, h2, h3')).to.exist;
+  });
+});
+```
+
+**Performance Testing Requirements:**
+```javascript
+// ✅ Test LCP impact
+it('renders LCP elements immediately', async () => {
+  const block = createFirstSectionBlock();
+  const startTime = performance.now();
+  await init(block);
+  const endTime = performance.now();
+  
+  expect(block.querySelector('.lcp-element')).to.exist;
+  expect(endTime - startTime).to.be.below(100); // Fast initialization
+});
+
+// ✅ Test lazy loading for non-LCP
+it('uses IntersectionObserver for lazy loading', () => {
+  const block = createNonFirstSectionBlock();
+  init(block);
+  expect(window.IntersectionObserver).to.have.been.called;
+});
+```
+
+**Accessibility Testing Standards:**
+```javascript
+// ✅ REQUIRED: Keyboard navigation
+it('supports keyboard navigation', async () => {
+  const block = createTestBlock();
+  await init(block);
+  
+  const focusableElements = block.querySelectorAll('[tabindex], button, a');
+  expect(focusableElements.length).to.be.greaterThan(0);
+  
+  // Test keyboard events
+  focusableElements[0].focus();
+  expect(document.activeElement).to.equal(focusableElements[0]);
+});
+
+// ✅ REQUIRED: ARIA compliance
+it('provides proper ARIA labeling', async () => {
+  const block = createTestBlock();
+  await init(block);
+  
+  const interactiveElements = block.querySelectorAll('button, [role="button"]');
+  interactiveElements.forEach(el => {
+    expect(el.getAttribute('aria-label') || el.textContent.trim()).to.not.be.empty;
+  });
+});
+```
+
+**Mock Requirements:**
+```javascript
+// ✅ REQUIRED: Mock external dependencies
+beforeEach(() => {
+  // Mock fetch requests
+  window.fetch = sinon.stub().resolves({
+    ok: true,
+    json: () => Promise.resolve({ data: 'mock' })
+  });
+  
+  // Mock external URLs
+  sinon.stub(window, 'open');
+});
+
+// ✅ REQUIRED: Mock real URLs in test data
+const mockData = {
+  // ❌ NEVER: href: 'https://commerce-stg.adobe.com/...'
+  // ✅ REQUIRED: 
+  href: 'https://mock-commerce.example.com/store',
+  embedUrl: 'https://mock-video.example.com/embed/123'
+};
+```
+
+#### HTML Files (including mocks):
+- ✅ Semantic HTML structure
+- ✅ Proper ARIA attributes
+- ✅ No real external URLs in test mocks
+- ✅ Proper heading hierarchy
+- ✅ Alt text for images
+
+## Memory Rule Integration:
+
+Always check the user's memory rules during code review. If any memory contradicts your findings or provides additional context, integrate that information into your review.
+
+## Pattern References:
+
+Point to specific express-milo files as examples:
+- Event cleanup: `express/code/blocks/grid-marquee/grid-marquee.js`
+- ARIA patterns: `express/code/scripts/widgets/frictionless-locale-dropdown.js`
+- Lazy loading: `core-web-vitals-standards.mdc`
+- DOM manipulation: `dom-manipulation-best-practices.mdc`
+- Block structure: `aem-markup-sections-blocks.mdc`
+- LCP optimization: `lighthouse-performance-troubleshooting.mdc`
+- Test patterns: Enhanced test guidelines in this file
+
+## Final Section Requirements:
+
+### 🔧 **REQUIRED FIXES SUMMARY**
+List fixes in priority order:
+1. **Priority 1 (Blocking):** [List items that prevent merge]
+2. **Priority 2 (Before Merge):** [List items needed before merge]
+3. **Priority 3 (Performance):** [List nice-to-have improvements]
+
+### Performance Impact Assessment:
+- Core Web Vitals impact (LCP/FCP/INP/CLS)
+- Memory usage concerns
+- Scalability considerations
+
+### Accessibility Compliance:
+- WCAG 2.1 compliance issues
+- Keyboard navigation problems
+- Screen reader compatibility
+
+## Code Review Trigger:
+
+When a user says "code review" or provides a diff, automatically apply ALL these rules and format the output exactly as specified above.
+description:
+globs:
+alwaysApply: false
+---

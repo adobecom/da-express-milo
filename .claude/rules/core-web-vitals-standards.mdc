@@ -1,0 +1,228 @@
+
+# Core Web Vitals Performance Standards
+
+**APPLY: EVERY QUERY - CRITICAL PERFORMANCE RULE**
+
+## Performance is Non-Negotiable
+Following AEM's "Keeping it 100" principle: Maintain Lighthouse Score 100 through Three-Phase Loading (E-L-D)
+
+## CRITICAL: CSS Render-Blocking Detection & Resolution
+**ALWAYS check CSS loading sequence FIRST when diagnosing slow LCP**
+
+### CSS Render-Blocking Symptoms (URGENT INVESTIGATION REQUIRED)
+- LCP > 3 seconds with white screen until late in loading
+- Body visibility delayed despite JavaScript optimization
+- Performance scores plateau despite component optimizations
+- Render delay >70% in LCP breakdown
+
+### CSS Render-Blocking Root Cause
+Large CSS files (>20KB) loaded via JavaScript after HTML parsing:
+```javascript
+// ❌ ANTI-PATTERN: Render-blocking CSS via JavaScript
+const link = document.createElement('link');
+link.setAttribute('rel', 'stylesheet');
+link.setAttribute('href', 'large-file.css'); // Blocks body visibility
+document.head.appendChild(link);
+```
+
+### REQUIRED AEM Performance Pattern
+```javascript
+// ✅ REQUIRED: Follow AEM Three-Phase Loading for LCP optimization
+// Phase E: Focus on accelerating transformation speed for LCP elements
+export default async function init(el) {
+  // Create LCP structure immediately (synchronous DOM)
+  const basicStructure = createLCPStructure(el);
+  el.append(basicStructure);
+  
+  // Phase L: Defer heavy operations to Promise.all
+  const enhancementPromise = Promise.all([
+    loadAdditionalData(),
+    processAsyncFeatures()
+  ]);
+  
+  // Progressive enhancement without blocking LCP
+  const data = await enhancementPromise;
+  enhanceWithData(basicStructure, data);
+}
+```
+
+## Three-Phase Loading Strategy (REQUIRED)
+Based on AEM's [performance best practices](https://www.aem.live/developer/keeping-it-100):
+
+### Phase E (Eager) - Critical Path to LCP
+- **100kb Payload Limit**: Everything before LCP MUST stay under 100kb total
+- **Single Origin Rule**: NO connections to second origins before LCP (TLS/DNS overhead blocks LCP)
+- **Body Hidden Pattern**: `body { display: none; }` in [head.html](mdc:head.html) prevents premature image downloads
+- **LCP Target**: 1560ms or better on mobile (100 score in PageSpeed Insights)
+
+### Phase L (Lazy) - Same-Origin Enhancement  
+- **Project-Controlled Content**: First-party resources that don't affect TBT/FID
+- **Next Sections Loading**: Below-fold blocks and their resources
+- **Lazy Images**: All images with `loading="lazy"` attribute
+- **Non-Blocking Libraries**: JavaScript that doesn't impact main thread
+
+### Phase D (Delayed) - Third-Party Deferred
+- **3+ Second Delay**: MANDATORY delay after LCP before loading third-party content
+- **Marketing Tools**: Tag managers, analytics, consent management
+- **Interactive Modules**: Chat systems, social embeds, A11y tools
+- **External Scripts**: Any content not controlled by first party
+
+## Progressive Enhancement Strategy (REQUIRED)
+Our system delivers simple DOM structure that components intake, process, and display:
+- `body { display: none; }` in [head.html](mdc:head.html) is REQUIRED and intentional
+- Components enhance basic HTML into rich interactive experiences
+- Performance optimization focuses on JavaScript execution speed, NOT inline CSS
+- Never optimize by removing progressive enhancement - optimize the enhancement process
+
+### LCP (Largest Contentful Paint) Requirements - Phase E
+- **Payload Budget**: Aggregate resources before LCP MUST stay under 100kb
+- **Single Origin Only**: No external connections (CDNs, fonts, APIs) before LCP
+- **Above-the-fold images** MUST use `loading="eager"` and `fetchpriority="high"`
+- **First image in each block** MUST be preloaded via `<link rel="preload" as="image">`
+- Use responsive image sizing: mobile (400px), tablet (600px), desktop (900px)
+- Always include width/height attributes to prevent layout shift
+- **CRITICAL:** Optimize component initialization speed, not static rendering
+
+#### LCP DOM Insertion Rules (CRITICAL)
+- **LCP elements MUST be added to DOM immediately, before any async operations**
+- **NEVER structure init() as monolithic flow where DOM insertion waits for all data**
+- **ANTI-PATTERN:** `await fetchData(); await fetchMore(); el.append(ui);` (All-or-Nothing Initialization)
+- **REQUIRED PATTERN:** `el.append(basicUI); fetchData().then(enhance);` (Progressive Enhancement)
+- **NEVER** hide LCP elements while fetching data (`visibility: hidden` blocks LCP)
+- **REQUIRED:** Separate visual rendering from data fetching - render visuals first, enhance with data later
+
+#### LCP Content Requirements (CRITICAL - Follow Milo Guidelines)
+**Target: LCP < 2.5 seconds (Good), < 1.8 seconds (Excellent)**
+
+**Content Size & Hierarchy Rules:**
+- **First section content MUST be larger** than content in following sections
+- If text-only content cannot be larger, use **high-entropy background image** (texture, pixel differentiation) to focus LCP on entire section
+- **First section MUST fill viewport** - add content or choose blocks with taller min-height
+- **Image size hierarchy**: First section image must be larger than second section image
+
+**LCP Element Detection Requirements:**
+- **First section background**: Use inline image or background image, NOT hex colors or gradients
+- **Second section visibility**: If second section visible in viewport, ensure first section has dominant visual weight
+- **Viewport filling**: First section must be all that's visible in initial viewport to ensure LCP detection
+
+**Common LCP Failures & Fixes:**
+```css
+/* ❌ ANTI-PATTERN: Hex/gradient background in first section */
+.section:first-child { background: #f1f1f1; }
+
+/* ✅ REQUIRED: Background image for LCP detection */
+.section:first-child { 
+  background-image: url('hero-bg.jpg');
+  min-height: 100vh; /* Ensure viewport filling */
+}
+```
+
+#### Resource Preloading Performance (CRITICAL)
+- **AVOID**: Early hints, h2-push, preconnect before LCP (consumes 100kb bandwidth budget)
+- **REQUIRED:** ALL preloading MUST be in head.html during HTML parsing
+- **PRIMARY PATTERN:** Add static preloads as `<link rel="preload">` in head.html
+- **FONT STRATEGY:** Load fonts AFTER LCP (bandwidth constrained, different origin)
+- **CSS IMPLEMENTATION:** Use libs detection pattern to preload Milo and Express CSS immediately
+- **LOCALE DETECTION:** Extract locale from path segments in head.html script (e.g., `/uk/express/` vs `/express/`)
+- **PRELOAD ORDER:** Critical resources start downloading during HTML parsing (parallel)
+- **AVOID:** ANY preloading in JavaScript - too late in loading waterfall
+
+#### DOM Structure Contract (CRITICAL)
+- **GOLDEN RULE:** Performance optimization NEVER changes DOM structure or element order
+- **REQUIRED:** Check `test/blocks/{block-name}/mocks/body.html` for expected DOM output before optimization
+- **ANTI-PATTERN:** Changing element insertion order or hierarchy for performance
+- **CRITICAL:** CSS depends on exact DOM structure - any change breaks visual layout
+- **REQUIRED:** Component output MUST match test mocks regardless of performance optimizations
+
+#### Async Operation Rules (CRITICAL)
+- **NEVER** use `await` in init() before basic DOM insertion
+- **NEVER** block DOM insertion with Promise.all() for non-critical data (ratings, analytics, etc.)
+- **ANTI-PATTERN:** Calling async functions synchronously in render path (`formatDynamicCartLink(cta)` without await)
+- **REQUIRED:** Use setTimeout/requestIdleCallback for enhancement after basic render
+
+#### Progressive Enhancement Architecture (REQUIRED)
+```javascript
+// ✅ CORRECT: Progressive Enhancement Pattern (Phase E)
+export default async function init(el) {
+  // IMMEDIATE: Zero-dependency DOM insertion for LCP
+  const basicUI = createBasicStructure(el);
+  el.append(basicUI);  // LCP element visible now
+  
+  // DEFERRED: Enhance progressively (Phase L)
+  setTimeout(async () => {
+    const data = await fetchEnhancements();
+    enhanceUI(basicUI, data);
+  }, 0);
+}
+
+// ❌ WRONG: Monolithic Initialization Pattern  
+export default async function init(el) {
+  const data = await fetchAllData();  // Blocks LCP
+  const ui = buildCompleteUI(data);
+  el.append(ui);  // Too late for good LCP
+}
+```
+
+### FCP (First Contentful Paint) Requirements - Phase L
+- ALL non-critical blocks MUST use IntersectionObserver lazy loading
+- **NO inline CSS** - maintain separation between structure and presentation
+- Scripts MUST be loaded with `type="module"` and proper async/defer
+- Header/footer loaded asynchronously (not critical for LCP)
+- Use `<link rel="modulepreload">` for critical JavaScript modules
+
+### Phase D - Delayed Loading (3+ Seconds After LCP)
+Third-party scripts MUST be delayed using the delayed loading pattern:
+
+```javascript
+// ✅ REQUIRED - 3+ second delay for Phase D content
+const loadDelayed = (dependencies, DELAY = 3000) => new Promise(resolve => {
+  setTimeout(() => {
+    // Marketing and analytics tools (Phase D)
+    loadPrivacy();
+    loadAnalytics(); 
+    loadTagManager();
+    loadChatSupport();
+    loadA11yTools();
+    
+    // Social and interactive features (Phase D)
+    loadSocialMediaEmbeds();
+    loadCommentSystems();
+    loadConsentManagement();
+    
+    resolve();
+  }, DELAY);
+});
+```
+
+### INP (Interaction to Next Paint) Requirements
+- Batch DOM updates using `setImmediate()` or `requestAnimationFrame()`
+- Throttle/debounce high-frequency events (scroll, input, resize)
+- Use `await yieldToMain()` for long-running tasks
+- Event handlers MUST be passive where possible
+
+### CLS (Cumulative Layout Shift) Requirements
+- Reserve space with width/height attributes before content loads
+- Delay decorative elements until main content is rendered
+- Use JavaScript-based decoration over CSS pseudo-selectors
+- Never inject content without dimension reservation
+
+### TBT (Total Blocking Time) Requirements
+- Defer non-critical features by 3+ seconds using delayed loading pattern (Phase D)
+- Use Document Fragments for complex DOM assembly
+- Batch operations: max 4 concurrent requests, add delays for large batches
+- Avoid `innerHTML` - use `createElement` + `appendChild` pattern from [utils.js](mdc:express/code/scripts/utils.js)
+
+## Performance Monitoring Requirements
+- Implement Web Vitals tracking for all blocks
+- Use conditional loading based on performance metadata
+- Monitor CLS with PerformanceObserver
+- Track LCP with contextual element data
+- Target PageSpeed Insights Mobile score of 100 (1560ms LCP threshold)
+
+## Anti-Patterns to Avoid (Based on AEM Guidelines)
+- **Early Hints/H2-Push**: Consumes bandwidth budget before LCP
+- **Font Preloading**: Fonts should load AFTER LCP (bandwidth constrained)
+- **Multiple Origins**: Second origin connections add TLS/DNS overhead
+- **CDN Script Injection**: Can negatively impact performance before LCP
+- **Redirects**: Each redirect adds performance penalty
+- **Preconnect Before LCP**: Uses bandwidth that should be reserved for critical resources

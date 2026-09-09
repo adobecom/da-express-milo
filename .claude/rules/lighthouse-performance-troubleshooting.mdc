@@ -1,0 +1,303 @@
+# Lighthouse Performance Troubleshooting Guide
+
+**APPLY: EVERY QUERY - LIGHTHOUSE SCORE OPTIMIZATION**
+
+## Target Performance Scores
+Based on Express-Milo architecture requirements:
+- **Performance: 90+ (Target: 97-100)**
+- **Accessibility: 100** 
+- **Best Practices: 100**
+- **SEO: 92+**
+
+## Critical Performance Issues & Solutions
+
+### Issue 1: LCP > 3 seconds (Score drops from 100 to 86)
+
+**Root Cause Analysis:**
+- Large content elements not optimized for LCP detection
+- Render-blocking resources in critical path
+- Poor content hierarchy in first section
+
+**REQUIRED Solutions:**
+```css
+/* ✅ First section must dominate viewport */
+.section:first-child {
+  min-height: 100vh;
+  background-image: url('high-entropy-image.jpg');
+  background-size: cover;
+}
+
+/* ✅ Ensure LCP element is largest contentful element */
+.section:first-child h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  margin: 2rem 0;
+}
+
+/* ✅ Make first section image larger than second section */
+.section:first-child img {
+  width: 100%;
+  max-width: 800px; /* Larger than second section */
+}
+
+.section:nth-child(2) img {
+  max-width: 600px; /* Smaller than first section */
+}
+```
+
+**Content Strategy Fix:**
+```javascript
+// ✅ Auto-block to ensure proper LCP structure
+function buildAutoBlocks(main) {
+  const firstSection = main.querySelector('.section');
+  const h1 = firstSection?.querySelector('h1');
+  const firstImage = firstSection?.querySelector('img');
+  
+  if (firstSection && (!firstImage || hasLowEntropy(firstImage))) {
+    // Add high-entropy background for LCP detection
+    firstSection.style.backgroundImage = 'url("/express/assets/hero-texture.jpg")';
+    firstSection.classList.add('hero-section');
+  }
+}
+```
+
+### Issue 2: Largest Contentful Paint Optimization
+
+**Problem:** LCP element not in first section (common cause of 86 vs 100 score)
+
+**Diagnostic Steps:**
+1. **Check LCP element location**: Use Chrome DevTools → Performance → Web Vitals
+2. **Verify first section dominance**: Ensure first section fills viewport
+3. **Image size hierarchy**: First section image > second section image
+
+**Required Implementation:**
+```javascript
+// ✅ REQUIRED: Immediate LCP structure in Phase E
+export default async function init(el) {
+  const isFirstSection = el.closest('.section')?.dataset.sectionStatus === 'loading';
+  
+  if (isFirstSection) {
+    // Phase E: Create LCP structure immediately
+    createLCPStructure(el);
+    
+    // Mark as LCP ready
+    el.classList.add('lcp-ready');
+    
+    // Queue enhancements for Phase L
+    setTimeout(() => enhanceNonCritical(el), 0);
+  }
+}
+
+function createLCPStructure(el) {
+  // Create largest contentful element immediately
+  const heroContent = createTag('div', { class: 'hero-content' });
+  const title = el.querySelector('h1') || createTag('h1', {}, 'Default Title');
+  const image = el.querySelector('img');
+  
+  // Ensure title is large and prominent
+  title.style.fontSize = 'clamp(2rem, 5vw, 4rem)';
+  
+  // Ensure image is properly sized for LCP
+  if (image) {
+    image.setAttribute('loading', 'eager');
+    image.setAttribute('fetchpriority', 'high');
+  }
+  
+  heroContent.append(title, image);
+  el.prepend(heroContent);
+}
+```
+
+### Issue 3: Performance Score Plateau at 80-85
+
+**Common Causes:**
+- Component-level optimizations (too late in loading process)
+- CSS render-blocking issues
+- Third-party script loading in Phase E/L instead of Phase D
+
+**Required System-Level Fixes:**
+```html
+<!-- ✅ head.html: Required AEM EDS structure -->
+<style>
+  body { display: none; }
+  .section { min-height: 50vh; }
+  .section:first-child { min-height: 100vh; }
+  h1 { font-size: 2.5rem; margin: 1rem 0; }
+</style>
+
+<!-- ✅ Non-blocking CSS loading -->
+<link rel="preload" href="/express/code/styles/styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/express/code/styles/styles.css"></noscript>
+```
+
+### Issue 4: Cumulative Layout Shift (CLS) Prevention
+
+**REQUIRED Patterns:**
+```css
+/* ✅ Prevent layout shift with explicit dimensions */
+img {
+  aspect-ratio: attr(width) / attr(height);
+  height: auto;
+}
+
+/* ✅ Reserve space for dynamic content */
+.loading-placeholder {
+  min-height: 200px;
+  background: linear-gradient(90deg, #f0f0f0 25%, transparent 37%, #f0f0f0 63%);
+}
+
+/* ✅ Stable font loading */
+@font-face {
+  font-family: 'Adobe-Fonts';
+  font-display: swap; /* Prevent invisible text during font load */
+  src: url('/fonts/adobe-fonts.woff2') format('woff2');
+}
+```
+
+### Issue 5: Time to First Byte (TTFB) Optimization
+
+**AEM/Franklin Specific Optimizations:**
+```javascript
+// ✅ Optimize block loading sequence
+function loadBlocks(main) {
+  const blocks = main.querySelectorAll('[class*="block"]');
+  
+  // Load LCP blocks immediately
+  const lcpBlocks = [...blocks].filter(block => 
+    block.closest('.section') === document.querySelector('.section')
+  );
+  
+  // Load non-LCP blocks with intersection observer
+  const nonLcpBlocks = [...blocks].filter(block => !lcpBlocks.includes(block));
+  
+  // Phase E: Load LCP blocks
+  lcpBlocks.forEach(block => loadBlock(block));
+  
+  // Phase L: Lazy load others
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        loadBlock(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  });
+  
+  nonLcpBlocks.forEach(block => observer.observe(block));
+}
+```
+
+## Performance Testing Requirements
+
+### Required Test Coverage
+```javascript
+// ✅ Performance regression testing
+describe('Performance Standards', () => {
+  it('achieves LCP < 2.5 seconds', async () => {
+    const startTime = performance.now();
+    const block = createFirstSectionBlock();
+    await init(block);
+    
+    const lcpElement = block.querySelector('.lcp-ready');
+    expect(lcpElement).to.exist;
+    
+    const renderTime = performance.now() - startTime;
+    expect(renderTime).to.be.below(100); // Component init time
+  });
+  
+  it('prevents cumulative layout shift', async () => {
+    const block = createTestBlock();
+    const initialHeight = block.offsetHeight;
+    
+    await init(block);
+    
+    const finalHeight = block.offsetHeight;
+    const shift = Math.abs(finalHeight - initialHeight) / initialHeight;
+    expect(shift).to.be.below(0.1); // < 10% layout shift
+  });
+});
+```
+
+### Lighthouse CI Integration
+```yaml
+# ✅ .github/workflows/lighthouse.yml
+name: Lighthouse Performance Check
+on: [pull_request]
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lighthouse CI
+        run: |
+          lhci autorun --config=.lighthouserc.json
+        env:
+          PERFORMANCE_THRESHOLD: 90
+          LCP_THRESHOLD: 2500
+```
+
+## Debugging Tools & Commands
+
+### Chrome DevTools Investigation
+```javascript
+// ✅ LCP debugging in console
+new PerformanceObserver((list) => {
+  const entries = list.getEntries();
+  const lastEntry = entries[entries.length - 1];
+  console.log('LCP:', lastEntry.startTime, lastEntry.element);
+}).observe({ entryTypes: ['largest-contentful-paint'] });
+
+// ✅ CLS debugging
+new PerformanceObserver((list) => {
+  let cls = 0;
+  list.getEntries().forEach((entry) => {
+    if (!entry.hadRecentInput) {
+      cls += entry.value;
+    }
+  });
+  console.log('CLS:', cls);
+}).observe({ entryTypes: ['layout-shift'] });
+```
+
+### Performance Monitoring
+```javascript
+// ✅ Real-time performance tracking
+function trackWebVitals() {
+  new PerformanceObserver((list) => {
+    list.getEntries().forEach((entry) => {
+      if (entry.entryType === 'navigation') {
+        console.log('TTFB:', entry.responseStart - entry.fetchStart);
+      }
+    });
+  }).observe({ entryTypes: ['navigation'] });
+}
+```
+
+## Anti-Patterns That Kill Performance
+
+### ❌ Component-Level Performance Fixes
+```javascript
+// ❌ ANTI-PATTERN: Optimizing at component level (too late)
+export default async function init(el) {
+  // These optimizations don't affect Lighthouse scores:
+  await optimizeImages(); // Too late - LCP already measured
+  await minifyHTML(); // Too late - HTML already parsed
+  await loadCriticalCSS(); // Too late - render already blocked
+}
+```
+
+### ❌ Render-Blocking Patterns
+```javascript
+// ❌ ANTI-PATTERN: Blocking critical rendering path
+const css = await fetch('/styles/large-file.css');
+document.head.appendChild(createStylesheet(css)); // Blocks LCP
+```
+
+### ❌ LCP Element Mistakes
+```html
+<!-- ❌ ANTI-PATTERN: Non-contentful LCP candidates -->
+<div style="background: #f1f1f1; height: 100vh;"></div> <!-- Not contentful -->
+
+<!-- ✅ REQUIRED: Contentful LCP element -->
+<div style="background-image: url('hero.jpg'); height: 100vh;">
+  <h1>Large prominent heading</h1>
+</div>
+```

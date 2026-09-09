@@ -1,0 +1,31 @@
+# AEM Three-Phase Loading (E-L-D)
+
+**APPLY: EVERY PERFORMANCE QUERY**
+
+## Phase Assignment
+
+**Phase E (Eager)**: LCP elements, <100KB, single origin
+**Phase L (Lazy)**: Below-fold, same-origin enhancement  
+**Phase D (Delayed)**: Third-party, 3+ seconds after LCP
+
+## Phase E Budget Rules
+- **100KB total** before LCP
+- **Single origin only** (no CDNs, fonts, APIs)
+- **Essential AEM CSS** (required for transformations)
+- **First section only**
+
+## Implementation Pattern
+```javascript
+// ✅ Phase E: LCP structure immediately
+export default async function init(el) {
+  const isFirstSection = el.closest('.section') === document.querySelector('.section');
+  
+  if (isFirstSection) {
+    // Phase E: Create LCP DOM immediately
+    createLCPStructure(el);
+  } else {
+    // Phase L: Lazy load with intersection observer
+    setupLazyLoading(el);
+  }
+}
+```

@@ -1,0 +1,54 @@
+# AEM Franklin Loading Phases & Performance
+
+**APPLY: EVERY PERFORMANCE QUERY**
+
+## AEM/Franklin Loading Phases (CRITICAL ARCHITECTURE)
+1. **Raw HTML Phase**: Franklin EDS delivers undecorated HTML structure
+2. **Decoration Phase**: Blocks receive `data-status="decorated"` - components start decorating  
+3. **Loaded Phase**: Final `data-block-status="loaded"` - all interactions ready
+
+**Performance wins happen in phases 1-2, not phase 3**
+
+## Three-Phase Loading (E-L-D) Assignment
+
+**Phase E (Eager)**: LCP elements, <100KB, single origin
+**Phase L (Lazy)**: Below-fold, same-origin enhancement  
+**Phase D (Delayed)**: Third-party, 3+ seconds after LCP
+
+## Phase E Budget Rules
+- **100KB total** before LCP
+- **Single origin only** (no CDNs, fonts, APIs)
+- **First section only**
+
+## Block Performance Pattern (Hero-Marquee Style)
+```javascript
+// ✅ LCP structure first, heavy operations deferred to Promise.all
+export default async function init(el) {
+  // Create LCP DOM immediately - no heavy operations
+  const foreground = document.createElement('div');
+  foreground.appendChild(headline); // LCP element here
+  el.appendChild(foreground);
+  
+  // Defer heavy operations to Promise.all like hero-marquee
+  const promiseArr = [];
+  promiseArr.push(cardProcessing());
+  promiseArr.push(ratingsAPI());
+  await Promise.all(promiseArr);
+}
+```
+
+## Implementation Pattern
+```javascript
+// ✅ Phase E: LCP structure immediately
+export default async function init(el) {
+  const isFirstSection = el.closest('.section') === document.querySelector('.section');
+  
+  if (isFirstSection) {
+    // Phase E: Create LCP DOM immediately - no async blocking
+    createLCPStructure(el);
+  } else {
+    // Phase L: Lazy load with intersection observer
+    setupLazyLoading(el);
+  }
+}
+```

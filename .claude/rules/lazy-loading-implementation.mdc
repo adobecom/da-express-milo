@@ -1,0 +1,358 @@
+
+# Lazy Loading Performance Rules - Three-Phase Strategy
+
+**APPLY: EVERY QUERY - CRITICAL PERFORMANCE RULE**
+
+## AEM Three-Phase Loading Implementation (REQUIRED)
+Based on [AEM's performance guidelines](https://www.aem.live/developer/keeping-it-100):
+
+### Phase Assignment Strategy
+
+**Phase E (Eager)**: First section only, LCP candidates, under 100kb total
+**Phase L (Lazy)**: Below-fold blocks, same-origin enhancements  
+**Phase D (Delayed)**: Third-party content, 3+ seconds after LCP
+
+## Phase E - Critical Section Only (REQUIRED)
+**NEVER lazy load the first section - it contains LCP candidates**
+
+```javascript
+// ✅ REQUIRED - First section loads immediately (Phase E)
+export default async function init(element) {
+  const isFirstSection = element.closest('.section') === document.querySelector('.section');
+  
+  if (isFirstSection) {
+    // Critical path - load immediately for LCP
+    loadBlock(element);
+  } else {
+    // Below-fold - use Phase L lazy loading
+    createIntersectionObserver({
+      el: element,
+      options: { rootMargin: '200px' },
+      callback: loadBlock,
+    });
+  }
+}
+```
+
+## Phase L - IntersectionObserver Pattern (REQUIRED)
+ALL non-critical blocks MUST use lazy loading following [utils.js](mdc:express/code/scripts/utils.js):
+
+```javascript
+// ✅ REQUIRED - Standard Phase L lazy loading
+export default async function init(element) {
+  // Check for override (testing purposes)
+  if (element.textContent.includes('no-lazy')) {
+    loadBlock(element);
+    return;
+  }
+  
+  // Phase L: Lazy load with appropriate rootMargin
+  const blockType = element.classList[0];
+  const rootMargin = getOptimalRootMargin(blockType);
+  
+  createIntersectionObserver({
+    el: element,
+    options: { rootMargin },
+    callback: () => loadBlock(element),
+  });
+}
+
+// Optimize loading distance based on block importance
+function getOptimalRootMargin(blockType) {
+  const criticalBlocks = ['marquee', 'hero', 'cards'];
+  const heavyBlocks = ['video', 'carousel', 'interactive'];
+  
+  if (criticalBlocks.includes(blockType)) return '300px'; // Load earlier
+  if (heavyBlocks.includes(blockType)) return '100px';   // Load closer
+  return '200px'; // Default
+}
+```
+
+## Progressive Enhancement with Timeout Fallback (REQUIRED)
+
+```javascript
+// ✅ REQUIRED - Intersection + timeout reliability pattern
+export default async function init(element) {
+  let decorationTimeout;
+  let hasLoaded = false;
+  
+  const loadContent = () => {
+    if (hasLoaded) return;
+    hasLoaded = true;
+    
+    clearTimeout(decorationTimeout);
+    if (observer) observer.disconnect();
+    
+    this.decorateContent();
+  };
+  
+  // Primary: IntersectionObserver
+  const observer = new IntersectionObserver((entries) => {
+    const isIntersecting = entries.find(entry => entry.isIntersecting);
+    if (isIntersecting) loadContent();
+  }, { rootMargin: '300px 0px' });
+  
+  observer.observe(element);
+  
+  // Fallback: Timeout ensures content eventually loads
+  decorationTimeout = setTimeout(loadContent, 3000);
+}
+```
+
+## Phase D - Third-Party Script Lazy Loading (REQUIRED)
+Use delayed loading for heavy dependencies that belong in Phase D:
+
+```javascript
+// ✅ REQUIRED - Phase D loading (3+ seconds after LCP)
+export function lazyLoadThirdPartyScript(element) {
+  // Wait for LCP + 3 seconds before loading third-party content
+  const observer = new PerformanceObserver((list) => {
+    const lcpEntry = list.getEntries()[list.getEntries().length - 1];
+    if (lcpEntry) {
+      setTimeout(() => {
+        loadThirdPartyContent(element);
+      }, 3000); // Phase D delay
+    }
+  });
+  
+  observer.observe({ entryTypes: ['largest-contentful-paint'] });
+}
+
+// ✅ REQUIRED - 25% visibility threshold for heavy Phase D scripts
+function loadThirdPartyContent(element) {
+  const observer = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+    if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+      loadHeavyScript(element);
+      observer.unobserve(element);
+    }
+  }, { threshold: [0.0, 0.25] });
+  
+  observer.observe(element);
+}
+```
+
+## Connection Prewarming (Phase L Only)
+**NO preconnect before LCP - it consumes bandwidth budget**
+
+```javascript
+// ✅ REQUIRED - Preconnect ONLY after LCP is achieved
+static warmConnections() {
+  if (this.preconnected) return;
+  
+  // Wait for LCP before establishing external connections
+  const observer = new PerformanceObserver((list) => {
+    const lcpEntry = list.getEntries()[list.getEntries().length - 1];
+    if (lcpEntry) {
+      this.preconnected = true;
+      
+      // Now safe to preconnect for Phase L/D resources
+      ['external-api.com', 'cdn.example.com'].forEach(domain => {
+        const link = document.createElement('link');
+        link.rel = 'preconnect';
+        link.href = `https://${domain}`;
+        document.head.appendChild(link);
+      });
+    }
+  });
+  
+  observer.observe({ entryTypes: ['largest-contentful-paint'] });
+}
+```
+
+## Image Loading by Phase (REQUIRED)
+
+```javascript
+// ✅ REQUIRED - Phase-aware image loading
+const handleImagesByPhase = (block) => {
+  const isFirstSection = block.closest('.section') === document.querySelector('.section');
+  const images = block.querySelectorAll('img');
+  
+  images.forEach((img, index) => {
+    if (isFirstSection && index === 0) {
+      // Phase E: LCP candidate
+      img.removeAttribute('loading');
+      img.setAttribute('loading', 'eager');
+      img.setAttribute('fetchpriority', 'high');
+      
+      // Preload only if under bandwidth budget
+      if (payloadTracker.canLoadResource(estimateImageSize(img))) {
+        preloadImage(img.src);
+      }
+    } else {
+      // Phase L: Lazy loading
+      img.setAttribute('loading', 'lazy');
+    }
+  });
+};
+
+// Remove lazy loading on deferred event (Phase D)
+const handleDeferredImages = (block) => {
+  document.addEventListener('deferred', () => {
+    const lazyImages = block.querySelectorAll('img[loading="lazy"]');
+    lazyImages.forEach(img => img.removeAttribute('loading'));
+  }, { once: true, capture: true });
+};
+```
+
+## Visibility-Based Loading for Carousels (Phase L)
+
+```javascript
+// ✅ REQUIRED - Load carousel items progressively in Phase L
+const scrollObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      const item = entry.target;
+      
+      // Phase L: Load content for visible carousel items
+      loadContentForItem(item);
+      scrollObserver.unobserve(item);
+    }
+  });
+}, { 
+  root: scrollContainer, 
+  threshold: 0.25,
+  rootMargin: '50px' 
+});
+
+// Only observe items that are not in the first section
+carouselItems
+  .filter(item => !isInFirstSection(item))
+  .forEach(item => scrollObserver.observe(item));
+```
+
+## Resource Loading Priority by Phase (REQUIRED)
+
+### Phase E (Eager - Critical Path)
+- **First section blocks only**: Load immediately, no lazy loading
+- **LCP images**: `loading="eager"`, `fetchpriority="high"`, preload if under budget
+- **Essential CSS/JS**: AEM EDS structure requirements (under 100kb total)
+
+### Phase L (Lazy - Same Origin Enhancement)  
+- **Below-fold blocks**: IntersectionObserver with 200-300px rootMargin
+- **Secondary images**: `loading="lazy"` attribute
+- **Feature enhancements**: Load after intersection
+- **Header/footer**: Async loading (not critical for LCP)
+
+### Phase D (Delayed - Third Party)
+- **Analytics scripts**: 3+ second delay after LCP
+- **Social embeds**: Load after visibility + delay
+- **Chat widgets**: Heavy scripts with high threshold
+- **Marketing tools**: Deferred to avoid TBT impact
+
+## Memory Management (REQUIRED)
+Always clean up observers to prevent memory leaks:
+
+```javascript
+// ✅ REQUIRED - Comprehensive cleanup
+class LazyBlock {
+  init() {
+    this.intersectionObserver = new IntersectionObserver(this.handleIntersect);
+    this.intersectionObserver.observe(this.element);
+    
+    this.timeoutId = setTimeout(() => this.loadContent(), 3000);
+  }
+  
+  destroy() {
+    // Clean up intersection observer
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+      this.intersectionObserver = null;
+    }
+    
+    // Clean up timeout
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+  }
+  
+  handleIntersect = (entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        this.loadContent();
+        this.intersectionObserver.unobserve(entry.target);
+      }
+    });
+  }
+  
+  loadContent() {
+    // Implementation
+  }
+}
+```
+
+## Loading State Management (REQUIRED)
+Provide visual feedback during Phase L loading:
+
+```javascript
+// ✅ REQUIRED - Loading states for Phase L content
+const showLoadingState = (element) => {
+  element.classList.add('loading');
+  element.setAttribute('aria-busy', 'true');
+  
+  // Add loading skeleton if appropriate
+  if (element.dataset.loadingSkeleton) {
+    element.innerHTML = createLoadingSkeleton();
+  }
+};
+
+const hideLoadingState = (element) => {
+  element.classList.remove('loading');
+  element.removeAttribute('aria-busy');
+};
+
+// Use during Phase L loading
+const loadWithVisualFeedback = async (element) => {
+  showLoadingState(element);
+  try {
+    await loadBlockContent(element);
+  } finally {
+    hideLoadingState(element);
+  }
+};
+```
+
+## Phase Transition Events (REQUIRED)
+Implement events to coordinate phase transitions:
+
+```javascript
+// ✅ REQUIRED - Phase transition coordination
+const PhaseManager = {
+  phases: { E: 'complete', L: 'loading', D: 'pending' },
+  
+  markPhaseComplete(phase) {
+    this.phases[phase] = 'complete';
+    document.dispatchEvent(new CustomEvent(`phase-${phase}-complete`));
+    
+    // Auto-trigger next phase
+    if (phase === 'E') this.startPhaseL();
+    if (phase === 'L') this.startPhaseD();
+  },
+  
+  startPhaseL() {
+    document.dispatchEvent(new CustomEvent('phase-L-start'));
+    // Load below-fold lazy content
+  },
+  
+  startPhaseD() {
+    setTimeout(() => {
+      document.dispatchEvent(new CustomEvent('phase-D-start'));
+      // Load third-party delayed content
+    }, 3000);
+  }
+};
+
+// Listen for LCP to trigger phase transitions
+const observer = new PerformanceObserver((list) => {
+  const lcpEntry = list.getEntries()[list.getEntries().length - 1];
+  if (lcpEntry) {
+    PhaseManager.markPhaseComplete('E');
+  }
+});
+
+observer.observe({ entryTypes: ['largest-contentful-paint'] });
+```
+
+};
+```

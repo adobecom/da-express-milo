@@ -1,0 +1,58 @@
+# AEM EDS Transformation Patterns
+
+**APPLY: Block decoration and performance optimization**
+
+## Three-Phase Transformation (NEVER bypass)
+
+**Raw HTML** → **Decorated** → **Loaded**
+```
+Simple nested divs → data-status="decorated" → data-block-status="loaded"
+```
+
+**Users see NOTHING until loaded. `body { display: none; }` stays until Phase 3.**
+
+## Block Structure Transformation
+
+```html
+<!-- Raw (Phase 1): Author-friendly structure -->
+<div class="grid-marquee ratings">
+  <div><div><h1>Title</h1><p>Content</p></div></div>
+  <div><div><picture>...</picture></div></div>
+</div>
+
+<!-- Loaded (Phase 3): Interactive structure -->
+<div class="grid-marquee ratings" data-block-status="loaded">
+  <div class="background"><picture>...</picture></div>
+  <div class="foreground">
+    <div class="headline"><h1>Title</h1><p>Content</p></div>
+    <div class="cards-container">...</div>
+  </div>
+</div>
+```
+
+## Performance Optimization Strategy
+
+**Optimize transformation speed, not bypass transformation:**
+
+```javascript
+// ✅ Phase E: LCP structure immediately
+export default async function init(el) {
+  const foreground = createTag('div', { class: 'foreground' });
+  foreground.append(logo, decorateHeadline(headline)); // LCP elements
+  el.append(foreground);
+  
+  // ✅ Phase L: Enhancement async
+  setTimeout(() => enhanceWithCards(), 0);
+}
+```
+
+## AEM Performance Requirements
+
+Focus on accelerating transformation speed for LCP elements:
+```css
+/* ✅ Targets final structure */
+.grid-marquee .foreground .headline h1 { }
+
+/* ❌ Won't work - raw structure */
+.grid-marquee > div > div h1 { }
+```

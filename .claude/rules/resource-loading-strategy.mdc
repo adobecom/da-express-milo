@@ -1,0 +1,357 @@
+
+# Resource Loading Performance Rules - Three-Phase Strategy
+
+**APPLY: EVERY QUERY - CRITICAL PERFORMANCE RULE**
+
+## AEM Three-Phase Loading (E-L-D) - REQUIRED
+Based on [AEM's performance guidelines](https://www.aem.live/developer/keeping-it-100):
+
+### Phase E (Eager) - Critical Path to LCP
+**100KB BANDWIDTH BUDGET - STRICTLY ENFORCED**
+
+```html
+<!-- ✅ REQUIRED - Critical path optimization in head.html -->
+<style>body { display: none; }</style>
+
+<!-- ✅ REQUIRED - Single origin, under 100kb total -->
+<script src="/express/code/scripts/scripts.js" type="module"></script>
+<script src="/express/code/scripts/fallback.js" nomodule></script>
+
+<!-- ✅ REQUIRED - Viewport meta for responsive design -->
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<!-- ❌ FORBIDDEN - Before LCP (consumes bandwidth budget) -->
+<!-- NO early hints, h2-push, preconnect, or font loading -->
+```
+
+### Phase L (Lazy) - Same-Origin Enhancement
+**Project-controlled content that doesn't affect TBT/FID**
+
+```javascript
+// ✅ REQUIRED - Lazy loading for Phase L content
+const loadPhaseL = () => {
+  // Load next sections and their blocks
+  loadBelowFoldSections();
+  
+  // Load remaining images with lazy loading
+  const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+  lazyImages.forEach(img => observeImage(img));
+  
+  // Load non-blocking JavaScript libraries
+  loadNonCriticalModules();
+};
+
+// Start Phase L after LCP is achieved
+document.addEventListener('lcp-ready', loadPhaseL);
+```
+
+### Phase D (Delayed) - Third-Party Deferred
+**MANDATORY 3+ second delay after LCP**
+
+```javascript
+// ✅ REQUIRED - Phase D delayed loading (3+ seconds)
+const loadPhaseD = (DELAY = 3000) => new Promise(resolve => {
+  setTimeout(() => {
+    // Marketing and analytics (not critical for CWV)
+    loadAnalytics();
+    loadTagManager();
+    loadConsentManagement();
+    
+    // Interactive features
+    loadChatSupport();
+    loadSocialMediaEmbeds();
+    loadA11yTools();
+    
+    // Heavy third-party integrations
+    loadCommentSystems();
+    loadVideoEmbeds();
+    
+    resolve();
+  }, DELAY);
+});
+```
+
+## Critical Path Optimization (Phase E Only)
+Follow the loading strategy from [head.html](mdc:head.html):
+
+```javascript
+// ✅ REQUIRED - Single origin resource preloading (under 100kb total)
+const preloadCriticalResources = () => {
+  // Only preload if essential for LCP and under bandwidth budget
+  const criticalCSS = '/express/code/styles/critical.css'; // ~15kb
+  const criticalJS = '/express/code/scripts/core.js';      // ~25kb
+  
+  // Total payload calculation MUST stay under 100kb
+  if (calculateTotalPayload() < 100000) {
+    loadLink(criticalCSS, { rel: 'preload', as: 'style' });
+    loadLink(criticalJS, { rel: 'preload', as: 'script' });
+  }
+};
+```
+
+## Font Loading Strategy (AFTER LCP)
+**Fonts MUST be loaded in Phase L, NOT Phase E**
+
+```javascript
+// ✅ REQUIRED - Font loading AFTER LCP (bandwidth constrained)
+const loadFontsAfterLCP = () => {
+  // Wait for LCP before loading fonts from external origins
+  const observer = new PerformanceObserver((list) => {
+    const entries = list.getEntries();
+    const lcpEntry = entries[entries.length - 1];
+    
+    if (lcpEntry) {
+      // LCP achieved, now safe to load fonts
+      setTimeout(() => {
+        loadLink('https://use.typekit.net/jdq5hay.css', { 
+          rel: 'stylesheet',
+          media: 'print',
+          onload: 'this.media="all"' // Non-blocking load
+        });
+      }, 100); // Small delay to ensure LCP is stable
+    }
+  });
+  
+  observer.observe({ entryTypes: ['largest-contentful-paint'] });
+};
+
+// ❌ FORBIDDEN - Font preloading before LCP
+// This consumes bandwidth budget and delays LCP
+```
+
+## Resource Priority Hierarchy (REVISED)
+
+### 1. Phase E - Immediate (Critical for LCP)
+**UNDER 100KB TOTAL PAYLOAD**
+- AEM EDS structure CSS (required for phase transitions)
+- Essential JavaScript (core functionality only)
+- LCP image (hero/marquee only)
+- Core navigation structure
+
+### 2. Phase L - Lazy (Same-Origin Enhancement)
+- Below-the-fold images (`loading="lazy"`)
+- Additional sections and blocks
+- Interactive enhancements
+- Feature-specific JavaScript/CSS
+- Header and footer (loaded asynchronously)
+
+### 3. Phase D - Delayed (Third-Party, 3+ Seconds)
+- Analytics and tracking scripts
+- Marketing automation tools
+- Social media widgets  
+- Chat and support systems
+- A11y enhancement tools
+- Consent management platforms
+
+## Bandwidth Budget Management (CRITICAL)
+
+```javascript
+// ✅ REQUIRED - Track payload before LCP
+const payloadTracker = {
+  totalBytes: 0,
+  budget: 100000, // 100kb limit
+  
+  addResource(url, estimatedSize) {
+    if (this.totalBytes + estimatedSize > this.budget) {
+      console.warn(`Resource ${url} exceeds bandwidth budget. Moving to Phase L.`);
+      return false;
+    }
+    this.totalBytes += estimatedSize;
+    return true;
+  },
+  
+  canLoadResource(estimatedSize) {
+    return (this.totalBytes + estimatedSize) <= this.budget;
+  }
+};
+
+// Usage in resource loading
+if (payloadTracker.canLoadResource(15000)) { // 15kb resource
+  loadCriticalResource();
+} else {
+  deferToPhaseL(resource);
+}
+```
+
+## Anti-Patterns to Eliminate
+
+```javascript
+// ❌ FORBIDDEN - These consume bandwidth budget before LCP
+// Remove all early hints, h2-push, preconnect before LCP
+function removePerformanceAntiPatterns() {
+  // NO early resource hints
+  // document.head.appendChild(createLink({ rel: 'preconnect', href: external }));
+  
+  // NO font preloading  
+  // document.head.appendChild(createLink({ rel: 'preload', href: fontUrl }));
+  
+  // NO external origins before LCP
+  // loadScript('https://external-cdn.com/widget.js');
+  
+  // NO h2-push or early hints
+  // Link: </font.woff2>; rel=preload; as=font; crossorigin
+}
+```
+
+## Script Loading Optimization (Phase-Aware)
+
+```javascript
+// ✅ REQUIRED - Phase-aware script loading
+function loadScript(src, phase = 'L', options = {}) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    
+    switch (phase) {
+      case 'E': // Critical path - must be under bandwidth budget
+        if (!payloadTracker.canLoadResource(options.estimatedSize)) {
+          console.warn('Moving script to Phase L due to bandwidth constraints');
+          phase = 'L';
+        }
+        script.async = false; // Load in order for critical scripts
+        break;
+        
+      case 'L': // Lazy loading
+        script.async = true;
+        script.defer = true;
+        break;
+        
+      case 'D': // Delayed loading
+        setTimeout(() => {
+          script.async = true;
+          document.head.appendChild(script);
+        }, 3000);
+        return;
+    }
+    
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+// ✅ USAGE EXAMPLES
+// Phase E: Critical for LCP (careful with bandwidth)
+await loadScript('/critical-script.js', 'E', { estimatedSize: 25000 });
+
+// Phase L: Feature enhancement
+loadScript('/feature-script.js', 'L');
+
+// Phase D: Third-party tools
+loadScript('https://analytics.example.com/script.js', 'D');
+```
+
+## Header and Footer Loading (Phase L)
+
+```javascript
+// ✅ REQUIRED - Header/footer are NOT critical for LCP
+const loadNavigationElements = () => {
+  // Load asynchronously - not in critical path
+  setTimeout(() => {
+    loadBlock('header');
+    loadBlock('footer');
+  }, 0);
+};
+
+// Load after LCP is achieved, not before
+document.addEventListener('lcp-ready', loadNavigationElements);
+```
+
+## Connection Management
+
+```javascript
+// ✅ REQUIRED - Only connect to external origins AFTER LCP
+const establishExternalConnections = () => {
+  // Wait for LCP before connecting to external domains
+  const observer = new PerformanceObserver((list) => {
+    const lcpEntry = list.getEntries()[list.getEntries().length - 1];
+    if (lcpEntry) {
+      // Now safe to preconnect for Phase L/D resources
+      ['https://fonts.googleapis.com', 'https://analytics.example.com']
+        .forEach(addPreconnect);
+    }
+  });
+  
+  observer.observe({ entryTypes: ['largest-contentful-paint'] });
+};
+
+// ❌ FORBIDDEN - External preconnect before LCP
+// This adds TLS/DNS overhead that delays LCP
+```
+
+## Performance Monitoring Integration
+
+```javascript
+// ✅ REQUIRED - Track phase performance
+const phaseMetrics = {
+  phaseE: { startTime: performance.now(), endTime: null, payloadSize: 0 },
+  phaseL: { startTime: null, endTime: null, payloadSize: 0 },
+  phaseD: { startTime: null, endTime: null, payloadSize: 0 },
+  
+  markPhaseComplete(phase) {
+    this[phase].endTime = performance.now();
+    console.log(`${phase} completed in ${this[phase].endTime - this[phase].startTime}ms`);
+  }
+};
+
+// Target: Phase E under 1560ms for 100 Lighthouse score
+```
+
+## Common Performance Anti-Patterns (AVOID)
+
+Based on [keeping it 100](https://www.aem.live/developer/keeping-it-100) best practices:
+
+### ❌ FORBIDDEN: Early Hints / H2-Push / Pre-connect Before LCP
+```javascript
+// BAD: Consumes 100KB bandwidth budget before LCP
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="dns-prefetch" href="https://analytics.com">
+
+// These consume bandwidth that should be used for LCP content
+// Network budget is strictly bandwidth-constrained on mobile
+```
+
+### ❌ FORBIDDEN: Redirects for Path Resolution  
+```javascript
+// BAD: Multiple redirects add penalty for each hop
+www.domain.com → www.domain.com/en → www.domain.com/en/home
+// Each redirect adds RTT overhead that delays LCP
+```
+
+### ❌ FORBIDDEN: CDN Client Script Injection
+```javascript
+// BAD: CDN-injected scripts before LCP
+<script>/* CDN tracking code */</script>
+<script>/* WAF security script */</script>
+
+// CDN vendors often inject scripts that consume bandwidth
+// and create blocking time before LCP - these must be disabled
+```
+
+### ❌ FORBIDDEN: Font Loading Before LCP
+```javascript
+// BAD: Font preloading consumes critical bandwidth
+<link rel="preload" href="font.woff2" as="font" crossorigin>
+
+// Fonts should load AFTER LCP using fallback technique
+// to avoid CLS when font loads
+```
+
+## Network Budget Rules (100KB Mobile)
+
+### ✅ CORRECT: Single Host Budget Management
+```javascript
+// GOOD: All Phase E resources from same origin under 100KB
+const PHASE_E_BUDGET = 100 * 1024; // 100KB strictly enforced
+const resources = [
+  { url: '/scripts/scripts.js', size: 45000 },
+  { url: '/styles/styles.css', size: 35000 },
+  { url: '/images/hero.jpg', size: 18000 }
+];
+
+const totalSize = resources.reduce((sum, r) => sum + r.size, 0);
+if (totalSize > PHASE_E_BUDGET) {
+  // Move non-critical resources to Phase L
+  deferNonCriticalResources();
+}
+```

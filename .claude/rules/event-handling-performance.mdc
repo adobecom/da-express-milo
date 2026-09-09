@@ -1,0 +1,422 @@
+
+# Event Handling Performance Rules - Three-Phase Strategy
+
+**APPLY: EVERY QUERY - CRITICAL PERFORMANCE RULE**
+
+## AEM Performance Principles (REQUIRED)
+Based on [AEM's performance guidelines](https://www.aem.live/developer/keeping-it-100):
+- **Phase E (Eager)**: Minimal event handlers for LCP elements only
+- **Phase L (Lazy)**: Interactive enhancements and below-fold interactions
+- **Phase D (Delayed)**: Third-party event handlers after 3+ second delay
+
+## Phase E - Critical Event Handlers Only (REQUIRED)
+**Minimal event attachment for LCP elements to stay under 100kb budget**
+
+```javascript
+// ✅ REQUIRED - Phase E: Only critical event handlers for LCP elements
+const attachCriticalEvents = (element) => {
+  const isFirstSection = element.closest('.section') === document.querySelector('.section');
+  
+  if (isFirstSection) {
+    // Phase E: Only essential events for LCP elements
+    if (element.matches('button, [role="button"]')) {
+      element.addEventListener('click', handleCriticalAction, { passive: false });
+    }
+    
+    // Avoid heavy event handlers in Phase E
+    // NO scroll listeners, resize handlers, or mouse tracking
+  } else {
+    // Phase L: Full event handling for below-fold elements
+    attachEnhancedEvents(element);
+  }
+};
+```
+
+## Phase L - Enhanced Event Handling (REQUIRED)
+**Full interactive functionality after LCP is achieved**
+
+```javascript
+// ✅ REQUIRED - Phase L: Rich interactions after LCP
+const attachEnhancedEvents = (element) => {
+  // Wait for LCP before adding interactive enhancements
+  const observer = new PerformanceObserver((list) => {
+    const lcpEntry = list.getEntries()[list.getEntries().length - 1];
+    if (lcpEntry) {
+      // Now safe to add interactive event handlers
+      attachFullEventHandlers(element);
+    }
+  });
+  
+  observer.observe({ entryTypes: ['largest-contentful-paint'] });
+};
+
+const attachFullEventHandlers = (element) => {
+  // Throttled/debounced events for performance
+  element.addEventListener('scroll', throttle(handleScroll, 100), { passive: true });
+  element.addEventListener('resize', debounce(handleResize, 250), { passive: true });
+  element.addEventListener('input', debounce(handleInput, 300));
+};
+```
+
+## Throttling & Debouncing (REQUIRED)
+High-frequency events MUST be throttled or debounced using patterns from [hofs.js](mdc:express/code/scripts/utils/hofs.js):
+
+```javascript
+// ✅ REQUIRED - Throttle + debounce for input
+export function debounce(cb, time, { leading = false } = {}) {
+  let timer = null;
+  return function debounced(...args) {
+    let invoked = false;
+    if (timer === null && leading) {
+      cb.apply(this, args);
+      invoked = true;
+    }
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (!invoked) cb.apply(this, args);
+      timer = null;
+    }, time);
+  };
+}
+
+// ✅ REQUIRED - Use for search/autocomplete (Phase L)
+const debouncedSearch = debounce(performSearch, 500);
+const throttledScroll = throttle(handleScroll, 100);
+
+const inputHandler = (e) => {
+  if (e.target.value.length < 4) {
+    throttledSearch();
+  } else {
+    debouncedSearch();
+  }
+};
+```
+
+## Passive Event Listeners (REQUIRED)
+Use passive listeners for scroll and touch events to avoid TBT impact:
+
+```javascript
+// ✅ REQUIRED - Passive listeners for performance (Phase L)
+element.addEventListener('scroll', handler, { passive: true });
+element.addEventListener('touchstart', handler, { passive: true });
+element.addEventListener('touchmove', handler, { passive: true });
+
+// ✅ CORRECT - Only prevent default when necessary
+element.addEventListener('wheel', (e) => {
+  if (shouldPreventDefault(e)) {
+    e.preventDefault();
+  }
+  handleWheel(e);
+});
+```
+
+## Main Thread Yielding (REQUIRED)
+For long-running operations, yield control to avoid TBT issues:
+
+```javascript
+// ✅ REQUIRED - Yield between heavy operations (Phase L)
+async function processLargeDataset(items) {
+  const results = [];
+  
+  for (let i = 0; i < items.length; i++) {
+    await processItem(items[i]);
+    
+    // Yield every 10 items to keep UI responsive
+    if (i % 10 === 0) {
+      await yieldToMain();
+    }
+  }
+  
+  return results;
+}
+
+// Implementation
+function yieldToMain() {
+  return new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
+}
+```
+
+## Event Delegation (REQUIRED)
+Use event delegation for dynamic content to minimize event listener overhead:
+
+```javascript
+// ✅ CORRECT - Single event listener handles all items (Phase L)
+container.addEventListener('click', (e) => {
+  if (e.target.matches('.dynamic-item')) {
+    handleItemClick(e);
+  } else if (e.target.matches('.delete-button')) {
+    handleDeleteClick(e);
+  }
+});
+
+// ❌ WRONG - Multiple event listeners (increases TBT)
+dynamicItems.forEach(item => {
+  item.addEventListener('click', handleItemClick);
+});
+```
+
+## Request Animation Frame Usage (REQUIRED)
+Use RAF for visual updates to avoid main thread blocking:
+
+```javascript
+// ✅ REQUIRED - RAF for DOM updates that affect visuals (Phase L)
+function updatePositions() {
+  requestAnimationFrame(() => {
+    elements.forEach((element, index) => {
+      element.style.transform = `translateX(${positions[index]}px)`;
+    });
+  });
+}
+
+// ✅ REQUIRED - RAF for smooth scrolling (Phase L)
+function smoothScrollTo(targetPosition) {
+  const startPosition = window.pageYOffset;
+  const distance = targetPosition - startPosition;
+  const duration = 800;
+  let start = null;
+
+  function step(timestamp) {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
+    
+    window.scrollTo(0, startPosition + distance * easeInOutCubic(progress));
+    
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  }
+  
+  requestAnimationFrame(step);
+}
+```
+
+## Phase D - Third-Party Event Handlers (REQUIRED)
+**Delay third-party event attachment by 3+ seconds**
+
+```javascript
+// ✅ REQUIRED - Phase D: Third-party events after delay
+const attachThirdPartyEvents = (element) => {
+  // Wait for LCP + 3 seconds before third-party event handlers
+  const observer = new PerformanceObserver((list) => {
+    const lcpEntry = list.getEntries()[list.getEntries().length - 1];
+    if (lcpEntry) {
+      setTimeout(() => {
+        // Now safe to attach heavy third-party event handlers
+        attachAnalyticsEvents(element);
+        attachSocialMediaEvents(element);
+        attachChatEvents(element);
+      }, 3000); // Phase D delay
+    }
+  });
+  
+  observer.observe({ entryTypes: ['largest-contentful-paint'] });
+};
+
+// ✅ REQUIRED - Heavy third-party interactions
+const attachAnalyticsEvents = (element) => {
+  // Analytics click tracking
+  element.addEventListener('click', trackAnalyticsClick);
+  element.addEventListener('view', trackAnalyticsView);
+};
+```
+
+## Memory Management (REQUIRED)
+Clean up event listeners and timers to prevent memory leaks:
+
+```javascript
+// ✅ REQUIRED - Comprehensive cleanup
+class InteractiveComponent {
+  init() {
+    this.handleClick = this.handleClick.bind(this);
+    this.handleResize = debounce(this.handleResize.bind(this), 250);
+    
+    // Phase-aware event attachment
+    this.attachEventsByPhase();
+  }
+  
+  attachEventsByPhase() {
+    const isFirstSection = this.element.closest('.section') === document.querySelector('.section');
+    
+    if (isFirstSection) {
+      // Phase E: Minimal events
+      this.element.addEventListener('click', this.handleClick);
+    } else {
+      // Phase L: Full events after LCP
+      this.attachAfterLCP();
+    }
+  }
+  
+  attachAfterLCP() {
+    const observer = new PerformanceObserver((list) => {
+      const lcpEntry = list.getEntries()[list.getEntries().length - 1];
+      if (lcpEntry) {
+        this.element.addEventListener('click', this.handleClick);
+        window.addEventListener('resize', this.handleResize);
+        
+        this.intersectionObserver = new IntersectionObserver(this.handleIntersect);
+        this.intersectionObserver.observe(this.element);
+      }
+    });
+    
+    observer.observe({ entryTypes: ['largest-contentful-paint'] });
+  }
+  
+  destroy() {
+    // Clean up all event listeners
+    this.element.removeEventListener('click', this.handleClick);
+    window.removeEventListener('resize', this.handleResize);
+    
+    // Clean up observers
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+      this.intersectionObserver = null;
+    }
+    
+    // Clean up timers
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+  }
+}
+```
+
+## Touch and Mouse Event Optimization (REQUIRED)
+Handle both touch and mouse events efficiently without TBT impact:
+
+```javascript
+// ✅ REQUIRED - Unified pointer events where possible (Phase L)
+element.addEventListener('pointerdown', handlePointerStart);
+element.addEventListener('pointermove', handlePointerMove);
+element.addEventListener('pointerup', handlePointerEnd);
+
+// ✅ FALLBACK - For older browsers (Phase L only)
+if (!window.PointerEvent) {
+  element.addEventListener('mousedown', handlePointerStart);
+  element.addEventListener('mousemove', handlePointerMove);
+  element.addEventListener('mouseup', handlePointerEnd);
+  
+  element.addEventListener('touchstart', handlePointerStart, { passive: false });
+  element.addEventListener('touchmove', handlePointerMove, { passive: false });
+  element.addEventListener('touchend', handlePointerEnd);
+}
+```
+
+## Input Validation Optimization (REQUIRED)
+Optimize form validation for better INP without affecting LCP:
+
+```javascript
+// ✅ REQUIRED - Debounced validation (Phase L)
+const validateField = debounce((field) => {
+  const isValid = performValidation(field.value);
+  
+  // Use RAF for DOM updates to avoid blocking
+  requestAnimationFrame(() => {
+    field.classList.toggle('invalid', !isValid);
+    updateErrorMessage(field, isValid);
+  });
+}, 300);
+
+// ✅ REQUIRED - Immediate feedback for critical actions (Phase E)
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  // Immediate visual feedback (critical for UX)
+  submitButton.disabled = true;
+  submitButton.textContent = 'Submitting...';
+  
+  // Process in next tick to allow UI update
+  setTimeout(() => {
+    processFormSubmission();
+  }, 0);
+});
+```
+
+## Intersection Observer for Events (REQUIRED)
+Use Intersection Observer to optimize event attachment timing:
+
+```javascript
+// ✅ REQUIRED - Only attach expensive events when element is visible (Phase L)
+const attachExpensiveEvents = (element) => {
+  element.addEventListener('mousemove', expensiveMouseHandler);
+  element.addEventListener('scroll', expensiveScrollHandler, { passive: true });
+  element.dataset.eventsAttached = 'true';
+};
+
+const detachExpensiveEvents = (element) => {
+  element.removeEventListener('mousemove', expensiveMouseHandler);
+  element.removeEventListener('scroll', expensiveScrollHandler);
+  element.dataset.eventsAttached = 'false';
+};
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && entry.target.dataset.eventsAttached !== 'true') {
+      attachExpensiveEvents(entry.target);
+    } else if (!entry.isIntersecting && entry.target.dataset.eventsAttached === 'true') {
+      detachExpensiveEvents(entry.target);
+    }
+  });
+});
+```
+
+## Event Handler Priority by Phase (REQUIRED)
+
+### Phase E (Eager - Critical Path)
+- **Essential clicks only**: Primary CTA buttons, navigation
+- **NO scroll/resize handlers**: These add to TBT and aren't needed for LCP
+- **NO analytics events**: Defer to Phase D
+- **Minimal DOM manipulation**: Just what's needed for basic functionality
+
+### Phase L (Lazy - Enhanced Interaction)
+- **Full interactive events**: Scroll, resize, input validation
+- **Throttled/debounced handlers**: For high-frequency events
+- **Intersection observers**: For visibility-based interactions
+- **Form enhancements**: Advanced validation and UX improvements
+
+### Phase D (Delayed - Third-Party)
+- **Analytics events**: Click tracking, view tracking
+- **Social media handlers**: Share buttons, embed interactions
+- **Chat systems**: Customer support widget events
+- **Marketing automation**: Lead tracking, behavior monitoring
+
+## Performance Monitoring for Events (REQUIRED)
+
+```javascript
+// ✅ REQUIRED - Monitor event handler performance impact
+const monitorEventPerformance = () => {
+  let eventCount = 0;
+  let totalExecutionTime = 0;
+  
+  const originalAddEventListener = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    const wrappedListener = function(event) {
+      const start = performance.now();
+      const result = listener.call(this, event);
+      const duration = performance.now() - start;
+      
+      eventCount++;
+      totalExecutionTime += duration;
+      
+      // Warn if event handler is blocking
+      if (duration > 16) { // 16ms = 60fps threshold
+        console.warn(`Slow event handler: ${type} took ${duration}ms`);
+      }
+      
+      return result;
+    };
+    
+    return originalAddEventListener.call(this, type, wrappedListener, options);
+  };
+};
+
+// Enable in development
+if (process.env.NODE_ENV === 'development') {
+  monitorEventPerformance();
+}
+```
+
+});
+```

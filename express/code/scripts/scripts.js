@@ -304,7 +304,10 @@ window.addEventListener('unhandledrejection', (event) => {
   const { reason } = event;
   // Dynamic import failures are TypeErrors with this message pattern
   if (reason instanceof TypeError && reason.message.includes('dynamically imported module')) {
-    event.preventDefault(); // stops lana from catching it as a top-level unhandled rejection
+    event.preventDefault();
+    // preventDefault() only suppresses the browser's default console reporting;
+    // lana's own unhandledrejection listener still fires unless propagation is stopped.
+    event.stopImmediatePropagation();
     window.lana?.log(`Import failed: ${reason.message}`, { errorType: 'i', sampleRate: 1 });
   }
 });

@@ -1,0 +1,448 @@
+
+# DOM Manipulation Performance Rules - Three-Phase Strategy
+
+**APPLY: EVERY QUERY - CRITICAL PERFORMANCE RULE**
+
+## AEM Performance Principles (REQUIRED)
+Based on [AEM's performance guidelines](https://www.aem.live/developer/keeping-it-100):
+- **Phase E (Eager)**: Minimal DOM creation for LCP elements only
+- **Phase L (Lazy)**: Progressive enhancement of below-fold content
+- **Phase D (Delayed)**: Third-party DOM modifications after 3+ second delay
+
+## Phase E - LCP Critical DOM Operations (REQUIRED)
+**Immediate DOM insertion for LCP elements, minimal complexity**
+
+```javascript
+// ✅ REQUIRED - Phase E: Simple DOM structure for LCP
+const createLCPElement = (content) => {
+  const isFirstSection = true; // Determining logic for first section
+  
+  if (isFirstSection) {
+    // Phase E: Keep DOM structure minimal for LCP
+    const el = createTag('div', { class: 'hero-content' });
+    el.textContent = content; // Simple text content first
+    
+    // Return immediately for LCP
+    return el;
+  }
+};
+
+// ✅ REQUIRED - Progressive enhancement pattern
+const enhanceLCPElement = (element, enhancementData) => {
+  // Phase L: Add enhancements after LCP
+  setTimeout(() => {
+    const enhancedContent = createTag('div', { class: 'enhanced-content' });
+    enhancedContent.innerHTML = enhancementData;
+    element.appendChild(enhancedContent);
+  }, 0);
+};
+```
+
+## createElement Pattern (REQUIRED)
+Always use the standardized `createTag` pattern from [utils.js](mdc:express/code/scripts/utils.js):
+
+```javascript
+// ✅ CORRECT - Preserves events and performance (all phases)
+const el = createTag('div', { class: 'my-class' }, content);
+parent.append(el);
+
+// ❌ WRONG - Breaks event listeners and re-parses DOM  
+parent.innerHTML = '<div class="my-class">content</div>';
+```
+
+## Phase-Aware DOM Construction (REQUIRED)
+
+```javascript
+// ✅ REQUIRED - Build DOM progressively by phase
+class ComponentBuilder {
+  constructor(element) {
+    this.element = element;
+    this.isFirstSection = element.closest('.section') === document.querySelector('.section');
+  }
+  
+  init() {
+    if (this.isFirstSection) {
+      // Phase E: Critical structure only
+      this.buildCriticalDOM();
+    } else {
+      // Phase L: Build with intersection observer
+      this.buildWithLazyLoading();
+    }
+  }
+  
+  buildCriticalDOM() {
+    // Phase E: Minimal DOM for LCP
+    const basicStructure = this.createBasicStructure();
+    this.element.appendChild(basicStructure);
+    
+    // Queue enhancements for Phase L
+    this.queueEnhancements();
+  }
+  
+  buildWithLazyLoading() {
+    // Phase L: Full DOM construction with intersection observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.buildFullDOM();
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '200px' });
+    
+    observer.observe(this.element);
+  }
+  
+  createBasicStructure() {
+    // Simple DOM for LCP - no nested complexity
+    return createTag('div', { class: 'basic-content' }, this.getBasicContent());
+  }
+  
+  buildFullDOM() {
+    // Phase L: Rich DOM structure
+    const fullStructure = this.createEnhancedStructure();
+    this.element.appendChild(fullStructure);
+  }
+}
+```
+
+## Batched DOM Operations (REQUIRED)
+**Minimize reflows across all phases**
+
+```javascript
+// ✅ CORRECT - Single reflow (Phase E for critical, Phase L for non-critical)
+const batchDOMOperations = (items, isPhaseE = false) => {
+  const fragment = document.createDocumentFragment();
+  
+  if (isPhaseE) {
+    // Phase E: Simple structure only
+    items.slice(0, 1).forEach(item => { // Only first item for LCP
+      fragment.appendChild(createTag('div', { class: 'lcp-item' }, item));
+    });
+  } else {
+    // Phase L: Full construction
+    items.forEach(item => {
+      fragment.appendChild(createTag('div', { class: 'enhanced-item' }, item));
+    });
+  }
+  
+  container.appendChild(fragment);
+};
+
+// ❌ WRONG - Multiple reflows (impacts TBT)
+items.forEach(item => container.appendChild(createTag('div', {}, item)));
+```
+
+## Update Batching Pattern (REQUIRED)
+Use batching for consecutive DOM updates to avoid TBT impact:
+
+```javascript
+// ✅ REQUIRED - Phase-aware update batching
+class DOMUpdateManager {
+  constructor() {
+    this.pendingUpdates = new Map();
+    this.timer = null;
+  }
+  
+  requestUpdate(element, updateFn, phase = 'L') {
+    if (phase === 'E') {
+      // Phase E: Execute immediately for LCP
+      updateFn();
+      return;
+    }
+    
+    // Phase L/D: Batch updates
+    this.pendingUpdates.set(element, updateFn);
+    
+    if (this.timer) return; // Already batching
+    
+    this.timer = setImmediate(async () => {
+      this.timer = null;
+      
+      // Apply all batched updates in single operation
+      const fragment = document.createDocumentFragment();
+      
+      for (const [element, updateFn] of this.pendingUpdates) {
+        updateFn(fragment);
+      }
+      
+      // Single DOM insertion
+      document.body.appendChild(fragment);
+      this.pendingUpdates.clear();
+    });
+  }
+}
+
+const updateManager = new DOMUpdateManager();
+
+// Usage
+updateManager.requestUpdate(element, () => {
+  // Update operations
+}, 'L'); // Phase L
+```
+
+## Safe HTML Insertion (When Necessary)
+If you must use HTML strings, use phase-appropriate methods:
+
+```javascript
+// ✅ PHASE E - Minimal HTML for LCP
+const insertLCPContent = (element, content) => {
+  // Keep it simple for Phase E
+  element.textContent = content; // Prefer text over HTML
+};
+
+// ✅ PHASE L - Enhanced HTML insertion
+const insertEnhancedContent = (element, htmlString) => {
+  // Phase L: Can use more complex HTML
+  element.insertAdjacentHTML('beforeend', htmlString);
+};
+
+// ❌ WRONG - Never use innerHTML (re-parses entire element)
+element.innerHTML = htmlString;
+```
+
+## Fragment-Based Assembly (REQUIRED)
+For complex DOM construction in Phase L:
+
+```javascript
+// ✅ CORRECT - Build in fragment, then attach (Phase L)
+const buildComplexComponent = (data, phase = 'L') => {
+  if (phase === 'E') {
+    // Phase E: Simple structure only
+    return createTag('div', { class: 'simple-component' }, data.title);
+  }
+  
+  // Phase L: Complex structure
+  const fragment = document.createDocumentFragment();
+  const container = createTag('div', { class: 'complex-component' });
+  
+  // Build complex structure
+  const header = createTag('header', {}, data.title);
+  const content = createTag('section', {}, data.content);
+  const actions = createTag('footer', {});
+  
+  data.actions.forEach(action => {
+    const button = createTag('button', { class: 'action-btn' }, action.label);
+    actions.appendChild(button);
+  });
+  
+  container.appendChild(header);
+  container.appendChild(content);
+  container.appendChild(actions);
+  fragment.appendChild(container);
+  
+  return fragment;
+};
+```
+
+## Dimension Reservation (REQUIRED)
+Always set dimensions before content loads to prevent CLS:
+
+```javascript
+// ✅ REQUIRED - Set dimensions immediately (all phases)
+const reserveSpace = (img, phase = 'L') => {
+  if (phase === 'E') {
+    // Phase E: LCP image dimensions
+    const width = getOptimalImageSize();
+    const height = Math.round(width * 0.6); // Assumed aspect ratio
+    
+    img.setAttribute('width', width);
+    img.setAttribute('height', height);
+    img.style.aspectRatio = `${width} / ${height}`;
+  } else {
+    // Phase L: Standard dimensions
+    img.setAttribute('width', calculatedWidth);
+    img.setAttribute('height', calculatedHeight);
+  }
+  
+  // Load content after dimensions are set
+  img.src = imageUrl;
+};
+```
+
+## Event Preservation (CRITICAL)
+Never use innerHTML when existing elements have event listeners:
+
+```javascript
+// ✅ CORRECT - Preserves existing events (all phases)
+const replaceElementSafely = (oldElement, newContent) => {
+  const newElement = createTag('div', {}, newContent);
+  oldElement.replaceWith(newElement);
+  return newElement;
+};
+
+// ❌ WRONG - Destroys all event listeners
+container.innerHTML = newHTML;
+```
+
+## Phase D - Third-Party DOM Modifications (REQUIRED)
+**Delay third-party DOM changes by 3+ seconds**
+
+```javascript
+// ✅ REQUIRED - Phase D: Third-party DOM modifications
+const addThirdPartyContent = (container) => {
+  // Wait for LCP + 3 seconds before third-party DOM changes
+  const observer = new PerformanceObserver((list) => {
+    const lcpEntry = list.getEntries()[list.getEntries().length - 1];
+    if (lcpEntry) {
+      setTimeout(() => {
+        // Now safe to add third-party content
+        addAnalyticsPixels(container);
+        addSocialMediaWidgets(container);
+        addChatWidget(container);
+      }, 3000); // Phase D delay
+    }
+  });
+  
+  observer.observe({ entryTypes: ['largest-contentful-paint'] });
+};
+
+// ✅ REQUIRED - Third-party DOM insertions
+const addAnalyticsPixels = (container) => {
+  const pixel = createTag('img', {
+    src: 'https://analytics.example.com/pixel.gif',
+    style: 'display: none;',
+    loading: 'lazy'
+  });
+  container.appendChild(pixel);
+};
+```
+
+## Performance-Conscious DOM Patterns (REQUIRED)
+
+```javascript
+// ✅ REQUIRED - Minimize DOM depth in Phase E
+const createLCPStructure = () => {
+  // Keep DOM shallow for LCP performance
+  return createTag('div', { class: 'hero' }, [
+    createTag('h1', {}, title),
+    createTag('p', {}, description)
+  ]);
+};
+
+// ✅ REQUIRED - Rich structure in Phase L
+const createEnhancedStructure = () => {
+  // Can build complex DOM in Phase L
+  const container = createTag('section', { class: 'enhanced-hero' });
+  
+  // Multiple levels and complex interactions
+  const header = createTag('header', {});
+  const nav = createTag('nav', {});
+  const content = createTag('main', {});
+  
+  // Build complex nested structure
+  return container;
+};
+```
+
+## DOM Monitoring and Optimization (REQUIRED)
+
+```javascript
+// ✅ REQUIRED - Monitor DOM manipulation performance
+const monitorDOMPerformance = () => {
+  let mutationCount = 0;
+  let complexMutations = 0;
+  
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+      mutationCount++;
+      
+      // Track complex mutations that might impact performance
+      if (mutation.addedNodes.length > 10 || 
+          mutation.removedNodes.length > 5) {
+        complexMutations++;
+        console.warn('Complex DOM mutation detected:', mutation);
+      }
+    });
+  });
+  
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: false // Ignore attribute changes for performance
+  });
+  
+  // Report metrics periodically
+  setInterval(() => {
+    if (mutationCount > 0) {
+      console.log(`DOM Mutations: ${mutationCount}, Complex: ${complexMutations}`);
+      mutationCount = 0;
+      complexMutations = 0;
+    }
+  }, 10000);
+};
+
+// Enable in development
+if (process.env.NODE_ENV === 'development') {
+  monitorDOMPerformance();
+}
+```
+
+## Anti-Patterns to Avoid (CRITICAL)
+
+```javascript
+// ❌ FORBIDDEN - These impact LCP and TBT
+
+// NO complex DOM in Phase E
+// const complexElement = buildComplexStructure(); // Delays LCP
+
+// NO innerHTML for existing content
+// container.innerHTML = newHTML; // Destroys events
+
+// NO synchronous DOM in tight loops
+// items.forEach(item => container.appendChild(item)); // Multiple reflows
+
+// NO nested DOM queries in Phase E
+// const nested = element.querySelector('.deep .nested .selector'); // Slow
+
+// ✅ CORRECT - Performance-conscious alternatives
+if (isPhaseE) {
+  // Simple DOM for LCP
+  const simple = createTag('div', {}, content);
+} else {
+  // Complex DOM for Phase L
+  const complex = buildEnhancedStructure();
+}
+```
+
+## Memory Management for DOM Operations (REQUIRED)
+
+```javascript
+// ✅ REQUIRED - Clean up DOM references
+class DOMComponent {
+  constructor(element) {
+    this.element = element;
+    this.childNodes = new Set();
+    this.observers = new Set();
+  }
+  
+  addChild(child) {
+    this.element.appendChild(child);
+    this.childNodes.add(child);
+  }
+  
+  addObserver(observer) {
+    this.observers.add(observer);
+  }
+  
+  destroy() {
+    // Clean up observers
+    this.observers.forEach(observer => observer.disconnect());
+    this.observers.clear();
+    
+    // Remove child nodes
+    this.childNodes.forEach(node => {
+      if (node.parentNode) {
+        node.parentNode.removeChild(node);
+      }
+    });
+    this.childNodes.clear();
+    
+    // Clear element reference
+    this.element = null;
+  }
+}
+```
+
+container.innerHTML = newHTML;
+```

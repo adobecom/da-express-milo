@@ -1,0 +1,232 @@
+
+# DOM Structure Preservation Rule - Three-Phase Compatible
+
+**APPLY: EVERY QUERY - CRITICAL PERFORMANCE RULE**
+
+## CRITICAL: Never Break Existing DOM Structure
+
+When refactoring, optimizing, or improving block code, you MUST preserve the **exact same DOM output**. This is non-negotiable and applies across all phases of the [AEM Three-Phase Loading strategy](mdc:aem-three-phase-performance.mdc).
+
+### ⚠️ ABSOLUTE REQUIREMENT: IDENTICAL MARKUP POST-OPTIMIZATION
+
+**The markup that is present today MUST be present after any performance optimizations. Class names, DOM order, element types, attributes, text content - EVERYTHING must be identical.**
+
+This means:
+- **Same CSS works** without modification
+- **Same visual appearance** with zero changes  
+- **Same DOM inspector view** when development is complete
+- **Same element hierarchy** and nesting structure
+- **Same class names** and attribute values
+- **Same text content** and innerHTML structure
+
+### Why This Matters
+- **Thousands of pages** are QA tested and business approved
+- **Existing CSS** relies on specific selectors and class names  
+- **Production sites** depend on current DOM structure
+- **Breaking changes** affect live customer experiences
+
+### ✅ ALLOWED Performance Optimizations (All Phases)
+
+```javascript
+// ✅ GOOD - Phase E: Simple initial structure for LCP
+const basicStructure = createTag('div', { class: 'hero' });
+el.append(basicStructure); // Same final DOM as before
+
+// ✅ GOOD - Phase L: Progressive enhancement maintaining final structure
+setTimeout(() => {
+  const enhancement = createTag('div', { class: 'hero-overlay' });
+  basicStructure.append(enhancement); // Identical to non-optimized version
+}, 0);
+
+// ✅ GOOD - Internal batching without DOM changes
+const promises = items.map(processItem);
+await Promise.all(promises);
+
+// ✅ GOOD - Event listener optimization keeping same behavior
+element.addEventListener('click', handler, { passive: true });
+
+// ✅ GOOD - Lazy loading that produces identical final DOM
+const observer = new IntersectionObserver(loadContent);
+
+// ✅ GOOD - requestAnimationFrame for internal state management
+requestAnimationFrame(() => updateInternalState());
+
+// ✅ GOOD - Phase D: Delayed third-party content
+setTimeout(() => {
+  addAnalyticsPixel(); // Same DOM structure as before
+}, 3000);
+```
+
+### ❌ FORBIDDEN Changes During Optimization
+
+```javascript
+// ❌ WRONG - Changing class names for performance
+element.classList.add('new-performance-class');
+
+// ❌ WRONG - Altering element structure for phases
+const newWrapper = createTag('div', { class: 'phase-wrapper' });
+
+// ❌ WRONG - Modifying element types
+const button = createTag('button'); // when it was <a> before
+
+// ❌ WRONG - Changing attribute names or values
+element.setAttribute('data-phase', 'E');
+
+// ❌ WRONG - Removing or adding DOM elements
+existingElement.remove(); // unless it was always conditional
+
+// ❌ WRONG - Changing text content or innerHTML structure
+element.innerHTML = '<div class="optimized-structure">content</div>';
+
+// ❌ WRONG - Changing element order for performance
+parent.insertBefore(child, firstChild); // unless order was always dynamic
+```
+
+### Three-Phase Loading Compatibility
+
+The Three-Phase Loading strategy is **completely compatible** with DOM structure preservation:
+
+#### Phase E (Eager) - LCP Critical DOM
+- **Minimal initial structure** that grows into full structure
+- **Same final elements** as non-optimized version
+- **Identical class names** and hierarchy
+- **Progressive rendering** that preserves final state
+
+#### Phase L (Lazy) - Enhanced DOM
+- **Gradual enhancement** maintaining identical final DOM
+- **Same final structure** as original implementation
+- **Invisible transitions** from basic to full functionality
+- **Preserve all CSS selectors** and styling hooks
+
+#### Phase D (Delayed) - Third-Party DOM
+- **Deferred additions** that match original timing
+- **Same integration points** as before optimization
+- **Identical final markup** after all phases complete
+- **No structural changes** to accommodate phases
+
+### The Golden Rule: Same Input = Same Output (All Phases)
+
+**Before optimization:**
+```javascript
+function createCard(data) {
+  return `<div class="card"><h3>${data.title}</h3><p>${data.content}</p></div>`;
+}
+```
+
+**After Three-Phase optimization:**
+```javascript
+function createCard(data) {
+  // Phase E: Basic structure for LCP
+  const card = createTag('div', { class: 'card' });
+  const title = createTag('h3', {}, data.title);
+  card.append(title);
+  
+  // Phase L: Complete structure (deferred)
+  setTimeout(() => {
+    const content = createTag('p', {}, data.content);
+    card.append(content);
+    // Final DOM identical to original: <div class="card"><h3>title</h3><p>content</p></div>
+  }, 0);
+  
+  return card;
+}
+```
+
+### Testing Your Changes Across Phases
+
+1. **Compare final DOM** after all phases complete using browser dev tools
+2. **Verify CSS selectors** still work exactly the same on final result
+3. **Check existing tests** pass without modification after full loading
+4. **Ensure visual appearance** is pixel-perfect identical when complete
+5. **Test on actual pages** that use the block after all phases
+6. **Use diff tools** to compare final rendered HTML output
+7. **Verify phase transitions** don't break CSS or functionality
+
+### Performance Focus Areas (Safe to Optimize)
+
+#### Phase E Optimizations
+- **Minimal DOM creation** for LCP elements
+- **Essential event handlers** only
+- **Critical resource loading** within bandwidth budget
+- **Simple structure** that enhances later
+
+#### Phase L Optimizations  
+- **Event listener efficiency** (passive, debouncing, cleanup)
+- **Async operation batching** (Promise.all, requestAnimationFrame)  
+- **Lazy loading implementation** (IntersectionObserver)
+- **Progressive enhancement** maintaining final structure
+
+#### Phase D Optimizations
+- **Third-party script delays** (3+ seconds)
+- **Analytics integration** maintaining same tracking
+- **Marketing tool loading** preserving functionality
+- **Heavy processing deferral** with identical results
+
+### Red Flag Indicators
+
+If your Three-Phase optimization involves:
+- Changing any `createTag` parameters between phases
+- Modifying existing CSS classes for performance  
+- Altering element hierarchy for phase separation
+- Adding/removing DOM nodes for optimization
+- Changing element attributes based on phase
+- Modifying text content structure for loading
+- Reordering elements to accommodate phases
+- Changing element types for performance
+
+**STOP** - You're likely breaking backward compatibility.
+
+### Remember: Invisible Optimizations Only
+
+The best Three-Phase performance optimizations are **completely invisible** to:
+- CSS stylesheets (work identically on final DOM)
+- QA testing (final result matches expectations)
+- Visual appearance (pixel-perfect match when complete)
+- DOM inspector (final state identical to original)
+- User experience (better performance, same functionality)
+- Existing functionality (zero breaking changes)
+
+**Performance gains through phase separation should never come at the cost of breaking existing functionality or changing the final rendered output.**
+
+### Three-Phase Optimization Pattern
+
+```javascript
+// ✅ PATTERN: Three-Phase loading with DOM preservation
+export default async function init(el) {
+  const isFirstSection = el.closest('.section') === document.querySelector('.section');
+  
+  if (isFirstSection) {
+    // Phase E: IMMEDIATE LCP structure (minimal but correct)
+    const criticalElements = createCriticalStructure(el);
+    el.append(criticalElements);
+    
+    // Phase L: DEFERRED enhancement maintaining same final DOM
+    setTimeout(async () => {
+      await enhanceWithComplexFeatures(el);
+      // Final DOM structure identical to non-optimized version
+    }, 0);
+    
+    // Phase D: DELAYED third-party integration  
+    setTimeout(() => {
+      addThirdPartyIntegrations(el);
+      // Same integrations as before, just delayed
+    }, 3000);
+  } else {
+    // Non-critical sections use standard lazy loading
+    const observer = new IntersectionObserver(() => {
+      buildFullStructure(el); // Identical DOM to original
+    });
+    observer.observe(el);
+  }
+}
+```
+
+### Integration with Three-Phase Strategy
+
+This DOM preservation rule works seamlessly with:
+- **[AEM Three-Phase Performance](mdc:aem-three-phase-performance.mdc)**: Maintains DOM consistency across all phases
+- **[Core Web Vitals Standards](mdc:core-web-vitals-standards.mdc)**: LCP optimization without breaking structure
+- **[Lazy Loading Implementation](mdc:lazy-loading-implementation.mdc)**: Progressive loading with identical final result
+- **[DOM Manipulation Best Practices](mdc:dom-manipulation-best-practices.mdc)**: Phase-aware construction preserving structure
+
+**Performance gains through systematic phase separation should never come at the cost of breaking existing functionality.**

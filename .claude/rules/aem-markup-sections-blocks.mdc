@@ -1,0 +1,308 @@
+# AEM Markup, Sections, and Blocks Architecture
+
+**APPLY: EVERY QUERY - CRITICAL STRUCTURE RULE**
+
+## Overview
+Based on [AEM's markup documentation](https://www.aem.live/developer/markup-sections-blocks), our architecture follows a structured approach for content organization and block development that balances author simplicity with developer flexibility.
+
+## Document Structure Hierarchy
+
+### 1. Default Content (Preferred)
+**Keep as much content as default content as possible** - this is the natural authoring experience.
+
+**Default content includes:**
+- Headings (`<h1>` - `<h6>`)
+- Body text and paragraphs
+- Lists (`<ul>`, `<ol>`)
+- Images with responsive `<picture>` tags
+- Links and emphasis (`<em>`, `<strong>`)
+- Natural semantic markup
+
+**Author Experience:** Content creators work with familiar Word/Google Docs semantics without needing to understand blocks.
+
+### 2. Sections (Layout Grouping)
+**Purpose:** Group content visually (background colors, layout changes)
+
+**Section Rules:**
+- Separated by horizontal rules (`---`) in authoring
+- Contain multiple blocks and/or default content
+- Minimal JavaScript interaction beyond CSS styling
+- Can include `Section Metadata` for data attributes and styling
+
+**Example Section Metadata:**
+```markdown
+Section Metadata
+- Style: dark, wide
+- Background: blue
+```
+
+**DOM Output:**
+```html
+<div class="section dark wide" data-background="blue">
+  <!-- section content -->
+</div>
+```
+
+### 3. Blocks (Component Logic)
+**Purpose:** Componentized functionality and styling
+
+**Block Architecture:**
+- **Block name** = folder name = CSS class = filename
+- **CSS file**: `blockname.css` (scoped to `.blockname` class)
+- **JavaScript file**: `blockname.js` (ESM module with default export)
+- **DOM structure**: Nested `<div>` tags for rows/columns
+
+## Block Development Standards
+
+### Block File Structure
+```
+blocks/
+  blockname/
+    blockname.css
+    blockname.js
+```
+
+### Block JavaScript Pattern (REQUIRED)
+```javascript
+// ✅ REQUIRED: Standard block export pattern
+export default async function init(el) {
+  // 1. DOM enhancement first (for LCP)
+  const basicStructure = createBasicUI(el);
+  el.append(basicStructure);
+  
+  // 2. Data fetching second (progressive enhancement)
+  const data = await fetchData();
+  enhanceWithData(basicStructure, data);
+}
+```
+
+### Block CSS Scoping (REQUIRED)
+```css
+/* ✅ REQUIRED: All selectors scoped to block */
+.blockname {
+  /* block container styles */
+}
+
+.blockname .element {
+  /* nested element styles */
+}
+
+.blockname .section {
+  /* can use containing section for context */
+}
+
+/* ❌ ANTI-PATTERN: Global selectors */
+.element { /* affects other blocks */ }
+```
+
+### Block Options (Authoring Flexibility)
+**Single option:** `Blockname (wide)` → `<div class="blockname wide">`
+**Multiple words:** `Blockname (super wide)` → `<div class="blockname super-wide">`
+**Multiple options:** `Blockname (dark, wide)` → `<div class="blockname dark wide">`
+
+## Auto-Blocking Strategy
+
+### When to Use Auto-Blocking
+**Ideal scenarios:**
+- Content naturally belongs outside blocks (article headers, embed links)
+- Template-based pages with predictable patterns
+- Converting default content to blocks programmatically
+
+### Auto-Blocking Implementation
+**Location:** `buildAutoBlocks()` function in `scripts.js`
+
+**Common patterns:**
+```javascript
+// ✅ Article header auto-blocking
+function buildAutoBlocks(main) {
+  const h1 = main.querySelector('h1');
+  const firstImage = main.querySelector('img');
+  const meta = getMetadata();
+  
+  if (h1 && firstImage && meta.author) {
+    const headerBlock = createAutoBlock('article-header', [
+      [h1.textContent, meta.author, meta.date],
+      [firstImage]
+    ]);
+    h1.closest('div').replaceWith(headerBlock);
+  }
+}
+
+// ✅ Embed link auto-blocking  
+function autoBlockEmbeds(main) {
+  main.querySelectorAll('a[href*="youtube.com"]').forEach(link => {
+    const embedBlock = createAutoBlock('embed', [[link.href]]);
+    link.closest('p').replaceWith(embedBlock);
+  });
+}
+```
+
+## AEM EDS Three-Phase DOM Transformation (CRITICAL)
+
+### Understanding Why `body { display: none; }` is Required
+
+AEM EDS delivers content through a **3-phase transformation process** that users must NOT see until complete:
+
+### Phase 1: Raw Franklin HTML (Initial Delivery)
+```html
+<div>
+  <div class="grid-marquee ratings">
+    <div>
+      <div>
+        <h1 id="the-quick-and-easy-create-anything-app">The quick and easy create-anything app.</h1>
+        <p>Make stunning social posts, images, videos, flyers, and more with Adobe Express. Dream it. Make it. Easy.</p>
+        <p><a href="https://commerce-stg.adobe.com/store/segmentation...">Start 30-day free trial</a> <a href="https://adobesparkpost.app.link/...">Get Adobe Express Free</a></p>
+      </div>
+    </div>
+    <div>
+      <div>
+        <picture>
+          <img loading="lazy" alt="" src="./media_11a6d037c34b18552b0501aae71a97271609274b2.png..." width="76" height="50">
+        </picture>
+      </div>
+    </div>
+    <!-- Additional card content in simple nested divs -->
+  </div>
+</div>
+```
+
+### Phase 2: Decorated State (`data-status="decorated"`)
+```html
+<div class="section" data-status="decorated" data-idx="0">
+  <div class="grid-marquee ratings">
+    <div>
+      <div>
+        <h1 id="the-quick-and-easy-create-anything-app-1">The quick and easy create-anything app.</h1>
+        <p>Make stunning social posts, images, videos, flyers, and more with Adobe Express. Dream it. Make it. Easy.</p>
+        <p><a href="https://commerce-stg.adobe.com/..." class="same-fcta">Start 30-day free trial</a> <a href="https://adobesparkpost.app.link/..." class="quick-link" rel="nofollow">Get Adobe Express Free</a></p>
+      </div>
+    </div>
+    <!-- Links get classes, some processing begins -->
+  </div>
+</div>
+```
+
+### Phase 3: Fully Loaded (`data-block-status="loaded"`)
+```html
+<div class="section">
+  <div class="grid-marquee ratings" data-block-status="loaded" data-block="">
+    <div class="background">
+      <div><picture><!-- Background image --></picture></div>
+    </div>
+    <div class="foreground">
+      <img class="icon icon-adobe-express-logo express-logo" src="/express/code/icons/adobe-express-logo.svg">
+      <div class="headline">
+        <div>
+          <h1 id="the-quick-and-easy-create-anything-app-1">The quick and easy create-anything app.</h1>
+          <p>Make stunning social posts, images, videos, flyers, and more with Adobe Express. Dream it. Make it. Easy.</p>
+          <p class="ctas">
+            <a href="..." class="same-fcta button primaryCTA">Start 30-day free trial</a> 
+            <a href="..." class="quick-link button">Get Adobe Express Free</a>
+          </p>
+        </div>
+      </div>
+      <div class="cards-container">
+        <button class="card" aria-controls="drawer-Get started..." aria-expanded="false">
+          <div class="face"><!-- Card content --></div>
+          <div class="drawer hide"><!-- Interactive drawer --></div>
+        </button>
+        <!-- Additional interactive cards -->
+      </div>
+      <div class="ratings"><!-- App store ratings --></div>
+    </div>
+  </div>
+</div>
+```
+
+## Critical Performance Implications
+
+### Why `body { display: none; }` Cannot Be Removed
+**Users must NEVER see the intermediate transformation states.** The raw HTML and decorated states are structurally incomplete and visually broken. Only the final loaded state should be visible.
+
+### Performance Optimization Strategy
+**The key is optimizing the transformation speed, NOT bypassing the hiding mechanism:**
+
+1. **LCP Elements Available Early**: The H1 exists in Phase 1 raw HTML
+2. **Structure Transforms**: Simple divs become complex interactive components  
+3. **Critical Path**: Optimize decoration speed for LCP elements (headline)
+4. **Progressive Enhancement**: Cards and interactions can load after LCP
+
+## Author-First Design Principles
+
+### Keep Simple for Authors
+**REQUIRED:** Absorb complexity in JavaScript, not authoring
+- Authors should copy/paste blocks intuitively
+- Avoid complex table structures
+- Use auto-blocking when content naturally lives outside blocks
+- Progressive enhancement over all-or-nothing patterns
+
+### Block Complexity Guidelines
+```javascript
+// ✅ GOOD: Author creates simple structure
+Columns
+| Content A | Content B |
+
+// ❌ BAD: Author manages complex options
+Columns (responsive, equal-height, mobile-stack, border-style-dotted)
+| Content A | Background: blue, Font: large | Content B | Padding: 20px |
+```
+
+## Performance Integration with Three-Phase Loading
+
+### Phase E (Eager) - First Section Only
+```javascript
+export default async function init(el) {
+  const isFirstSection = el.closest('.section') === document.querySelector('.section');
+  
+  if (isFirstSection) {
+    // Phase E: Immediate LCP structure
+    createLCPStructure(el);
+  } else {
+    // Phase L: Lazy load with IntersectionObserver
+    setupLazyLoading(el);
+  }
+}
+```
+
+### Block Loading States
+1. **Raw markup** - Server-delivered HTML structure
+2. **data-block-status="decorated"** - JavaScript processing started
+3. **data-block-status="loaded"** - Full enhancement complete
+
+## Testing Block Structure
+
+### Required Test Coverage
+```javascript
+// ✅ Test block structure integrity
+describe('Block Structure', () => {
+  it('preserves author markup hierarchy', () => {
+    const block = createBlockFromHTML(markup);
+    expect(block.querySelector('.original-content')).to.exist;
+  });
+  
+  it('enhances without breaking semantics', () => {
+    const block = createBlockFromHTML(markup);
+    init(block);
+    expect(block.querySelector('h1')).to.exist;
+    expect(block.getAttribute('aria-label')).to.exist;
+  });
+});
+```
+
+## Anti-Patterns to Avoid
+
+### ❌ Author Complexity
+- Complex table structures requiring technical knowledge
+- Multiple nested block options
+- Manual data attribute management
+
+### ❌ Developer Shortcuts
+- Global CSS affecting other blocks
+- Monolithic block JavaScript files
+- Breaking semantic HTML structure
+- All-or-nothing initialization patterns
+
+### ❌ Performance Issues
+- Loading all block resources in Phase E
+- Blocking LCP with complex block initialization
+- Ignoring Three-Phase Loading principles

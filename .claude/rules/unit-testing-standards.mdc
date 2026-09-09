@@ -1,0 +1,388 @@
+# Unit Testing Standards
+
+**APPLY: "Write my tests" queries**
+
+## Testing Philosophy
+
+Based on [Adobe AEM unit testing best practices](https://experienceleague.adobe.com/docs/experience-manager-learn/getting-started-wknd-tutorial-develop/project-archetype/unit-testing.html) and community discussions:
+
+### Testing Framework Stack
+- **JUnit 5**: Primary testing framework
+- **Mockito**: Mock object creation and verification  
+- **wcm.io AEM Mocks**: Mock AEM context and services
+- **Apache Sling Mocks**: Mock Sling abstractions
+
+## Test Structure Patterns
+
+### 1. Standard Test File Organization
+```javascript
+// ✅ REQUIRED: 1-to-1 mapping with source files
+src/main/js/features/hero-marquee/hero-marquee.js
+→ test/unit/features/hero-marquee/hero-marquee.test.js
+
+// ✅ REQUIRED: Test suffix naming convention
+// Allows easy identification and differentiation from source
+```
+
+### 2. Basic Test Structure
+```javascript
+// ✅ STANDARD: Test structure pattern
+describe('Hero Marquee Block', () => {
+  let mockEl;
+  
+  beforeEach(() => {
+    // Setup fresh DOM for each test
+    document.body.innerHTML = '<div class="hero-marquee"></div>';
+    mockEl = document.querySelector('.hero-marquee');
+  });
+  
+  afterEach(() => {
+    // Clean up DOM after each test
+    document.body.innerHTML = '';
+  });
+  
+  it('should create basic structure', () => {
+    // Test the building blocks of functionality
+    init(mockEl);
+    expect(mockEl.querySelector('.foreground')).to.exist;
+  });
+  
+  it('should handle missing content gracefully', () => {
+    // Test edge cases and error conditions
+    const emptyEl = document.createElement('div');
+    init(emptyEl);
+    expect(emptyEl.children.length).to.be.greaterThan(0);
+  });
+});
+```
+
+### 3. Testing Asynchronous Block Initialization
+```javascript
+// ✅ REQUIRED: Test async block patterns
+describe('Async Block Features', () => {
+  it('should handle Promise.all data loading', async () => {
+    const mockData = { cards: [], ratings: {} };
+    
+    // Mock async functions
+    global.fetchCards = () => Promise.resolve(mockData.cards);
+    global.fetchRatings = () => Promise.resolve(mockData.ratings);
+    
+    await init(mockEl);
+    
+    // Verify structure is created immediately (LCP optimization)
+    expect(mockEl.querySelector('.headline')).to.exist;
+    
+    // Verify data enhancement happens after
+    expect(mockEl.querySelector('.cards-container')).to.exist;
+  });
+  
+  it('should not block LCP with API failures', async () => {
+    // Mock API failure
+    global.fetchCards = () => Promise.reject(new Error('API Error'));
+    
+    await init(mockEl);
+    
+    // Basic structure should still exist
+    expect(mockEl.querySelector('.headline')).to.exist;
+  });
+});
+```
+
+## Mock Strategy Patterns
+
+### 1. DOM Mocking for Blocks
+```javascript
+// ✅ REQUIRED: Create realistic author content structure
+const createAuthorContent = () => {
+  const content = `
+    <div class="hero-marquee">
+      <div>
+        <h1>Test Headline</h1>
+        <p>Test body content</p>
+        <p><a href="/test">Test CTA</a></p>
+      </div>
+      <div>
+        <picture>
+          <img src="/test-image.jpg" alt="Test">
+        </picture>
+      </div>
+    </div>
+  `;
+  
+  document.body.innerHTML = content;
+  return document.querySelector('.hero-marquee');
+};
+```
+
+### 2. Utility Function Mocking
+```javascript
+// ✅ REQUIRED: Mock express-milo utilities
+beforeEach(() => {
+  // Mock getLibs function
+  global.getLibs = () => '/libs';
+  
+  // Mock utils import
+  global.import = (path) => {
+    if (path.includes('utils.js')) {
+      return Promise.resolve({
+        createTag: (tag, attributes = {}) => {
+          const el = document.createElement(tag);
+          Object.entries(attributes).forEach(([key, value]) => {
+            el.setAttribute(key, value);
+          });
+          return el;
+        },
+        getConfig: () => ({ env: { name: 'test' } })
+      });
+    }
+    return Promise.resolve({});
+  };
+});
+```
+
+### 3. API and External Service Mocking
+```javascript
+// ✅ REQUIRED: Mock external dependencies
+describe('External API Integration', () => {
+  let fetchStub;
+  
+  beforeEach(() => {
+    // Mock fetch API
+    fetchStub = sinon.stub(global, 'fetch');
+  });
+  
+  afterEach(() => {
+    fetchStub.restore();
+  });
+  
+  it('should handle API success', async () => {
+    fetchStub.resolves({
+      ok: true,
+      json: () => Promise.resolve({ data: 'test' })
+    });
+    
+    const result = await fetchExternalData();
+    expect(result.data).to.equal('test');
+  });
+  
+  it('should handle API failure gracefully', async () => {
+    fetchStub.rejects(new Error('Network error'));
+    
+    const result = await fetchExternalData();
+    expect(result).to.be.null; // Should fail gracefully
+  });
+});
+```
+
+## Testing Strategies by Component Type
+
+### 1. Block Testing (Core Functionality)
+```javascript
+// ✅ FOCUS: Test block transformation logic
+describe('Block Transformation', () => {
+  it('should transform author content to final structure', () => {
+    // Test the core purpose: transforming author content
+    const authorContent = createAuthorContent();
+    init(authorContent);
+    
+    // Verify transformation completed
+    expect(authorContent.querySelector('.foreground .headline')).to.exist;
+    expect(authorContent.querySelector('.background')).to.exist;
+  });
+  
+  it('should preserve semantic content', () => {
+    // Test that transformation doesn't break semantics
+    const originalH1 = mockEl.querySelector('h1').textContent;
+    init(mockEl);
+    const transformedH1 = mockEl.querySelector('h1').textContent;
+    
+    expect(transformedH1).to.equal(originalH1);
+  });
+});
+```
+
+### 2. Utility Function Testing
+```javascript
+// ✅ FOCUS: Test pure functions in isolation
+describe('Utility Functions', () => {
+  it('should format dynamic cart links correctly', () => {
+    const link = document.createElement('a');
+    link.href = '/products/123';
+    
+    formatDynamicCartLink(link);
+    
+    expect(link.href).to.include('cart');
+    expect(link.hasAttribute('data-tracked')).to.be.true;
+  });
+  
+  it('should handle edge cases', () => {
+    // Test null, undefined, empty inputs
+    expect(() => formatDynamicCartLink(null)).to.not.throw;
+    expect(() => formatDynamicCartLink(undefined)).to.not.throw;
+  });
+});
+```
+
+### 3. Performance-Critical Path Testing
+```javascript
+// ✅ FOCUS: Test LCP optimization patterns
+describe('Performance Critical Paths', () => {
+  it('should create LCP structure synchronously', () => {
+    const startTime = performance.now();
+    
+    init(mockEl);
+    
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    
+    // Verify synchronous DOM creation (should be < 10ms)
+    expect(duration).to.be.below(10);
+    expect(mockEl.querySelector('.headline')).to.exist;
+  });
+  
+  it('should defer expensive operations', async () => {
+    let expensiveOperationCalled = false;
+    
+    // Mock expensive operation
+    global.loadHeavyFeature = () => {
+      expensiveOperationCalled = true;
+      return Promise.resolve();
+    };
+    
+    init(mockEl);
+    
+    // Should NOT be called immediately
+    expect(expensiveOperationCalled).to.be.false;
+    
+    // Wait for async operations
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    // Now should be called
+    expect(expensiveOperationCalled).to.be.true;
+  });
+});
+```
+
+## Test Coverage Guidelines
+
+### Required Coverage Areas
+1. **Happy Path**: Normal operation with valid inputs
+2. **Edge Cases**: Null, undefined, empty inputs
+3. **Error Conditions**: API failures, missing dependencies
+4. **Performance Paths**: LCP optimization, async operations
+5. **Accessibility**: Screen reader content, keyboard navigation
+6. **Responsive Behavior**: Different viewport sizes
+
+### Coverage Thresholds
+- **Functions**: 80% minimum coverage
+- **Lines**: 75% minimum coverage  
+- **Branches**: 70% minimum coverage
+
+```javascript
+// ✅ REQUIRED: Test configuration
+module.exports = {
+  collectCoverageFrom: [
+    'express/code/**/*.js',
+    '!express/code/**/test/**',
+    '!express/code/**/node_modules/**'
+  ],
+  coverageThreshold: {
+    global: {
+      functions: 80,
+      lines: 75,
+      branches: 70
+    }
+  }
+};
+```
+
+## Anti-Patterns to Avoid
+
+### ❌ AVOID: Testing Implementation Details
+```javascript
+// BAD: Testing internal methods that could change
+it('should call internal _parseContent method', () => {
+  const spy = sinon.spy(block, '_parseContent');
+  init(mockEl);
+  expect(spy).to.have.been.called;
+});
+
+// GOOD: Testing public behavior
+it('should display parsed content correctly', () => {
+  init(mockEl);
+  expect(mockEl.querySelector('.content')).to.exist;
+});
+```
+
+### ❌ AVOID: Brittle Selectors in Tests
+```javascript
+// BAD: Testing exact DOM structure that might change
+expect(mockEl.children[0].children[1].tagName).to.equal('H1');
+
+// GOOD: Testing semantic structure
+expect(mockEl.querySelector('h1')).to.exist;
+expect(mockEl.querySelector('.headline h1')).to.exist;
+```
+
+### ❌ AVOID: Testing Framework Features
+```javascript
+// BAD: Testing that DOM manipulation works
+it('should append elements correctly', () => {
+  const div = document.createElement('div');
+  mockEl.appendChild(div);
+  expect(mockEl.children.length).to.equal(1);
+});
+
+// GOOD: Testing business logic
+it('should create required content sections', () => {
+  init(mockEl);
+  expect(mockEl.querySelector('.headline')).to.exist;
+  expect(mockEl.querySelector('.actions')).to.exist;
+});
+```
+
+## Test Environment Setup
+
+### Required Dependencies
+```json
+{
+  "devDependencies": {
+    "@web/test-runner": "^0.15.0",
+    "chai": "^4.3.0", 
+    "sinon": "^15.0.0",
+    "sinon-chai": "^3.7.0"
+  }
+}
+```
+
+### Configuration Files
+```javascript
+// web-test-runner.config.js
+export default {
+  files: 'test/**/*.test.js',
+  nodeResolve: true,
+  coverage: true,
+  coverageConfig: {
+    threshold: {
+      functions: 80,
+      lines: 75,
+      branches: 70
+    }
+  }
+};
+```
+
+### Test Commands
+```bash
+# Run all tests
+npm run test
+
+# Run tests in watch mode  
+npm run test:watch
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific test file
+npm run test -- --grep "hero-marquee"
+```

@@ -1,0 +1,107 @@
+# Express-Milo Block Patterns
+
+**APPLY: Block development and optimization**
+
+## Block Design Principles
+
+Following [Helix Block design best practices](https://milo.adobe.com/blog/2022/07/05/block-design):
+
+### 1. Intuitive Authoring (REQUIRED)
+- **Word compatibility**: 100% Word Online compatible, avoid Desktop-only features
+- **Visual structure**: Authors should be able to "squint and see the final UI"
+- **NO key/value pairs**: Avoid recreating AEM dialogs in table structures
+- **3-column limit**: Beyond 3 columns, flip axis (columns → rows)
+
+### 2. Section Metadata Integration
+```javascript
+// ✅ Use section metadata for edge cases instead of complex block options
+// Example: accordion + three-up styling via section class
+const section = el.closest('.section');
+if (section.classList.contains('three-up')) {
+  // Adjust block behavior for three-up layout
+}
+```
+
+### 3. Resilient Block Structure
+```javascript
+// ✅ Standard express-milo block pattern
+export default async function init(el) {
+  // 1. DIVIDE CONTENT: Required vs Optional parts
+  const rows = [...el.querySelectorAll(':scope > div')];
+  const title = el.querySelector('h1, h2, h3'); // REQUIRED: Start with title
+  
+  // 2. PROBE OUTWARD: Build from required content
+  const detail = findContentAbove(title); // Optional: Detail above title
+  const body = findContentBelow(title);   // Optional: Body below title  
+  const actions = findLinkContainer(el);  // Optional: Action area
+  
+  // 3. DECORATE DOM: Add human-readable classes, avoid nth-child
+  if (detail) detail.classList.add('detail');
+  title.classList.add('headline');
+  if (body) body.classList.add('body');
+  if (actions) actions.classList.add('actions');
+
+  // 4. PRESERVE CONTENT: Use append, avoid innerHTML
+  const structure = createFinalStructure();
+  safelyMoveContent(title, detail, body, actions, structure);
+  el.append(structure);
+}
+```
+
+## Express-Milo Utilities
+
+```javascript
+// Icons: Use deprecated version for compatibility
+const logo = getIconElementDeprecated('adobe-express-logo');
+
+// Dynamic cart links: Always async enhance
+formatDynamicCartLink(cta);
+
+// Branch tracking: Always await
+await trackBranchParameters([link]);
+```
+
+## Performance Anti-Patterns (AVOID)
+
+### ❌ Complex Table Structures
+```javascript
+// BAD: Forces authors to manage technical complexity
+Columns (responsive, equal-height, mobile-stack, border-style-dotted)
+| Content A | Background: blue, Font: large | Content B | Padding: 20px |
+```
+
+### ❌ Brittle CSS Selectors  
+```css
+/* BAD: Breaks when author content changes */
+.block > div:nth-child(2) > p:first-child { }
+.block div:last-of-type { }
+```
+
+### ❌ innerHTML Content Replacement
+```javascript
+// BAD: Destroys events, breaks Preact components
+element.innerHTML = newContent; // Loses all attached events
+```
+
+## Performance Patterns (REQUIRED)
+
+### ✅ Author-First Design
+- **Simple authoring**: Copy/paste blocks intuitively
+- **Progressive enhancement**: Start simple, enhance with JS
+- **Resilient selectors**: Use decorated classes, not pseudo-selectors
+
+### ✅ Performance by Phase
+- **Phase E**: Immediate LCP structure creation (synchronous DOM)
+- **Phase L**: Progressive enhancement via Promise.all
+- **Phase D**: Third-party integrations (3+ seconds delay)
+
+### ✅ Content Preservation
+```javascript
+// GOOD: Preserve all content and events
+function safelyMoveContent(source, target) {
+  // Move DOM nodes, preserve events
+  while (source.firstChild) {
+    target.appendChild(source.firstChild);
+  }
+}
+```

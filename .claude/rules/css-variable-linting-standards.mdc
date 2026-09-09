@@ -1,0 +1,372 @@
+# CSS Variable Linting Standards
+
+**APPLY: "Code review" queries and block creation**
+
+## Automated CSS Variable Enforcement
+
+Based on [PR #496: CSS Variable Linter](https://github.com/adobecom/express-milo/pull/496) and enhanced by [PR #527: Auto-fix Improvements](https://github.com/adobecom/express-milo/pull/527), this rule enforces consistent use of CSS variables from `:root` instead of hardcoded values.
+
+## Pre-commit Hook Integration
+
+### Automatic Enforcement
+- **Blocks commits** until violations are fixed
+- **Staged files only** - only checks files being committed  
+- **Clear feedback** - shows exact file, line, and suggested fixes
+- **Reliable auto-fix** - actually replaces values (enhanced in PR #527)
+- **Multiple values per line** - handles `padding: 40px 32px;` correctly
+- **Precise line targeting** - accurate line number calculation for fixes
+
+### What Gets Detected
+
+#### 1. Color Values (All Formats)
+```css
+/* ❌ VIOLATIONS: Hardcoded colors */
+color: #ffffff;
+background: #000;
+border-color: #E9E9E9;
+background: rgb(255, 255, 255);
+border: 1px solid rgba(0, 0, 0, 0.1);
+color: black;           /* ✨ NEW: Named colors now detected */
+background: white;      /* ✨ NEW: Named colors now detected */
+color: transparent;     /* ✨ NEW: Named colors now detected */
+
+/* ✅ CORRECT: CSS variables */
+color: var(--color-white);
+background: var(--color-black);
+border-color: var(--color-light-gray);
+background: var(--color-white);
+border: 1px solid var(--color-black-10);
+color: var(--color-black);      /* ✨ NEW: Better variable suggestions */
+background: var(--color-white); /* ✨ NEW: Better variable suggestions */
+color: var(--color-transparent);/* ✨ NEW: Better variable suggestions */
+```
+
+#### 2. Spacing Values (All Units)
+```css
+/* ❌ VIOLATIONS: Hardcoded spacing */
+margin-top: 16px;
+padding: 8px 16px;          /* ✨ FIXED: Multiple values now handled */
+gap: 24px;
+margin: 40px 32px 24px 16px; /* ✨ FIXED: All values replaced correctly */
+width: 320px;
+height: 2rem;
+
+/* ✅ CORRECT: CSS variables (auto-fix now works reliably) */
+margin-top: var(--spacing-300);
+padding: var(--spacing-100) var(--spacing-300);     /* ✨ FIXED: Both values replaced */
+gap: var(--spacing-400);
+margin: var(--spacing-600) var(--spacing-500) var(--spacing-400) var(--spacing-300); /* ✨ FIXED: All values replaced */
+width: var(--size-mobile-width);
+height: var(--spacing-600);
+```
+
+#### 3. Complex Property Values
+```css
+/* ❌ VIOLATIONS: Mixed hardcoded values */
+background: #ffffff url(image.png) no-repeat;
+margin: 8px 16px 24px 8px;
+border: 2px solid #000000;
+
+/* ✅ CORRECT: Variables for relevant values */
+background: var(--color-white) url(image.png) no-repeat;
+margin: var(--spacing-100) var(--spacing-300) var(--spacing-400) var(--spacing-100);
+border: var(--border-width-thick) solid var(--color-black);
+```
+
+## Usage Commands
+
+### Check for Violations
+```bash
+npm run lint:css-vars
+```
+
+### Auto-fix Violations  
+```bash
+npm run lint:css-vars:fix
+```
+
+### Development Workflow
+```bash
+# 1. Make changes to CSS files
+git add express/code/features/hero-marquee/hero-marquee.css
+
+# 2. Try to commit (pre-commit hook runs automatically)
+git commit -m "Update hero styles"
+
+# 3. If violations found, auto-fix them
+npm run lint:css-vars:fix
+
+# 4. Re-stage and commit
+git add express/code/features/hero-marquee/hero-marquee.css
+git commit -m "Update hero styles"
+```
+
+## Supported CSS Properties
+
+### Color Properties
+- `color`
+- `background-color`  
+- `border-color`
+- `fill`
+- `stroke`
+- `background` (extracts color values)
+- `border` (extracts color values)
+
+### Spacing Properties
+- `margin` (all variations: -top, -right, -bottom, -left, -inline-start, -inline-end)
+- `padding` (all variations: -top, -right, -bottom, -left, -inline-start, -inline-end)
+- `gap`
+- `top`, `right`, `bottom`, `left`
+- `width`, `height`
+- `min-width`, `max-width`
+- `min-height`, `max-height`
+
+## Variable Sources
+
+### Color Variables (from `express/code/styles/styles.css`)
+```css
+:root {
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-light-gray: #E9E9E9;
+  --color-dark-gray: #505050;
+  --color-blue: #1473E6;
+  --color-red: #D7373F;
+  /* ... all color variables automatically detected */
+}
+```
+
+### Spacing Variables (from `express/code/styles/styles.css`)
+```css
+:root {
+  --spacing-100: 8px;
+  --spacing-200: 12px;
+  --spacing-300: 16px;
+  --spacing-400: 24px;
+  --spacing-500: 32px;
+  --spacing-600: 40px;
+  /* ... all spacing variables automatically detected */
+}
+```
+
+## Smart Matching Features
+
+### 1. Hex Normalization
+```css
+/* All these variations match the same variable */
+#fff ↔ #ffffff ↔ #FFF → var(--color-white)
+```
+
+### 2. Case Insensitive Matching
+```css
+/* Mixed case handled automatically */
+#FFFFFF → var(--color-white)
+#ffffff → var(--color-white)
+```
+
+### 3. Complex Value Extraction
+```css
+/* Extracts only relevant values for replacement */
+background: #ffffff url(image.png) no-repeat center;
+          ↓
+background: var(--color-white) url(image.png) no-repeat center;
+```
+
+## Example Linter Output
+
+```bash
+❌ CSS Variable Linting Issues Found in Staged Files:
+
+📁 express/code/features/hero-marquee/hero-marquee.css:45
+   Found: .hero-marquee .headline { color: #ffffff; }
+   Use: var(--color-white)
+
+📁 express/code/features/hero-marquee/hero-marquee.css:52  
+   Found: .hero-marquee .cta { padding: 8px 16px; }
+   Replace:
+     8px → var(--spacing-100)
+     16px → var(--spacing-300)
+
+Total issues: 2
+
+💡 Update these hardcoded colors and spacing to use CSS variables from :root
+
+🔄 Applying fixes...
+✅ Fixes applied. Please re-stage your files.
+```
+
+## Enhanced Features (PR #527)
+
+### ✅ Reliable Auto-fix Functionality
+**Before**: Auto-fix would report success but not actually replace values
+**After**: Auto-fix correctly replaces hardcoded values with CSS variables
+
+```bash
+# Before (broken auto-fix)
+npm run lint:css-vars:fix
+# ❌ Reports success but values remain unchanged
+# padding: 40px 32px; (still hardcoded)
+
+# After (working auto-fix)  
+npm run lint:css-vars:fix
+# ✅ Actually replaces values
+# padding: var(--spacing-600) var(--spacing-500);
+```
+
+### ✅ Multiple Value Replacement
+**Before**: Could only replace one value per line
+**After**: Handles multiple replacements in the same line correctly
+
+```css
+/* Before: Only first value replaced */
+padding: var(--spacing-600) 32px; /* ❌ Partial replacement */
+
+/* After: All values replaced */
+padding: var(--spacing-600) var(--spacing-500); /* ✅ Complete replacement */
+```
+
+### ✅ Enhanced Color Detection
+**Before**: Only detected hex colors and RGB values
+**After**: Now detects named colors (black, white, transparent, etc.)
+
+```css
+/* New violations caught */
+color: black;        /* ✅ Now detected */
+background: white;   /* ✅ Now detected */
+opacity: transparent;/* ✅ Now detected */
+```
+
+### ✅ Improved Variable Name Prioritization
+**Before**: Would suggest complex variable names over simple ones
+**After**: Prioritizes semantically correct names
+
+```css
+/* Better suggestions */
+color: black; 
+/* Before: var(--color-info-primary-down) */
+/* After:  var(--color-black) ✅ */
+```
+
+### ✅ Nested var() Prevention
+**Before**: Could create nested var() calls like `var(--color-var(--color-black))`
+**After**: Prevents processing values already inside var() calls
+
+```css
+/* Prevents corruption */
+color: var(--existing-var); /* ✅ Left unchanged */
+/* Won't become: var(--color-var(--existing-var)) */
+```
+
+### ✅ Precise Line Number Calculation
+**Before**: Incorrect line numbers caused auto-fix to fail
+**After**: Precise line number calculation based on semicolon position
+
+```bash
+# Accurate error reporting
+📁 file.css:45
+   Found: .class { color: #fff; }  /* ✅ Exact line */
+```
+
+## Integration Points
+
+### 1. Pre-commit Hook (`.husky/pre-commit`)
+```bash
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run CSS variable linting
+npm run lint:css-vars
+```
+
+### 2. Package.json Scripts
+```json
+{
+  "scripts": {
+    "lint:css-vars": "node scripts/lint-css-vars.js",
+    "lint:css-vars:fix": "node scripts/lint-css-vars.js --fix"
+  }
+}
+```
+
+### 3. Code Review Integration
+This linter is automatically triggered during:
+- **Pre-commit hooks**: Prevents violations from being committed
+- **Code review**: Ensures consistent design system usage
+- **Block development**: Enforces standards for new components
+
+## Benefits for Design System Consistency
+
+### 1. Maintainability
+- **Centralized values**: All colors and spacing defined in `:root`
+- **Easy theme changes**: Update variables instead of searching/replacing
+- **Clear audit trail**: Track design system compliance
+
+### 2. Quality Assurance  
+- **Prevents inconsistencies**: No hardcoded values reach production
+- **Early detection**: Catches violations during development
+- **Automatic fixes**: Reduces manual work for developers
+
+### 3. Developer Experience (Enhanced in PR #527)
+- **Reliable auto-fix**: Now actually works instead of just reporting success
+- **Clear feedback**: Exact file locations and accurate line numbers
+- **Multiple value handling**: Properties like `padding: 40px 32px;` fully replaced
+- **Enhanced detection**: Named colors (black, white, transparent) now caught
+- **Better suggestions**: Semantic variable names prioritized
+- **Non-breaking**: Existing code continues working normally
+- **Trust factor**: Developers can now trust the tool to work as expected
+
+## Configuration Details
+
+### Linter Script Location
+```
+scripts/lint-css-vars.js
+```
+
+### Supported File Extensions
+- `.css` files only
+- Staged files during pre-commit
+- All CSS files when run manually
+
+### Performance Characteristics
+- **Fast execution**: Only processes staged files during commits
+- **Smart caching**: Remembers variable mappings from `:root`
+- **Minimal overhead**: Adds ~200ms to commit process
+
+## Customization Options
+
+### Adding New Variable Categories
+```javascript
+// In scripts/lint-css-vars.js, extend variable detection:
+const additionalVars = {};
+
+// Extract font variables
+const fontRegex = /--font-([^:]+):\s*([^;]+);/g;
+// Extract shadow variables  
+const shadowRegex = /--shadow-([^:]+):\s*([^;]+);/g;
+```
+
+### Excluding Files or Properties
+```javascript
+// Add to the linter configuration:
+const excludeFiles = [
+  'express/code/vendor/',
+  'express/code/legacy/'
+];
+
+const excludeProperties = [
+  'transition-duration', // Time values might not have variables
+  'z-index'              // Layer values might be hardcoded
+];
+```
+
+## Migration Strategy
+
+### For Existing Codebases
+1. **Gradual adoption**: Linter only affects new commits
+2. **Batch fixing**: Use `npm run lint:css-vars:fix` for mass updates
+3. **No breaking changes**: Existing hardcoded values continue working
+
+### For New Development
+1. **Immediate enforcement**: All new CSS must use variables
+2. **Clear guidance**: Linter suggests exact variable names
+3. **Fast iteration**: Auto-fix enables rapid development

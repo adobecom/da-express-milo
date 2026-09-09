@@ -1,0 +1,60 @@
+# Express-Milo Performance Diagnosis
+
+**APPLY: PageSpeed < 90 queries**
+
+## Performance Issue Decision Tree
+
+```
+User: "PageSpeed score 75, H1 LCP 5+ seconds"
+├─ LCP > 3s + white screen pattern?
+│  └─ YES → CSS render-blocking (27KB styles.css via JavaScript)
+├─ Font loading issue?
+│  └─ NO → Removing typekit has no impact
+└─ SOLUTION → Optimize AEM loading phases for LCP elements
+
+User: "Need to bypass body { display: none; }"
+└─ NO → Optimize AEM EDS transformation speed, not bypass
+```
+
+## Root Cause: CSS Render-Blocking in scripts.js
+
+```javascript
+// ❌ PROBLEM: 27KB CSS blocks body visibility for 5+ seconds
+(function loadStyles() {
+  const link = document.createElement('link');
+  link.setAttribute('rel', 'stylesheet');
+  link.setAttribute('href', path); // BLOCKS until download complete
+  document.head.appendChild(link);
+}());
+```
+
+## AEM EDS Transformation Requirements
+
+**Raw HTML → Decorated → Loaded (3 phases, users see NONE until loaded)**
+
+- H1 exists in raw HTML but needs final DOM structure CSS
+- `body { display: none; }` required until `data-block-status="loaded"`
+- Focus on accelerating transformation speed for LCP elements
+
+## Solution Pattern
+
+```javascript
+// ✅ SOLUTION: Follow hero-marquee pattern for LCP optimization
+export default async function init(el) {
+  // Phase 1: Create LCP structure immediately (synchronous DOM)
+  const basicStructure = createLCPStructure(el);
+  el.append(basicStructure);
+  
+  // Phase 2: Defer heavy operations to Promise.all
+  const dataPromises = Promise.all([
+    fetchCards(),
+    fetchRatings() // Don't block LCP with API calls
+  ]);
+  
+  // Phase 3: Enhance with data after LCP
+  const data = await dataPromises;
+  enhanceWithData(basicStructure, data);
+}
+```
+
+**Expected: LCP 5s → 1.5s, PageSpeed 75 → 98**

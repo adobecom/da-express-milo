@@ -1,0 +1,512 @@
+# Nala E2E Test Generation Standards
+
+**APPLY: "Generate Nala tests" or "Write E2E tests" queries**
+
+## Automated Nala Test Generation
+
+Based on the [Nala Testing Framework](https://github.com/adobecom/milo/wiki/Nala#nala-introduction), this rule generates comprehensive end-to-end tests for AEM Edge Delivery Services blocks and pages.
+
+## Test Generation Patterns
+
+### 1. Block-Level Test Structure
+```javascript
+// ✅ STANDARD: Generated Nala test for blocks
+import { test, expect } from '@playwright/test';
+
+test.describe('[BlockName] Block Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/express/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display core elements correctly', async ({ page }) => {
+    const block = page.locator('.block-name');
+    await expect(block).toBeVisible();
+    
+    // Test headline presence and content
+    const headline = block.locator('h1, h2, h3').first();
+    await expect(headline).toBeVisible();
+    await expect(headline).not.toBeEmpty();
+    
+    // Test CTA functionality
+    const cta = block.locator('.cta a, .button').first();
+    if (await cta.count() > 0) {
+      await expect(cta).toBeVisible();
+      await expect(cta).toHaveAttribute('href');
+    }
+  });
+
+  test('should be accessible', async ({ page }) => {
+    const block = page.locator('.block-name');
+    
+    // Check ARIA labels and semantic structure
+    await expect(block.locator('h1, h2, h3')).toHaveCount(1); // One main heading
+    
+    // Check keyboard navigation
+    await page.keyboard.press('Tab');
+    const focusedElement = page.locator(':focus');
+    await expect(focusedElement).toBeVisible();
+  });
+
+  test('should be responsive', async ({ page }) => {
+    const block = page.locator('.block-name');
+    
+    // Mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.reload();
+    await expect(block).toBeVisible();
+    
+    // Tablet viewport
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.reload();
+    await expect(block).toBeVisible();
+    
+    // Desktop viewport
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.reload();
+    await expect(block).toBeVisible();
+  });
+});
+```
+
+### 2. Performance-Focused Tests
+```javascript
+// ✅ STANDARD: Performance validation for AEM EDS
+test.describe('[BlockName] Performance Tests', () => {
+  test('should meet Core Web Vitals standards', async ({ page }) => {
+    // Start performance monitoring
+    await page.goto('/express/', { waitUntil: 'networkidle' });
+    
+    // Measure LCP (Largest Contentful Paint)
+    const lcpElement = page.locator('.block-name h1, .block-name img').first();
+    await expect(lcpElement).toBeVisible();
+    
+    // Check for layout shifts
+    const block = page.locator('.block-name');
+    const initialBox = await block.boundingBox();
+    
+    // Wait for any potential layout shifts
+    await page.waitForTimeout(1000);
+    const finalBox = await block.boundingBox();
+    
+    // Verify no significant layout shift
+    expect(Math.abs(initialBox.y - finalBox.y)).toBeLessThan(5);
+  });
+
+  test('should load efficiently on slow networks', async ({ page, context }) => {
+    // Simulate slow 3G
+    await context.route('**/*', route => {
+      route.continue();
+    });
+    
+    await page.goto('/express/');
+    
+    const block = page.locator('.block-name');
+    const startTime = Date.now();
+    await expect(block).toBeVisible();
+    const loadTime = Date.now() - startTime;
+    
+    // Should be visible within 3 seconds even on slow networks
+    expect(loadTime).toBeLessThan(3000);
+  });
+});
+```
+
+### 3. Multi-Device Test Generation
+```javascript
+// ✅ STANDARD: Cross-device compatibility tests
+const devices = [
+  { name: 'Mobile', width: 375, height: 667 },
+  { name: 'Tablet', width: 768, height: 1024 },
+  { name: 'Desktop', width: 1200, height: 800 },
+  { name: 'Large Desktop', width: 1920, height: 1080 }
+];
+
+devices.forEach(device => {
+  test.describe(`[BlockName] on ${device.name}`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.setViewportSize({ width: device.width, height: device.height });
+    });
+
+    test(`should display correctly on ${device.name}`, async ({ page }) => {
+      await page.goto('/express/');
+      
+      const block = page.locator('.block-name');
+      await expect(block).toBeVisible();
+      
+      // Device-specific assertions
+      if (device.width < 768) {
+        // Mobile-specific checks
+        const mobileLayout = block.locator('.mobile-layout, .stacked');
+        if (await mobileLayout.count() > 0) {
+          await expect(mobileLayout).toBeVisible();
+        }
+      } else {
+        // Desktop-specific checks
+        const desktopLayout = block.locator('.desktop-layout, .side-by-side');
+        if (await desktopLayout.count() > 0) {
+          await expect(desktopLayout).toBeVisible();
+        }
+      }
+    });
+  });
+});
+```
+
+## Block-Specific Test Patterns
+
+### Hero/Marquee Blocks
+```javascript
+// ✅ SPECIALIZED: Hero/Marquee block tests
+test.describe('Hero Marquee Block', () => {
+  test('should display hero content with proper hierarchy', async ({ page }) => {
+    await page.goto('/express/');
+    
+    const hero = page.locator('.hero-marquee, .grid-marquee');
+    await expect(hero).toBeVisible();
+    
+    // Check content hierarchy
+    const headline = hero.locator('h1');
+    await expect(headline).toBeVisible();
+    await expect(headline).toContainText(/express|adobe/i);
+    
+    const body = hero.locator('p').first();
+    await expect(body).toBeVisible();
+    
+    // Check CTA presence and functionality
+    const primaryCTA = hero.locator('.cta a, .button').first();
+    await expect(primaryCTA).toBeVisible();
+    await expect(primaryCTA).toHaveAttribute('href');
+    
+    // Test image loading
+    const heroImage = hero.locator('img').first();
+    if (await heroImage.count() > 0) {
+      await expect(heroImage).toBeVisible();
+      await expect(heroImage).toHaveAttribute('src');
+    }
+  });
+
+  test('should handle ratings display', async ({ page }) => {
+    await page.goto('/express/');
+    
+    const hero = page.locator('.hero-marquee.ratings, .grid-marquee.ratings');
+    if (await hero.count() > 0) {
+      const ratingsSection = hero.locator('.ratings');
+      await expect(ratingsSection).toBeVisible();
+      
+      const stars = ratingsSection.locator('.stars, .rating-stars');
+      if (await stars.count() > 0) {
+        await expect(stars).toBeVisible();
+      }
+    }
+  });
+});
+```
+
+### Form Blocks
+```javascript
+// ✅ SPECIALIZED: Form block tests
+test.describe('Form Block', () => {
+  test('should validate form functionality', async ({ page }) => {
+    await page.goto('/express/contact/');
+    
+    const form = page.locator('form, .form');
+    await expect(form).toBeVisible();
+    
+    // Test required field validation
+    const requiredFields = form.locator('input[required], select[required], textarea[required]');
+    const requiredCount = await requiredFields.count();
+    
+    if (requiredCount > 0) {
+      const submitButton = form.locator('button[type="submit"], input[type="submit"]');
+      await submitButton.click();
+      
+      // Check for validation messages
+      const validationMessages = page.locator('.error, .invalid, [aria-invalid="true"]');
+      expect(await validationMessages.count()).toBeGreaterThan(0);
+    }
+  });
+
+  test('should submit form successfully', async ({ page }) => {
+    await page.goto('/express/contact/');
+    
+    const form = page.locator('form, .form');
+    
+    // Fill out form with test data
+    await form.locator('input[type="email"]').fill('test@example.com');
+    await form.locator('input[type="text"]').first().fill('Test User');
+    
+    const textarea = form.locator('textarea');
+    if (await textarea.count() > 0) {
+      await textarea.fill('This is a test message');
+    }
+    
+    // Submit form
+    await form.locator('button[type="submit"], input[type="submit"]').click();
+    
+    // Check for success indication
+    await expect(page.locator('.success, .thank-you, .submitted')).toBeVisible({ timeout: 10000 });
+  });
+});
+```
+
+### Navigation Blocks
+```javascript
+// ✅ SPECIALIZED: Navigation/Header block tests
+test.describe('Header Navigation', () => {
+  test('should display navigation menu', async ({ page }) => {
+    await page.goto('/express/');
+    
+    const header = page.locator('header, .header');
+    await expect(header).toBeVisible();
+    
+    const logo = header.locator('.logo, .brand');
+    await expect(logo).toBeVisible();
+    
+    const nav = header.locator('nav, .nav');
+    await expect(nav).toBeVisible();
+    
+    const navItems = nav.locator('a');
+    expect(await navItems.count()).toBeGreaterThan(0);
+  });
+
+  test('should handle mobile menu toggle', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/express/');
+    
+    const header = page.locator('header, .header');
+    const mobileToggle = header.locator('.menu-toggle, .hamburger, [aria-label*="menu"]');
+    
+    if (await mobileToggle.count() > 0) {
+      await expect(mobileToggle).toBeVisible();
+      
+      // Test menu toggle
+      await mobileToggle.click();
+      const mobileMenu = page.locator('.mobile-menu, .nav-menu[aria-expanded="true"]');
+      await expect(mobileMenu).toBeVisible();
+      
+      // Test menu close
+      await mobileToggle.click();
+      await expect(mobileMenu).not.toBeVisible();
+    }
+  });
+});
+```
+
+## Test File Organization
+
+### Standard File Structure
+```
+test/nala/blocks/
+  ├── hero-marquee/
+  │   ├── hero-marquee.test.js
+  │   ├── hero-marquee.spec.js (page objects)
+  │   └── fixtures/
+  │       └── hero-marquee-data.json
+  ├── pricing-table/
+  │   ├── pricing-table.test.js
+  │   └── pricing-table.spec.js
+  └── shared/
+      ├── common-tests.js
+      └── page-objects/
+          ├── base-block.js
+          └── base-page.js
+```
+
+### Page Object Pattern
+```javascript
+// ✅ STANDARD: Page object for reusable block interactions
+export class BlockPageObject {
+  constructor(page) {
+    this.page = page;
+    this.block = page.locator('.block-name');
+  }
+
+  async navigateToBlock() {
+    await this.page.goto('/express/');
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  async getHeadline() {
+    return this.block.locator('h1, h2, h3').first();
+  }
+
+  async getCTA() {
+    return this.block.locator('.cta a, .button').first();
+  }
+
+  async clickCTA() {
+    const cta = await this.getCTA();
+    await cta.click();
+  }
+
+  async waitForAnimation() {
+    await this.page.waitForTimeout(500); // Wait for transitions
+  }
+
+  async takeScreenshot(name) {
+    return await this.block.screenshot({ path: `screenshots/${name}.png` });
+  }
+}
+```
+
+## Accessibility Test Generation
+
+### WCAG Compliance Tests
+```javascript
+// ✅ STANDARD: Accessibility validation
+test.describe('Accessibility Tests', () => {
+  test('should meet WCAG 2.1 AA standards', async ({ page }) => {
+    await page.goto('/express/');
+    
+    const block = page.locator('.block-name');
+    
+    // Check heading hierarchy
+    const headings = block.locator('h1, h2, h3, h4, h5, h6');
+    const headingLevels = [];
+    
+    for (let i = 0; i < await headings.count(); i++) {
+      const heading = headings.nth(i);
+      const tagName = await heading.evaluate(el => el.tagName.toLowerCase());
+      headingLevels.push(parseInt(tagName.charAt(1)));
+    }
+    
+    // Verify proper heading hierarchy (no skipped levels)
+    for (let i = 1; i < headingLevels.length; i++) {
+      expect(headingLevels[i] - headingLevels[i-1]).toBeLessThanOrEqual(1);
+    }
+    
+    // Check for alt text on images
+    const images = block.locator('img');
+    for (let i = 0; i < await images.count(); i++) {
+      const img = images.nth(i);
+      const alt = await img.getAttribute('alt');
+      expect(alt).toBeDefined();
+    }
+    
+    // Check for keyboard navigation
+    await page.keyboard.press('Tab');
+    const focusedElement = page.locator(':focus');
+    await expect(focusedElement).toBeVisible();
+  });
+
+  test('should support screen readers', async ({ page }) => {
+    await page.goto('/express/');
+    
+    const block = page.locator('.block-name');
+    
+    // Check for ARIA labels
+    const interactiveElements = block.locator('button, a, input, select, textarea');
+    for (let i = 0; i < await interactiveElements.count(); i++) {
+      const element = interactiveElements.nth(i);
+      const ariaLabel = await element.getAttribute('aria-label');
+      const text = await element.textContent();
+      
+      // Each interactive element should have either aria-label or text content
+      expect(ariaLabel || text?.trim()).toBeTruthy();
+    }
+  });
+});
+```
+
+## Visual Regression Testing
+
+### Screenshot Comparison Tests
+```javascript
+// ✅ STANDARD: Visual regression testing
+test.describe('Visual Regression Tests', () => {
+  test('should match visual baseline', async ({ page }) => {
+    await page.goto('/express/');
+    
+    const block = page.locator('.block-name');
+    await expect(block).toBeVisible();
+    
+    // Take screenshot and compare with baseline
+    await expect(block).toHaveScreenshot('block-baseline.png');
+  });
+
+  test('should handle dark mode correctly', async ({ page, context }) => {
+    // Set dark mode preference
+    await context.addInitScript(() => {
+      localStorage.setItem('theme', 'dark');
+    });
+    
+    await page.goto('/express/');
+    
+    const block = page.locator('.block-name');
+    await expect(block).toBeVisible();
+    
+    // Take dark mode screenshot
+    await expect(block).toHaveScreenshot('block-dark-mode.png');
+  });
+});
+```
+
+## Integration with Nala Commands
+
+### Generated Test Execution
+```bash
+# Run generated tests for specific block
+npm run nala stage @hero-marquee
+
+# Run generated accessibility tests
+npm run nala stage @a11y-hero-marquee
+
+# Run generated performance tests  
+npm run nala stage @perf-hero-marquee
+
+# Run generated responsive tests
+npm run nala stage @responsive-hero-marquee
+```
+
+### Test Tags for Organization
+```javascript
+// ✅ STANDARD: Test tagging for Nala organization
+test.describe('Hero Marquee Block', () => {
+  test('core functionality @hero-marquee @core', async ({ page }) => {
+    // Core functionality test
+  });
+
+  test('accessibility validation @hero-marquee @a11y', async ({ page }) => {
+    // Accessibility test
+  });
+
+  test('performance validation @hero-marquee @perf', async ({ page }) => {
+    // Performance test
+  });
+
+  test('responsive design @hero-marquee @responsive', async ({ page }) => {
+    // Responsive test
+  });
+});
+```
+
+## Anti-Patterns to Avoid
+
+### ❌ AVOID: Brittle Selectors
+```javascript
+// BAD: Fragile selector that breaks with DOM changes
+await page.locator('div > div:nth-child(2) > p:first-child').click();
+
+// GOOD: Semantic selector that survives DOM changes
+await page.locator('.hero-marquee .cta a').first().click();
+```
+
+### ❌ AVOID: Hard-coded Wait Times
+```javascript
+// BAD: Fixed wait times that cause flaky tests
+await page.waitForTimeout(5000);
+
+// GOOD: Wait for specific conditions
+await page.waitForLoadState('networkidle');
+await expect(element).toBeVisible();
+```
+
+### ❌ AVOID: Environment-Specific URLs
+```javascript
+// BAD: Hard-coded staging URLs
+await page.goto('https://stage--da-express-milo--adobecom.aem.page/express/');
+
+// GOOD: Environment-agnostic paths
+await page.goto('/express/');
+```
