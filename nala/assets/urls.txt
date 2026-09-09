@@ -1,8 +1,6 @@
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ai-credits-cards/pricing-cards-credits
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/app-ratings/app-ratings
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-highlight
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-fullsize
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-fullsize-two-ctas
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-numbered
@@ -11,7 +9,6 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/a
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-dark
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-short
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-narrow
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-animation
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-panels/ax-panels
 
@@ -118,7 +115,7 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-steps
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-v2/how-to-v2
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-v2/how-to-v2-no-background
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/how-to-v3/how-to-v3
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-v3/how-to-v3
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/interactive-marquee/interactive-marquee
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/interactive-marquee/interactive-marquee-square
@@ -155,7 +152,7 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-tabl
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-table/pricing-table-2-col
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-table/pricing-table-3-col
 
-// https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ai-credits-cards/pricing-cards-credits
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ai-credits-cards/pricing-cards-credits
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/quick-action-hub/quick-action-hub
 

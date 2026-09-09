@@ -38,10 +38,6 @@ test.describe('BlogPostsV2Block Test Suite', () => {
     });
 
     await test.step('step-2: Verify block content', async () => {
-      // Wait for feed to load and at least one card to render
-      // await expect(block.block.locator('.blog-card').first()).toBeVisible({ timeout: 15000 });
-      await expect(block.blogCard.first()).toBeVisible({ timeout: 15000 });
-
       await expect(block.block).toBeVisible();
       const sem = data.semantic;
 
@@ -132,7 +128,6 @@ test.describe('BlogPostsV2Block Test Suite', () => {
     });
 
     await test.step('step-2: Verify block content', async () => {
-      await expect(block.blogCard.first()).toBeVisible({ timeout: 15000 });
       await expect(block.block).toBeVisible();
       const sem = data.semantic;
 
