@@ -161,8 +161,11 @@ export async function getTrackingAppendedURL(url, options = {}) {
   setParams('cgen', cgen);
   if (placement) setParams('placement', placement);
   const { locale: { ietf, region } } = getConfig();
-  setParams('locale', ietf);
-  setParams('contentRegion', region === 'uk' ? 'gb' : region);
+  setParams('locale', ietf === 'ar' ? 'ar-SA' : ietf);
+  let contentRegion = region;
+  if (region === 'uk') contentRegion = 'gb';
+  if (region === 'ara') contentRegion = 'sa';
+  setParams('contentRegion', contentRegion);
 
   if (sKwcId) {
     const sKwcIdParameters = sKwcId.split('!');

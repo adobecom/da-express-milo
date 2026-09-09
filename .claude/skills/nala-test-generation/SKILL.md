@@ -20,7 +20,7 @@ structure that matches the output of `npm run nala-test-gen`.
 | Input | Required | Notes |
 |-------|----------|-------|
 | **Block name** (kebab-case) | Yes | e.g. `ax-marquee`, `font-generator` |
-| **Test page path** | No — ask | Relative path e.g. `/drafts/nala/test-gen/font-generator`. If not provided, offer to create the page (see Phase 2). |
+| **Test page path** | No — ask | Relative path e.g. `/drafts/nala/blocks/font-generator`. If not provided, offer to create the page (see Phase 2). |
 
 ---
 
@@ -28,14 +28,32 @@ structure that matches the output of `npm run nala-test-gen`.
 
 Ask for the block name if not provided.
 
-Then ask about the test page:
+**If a page for this block was already authored earlier in the same workflow**
+(e.g. by `build-content-from-figma`, at a path like `/drafts/<ldap>/<block-name>`),
+do not silently create a second page under `/drafts/nala/blocks/`. Flag it to
+the developer and let them decide:
+
+> This block already has an authored page at `<existing-path>`. Should I:
+> - **Reuse it** as the nala test page (skip Phase 2), or
+> - **Create a separate page** under `/drafts/nala/blocks/<block-name>`?
+
+Proceed to Phase 3 with whichever path the developer chooses.
+
+Otherwise, ask about the test page:
 
 > Do you have an existing test page path, or should I create one?
-> - **I have a path** — provide the relative path (e.g. `/drafts/nala/test-gen/font-generator`)
+> - **I have a path** — provide the relative path (e.g. `/drafts/nala/blocks/font-generator`)
 > - **Create it for me** — I'll build a minimal DA page and give you the path
 
 If the user provides a path, skip to Phase 3.
 If the user wants a page created, continue to Phase 2.
+
+**Path check:** the canonical nala test-page root is `/drafts/nala/blocks/`
+— this matches every existing fixture under `nala/blocks/*/*.block.json`
+in this repo. Do not invent an alternate root (e.g. `/drafts/nala/test-gen/`);
+if a provided path doesn't start with `/drafts/nala/blocks/` and there is no
+reason (like reusing an existing authored page per above) to depart from
+that convention, flag it to the user before proceeding.
 
 ---
 
@@ -45,12 +63,12 @@ The test page is a minimal EDS document containing just the block under test
 with a lorem ipsum sentence. It is uploaded to DA under:
 
 ```
-adobecom / da-express-milo / drafts/nala/test-gen/<block-name>.html
+adobecom / da-express-milo / drafts/nala/blocks/<block-name>.html
 ```
 
 The nala path (used in `block.json`) will be:
 ```
-/drafts/nala/test-gen/<block-name>
+/drafts/nala/blocks/<block-name>
 ```
 
 ### 2a. Build the HTML
@@ -80,7 +98,7 @@ lorem ipsum sentence as placeholder content.
 </html>
 ```
 
-Save to `/tmp/da-upload/drafts/nala/test-gen/<block-name>.html`.
+Save to `/tmp/da-upload/drafts/nala/blocks/<block-name>.html`.
 
 ### 2b. Check DA auth token
 
@@ -99,10 +117,10 @@ If no token, instruct the user to:
 TOKEN=$(da-auth-helper token 2>/dev/null)
 
 curl -s -w "\n%{http_code}" -X POST \
-  "https://admin.da.live/source/adobecom/da-express-milo/drafts/nala/test-gen/<block-name>.html" \
+  "https://admin.da.live/source/adobecom/da-express-milo/drafts/nala/blocks/<block-name>.html" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: text/html" \
-  --data-binary @/tmp/da-upload/drafts/nala/test-gen/<block-name>.html
+  --data-binary @/tmp/da-upload/drafts/nala/blocks/<block-name>.html
 ```
 
 Expect **200** or **201**.
@@ -111,16 +129,16 @@ Expect **200** or **201**.
 
 ```bash
 curl -s -w "\n%{http_code}" -X POST \
-  "https://admin.hlx.page/preview/adobecom/da-express-milo/main/drafts/nala/test-gen/<block-name>" \
+  "https://admin.hlx.page/preview/adobecom/da-express-milo/main/drafts/nala/blocks/<block-name>" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 Report the preview URL:
 ```
-Preview: https://main--da-express-milo--adobecom.aem.page/drafts/nala/test-gen/<block-name>
+Preview: https://main--da-express-milo--adobecom.aem.page/drafts/nala/blocks/<block-name>
 ```
 
-The nala path for `block.json` is: `/drafts/nala/test-gen/<block-name>`
+The nala path for `block.json` is: `/drafts/nala/blocks/<block-name>`
 
 ---
 

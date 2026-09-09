@@ -137,7 +137,7 @@
   margin: 0;
   font-size: 22px;
   font-weight: var(--heading-font-weight);
-  text-align: left;
+  text-align: start;
   line-height: initial;
 }
 
@@ -396,12 +396,12 @@ main .quotes.singular .quote-details {
   margin: 0 16px;
   font-size: 22px;
   font-weight: 800;
-  text-align: left;
+  text-align: start;
   line-height: initial;
 }
 
 main .quotes.singular .desktop-container .quote-details {
-  margin-left: 30px;
+  margin-inline-start: 30px;
 }
 
 main .quotes.singular .author-description {
@@ -416,10 +416,7 @@ main .quotes.singular .mobile-container .author-panel {
   font-weight: 600;
   display: flex;
   align-items: center;
-}
-
-main .quotes.singular .mobile-container .author-panel .author-photo {
-  margin-right: 15px;
+  gap: 15px;
 }
 
 /* Ratings styles */

@@ -24,6 +24,8 @@ const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList,
     readFile({ path: './mocks/inject-logo.html' })],
 );
 
+const marqueeNoBackground = await readFile({ path: './mocks/marquee-no-background.html' });
+
 describe('Columns', () => {
   before(() => {
     window.isTestEnv = true;
@@ -228,5 +230,60 @@ describe('Logo injection', () => {
     expect(logo).to.exist;
     expect(logo.classList.contains('marquee-eyebrow-logo-wide')).to.be.true;
     expect(logo.alt).to.equal('Adobe Acrobat X Adobe Express co-brand logo');
+  });
+});
+
+describe('Marquee LCP background preload', () => {
+  const imagePreloads = () => [...document.head.querySelectorAll('link[rel="preload"][as="image"]')];
+  const bgUrlOf = (block) => block.style.getPropertyValue('--bg-image').replace(/^url\("|"\)$/g, '');
+
+  beforeEach(() => {
+    imagePreloads().forEach((link) => link.remove());
+  });
+
+  after(() => {
+    imagePreloads().forEach((link) => link.remove());
+  });
+
+  it('Preloads the background image at high priority, since it is the LCP element', async () => {
+    document.body.innerHTML = marquee;
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+
+    const preloads = imagePreloads();
+    expect(preloads.length).to.equal(1);
+    expect(preloads[0].getAttribute('fetchpriority')).to.equal('high');
+    expect(preloads[0].getAttribute('href')).to.equal(bgUrlOf(block));
+  });
+
+  it('Preloads a viewport appropriate variant rather than the raw authored asset', async () => {
+    document.body.innerHTML = marquee;
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+
+    const href = imagePreloads()[0].getAttribute('href');
+    expect(href).to.contain('format=webply');
+    expect(href).to.match(/width=\d+/);
+  });
+
+  it('Does not append a duplicate preload when the same block is decorated twice', async () => {
+    document.body.innerHTML = marquee;
+    await decorate(document.querySelector('.ax-columns'));
+    document.body.innerHTML = marquee;
+    await decorate(document.querySelector('.ax-columns'));
+
+    expect(imagePreloads().length).to.equal(1);
+  });
+
+  it('Falls back to preloading the first picture when there is no background image', async () => {
+    document.body.innerHTML = marqueeNoBackground;
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+
+    expect(bgUrlOf(block)).to.equal('');
+    const preloads = imagePreloads();
+    expect(preloads.length).to.equal(1);
+    expect(preloads[0].getAttribute('fetchpriority')).to.equal('high');
+    expect(preloads[0].getAttribute('href')).to.contain('fallback-image.jpg');
   });
 });

@@ -155,6 +155,7 @@ main .banner h2 {
   font-size: 17px;
   padding-left: 1.65em;
   padding-right: 1.65em;
+  border-radius: 999px;
 }
 
 .banner.cool h2 {

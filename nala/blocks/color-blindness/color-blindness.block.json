@@ -1,0 +1,274 @@
+{
+  "block": "color-blindness",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-blindness-ax-shell-host",
+      "selector": "div.color-blindness.ax-shell-host",
+      "path": "/drafts/nala/blocks/color/color-blindness?color-palette=424242,FF98BB,BA1650,CCCCCC,056C5C",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "li",
+              "nth": 3,
+              "tag": "li",
+              "text": "Color Blindness Simulator",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-four-rows-cb-title__label",
+              "nth": 0,
+              "tag": "span",
+              "text": "Deuteranopia",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-four-rows-cb-title__label",
+              "nth": 1,
+              "tag": "span",
+              "text": "Protanopia",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-four-rows-cb-title__label",
+              "nth": 2,
+              "tag": "span",
+              "text": "Tritanopia",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-cb-mobile-header__label--palette",
+              "nth": 0,
+              "tag": "span",
+              "text": "Palette",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-cb-mobile-row__hex",
+              "nth": 0,
+              "tag": "span",
+              "text": "#424242",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-cb-mobile-row__hex",
+              "nth": 1,
+              "tag": "span",
+              "text": "#FF98BB",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-cb-mobile-row__hex",
+              "nth": 2,
+              "tag": "span",
+              "text": "#BA1650",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-cb-mobile-row__hex",
+              "nth": 3,
+              "tag": "span",
+              "text": "#CCCCCC",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-cb-mobile-row__hex",
+              "nth": 4,
+              "tag": "span",
+              "text": "#056C5C",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-conflict-summary__label",
+              "nth": 0,
+              "tag": "span",
+              "text": "Potential color blind conflicts",
+              "markup": null
+            },
+            {
+              "selector": "span.strip-conflict-summary__badge.has-conflicts",
+              "nth": 0,
+              "tag": "span",
+              "text": "Conflicts found",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "color-conflicts",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "color-wheel-express",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Color wheel",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.action-menu-link.palette-link.color-action-button",
+              "nth": 0,
+              "text": "",
+              "href": "/express/create/color-wheel",
+              "ariaLabel": "Create palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.action-menu-link.contrast-link.color-action-button",
+              "nth": 0,
+              "text": "",
+              "href": "/express/create/color-contrast-analyzer",
+              "ariaLabel": "Contrast Checker",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "span.action-menu-link.color-blindness-link.color-action-button.active",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.undo-btn.color-action-button",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Undo",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.redo-btn.color-action-button",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Redo",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "span.strip-four-rows-cb-title__label",
+              "nth": 0,
+              "text": "Deuteranopia",
+              "href": null,
+              "ariaLabel": "Deuteranopia: Red-green color blindness",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "span.strip-four-rows-cb-title__label",
+              "nth": 1,
+              "text": "Protanopia",
+              "href": null,
+              "ariaLabel": "Protanopia: Red-green color blindness",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "span.strip-four-rows-cb-title__label",
+              "nth": 2,
+              "text": "Tritanopia",
+              "href": null,
+              "ariaLabel": "Tritanopia: Blue-yellow color blindness",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Share this color palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Download this color palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button",
+              "nth": 2,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Save this palette to your Library",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input.ax-palette-name-input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-button",
+              "nth": 0,
+              "text": "Create with my color palette",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@color-blindness",
+        "@ax-shell-host",
+        "@express"
+      ]
+    }
+  ]
+}

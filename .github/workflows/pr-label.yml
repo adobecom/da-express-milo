@@ -1,0 +1,50 @@
+name: PR Label
+
+on:
+  pull_request:
+    types: [opened, converted_to_draft]
+
+jobs:
+  manage-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add or remove Ready for Review label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const action = context.payload.action;
+
+            if (action === 'converted_to_draft') {
+              console.log(`PR #${pr.number} converted to draft — removing label`);
+              try {
+                await github.rest.issues.removeLabel({
+                  ...context.repo,
+                  issue_number: pr.number,
+                  name: 'Ready for Review',
+                });
+              } catch (e) {
+                if (e.status === 404) {
+                  console.log('Label not present — nothing to remove');
+                } else {
+                  core.setFailed(`Failed to remove label: ${e.message}`);
+                }
+              }
+              return;
+            }
+
+            if (pr.draft) {
+              console.log(`PR #${pr.number} opened as draft — skipping label`);
+              return;
+            }
+
+            console.log(`PR #${pr.number} opened as ready — adding label`);
+            try {
+              await github.rest.issues.addLabels({
+                ...context.repo,
+                issue_number: pr.number,
+                labels: ['Ready for Review'],
+              });
+            } catch (e) {
+              core.setFailed(`Failed to add label: ${e.message}`);
+            }
