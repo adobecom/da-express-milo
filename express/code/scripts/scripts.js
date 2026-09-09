@@ -389,6 +389,9 @@ CONFIG.decorateArea = decorateAreaWithLCP;
   if (getMetadata('theme') !== 'doodlebug') {
     paths.push('/express/code/styles/styles.css');
   }
+  if (getMetadata('font-styling')?.trim().toLowerCase() === 'jp') {
+    paths.push('/express/code/styles/font-styling-jp.css');
+  }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
     const link = document.createElement('link');
