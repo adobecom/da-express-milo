@@ -14,7 +14,7 @@ const {
   buildSearchParamsForEditorUrl,
 } = imports[2];
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
-  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
+  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'iwo3rvz.css' } } });
 });
 
 document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
