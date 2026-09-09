@@ -60,7 +60,7 @@ export default class DownloadProvider extends BaseProvider {
    * @param {Object} themeData
    * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode] - currently-selected Color mode
    */
-  async exportCSS(themeData, mode) {
+  async exportCSS(themeData, mode = 'HEX') {
     return this.safeExecute(() => this.#actions.exportCSS(themeData, mode));
   }
 
@@ -68,7 +68,7 @@ export default class DownloadProvider extends BaseProvider {
    * @param {Object} themeData
    * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode]
    */
-  async exportSCSS(themeData, mode) {
+  async exportSCSS(themeData, mode = 'HEX') {
     return this.safeExecute(() => this.#actions.exportSCSS(themeData, mode));
   }
 
@@ -76,7 +76,7 @@ export default class DownloadProvider extends BaseProvider {
    * @param {Object} themeData
    * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode]
    */
-  async exportLESS(themeData, mode) {
+  async exportLESS(themeData, mode = 'HEX') {
     return this.safeExecute(() => this.#actions.exportLESS(themeData, mode));
   }
 
@@ -84,7 +84,7 @@ export default class DownloadProvider extends BaseProvider {
    * @param {Object} themeData
    * @param {'HEX'|'RGB'} [mode]
    */
-  async exportXML(themeData, mode) {
+  async exportXML(themeData, mode = 'HEX') {
     return this.safeExecute(() => this.#actions.exportXML(themeData, mode));
   }
 }
