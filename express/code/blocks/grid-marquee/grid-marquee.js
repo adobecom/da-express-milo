@@ -237,11 +237,18 @@ async function makeRating(
   const storeTypeIndex = [APPLE, GOOGLE].indexOf(store);
   const [score, cnt] = ratings[storeTypeIndex].split(',').map((str) => str.trim());
   const ariaLabel = store === APPLE ? appleStoreLabelPlaceholder : playStoreLabelPlaceholder;
-  const { locale: { region } } = config;
-  // ToDo: Add support for all regions and remove Hardcoded Arabic region
-  const storeLink = createTag('a', {
-    href: link,
-  }, getIconElementDeprecated(`${store}-store${region === 'ara' ? `-${region}` : ''}`));
+  const { locale: { region, ietf } } = config;
+  // Localized store badges are keyed by region (e.g. apple-store-ara.svg) and only
+  // exist for some non-English locales. Load the localized badge when available and
+  // fall back to the English one on a missing asset. No authoring required.
+  const localize = region && !ietf?.startsWith('en');
+  const storeIcon = getIconElementDeprecated(`${store}-store${localize ? `-${region}` : ''}`);
+  if (localize) {
+    storeIcon.addEventListener('error', () => {
+      storeIcon.src = `/express/code/icons/${store}-store.svg`;
+    }, { once: true });
+  }
+  const storeLink = createTag('a', { href: link }, storeIcon);
   storeLink.setAttribute('aria-label', ariaLabel);
   const { default: trackBranchParameters } = await import('../../scripts/branchlinks.js');
   await trackBranchParameters([storeLink]);
