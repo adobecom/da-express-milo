@@ -228,6 +228,14 @@
     height: 822px;
 }
 
+.frictionless-quick-action-mobile .quick-action-container#video-compress-container {
+    height: 826px;
+}
+
+.frictionless-quick-action-mobile .quick-action-container#video-convert-container {
+    height: 826px;
+}
+
 .frictionless-quick-action-mobile > div.hidden {
     visibility: hidden;
     position: absolute;
