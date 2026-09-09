@@ -11,21 +11,6 @@
   min-height: unset;
 }
 
-/* Restores stage's zeroed top-padding for the FIRST ax-columns at the very top
-   of the page, dropped by the v2-spacing-default migration (which gave every
-   block symmetric top/bottom padding). At page-top the section already supplies
-   the top gap, so the block's own v2 top padding doubles it — this is the
-   intermittent first-block-only divergence. Scoped to a default-spacing first
-   section (an explicit *-spacing class means the author owns the gap), matching
-   the default-spacing guard used throughout this file. Unlike the last-child
-   bottom rule below this ZEROES padding (doesn't add), so it must NOT exclude
-   the self-managing variants — stage zeroed them here too, and leaving their v2
-   top padding in place is exactly the divergence being fixed. */
-.section:first-child:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child {
-  padding-top: 0;
-}
-
 /* Restores stage's bottom-padding for the last ax-columns (or fragment
    .content wrapper) in a section, dropped without replacement by the
    v2-spacing-default migration — found via a live diff against stage on
