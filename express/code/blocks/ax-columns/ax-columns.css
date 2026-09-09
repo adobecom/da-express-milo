@@ -210,6 +210,15 @@
   gap: 16px;
 }
 
+/* stage renders width-3-columns with no inter-column gap (columns are separated
+   by their own inline padding); the v2 base row `gap: 16px` above both shrinks
+   the side-by-side columns on tablet/desktop — so the mockup images render
+   ~10px narrower than stage — and adds vertical drift between the stacked
+   columns on mobile. Zero it for this variant to track stage. */
+.section .ax-columns.width-3-columns>div {
+  gap: 0;
+}
+
 /* Restores stage's row-to-row spacing (`.ax-columns:not(.v2)>div { padding:
    var(--spacing-600) 0 }`, unconditional at every viewport — 40px top +
    40px bottom = 80px between rows), dropped when the v2-spacing-default
@@ -2107,6 +2116,17 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .section .ax-columns.temporary-font-generator-styles h3 {
       font-size: var(--typography-headings-xl);
+    }
+
+  /* stage pads every column 32px inline at all breakpoints; the v2 rewrite only
+     kept that at desktop (the spacing-600 rule), so on mobile/tablet the stacked
+     width-3-columns mockup images grew to full column width (~64px taller than
+     stage) and the extra height accumulated down the block. Restore the inline
+     padding for mobile/tablet, scoped to width-3-columns so 2-col layouts keep
+     their own first/nth-child padding (switch-now etc. untouched). */
+  .ax-columns.width-3-columns:not(.fullsize):not(.marquee) .column:not(.column-picture):not(.hero-animation-overlay):not(.text) {
+      padding-left: var(--spacing-500);
+      padding-right: var(--spacing-500);
     }
 
 }
