@@ -183,13 +183,13 @@ export class ExportActions extends BaseActionGroup {
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
-   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='RGB'] - the currently-selected
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='HEX'] - the currently-selected
    *   Color mode; only this mode's values are emitted (see formatSwatchInMode)
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsCSS(themeData, mode = 'RGB') {
+  async exportAsCSS(themeData, mode = 'HEX') {
     validateSwatches(themeData, DownloadTopics.EXPORT.CSS);
 
     let output = '';
@@ -210,12 +210,12 @@ export class ExportActions extends BaseActionGroup {
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
-   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='RGB']
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='HEX']
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsSCSS(themeData, mode = 'RGB') {
+  async exportAsSCSS(themeData, mode = 'HEX') {
     validateSwatches(themeData, DownloadTopics.EXPORT.SCSS);
     const output = themeData.assetType === 'gradient'
       ? `$${getClassName(themeData.name)}: ${buildGradientCSSValue(themeData.swatches, mode)};\n`
@@ -226,12 +226,12 @@ export class ExportActions extends BaseActionGroup {
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
-   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='RGB']
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='HEX']
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsLESS(themeData, mode = 'RGB') {
+  async exportAsLESS(themeData, mode = 'HEX') {
     validateSwatches(themeData, DownloadTopics.EXPORT.LESS);
     const output = themeData.assetType === 'gradient'
       ? `@${getClassName(themeData.name)}: ${buildGradientCSSValue(themeData.swatches, mode)};\n`
@@ -242,14 +242,14 @@ export class ExportActions extends BaseActionGroup {
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
-   * @param {'HEX'|'RGB'} [mode='RGB'] - only HEX/RGB are valid (no XML
+   * @param {'HEX'|'RGB'} [mode='HEX'] - only HEX/RGB are valid (no XML
    *   representation exists for HSB/Lab, so those are excluded from the
    *   Codes menu entirely — see createColorModesHeader.js)
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsXML(themeData, mode = 'RGB') {
+  async exportAsXML(themeData, mode = 'HEX') {
     validateSwatches(themeData, DownloadTopics.EXPORT.XML);
 
     const cls = getClassName(themeData.name);
