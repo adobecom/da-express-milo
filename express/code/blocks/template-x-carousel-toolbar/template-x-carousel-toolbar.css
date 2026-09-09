@@ -241,7 +241,7 @@
 .template-x-carousel-toolbar .toolbar p {
   margin: auto;
   line-height: 1.3;
-  text-align: left;
+  text-align: start;
   font-size: var(--body-font-size-m);
 }
 
