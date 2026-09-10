@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@ribbon-banner-default",
       "selector": "div.ribbon-banner",
-      "path": "/drafts/nala/test-gen/ax-ribbon-banner/ribbon-banner",
+      "path": "/drafts/nala/blocks/ax-ribbon-banner/ribbon-banner",
       "data": {
         "semantic": {
           "texts": [

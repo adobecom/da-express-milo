@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@pricing-cards-credits-default",
       "selector": "div.pricing-cards-credits",
-      "path": "/drafts/nala/test-gen/ai-credits-cards/pricing-cards-credits",
+      "path": "/drafts/nala/blocks/ai-credits-cards/pricing-cards-credits",
       "data": {
         "semantic": {
           "texts": [

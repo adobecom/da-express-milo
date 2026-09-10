@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@hero-color-light",
       "selector": "div.hero-color.light",
-      "path": "/drafts/nala/test-gen/hero-color",
+      "path": "/drafts/nala/blocks/hero-color",
       "data": {
         "semantic": {
           "texts": [

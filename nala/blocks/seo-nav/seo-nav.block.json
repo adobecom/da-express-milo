@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@seo-nav-default",
       "selector": "div.seo-nav",
-      "path": "/drafts/nala/test-gen/seo-nav/seo-nav",
+      "path": "/drafts/nala/blocks/seo-nav/seo-nav",
       "data": {
         "semantic": {
           "texts": [

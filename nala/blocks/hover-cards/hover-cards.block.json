@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@hover-cards-default",
       "selector": "div.hover-cards",
-      "path": "/drafts/nala/test-gen/hover-cards/hover-cards",
+      "path": "/drafts/nala/blocks/hover-cards/hover-cards",
       "data": {
         "semantic": {
           "texts": [

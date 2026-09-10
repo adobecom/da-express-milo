@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@blog-posts-default",
       "selector": "div.blog-posts",
-      "path": "/drafts/nala/test-gen/blog-posts/blog-posts",
+      "path": "/drafts/nala/blocks/blog-posts/blog-posts",
       "data": {
         "semantic": {
           "texts": [
@@ -57,14 +57,14 @@
               "selector": "picture",
               "nth": 0,
               "tag": "picture",
-              "src": "/drafts/nala/test-gen/blog-posts/media_18b5e0473bd0911de08ac5d39748ab69e5fe91d08.png?width=750&format=png&optimize=medium",
+              "src": "/drafts/nala/blocks/blog-posts/media_18b5e0473bd0911de08ac5d39748ab69e5fe91d08.png?width=750&format=png&optimize=medium",
               "alt": "What is a meme – and how do I use them? | Adobe Express"
             },
             {
               "selector": "picture",
               "nth": 1,
               "tag": "picture",
-              "src": "/drafts/nala/test-gen/blog-posts/media_12eef8a550c9820f2f4085b0fb96faf64f01c43b4.jpg?width=750&format=jpg&optimize=medium",
+              "src": "/drafts/nala/blocks/blog-posts/media_12eef8a550c9820f2f4085b0fb96faf64f01c43b4.jpg?width=750&format=jpg&optimize=medium",
               "alt": "International Dog Day Social Posts and Memes | Adobe Express"
             }
           ],

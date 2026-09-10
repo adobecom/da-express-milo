@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@link-list-default",
       "selector": "div.link-list",
-      "path": "/drafts/nala/test-gen/link-list/link-list",
+      "path": "/drafts/nala/blocks/link-list/link-list",
       "data": {
         "semantic": {
           "texts": [
@@ -256,7 +256,7 @@
       "tcid": "1",
       "name": "@link-list-shaded",
       "selector": "div.link-list.shaded",
-      "path": "/drafts/nala/test-gen/link-list/link-list-shaded",
+      "path": "/drafts/nala/blocks/link-list/link-list-shaded",
       "data": {
         "semantic": {
           "texts": [
@@ -356,7 +356,7 @@
       "tcid": "2",
       "name": "@link-list-noarrows",
       "selector": "div.link-list.noarrows",
-      "path": "/drafts/nala/test-gen/link-list/link-list-noarrows",
+      "path": "/drafts/nala/blocks/link-list/link-list-noarrows",
       "data": {
         "semantic": {
           "texts": [
@@ -421,7 +421,7 @@
               "selector": "a.quick-link.button.secondary.medium",
               "nth": 0,
               "text": "Mixtape Covers",
-              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Fblocks%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Mixtape Covers",
@@ -432,7 +432,7 @@
               "selector": "a.quick-link.button.secondary.medium",
               "nth": 1,
               "text": "Podcast Covers",
-              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Fblocks%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Podcast Covers",
@@ -443,7 +443,7 @@
               "selector": "a.quick-link.button.secondary.medium",
               "nth": 2,
               "text": "CD Covers",
-              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Fblocks%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "CD Covers",
@@ -454,7 +454,7 @@
               "selector": "a.quick-link.button.secondary.medium",
               "nth": 3,
               "text": "SoundCloud Banners",
-              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Fblocks%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "SoundCloud Banners",
@@ -465,7 +465,7 @@
               "selector": "a.quick-link.button.secondary.medium",
               "nth": 4,
               "text": "Social Media Posts",
-              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
+              "href": "/QBRioiBSoub?url=%2Fdrafts%2Fnala%2Fblocks%2Flink-list%2Flink-list-noarrows&placement=link-list&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Social Media Posts",
@@ -517,7 +517,7 @@
       "tcid": "3",
       "name": "@link-list-leftalign",
       "selector": "div.link-list.leftalign",
-      "path": "/drafts/nala/test-gen/link-list/link-list-leftalign",
+      "path": "/drafts/nala/blocks/link-list/link-list-leftalign",
       "data": {
         "semantic": {
           "texts": [
@@ -797,7 +797,7 @@
       "tcid": "4",
       "name": "@link-list-large-shaded-centered",
       "selector": "div.link-list.large.shaded.centered",
-      "path": "/drafts/nala/test-gen/link-list/link-list-large-shaded-centered",
+      "path": "/drafts/nala/blocks/link-list/link-list-large-shaded-centered",
       "data": {
         "semantic": {
           "texts": [
@@ -897,7 +897,7 @@
       "tcid": "5",
       "name": "@link-list-large",
       "selector": "div.link-list.large",
-      "path": "/drafts/nala/test-gen/link-list/link-list-large",
+      "path": "/drafts/nala/blocks/link-list/link-list-large",
       "data": {
         "semantic": {
           "texts": [
@@ -997,7 +997,7 @@
       "tcid": "6",
       "name": "@link-list-center",
       "selector": "div.link-list.center",
-      "path": "/drafts/nala/test-gen/link-list/link-list-center",
+      "path": "/drafts/nala/blocks/link-list/link-list-center",
       "data": {
         "semantic": {
           "texts": [
