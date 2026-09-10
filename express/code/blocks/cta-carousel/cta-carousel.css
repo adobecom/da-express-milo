@@ -3,16 +3,9 @@
 }
 
 .cta-carousel {
-    padding: var(--section-padding-m) 0 var(--section-padding-m) var(--Grid-container-padding-side);
+    padding: 0 28px;
     max-width: 1440px;
     margin: auto;
-}
-
-@media (max-width: 599px) {
-    .cta-carousel {
-        padding-top: var(--section-padding-xl);
-        padding-bottom: var(--section-padding-xl);
-    }
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -25,26 +18,8 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
-    margin: auto auto 16px;
+    margin: auto auto 32px;
 }
-
-  .cta-carousel .carousel-container .carousel-fader-right,
-  .cta-carousel .carousel-container .carousel-fader-left {
-      box-sizing: border-box;
-      width: 80px;
-      height: 168px;
-      padding: 52px 20px 36px 20px;
-      justify-content: space-between;
-  }
-
-  .cta-carousel .carousel-container .carousel-fader-left {
-      padding-left: 4px;
-  }
-
-  .cta-carousel .carousel-container .carousel-fader-right a.button.carousel-arrow,
-  .cta-carousel .carousel-container .carousel-fader-left a.button.carousel-arrow {
-      margin: 0;
-  }
 
 .cta-carousel .cta-carousel-heading-section h2 {
     text-align: left;
@@ -395,13 +370,6 @@
 :lang(ja) main .cta-carousel.gen-ai .card .card-sleeve .gen-ai-input-form .gen-ai-input::placeholder {
     font-size: var(--body-font-size-s);
 }
-
-@media (min-width: 1200px) {
-    .cta-carousel {
-        margin-left: 0;
-    }
-}
-
 
 @media (min-width: 900px) {
     .cta-carousel .cta-carousel-heading-section {
