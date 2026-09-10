@@ -310,17 +310,17 @@
     padding: var(--spacing-900) var(--Grid-container-padding-side);
 }
 
+.color-how-to-carousel.temporary-specs-card .chtc-heading {
+    font-size: var(--ax-heading-xxl-size);
+    text-align: center;
+    color: var(--color-black);
+}
+
 @media (max-width: 599px) {
     .color-how-to-carousel.temporary-specs-card .chtc-heading {
         align-self: flex-start;
         text-align: left;
     }
-}
-
-.color-how-to-carousel.temporary-specs-card .chtc-heading {
-    font-size: var(--ax-heading-xxl-size);
-    text-align: center;
-    color: var(--color-black);
 }
 
 .color-how-to-carousel.temporary-specs-card .chtc-container {
