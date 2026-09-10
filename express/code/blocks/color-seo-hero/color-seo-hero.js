@@ -1,5 +1,5 @@
 import { getLibs, getIconElementDeprecated, createTag } from '../../scripts/utils.js';
-import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
+import { buildColorToolUrl } from '../../scripts/color-shared/utils/utilities.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -13,8 +13,6 @@ import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
 import { createCopyCodeAction, createDownloadAction } from '../../scripts/color-shared/toolbar/colorActionMenus.js';
 
 const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
-const COLOR_WHEEL_ORIGIN = 'https://color.adobe.com';
-const COLOR_WHEEL_PATH = '/create/color-wheel';
 
 const HARMONY_RULES = ['SHADES', 'COMPLEMENTARY', 'ANALOGOUS', 'TRIAD', 'DOUBLE_SPLIT_COMPLEMENTARY'];
 
@@ -55,7 +53,6 @@ async function loadStrings() {
   };
 
   return {
-    localePrefix: config.locale?.prefix || '',
     railStrings,
     ruleLabels: {
       SHADES: v(0, 'Shades'),
@@ -98,10 +95,7 @@ function allContainerColors(context) {
 }
 
 function colorWheelUrl(context, colors) {
-  const url = new URL(`${context.strings.localePrefix}${COLOR_WHEEL_PATH}`, COLOR_WHEEL_ORIGIN);
-  url.searchParams.set('tab', 'primary-color');
-  createColorPaletteParamApi().setOnUrl(url, colors);
-  return url.toString();
+  return buildColorToolUrl(context.colorWheelHref, { colors });
 }
 
 function showColorCopiedToast(context, hex) {
@@ -549,32 +543,12 @@ function attachGradientPointerTracking(block) {
   block.addEventListener('mouseleave', () => setTarget({ x: 0, y: 0 }));
 }
 
-export default async function decorate(block) {
-  const [contentRow, colorRow] = [...block.children];
-  const colorCells = colorRow ? [...colorRow.children] : [];
-  const colorName = getText(colorCells[0]);
-  const hex = getText(colorCells[1]);
-
-  if (!contentRow || !colorName || !HEX_PATTERN.test(hex)) return;
-
-  colorRow.remove();
-  contentRow.classList.add('color-seo-hero-content');
-  contentRow.prepend(getIconElementDeprecated('adobe-express-logo', 24, '', 'color-seo-hero-logo'));
-
+async function decorateAsync(block, layout, colorName, hex, colorWheelHref) {
   const [{ decorateButtons }] = await Promise.all([
     import(`${getLibs()}/utils/decorate.js`),
     loadIconsRail(),
   ]);
   decorateButtons(block);
-
-  contentRow.querySelectorAll('p').forEach((p) => {
-    p.classList.add('color-seo-hero-text');
-  });
-  const ctaLink = contentRow.querySelector('p a');
-  if (ctaLink) {
-    ctaLink.classList.add('color-seo-hero-cta', 'button', 'xlarge', 'primary');
-    ctaLink.closest('p').classList.add('color-seo-hero-cta-row');
-  }
 
   const strings = await loadStrings();
   const controller = new ColorThemeExpressController({
@@ -583,7 +557,7 @@ export default async function decorate(block) {
     baseColorIndex: 0,
   });
   const context = {
-    block, colorName, hex, rule: 'SHADES', swatches: [], strings, controller,
+    block, colorName, hex, colorWheelHref, rule: 'SHADES', swatches: [], strings, controller,
   };
 
   controller.subscribe((state) => {
@@ -595,15 +569,44 @@ export default async function decorate(block) {
     }
   });
 
-  const layout = createTag('div', { class: 'color-seo-hero-layout' });
   const [preview, toolbarMount] = await Promise.all([
     buildPreview(context),
     buildFloatingToolbar(context),
   ]);
-  layout.append(contentRow, preview);
-  block.append(buildMotionBg(), layout, toolbarMount);
+  layout.append(preview);
+  block.append(toolbarMount);
 
   block.classList.add('is-ready');
   attachGradientPointerTracking(block);
   updateColor(context, hex);
+}
+
+export default function decorate(block) {
+  const [contentRow, colorRow] = [...block.children];
+  const colorCells = colorRow ? [...colorRow.children] : [];
+  const colorName = getText(colorCells[0]);
+  const hex = getText(colorCells[1]);
+  // Authored as a real link (e.g. "https://color.adobe.com/create/color-wheel?tab=primary-color")
+  // so the color-wheel domain/path/tab live in DA content, not hardcoded here (see colorWheelUrl).
+  const colorWheelHref = colorCells[2]?.querySelector('a')?.href;
+
+  if (!contentRow || !colorName || !HEX_PATTERN.test(hex) || !colorWheelHref) return;
+
+  colorRow.remove();
+  contentRow.classList.add('color-seo-hero-content');
+  contentRow.prepend(getIconElementDeprecated('adobe-express-logo', 24, '', 'color-seo-hero-logo'));
+
+  contentRow.querySelectorAll('p').forEach((p) => {
+    p.classList.add('color-seo-hero-text');
+  });
+  const ctaLink = contentRow.querySelector('p a');
+  if (ctaLink) {
+    ctaLink.classList.add('color-seo-hero-cta', 'button', 'xlarge', 'primary');
+    ctaLink.closest('p').classList.add('color-seo-hero-cta-row');
+  }
+
+  const layout = createTag('div', { class: 'color-seo-hero-layout' });
+  layout.append(contentRow);
+  block.append(buildMotionBg(), layout);
+  decorateAsync(block, layout, colorName, hex, colorWheelHref);
 }

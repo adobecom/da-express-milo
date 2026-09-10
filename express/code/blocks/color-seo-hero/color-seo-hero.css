@@ -1,6 +1,6 @@
 .color-seo-hero {
   overflow: hidden;
-  padding: var(--spacing-600);
+  padding: var(--spacing-600) var(--Grid-container-padding-side);
   position: relative;
 }
 
@@ -54,11 +54,11 @@
 }
 
 .color-seo-hero.is-ready .color-seo-hero-glow-dark {
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-seo-hero-primary) 62%, #000) 0%, transparent 70%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-seo-hero-primary) 62%, var(--color-black)) 0%, transparent 70%);
 }
 
 .color-seo-hero.is-ready .color-seo-hero-glow-light {
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-seo-hero-primary) 55%, #fff) 0%, transparent 74%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-seo-hero-primary) 55%, var(--color-white)) 0%, transparent 74%);
 }
 
 @media (max-width: 600px) {
@@ -110,18 +110,18 @@
 }
 
 .color-seo-hero-content h1 {
-  font-size: var(--heading-font-size-xl);
+  font-size: var(--ax-heading-xxl-size);
   line-height: 104%;
 }
 
-.color-seo-hero-text {
-  font-size: var(--body-font-size-m);
+.color-seo-hero .color-seo-hero-text {
+  font-size: var(--ax-body-s-size);
   line-height: 140%;
-  margin: 1em 0 !important;
+  margin: 1em 0;
 }
 
-.color-seo-hero-cta {
-  margin: 0 !important;
+.color-seo-hero .color-seo-hero-cta-row .color-seo-hero-cta {
+  margin: 0;
 }
 
 .color-seo-hero-logo {
@@ -130,7 +130,7 @@
 }
 
 .color-seo-hero-preview {
-  background: #FFFFFF;
+  background: var(--color-white);
   border-radius: var(--spacing-350);
   box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
   display: flex;
@@ -249,8 +249,8 @@
 }
 
 .color-seo-hero-pick-label {
-  color: #505050;
-  font-size: var(--body-font-size-s);
+  color: var(--color-dark-gray);
+  font-size: var(--ax-body-xs-size);
   white-space: nowrap;
 }
 
@@ -344,8 +344,8 @@
   --mod-actionbutton-background-color-default: var(--color-light-gray-2);
 }
 
-.color-seo-hero-build-link {
-  margin: 0 !important;
+.color-seo-hero .color-seo-hero-actions-group .color-seo-hero-build-link {
+  margin: 0;
 }
 
 .color-seo-hero-toolbar-mount {
@@ -363,10 +363,6 @@
    ========================================================================== */
 
 @media (min-width: 1200px) {
-  main .section h1 {
-    font-size: var(--heading-font-size-xl);
-    line-height: 104%;
-  }
   .color-seo-hero {
     max-height: 765px;
   }
@@ -387,7 +383,7 @@
 @media (max-width: 1199px) {
   .color-seo-hero-cta.button.xlarge:any-link {
     padding: 6px 14px 8px 16px;
-    font-size: var(--body-font-size-s);
+    font-size: var(--ax-body-xs-size);
     border-radius: 999px;
   }
 }
@@ -395,7 +391,6 @@
 @media (min-width: 600px) and (max-width: 1199px) {
   .color-seo-hero {
     min-height: auto;
-    padding: var(--spacing-600) var(--spacing-500);
   }
 
   .color-seo-hero-layout {
@@ -432,7 +427,7 @@
 @media (max-width: 599px) {
   .color-seo-hero {
     min-height: auto;
-    padding: var(--spacing-300);
+    padding: var(--spacing-300) var(--Grid-container-padding-side);
   }
 
   .color-seo-hero-layout {
@@ -445,10 +440,6 @@
     align-items: flex-start;
     text-align: left;
     gap: 0;
-  }
-
-  .color-seo-hero-content h1 {
-    font-size: var(--heading-font-size-l);
   }
 
   .color-seo-hero-cta-row {

@@ -3,6 +3,7 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
+import { waitFor } from '../../helpers/waitfor.js';
 
 const [{ getLibs }] = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
@@ -16,10 +17,12 @@ const { default: decorate } = await import('../../../express/code/blocks/color-s
 describe('Color SEO Hero', () => {
   let block;
 
-  beforeEach(async () => {
+  beforeEach(async function beforeEachHook() {
+    this.timeout(6000);
     document.body.innerHTML = await readFile({ path: './mocks/basic.html' });
     block = document.querySelector('.color-seo-hero');
-    await decorate(block);
+    decorate(block);
+    await waitFor(() => block.classList.contains('is-ready'), 5000);
   });
 
   it('builds the interactive preview from the authored color row', async () => {

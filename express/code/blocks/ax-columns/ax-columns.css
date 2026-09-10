@@ -859,7 +859,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .ax-columns.color .column.text {
   padding: 0;
-  max-width: 345px;
 }
 
 .ax-columns.color.shadow .img-wrapper {
@@ -869,62 +868,51 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 .ax-columns.color h2,
 .ax-columns.color p {
   hyphens: manual;
-  text-align: center;
 }
 
 .ax-columns.color h2 {
   font-size: var(--heading-font-size-l);
 }
 
-.section.color-child .ax-columns.color {
+.ax-columns.color {
   box-sizing: border-box;
   max-width: var(--block-lg-max-width);
-  padding: 0 var(--spacing-500);
+  padding-inline: var(--Grid-container-padding-side);
 }
 
 @media (min-width: 600px) and (max-width: 1199px) {
-  .section.color-child .ax-columns.color {
-    padding-left: var(--spacing-400);
-    padding-right: var(--spacing-400);
-  }
-
-  .section.color-child .ax-columns.color > div {
+  .ax-columns.color > div {
     gap: var(--spacing-700);
   }
 }
 
 @media (min-width: 1200px) {
-  .section.color-child .ax-columns.color > div {
+  .ax-columns.color > div {
     gap: var(--spacing-800);
   }
 }
 
 @media (max-width: 599px) {
-  .section.color-child .ax-columns.color {
-    padding-left: var(--spacing-300);
-    padding-right: var(--spacing-300);
-  }
-
-  .section.color-child .ax-columns.color .img-wrapper {
+  .ax-columns.color .img-wrapper {
     width: 100%;
   }
 }
 
-.section.color-child .ax-columns.color > div {
+.ax-columns.color > div {
   justify-content: space-between;
 }
 
-.section.color-child .ax-columns.color .column.text {
+.ax-columns.color .column.text {
   max-width: none;
   flex: 1;
 }
 
-.section.color-child .ax-columns.color h2,
-.section.color-child .ax-columns.color p {
-  text-align: left;
+.ax-columns.color h2,
+.ax-columns.color p {
+  text-align: start;
 }
 
-.section.color-child .ax-columns.color p {
+.ax-columns.color p {
   font-size: var(--body-font-size-l);
 }
 
@@ -1236,11 +1224,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .ax-columns.color .img-wrapper {
     height: 418px;
     width: 418px;
-  }
-
-  .ax-columns.color h2,
-  .ax-columns.color p {
-    text-align: left;
   }
 
   .section:first-of-type .ax-columns:first-of-type .brand.icon {
@@ -1631,10 +1614,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .ax-columns.color .img-wrapper {
     height: 500px;
     width: 500px;
-  }
-
-  .ax-columns.color>div {
-    gap: 25px;
   }
 
   .ax-columns.fullsize.top>div {

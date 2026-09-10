@@ -1,15 +1,15 @@
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ckg-link-list:first-child {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ckg-link-list:not(.ckg-link-list-chips):first-child {
     padding-top: 60px;
 }
 
-.ckg-link-list {
+.ckg-link-list:not(.ckg-link-list-chips) {
     min-height: 62px;
     max-width: 375px;
     margin: auto;
 }
 
-.ckg-link-list .carousel-container {
+.ckg-link-list:not(.ckg-link-list-chips) .carousel-container {
     margin-bottom: 0;
 }
 
@@ -68,13 +68,168 @@
 }
 
 @media (min-width: 900px) {
-    .ckg-link-list {
+    .ckg-link-list:not(.ckg-link-list-chips) {
         max-width: 830px;
     }
 }
 
 @media (min-width: 1200px) {
-    .ckg-link-list {
+    .ckg-link-list:not(.ckg-link-list-chips) {
         max-width: 1024px;
     }
+}
+
+/*
+ * TEMP: chips layout, ported from the standalone explore-more-colors block.
+ * Opt-in only when the authored content has a heading (see ckg-link-list.js
+ * decorate()), so pages authored the legacy way (no heading) are unaffected.
+ * Scoped to `.ckg-link-list-chips` so it can never collide with the legacy
+ * rules above.
+ */
+.ckg-link-list.ckg-link-list-chips {
+  padding-block: var(--section-padding-m);
+  padding-inline-start: var(--spacing-400);
+  padding-inline-end: 0;
+  box-sizing: border-box;
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-header {
+  max-width: 1232px;
+  margin: 0 auto var(--spacing-500);
+  text-align: center;
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-header h1,
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-header h2,
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-header h3,
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-header h4 {
+  font-size: var(--heading-font-size-l);
+  font-weight: 900;
+  line-height: 104%;
+  margin: 0;
+  color: var(--color-content-neutral);
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: var(--spacing-300);
+  max-width: 1232px;
+  margin: 0 auto;
+  padding-top: var(--spacing-200);
+  padding-bottom: var(--spacing-200);
+  overflow-x: auto;
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-row .carousel-platform {
+  gap: var(--spacing-300);
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-row .carousel-fader-right,
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-row .carousel-fader-left {
+  box-sizing: border-box;
+  width: 80px;
+  height: 255px;
+  padding: 52px 20px 36px 20px;
+  justify-content: space-between;
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-row .carousel-fader-right a.button.carousel-arrow,
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-row .carousel-fader-left a.button.carousel-arrow {
+  margin: 0;
+}
+
+@media (max-width: 599px) {
+  .ckg-link-list.ckg-link-list-chips .explore-more-colors-row .carousel-fader-left {
+    padding-left: 4px;
+  }
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-chip {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 192px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-250, #e1e1e1);
+  border-radius: var(--spacing-300);
+  overflow: hidden;
+}
+
+.ckg-link-list.ckg-link-list-chips a.explore-more-colors-chip {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 150ms ease-out, transform 150ms ease-out;
+}
+
+.ckg-link-list.ckg-link-list-chips a.explore-more-colors-chip:hover {
+  box-shadow: 0 0 6px #00000029;
+  transform: translateY(-2px);
+}
+
+.ckg-link-list.ckg-link-list-chips a.explore-more-colors-chip:focus-visible {
+  outline: 2px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-chip-swatch {
+  width: 100%;
+  height: 174px;
+  border-radius: var(--spacing-200) var(--spacing-200) 0 0;
+  flex-shrink: 0;
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-chip-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-80);
+  padding: var(--spacing-300);
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-chip-info p {
+  margin: 0;
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-chip-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 92%;
+  margin: 0;
+  color: var(--color-default-font);
+}
+
+.ckg-link-list.ckg-link-list-chips .explore-more-colors-chip-hex {
+  font-size: var(--ax-body-xs-size);
+  line-height: 130%;
+  margin: 0;
+  color: var(--color-dark-gray);
+  font-weight: 400;
+}
+
+@media (max-width: 1199px) {
+  .ckg-link-list.ckg-link-list-chips .explore-more-colors-row .carousel-container .carousel-platform > * {
+    scroll-snap-align: center;
+  }
+}
+
+@media (max-width: 599px) {
+  .ckg-link-list.ckg-link-list-chips {
+    padding-block: var(--section-padding-m);
+    padding-inline-start: var(--spacing-300);
+    padding-inline-end: 0;
+  }
+
+  .ckg-link-list.ckg-link-list-chips .explore-more-colors-header {
+    text-align: start;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ckg-link-list.ckg-link-list-chips {
+    padding-block: var(--section-padding-xl);
+    padding-inline: 0;
+  }
 }
