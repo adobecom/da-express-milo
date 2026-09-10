@@ -187,6 +187,8 @@ describe('Grid Marquee - Ratings store icon localization', () => {
     '': { ietf: 'en-US', tk: 'hah7vzn.css' },
     ara: { ietf: 'ar', tk: 'cbp4pzm.css', dir: 'rtl' },
     fr: { ietf: 'fr-FR', tk: 'vrk5vyv.css' },
+    mx: { ietf: 'es-MX', tk: 'oln4yqj.css' },
+    ch_it: { ietf: 'it-CH', tk: 'bbf5pok.css' },
   };
 
   // milo's replaceKey short-circuits on config.placeholders before fetching, so
@@ -216,10 +218,10 @@ describe('Grid Marquee - Ratings store icon localization', () => {
     return [...gm.querySelectorAll('.ratings .ratings-container a img')];
   };
 
-  it('uses the localized store badges for a locale that has them (ara)', async () => {
+  it('uses the localized store badges for a locale that has them (ara -> ar)', async () => {
     const [apple, google] = await renderRatings('/ara/express/');
-    expect(apple.getAttribute('src')).to.equal('/express/code/icons/apple-store-ara.svg');
-    expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store-ara.svg');
+    expect(apple.getAttribute('src')).to.equal('/express/code/icons/apple-store-ar.svg');
+    expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store-ar.svg');
   });
 
   it('uses the English store badges for English locales without a 404 attempt (us)', async () => {
@@ -228,7 +230,17 @@ describe('Grid Marquee - Ratings store icon localization', () => {
     expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store.svg');
   });
 
-  it('requests the localized badge and falls back to English when the asset is missing (fr)', async () => {
+  it('resolves the badge by language, not URL region, for country locales', async () => {
+    const [mxApple, mxGoogle] = await renderRatings('/mx/express/');
+    expect(mxApple.getAttribute('src')).to.equal('/express/code/icons/apple-store-es-419.svg');
+    expect(mxGoogle.getAttribute('src')).to.equal('/express/code/icons/google-store-es-419.svg');
+
+    const [itApple, itGoogle] = await renderRatings('/ch_it/express/');
+    expect(itApple.getAttribute('src')).to.equal('/express/code/icons/apple-store-it.svg');
+    expect(itGoogle.getAttribute('src')).to.equal('/express/code/icons/google-store-it.svg');
+  });
+
+  it('falls back to the English badge when a localized asset is missing', async () => {
     const [apple, google] = await renderRatings('/fr/express/');
     // alt keeps the originally requested localized icon name (the fallback swaps
     // only src), proving the localized badge was attempted. src is asserted after
