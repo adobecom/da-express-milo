@@ -834,7 +834,8 @@ main.with-holiday-templates-banner {
 
 .template-x .load-more {
   position: absolute;
-  display: flex;
+  /* hidden until masonry draws the grid, else it paints over an empty block and shifts */
+  display: none;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
@@ -844,6 +845,10 @@ main.with-holiday-templates-banner {
   transform: translateX(-50%);
   height: 240px;
   background: linear-gradient(#ffffff00, #ffffff, #ffffff);
+}
+
+.template-x.template-x-complete .load-more {
+  display: flex;
 }
 
 .template-x.horizontal .load-more {
