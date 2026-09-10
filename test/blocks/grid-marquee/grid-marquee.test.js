@@ -11,6 +11,8 @@ const imports = await Promise.all([
 ]);
 const { default: decorateGrid } = imports[1];
 const { default: decorateHero } = imports[2];
+const { getLibs } = await import('../../../express/code/scripts/utils.js');
+const { setConfig } = await import(`${getLibs()}/utils/utils.js`);
 
 const oldAuthoring = await readFile({ path: './mocks/old-authoring.html' });
 const newAuthoring = await readFile({ path: './mocks/new-authoring.html' });
@@ -177,5 +179,74 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     const img = videoContainer.querySelector('img');
     expect(img).to.exist;
     expect(img.src).to.not.be.empty;
+  });
+});
+
+describe('Grid Marquee - Ratings store icon localization', () => {
+  const localesForTest = {
+    '': { ietf: 'en-US', tk: 'hah7vzn.css' },
+    ara: { ietf: 'ar', tk: 'cbp4pzm.css', dir: 'rtl' },
+    mx: { ietf: 'es-MX', tk: 'oln4yqj.css' },
+    ch_it: { ietf: 'it-CH', tk: 'bbf5pok.css' },
+  };
+
+  // milo's replaceKey short-circuits on config.placeholders before fetching, so
+  // seeding these here avoids the (disallowed) placeholders.json network request.
+  const placeholders = {
+    'app-store-ratings': '4.9, 233.8k; 4.6, 117k; https://adobesparkpost.app.link/GJrBPFUWBBb',
+    'app-store-stars': 'stars',
+    'app-store-ratings-play-store': 'Download on Google Play',
+    'app-store-ratings-apple-store': 'Download on the App Store',
+  };
+
+  before(() => {
+    window.isTestEnv = true;
+  });
+
+  // renderRatings mutates milo's module-level config; reset it so a later test
+  // (or reordering) doesn't inherit this block's locale/placeholders.
+  after(() => {
+    setConfig({ locales: localesForTest, pathname: '/' });
+  });
+
+  const renderRatings = async (pathname) => {
+    setConfig({ locales: localesForTest, pathname, placeholders });
+    document.body.innerHTML = oldAuthoring;
+    const gm = document.querySelector('.grid-marquee');
+    await decorateGrid(gm);
+    return [...gm.querySelectorAll('.ratings .ratings-container a img')];
+  };
+
+  it('uses the localized store badges for a locale that has them (ara -> ar)', async () => {
+    const [apple, google] = await renderRatings('/ara/express/');
+    expect(apple.getAttribute('src')).to.equal('/express/code/icons/apple-store-ar.svg');
+    expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store-ar.svg');
+  });
+
+  it('uses the English store badges for English locales without a 404 attempt (us)', async () => {
+    const [apple, google] = await renderRatings('/');
+    expect(apple.getAttribute('src')).to.equal('/express/code/icons/apple-store.svg');
+    expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store.svg');
+  });
+
+  it('resolves the badge by language, not URL region (ch_it -> it)', async () => {
+    const [apple, google] = await renderRatings('/ch_it/express/');
+    expect(apple.getAttribute('src')).to.equal('/express/code/icons/apple-store-it.svg');
+    expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store-it.svg');
+  });
+
+  it('requests the base-language badge and falls back to English when unshipped (mx -> es-419)', async () => {
+    const [apple, google] = await renderRatings('/mx/express/');
+    // es-MX resolves to the es-419 badge by language (not the URL region "mx").
+    // We do not ship es-419 assets, so the <img> 404s and the handler swaps to
+    // English. alt keeps the originally requested name; src is asserted after the
+    // error to stay deterministic regardless of the real 404's timing.
+    expect(apple.getAttribute('alt')).to.equal('apple-store-es-419');
+    expect(google.getAttribute('alt')).to.equal('google-store-es-419');
+
+    apple.dispatchEvent(new Event('error'));
+    google.dispatchEvent(new Event('error'));
+    expect(apple.getAttribute('src')).to.equal('/express/code/icons/apple-store.svg');
+    expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store.svg');
   });
 });
