@@ -14,6 +14,7 @@ test-a11y-results/
 *.crt
 *.pfx
 **/build/
+.qa-screendiff/*
 
 # Development and testing files
 dev/

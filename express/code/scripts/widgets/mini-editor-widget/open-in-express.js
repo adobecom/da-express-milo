@@ -92,9 +92,9 @@ const GENERIC_FONT_FAMILIES = new Set([
   'system-ui', 'ui-sans-serif', 'ui-serif',
 ]);
 
-// The widget stores font.family as a CSS font stack (e.g. `"lobster", var(--body-font-family,
-// sans-serif)`) because it needs that to render the DOM. Express only wants the concrete family
-// name, so send just that — not the quotes, the `var(...)` fallback, or generic keywords.
+// The model stores font.family as the concrete family (e.g. `"lobster"`), but stay tolerant of a
+// full CSS stack too: Express only wants the concrete family name, so strip quotes, any `var(...)`
+// fallback, and generic keywords.
 function primaryFontFamily(cssFamily) {
   return (cssFamily || '')
     .split(',')
@@ -119,9 +119,13 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
 
   const params = new URLSearchParams(window.location.search);
   const hzenv = params.get('hzenv');
-  const baseUrl = hzenv === 'local' || hzenv === 'stage'
-    ? getTestBaseUrl(hzenv, params.get('base'))
-    : prodBaseUrl;
+  const isTestEnv = hzenv === 'local' || hzenv === 'stage';
+
+  // Prod uses the default Branch link (PROD_BASE_URL) or the authored `mini-editor-cta-base-url`
+  // override (passed as prodBaseUrl). The per-template branch link (model.backgroundBranchUrl) is
+  // intentionally NOT used for now — the generic base opens a /new canvas, so we pass the
+  // background + canvas-size params below and Express reproduces the card.
+  const baseUrl = isTestEnv ? getTestBaseUrl(hzenv, params.get('base')) : prodBaseUrl;
 
   // Attribution params only (placement) — not isSearchOverride, which would
   // inject category=templates and its own width/height. Our params are set
@@ -130,7 +134,9 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
 
   // Reproduce the card's text contrast: a dark background (or unknown) gets light text,
   // a light background gets dark text — matching the widget's light-mode/dark-mode CSS.
-  const isLight = model.mode === 'light';
+  // `backgroundMode` is the canonical field the content model always carries (init, useQuote,
+  // colour pick), unlike the old `mode`, which was only set on a colour-control pick.
+  const isLight = model.backgroundMode === 'light';
   const quoteColor = isLight ? '#131313' : '#FFFFFF';
   const authorColor = isLight ? '#505050' : '#E6E6E6';
 
@@ -142,8 +148,8 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
   const quoteWidth = Math.round(measureQuoteExportWidth() * scale);
 
   const payload = {
-    // URN is carried for provenance/analytics; backgroundUrl is what Express fetches — the full-res
-    // rendition (a bare public template URN isn't dereferenceable on the hz side).
+    // URN is carried for provenance/analytics; backgroundUrl is what Express fetches
+    // (the template rendition — a bare public template URN isn't dereferenceable on the hz side).
     backgroundUrn: model.backgroundUrn || '',
     backgroundUrl: model.backgroundFullUrl || model.backgroundUrl || '',
     quote: model.quote || '',
@@ -164,6 +170,7 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
   url.searchParams.set('referrer', REFERRER);
   url.searchParams.set('feature-enable', FEATURE_FLAG);
   url.searchParams.set('miniEditor', encodePayload(payload));
+  // Canvas size for the /new route Express opens.
   url.searchParams.set('width', String(canvasWidth));
   url.searchParams.set('height', String(canvasHeight));
   url.searchParams.set('unit', CANVAS_UNIT);

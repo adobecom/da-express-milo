@@ -37,6 +37,7 @@ describe('mini-editor-background-loader', () => {
       {
         id: 'urn:1',
         bg: 'https://cdn/rendition/1',
+        branchUrl: 'https://example.com',
         fullBg: undefined,
         width: undefined,
         height: undefined,
@@ -46,6 +47,7 @@ describe('mini-editor-background-loader', () => {
       {
         id: 'urn:2',
         bg: 'https://cdn/rendition/2',
+        branchUrl: 'https://example.com',
         fullBg: undefined,
         width: undefined,
         height: undefined,

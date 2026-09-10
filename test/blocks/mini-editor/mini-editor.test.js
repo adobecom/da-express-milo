@@ -93,6 +93,9 @@ describe('mini-editor', () => {
     const block = await decorateWithBody();
     const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
 
+    // The top-actions bar is populated in the background (see
+    // buildMiniEditorActions) — not part of the card's own first paint.
+    await waitFor(() => !!block.querySelector('.me-action--download'));
     const downloadButton = block.querySelector('.me-action--download');
     downloadButton.click();
     downloadButton.click();
@@ -112,9 +115,17 @@ describe('mini-editor', () => {
     const block = await decorateWithBody();
     const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
 
+    await waitFor(() => !!block.querySelector('.me-action--download'));
     block.querySelector('.me-arc-nav--next').click();
     block.querySelector('.me-action--download').click();
-    await waitFor(() => downloadStub.calledOnce);
+    // The requestAnimationFrame stub above fires synchronously/immediately, so the arc
+    // carousel's snap animation (buildArcCarousel's requestAsyncAnimationFrame, chained via
+    // Promise.resolve().then()) busy-chains microtasks for its ~1s duration instead of
+    // yielding real per-frame gaps the way a real rAF would — starving the macrotask that
+    // resolves downloadCard's dynamic import (see getCardExporter) until the animation
+    // finishes. A real browser's rAF yields between frames, so this is a test-only artifact,
+    // not a production timing risk — the default 1000ms waitFor is too tight for it here.
+    await waitFor(() => downloadStub.calledOnce, 2000);
 
     expect(downloadStub.firstCall.args[0]).to.deep.include({
       quote: '"Adopt the pace of nature: her secret is patience."',
@@ -126,7 +137,6 @@ describe('mini-editor', () => {
   it('uses the generic menu and shares a fresh PNG from More options', async () => {
     window.placeholders = {
       'mini-editor-share-image': 'Share image',
-      'share-menu-whatsapp': 'WhatsApp',
       'mini-editor-copy-image': 'Copy image',
       'share-menu-more-options': 'More options',
     };
@@ -140,14 +150,13 @@ describe('mini-editor', () => {
     });
     const block = await decorateWithBody();
 
+    await waitFor(() => !!block.querySelector('.me-action--share'));
     block.querySelector('.me-action--share').click();
     const menu = block.querySelector('.share-menu-list');
     expect(menu).to.exist;
-    expect(menu.querySelectorAll('sp-menu-item')).to.have.length(3);
+    expect(menu.querySelectorAll('sp-menu-item')).to.have.length(2);
     expect(menu.querySelector('sp-menu-group [slot="header"]').textContent).to.equal('Share image');
-    const whatsAppIcon = menu.querySelector('sp-menu-item[value="whatsapp"] sp-icon');
-    expect(whatsAppIcon.src).to.contain('/express/code/icons/S2_Icon_WhatsApp_20_N.svg');
-    expect(whatsAppIcon.size).to.equal('m');
+    expect(menu.querySelector('sp-menu-item[value="whatsapp"]')).to.not.exist;
     expect(menu.querySelector('sp-menu-item[value="copy"] sp-icon-image')).to.exist;
     expect(menu.querySelector('sp-menu-item[value="more"] sp-icon-more')).to.exist;
 
@@ -158,7 +167,10 @@ describe('mini-editor', () => {
 
     block.querySelector('.me-arc-nav--next').click();
     menu.querySelector('sp-menu-item[value="more"]').click();
-    await waitFor(() => shareStub.calledTwice);
+    // Same test-only rAF-stub/arc-carousel-animation artifact as the download test above —
+    // the dynamic import backing getCardBlobPromise's card export doesn't resolve until the
+    // carousel's busy-chained snap animation finishes, well past the default 1000ms.
+    await waitFor(() => shareStub.calledTwice, 2000);
 
     expect(createBlobStub.calledTwice).to.be.true;
     expect(createBlobStub.secondCall.args[0].backgroundUrl)
@@ -170,17 +182,24 @@ describe('mini-editor', () => {
     expect(shareData.files[0].type).to.equal('image/png');
   });
 
-  it('logs and shows a localized negative toast when download fails', async () => {
+  it('logs and shows a localized negative toast when download fails', async function downloadFailsToast() {
+    // Cold-loading the sp-toast web component under coverage/CI can exceed the
+    // default 2s mocha timeout, so give this toast-dependent test more room.
+    this.timeout(10000);
     const block = await decorateWithBody();
-    window.placeholders = { 'screenshot-download-failed': 'Unable to download this design.' };
+    window.placeholders = { 'mini-editor-download-failed': 'Download failed' };
     window.lana = { log: sinon.spy() };
     sinon.stub(MiniEditorCardExporter, 'download').rejects(new Error('render failed'));
 
+    await waitFor(() => !!block.querySelector('.me-action--download'));
     block.querySelector('.me-action--download').click();
-    await waitFor(() => !!document.querySelector('sp-toast'));
+    // Generous timeout: the failure path cold-loads the sp-toast web component
+    // (dynamic import + customElements.whenDefined), which can exceed the 1s
+    // waitFor default under coverage/CI load.
+    await waitFor(() => !!document.querySelector('sp-toast'), 5000);
 
     const toast = document.querySelector('sp-toast');
-    expect(toast.textContent).to.equal('Unable to download this design.');
+    expect(toast.textContent).to.equal('Download failed');
     expect(toast.getAttribute('variant')).to.equal('negative');
     expect(window.lana.log.calledWithMatch('Mini-editor download failed: render failed')).to.be.true;
     expect(document.body.contains(block)).to.be.true;

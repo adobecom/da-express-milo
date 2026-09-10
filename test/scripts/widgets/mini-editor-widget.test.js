@@ -2,6 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { createTag, getIconElementDeprecated } from '../../../express/code/scripts/utils.js';
 import createMiniEditorWidget from '../../../express/code/scripts/widgets/mini-editor-widget/mini-editor-widget.js';
+import { waitFor } from '../../helpers/waitfor.js';
 
 const noop = () => {};
 const a11y = {
@@ -13,8 +14,8 @@ const a11y = {
 };
 
 const fontOptions = [
-  { label: 'Sans', font: '"Cal Sans", sans-serif' },
-  { label: 'Serif', font: 'Georgia, serif', italic: true },
+  { label: 'Sans', family: '"Cal Sans"', font: '"Cal Sans", sans-serif' },
+  { label: 'Serif', family: 'Georgia', font: 'Georgia, serif', italic: true },
 ];
 
 function buildCardSet(count = 9) {
@@ -22,6 +23,7 @@ function buildCardSet(count = 9) {
     card: {
       id: `urn:${i}`,
       bg: `/img/image${i}.jpg`,
+      branchUrl: `https://branch/${i}`,
       fullBg: `/img/image${i}-full.jpg`,
       width: 1920,
       height: 1080,
@@ -57,6 +59,7 @@ describe('mini-editor-widget', () => {
   });
 
   afterEach(() => {
+    document.head.querySelectorAll('meta[name="messagetype"]').forEach((meta) => meta.remove());
     clock.restore();
     document.body.innerHTML = '';
   });
@@ -83,9 +86,10 @@ describe('mini-editor-widget', () => {
       backgroundWidth: 1920,
       backgroundHeight: 1080,
       backgroundUrn: 'urn:0',
+      backgroundBranchUrl: 'https://branch/0',
       backgroundMode: 'dark',
       font: {
-        family: fontOptions[0].font,
+        family: fontOptions[0].family,
         style: 'normal',
         weight: 'normal',
         stretch: 'normal',
@@ -95,7 +99,7 @@ describe('mini-editor-widget', () => {
     model.quote = 'Changed outside';
     model.font.family = 'Changed outside';
     expect(editor.getContentModel().quote).to.equal('Quote number 0');
-    expect(editor.getContentModel().font.family).to.equal(fontOptions[0].font);
+    expect(editor.getContentModel().font.family).to.equal(fontOptions[0].family);
   });
 
   it('renders the first card set entry into the main widget card', async () => {
@@ -136,7 +140,7 @@ describe('mini-editor-widget', () => {
     expect(root.style.getPropertyValue('--me-quote-font-style')).to.equal('italic');
     expect(serifBtn.classList.contains('is-selected')).to.be.true;
     expect(editor.getContentModel().font).to.deep.equal({
-      family: fontOptions[1].font,
+      family: fontOptions[1].family,
       style: 'italic',
       weight: 'normal',
       stretch: 'normal',
@@ -175,7 +179,7 @@ describe('mini-editor-widget', () => {
       .find((b) => b.textContent === 'Serif');
     serifBtn.click();
     expect(editor.getContentModel().font).to.deep.equal({
-      family: fontOptions[1].font,
+      family: fontOptions[1].family,
       style: 'italic',
       weight: 'normal',
       stretch: 'normal',
@@ -225,6 +229,22 @@ describe('mini-editor-widget', () => {
     const { root, editor } = await mount();
     editor.useQuote({ quote: 'No author here' });
     expect(root.querySelector('.me-author').style.display).to.equal('none');
+  });
+
+  it('uses the page messagetype in the main copy and use labels', async () => {
+    const existing = document.head.querySelector('meta[name="messagetype"]');
+    if (existing) existing.remove();
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'messagetype');
+    meta.setAttribute('content', 'social');
+    document.head.append(meta);
+
+    const { root } = await mount();
+    const quoteWrap = root.querySelector('.me-quote-wrap');
+    const decoUse = root.querySelector('.me-deco-use');
+
+    expect(quoteWrap.getAttribute('aria-label')).to.equal('Click to copy social: Quote number 0');
+    expect(decoUse.textContent).to.equal('Use this social');
   });
 
   it('copying the main quote shows the is-copied affordance and then clears it', async () => {
@@ -312,6 +332,9 @@ describe('mini-editor-widget', () => {
       });
       const bar = root.querySelector('.mini-editor-widget > .me-actions');
       expect(bar).to.exist;
+      // The action bar's icons/tooltips are populated in the background
+      // (not part of the card's own first paint) — see buildMiniEditorActions.
+      await waitFor(() => bar.querySelectorAll('.me-action').length === 3);
       const buttons = bar.querySelectorAll('.me-action');
       expect(buttons.length).to.equal(3);
       expect([...buttons].map((b) => b.className)).to.deep.equal([
@@ -324,6 +347,7 @@ describe('mini-editor-widget', () => {
     it('renders only the types supplied', async () => {
       const { root } = await mount({ topActions: [{ type: 'share', onClick: () => {} }] });
       const bar = root.querySelector('.me-actions');
+      await waitFor(() => bar.querySelectorAll('.me-action').length === 1);
       expect(bar.querySelectorAll('.me-action').length).to.equal(1);
       expect(bar.querySelector('.me-action--share')).to.exist;
       expect(bar.querySelector('.me-action--edit')).to.not.exist;
@@ -341,6 +365,7 @@ describe('mini-editor-widget', () => {
         ],
       });
 
+      await waitFor(() => root.querySelectorAll('.me-action').length === 3);
       root.querySelector('.me-action--edit').click();
       root.querySelector('.me-action--share').click();
       root.querySelector('.me-action--download').click();

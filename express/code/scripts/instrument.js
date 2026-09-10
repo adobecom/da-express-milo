@@ -1,6 +1,8 @@
 /* global _satellite __satelliteLoadedCallback alloy */
+/* eslint-disable no-underscore-dangle */
 
 import { getLibs, getMetadata } from './utils.js';
+import { generateGuid, getAccessCountry, getDeviceInfo } from './utils/device-info.js';
 import trackBranchParameters from './branchlinks.js';
 
 let loadScript; let getConfig;
@@ -8,6 +10,56 @@ let loadScript; let getConfig;
 const d = document;
 const loc = window.location;
 const { pathname } = loc;
+const SOURCE_NAME = 'CCEX';
+const SOURCE_CLIENT_ID = 'projectx_webapp';
+
+function isMobileWeb() {
+  return /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent || '');
+}
+
+function getLanguage() {
+  return document.documentElement?.lang || 'en';
+}
+
+function getMiniEditorTaskName() {
+  return getMetadata('messagetype')?.trim() || 'quote';
+}
+
+function addIfDefined(target, key, value) {
+  if (value !== undefined && value !== null && value !== '') {
+    target[key] = value;
+  }
+}
+
+function toAttachedFormat(properties, prefix = '') {
+  return Object.entries(properties).flatMap(([propertyName, propertyValue]) => {
+    if (propertyValue && typeof propertyValue === 'object' && !Array.isArray(propertyValue)) {
+      return toAttachedFormat(propertyValue, `${prefix}${propertyName}.`);
+    }
+
+    return [{
+      propertyName: `${prefix}${propertyName}`,
+      propertyValue,
+      propertyType: typeof propertyValue,
+    }];
+  });
+}
+
+function toAttachedFormatForMiniEditor(properties) {
+  return toAttachedFormat(properties)
+    .filter((entry) => entry.propertyName !== 'custom.ui.location')
+    .map((entry) => {
+      if (entry.propertyName === 'event.event_date') {
+        return {
+          ...entry,
+          propertyName: 'event_date',
+        };
+      }
+
+      return entry;
+    });
+}
+
 let expressLandingPageType;
 switch (true) {
   case (
@@ -133,9 +185,35 @@ function safelyFireAnalyticsEvent(event) {
   }
 }
 
+function waitForAdobeIMS(timeout = 1000, pollInterval = 50) {
+  return new Promise((resolve) => {
+    if (window.adobeIMS) {
+      resolve(window.adobeIMS);
+      return;
+    }
+
+    const start = Date.now();
+    const poll = () => {
+      if (window.adobeIMS) {
+        resolve(window.adobeIMS);
+        return;
+      }
+
+      if (Date.now() - start >= timeout) {
+        resolve(null);
+        return;
+      }
+
+      window.setTimeout(poll, pollInterval);
+    };
+
+    poll();
+  });
+}
+
 export function sendEventToAnalytics(eventName) {
   const fireEvent = () => {
-    _satellite.track('event', {
+    window._satellite.track('event', {
       xdm: {},
       data: {
         eventType: 'web.webinteraction.linkClicks',
@@ -160,7 +238,7 @@ export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProp
       custom: extraCustom = {},
       content: extraContent,
     } = extraProperties;
-    _satellite.track('event', {
+    window._satellite.track('event', {
       xdm: {},
       data: {
         eventType: 'web.webinteraction.linkClicks',
@@ -207,7 +285,7 @@ export async function trackViewTemplatePage(
   const adobeEventName = 'adobe.com:express:view-template-page';
   const pageName = getPageName();
   const fireEvent = () => {
-    _satellite.track('event', {
+    window._satellite.track('event', {
       xdm: {
         eventType: 'web.webpagedetails.pageViews',
         web: {
@@ -338,7 +416,7 @@ function trackColorPageLoad() {
   }
 }
 
-function trackExpressFeaturePageLoad() {
+export async function trackExpressFeaturePageLoad() {
   try {
     const pageType = getMetadata('pagetype');
     if (pageType !== 'font-generator' && pageType !== 'mini-editor') return;
@@ -352,8 +430,104 @@ function trackExpressFeaturePageLoad() {
       previousPagename = referrerUrl.pathname;
     } catch { /* no referrer or invalid */ }
 
+    const isMiniEditorPage = pageType === 'mini-editor';
+    const isMobile = isMobileWeb();
+    const dtsStart = isMiniEditorPage ? new Date().toISOString() : '';
+    const eventDate = isMiniEditorPage ? dtsStart.slice(0, 10) : '';
+    const guid = isMiniEditorPage ? generateGuid() : '';
+    const ims = isMiniEditorPage ? await waitForAdobeIMS() : null;
+    const isAuthenticated = isMiniEditorPage
+      ? !!ims?.isSignedInUser?.()
+      : false;
+    let userGuid = '';
+
+    if (isMiniEditorPage && isAuthenticated && ims?.getProfile) {
+      try {
+        const profile = await ims.getProfile();
+        userGuid = profile?.userId || '';
+      } catch {
+        userGuid = '';
+      }
+    }
+
+    const deviceInfo = isMiniEditorPage ? await getDeviceInfo() : null;
+    const accessCountry = isMiniEditorPage ? await getAccessCountry() : 'Unknown';
+    let userAccountType = 'unknown';
+    let mcidGuid = '';
+    const pageName = getPageName();
+
+    if (isMiniEditorPage) {
+      // eslint-disable-next-line no-underscore-dangle
+      const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
+      mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID || '';
+
+      try {
+        userAccountType = ims?.getAccountType?.() || 'unknown';
+      } catch {
+        userAccountType = 'unknown';
+      }
+    }
+
+    const miniEditorSdmPayload = isMiniEditorPage ? {
+      event: {
+        pagename: eventName,
+        platform_name: isMobile ? 'mobile-web' : 'desktop-web',
+        aa: {
+          page_name: pageName,
+        },
+        url: loc.href,
+        event_date: eventDate,
+        dts_start: dtsStart,
+        user_agent: navigator.userAgent,
+        guid,
+        user_guid: userGuid,
+        category: 'WEB',
+        subcategory: 'operations',
+        subtype: 'acom',
+        type: 'render',
+        workflow: 'lifecycle',
+        is_authenticated: isAuthenticated,
+        mcid_guid: mcidGuid,
+      },
+      user: {
+        aa: {
+          post_page_url: loc.href,
+        },
+      },
+      source: {
+        name: SOURCE_NAME,
+        client_id: SOURCE_CLIENT_ID,
+      },
+      hz: {
+        source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
+        device_name: deviceInfo.deviceName,
+        user: {
+          access_country: accessCountry,
+          os_name: deviceInfo.osName,
+          os_version: deviceInfo.osVersion,
+        },
+      },
+      custom: {
+        aa: {
+          ref_domain: refDomain,
+          previous_pagename: previousPagename,
+        },
+        link: {
+          page_url: loc.href,
+          page_type: 'mini-editor',
+        },
+        displayedLanguage: getLanguage(),
+        task: {
+          name: getMiniEditorTaskName(),
+        },
+      },
+    } : null;
+
+    if (miniEditorSdmPayload) {
+      addIfDefined(miniEditorSdmPayload.hz.user, 'account_type', userAccountType);
+    }
+
     const fireEvent = () => {
-      const isMiniEditorPage = pageType === 'mini-editor';
       _satellite.track('event', {
         xdm: {},
         data: {
@@ -367,46 +541,34 @@ function trackExpressFeaturePageLoad() {
           },
           _adobe_corpnew: {
             ...(isMiniEditorPage && {
-              custom: [
-                { propertyName: 'event.pagename', propertyValue: eventName },
-                { propertyName: 'event.url', propertyValue: loc.href },
-                { propertyName: 'event.subcategory', propertyValue: 'operations' },
-                { propertyName: 'event.type', propertyValue: 'render' },
-                { propertyName: 'event.subtype', propertyValue: 'acom' },
-                { propertyName: 'event.workflow', propertyValue: 'lifecycle' },
-                { propertyName: 'custom.aa.page_name', propertyValue: getPageName() },
-                { propertyName: 'custom.aa.ref_domain', propertyValue: refDomain },
-                { propertyName: 'custom.aa.previous_pagename', propertyValue: previousPagename },
-                { propertyName: 'custom.link.page_url', propertyValue: loc.href },
-                { propertyName: 'custom.link.page_type', propertyValue: isMiniEditorPage ? 'mini-editor' : 'fonts' },
-                { propertyName: 'custom.ui.location', propertyValue: pathname },
-
-              ],
+              custom: toAttachedFormatForMiniEditor(miniEditorSdmPayload),
             }),
-            sdm: {
-              event: {
-                pagename: eventName,
-                url: loc.href,
-                subcategory: 'operations',
-                type: 'render',
-                subtype: 'acom',
-                workflow: 'lifecycle',
+            sdm: isMiniEditorPage
+              ? miniEditorSdmPayload
+              : {
+                event: {
+                  pagename: eventName,
+                  url: loc.href,
+                  subcategory: 'operations',
+                  type: 'render',
+                  subtype: 'acom',
+                  workflow: 'lifecycle',
+                },
+                custom: {
+                  aa: {
+                    page_name: getPageName(),
+                    ref_domain: refDomain,
+                    previous_pagename: previousPagename,
+                  },
+                  link: {
+                    page_url: loc.href,
+                    page_type: 'fonts',
+                  },
+                  ui: {
+                    location: pathname,
+                  },
+                },
               },
-              custom: {
-                aa: {
-                  page_name: getPageName(),
-                  ref_domain: refDomain,
-                  previous_pagename: previousPagename,
-                },
-                link: {
-                  page_url: loc.href,
-                  page_type: isMiniEditorPage ? 'mini-editor' : 'fonts',
-                },
-                ui: {
-                  location: pathname,
-                },
-              },
-            },
           },
         },
       });
@@ -421,7 +583,7 @@ export function trackColorBlockLoad(blockType) {
   try {
     const eventName = 'view-color-block';
     const fireEvent = () => {
-      _satellite.track('event', {
+      window._satellite.track('event', {
         xdm: {},
         data: {
           eventType: 'web.webinteraction.linkClicks',
@@ -544,18 +706,20 @@ export function trackButtonClick(a) {
       adobeEventName = appendLinkText(adobeEventName, a);
     }
 
-    // clicks using [data-lh and data-ll]
-    let trackingHeader = a.closest('[data-lh]');
+    // clicks using [data-lh/data-ll] or [daa-lh/daa-ll]
+    let trackingHeader = a.closest('[data-lh], [daa-lh]');
+    const daaLl = a.getAttribute('daa-ll');
     if (trackingHeader || a.dataset.lh) {
       adobeEventName = 'adobe.com:express';
       let headerString = '';
       while (trackingHeader) {
-        headerString = `:${textToName(trackingHeader.dataset.lh.trim())}${headerString}`;
-        trackingHeader = trackingHeader.parentNode.closest('[data-lh]');
+        const headerLabel = trackingHeader.dataset.lh || trackingHeader.getAttribute('daa-lh');
+        headerString = `:${textToName(headerLabel.trim())}${headerString}`;
+        trackingHeader = trackingHeader.parentNode.closest('[data-lh], [daa-lh]');
       }
       adobeEventName += headerString;
-      if (a.dataset.ll) {
-        adobeEventName += `:${textToName(a.dataset.ll.trim())}`;
+      if (a.dataset.ll || daaLl) {
+        adobeEventName += `:${textToName((a.dataset.ll || daaLl).trim())}`;
       } else {
         adobeEventName += `:${textToName(a.innerText.trim())}`;
       }
@@ -605,8 +769,9 @@ function trackVideoAnalytics(parameters) {
 function decorateAnalyticsEvents() {
   // for tracking all of the links
   d.addEventListener('click', (event) => {
-    if (event.target.tagName === 'A' || event.target.dataset.ll?.length) {
-      trackButtonClick(event.target);
+    const target = event.target.closest?.('a, [data-ll], [daa-ll]');
+    if (target) {
+      trackButtonClick(target);
     }
   });
 
@@ -641,7 +806,7 @@ function decorateAnalyticsEvents() {
   // tracking videos loaded asynchronously.
   d.addEventListener('videoloaded', (e) => {
     trackVideoAnalytics(e.detail.parameters);
-    _satellite.track('videoloaded');
+    window._satellite.track('videoloaded');
   });
 
   d.addEventListener('videoclosed', (e) => {
@@ -779,8 +944,8 @@ export async function trackPrintAddonInteraction(metadata = {}) {
           },
         },
       };
-      if (typeof _satellite !== 'undefined' && _satellite.track) {
-        _satellite.track('event', payload);
+      if (window._satellite?.track) {
+        window._satellite.track('event', payload);
       }
     };
     safelyFireAnalyticsEvent(fireEvent);

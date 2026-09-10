@@ -79,6 +79,30 @@ describe('mini-editor open-in-express', () => {
     });
   });
 
+  describe('per-template branch link is ignored (uses default/authored base) for now', () => {
+    const BRANCH_MODEL = { ...MODEL, backgroundBranchUrl: 'https://adobesparkpost.app.link/MrDeAD6dB5b' };
+
+    it('uses the default prod base, not the template branch link', async () => {
+      const url = new URL(await buildExpressUrl(BRANCH_MODEL));
+      expect(url.pathname).to.include('JpBOBeJz35b');
+      expect(url.pathname).to.not.include('MrDeAD6dB5b');
+    });
+
+    it('still passes the background URL and canvas-size params', async () => {
+      const url = new URL(await buildExpressUrl(BRANCH_MODEL));
+      const payload = decodeMiniEditor(url.searchParams.get('miniEditor'));
+      expect(payload.backgroundUrl).to.equal(MODEL.backgroundFullUrl || MODEL.backgroundUrl);
+      expect(url.searchParams.get('width')).to.equal('1084');
+      expect(url.searchParams.get('height')).to.equal('700');
+      expect(url.searchParams.get('unit')).to.equal('px');
+    });
+
+    it('honors an authored base override over the default', async () => {
+      const url = new URL(await buildExpressUrl(BRANCH_MODEL, 'https://custom.example.com/new'));
+      expect(url.hostname).to.equal('custom.example.com');
+    });
+  });
+
   describe('appended params', () => {
     it('sets referrer, feature flag, and canvas size', async () => {
       const url = new URL(await buildExpressUrl(MODEL));
@@ -212,8 +236,8 @@ describe('mini-editor open-in-express', () => {
   });
 
   describe('text colour by background mode', () => {
-    async function colorsFor(mode) {
-      const url = new URL(await buildExpressUrl(mode ? { ...MODEL, mode } : MODEL));
+    async function colorsFor(backgroundMode) {
+      const url = new URL(await buildExpressUrl(backgroundMode ? { ...MODEL, backgroundMode } : MODEL));
       const payload = decodeMiniEditor(url.searchParams.get('miniEditor'));
       return { quoteColor: payload.quoteColor, authorColor: payload.authorColor };
     }
