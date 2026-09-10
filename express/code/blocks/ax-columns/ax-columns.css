@@ -1997,3 +1997,24 @@ main .ax-columns a.con-button.fill:any-link:active {
      background-color: var(--color-info-accent-hover);
     border-color: var(--color-info-accent-hover);
 }
+
+/* The .highlight card is a white surface even when the block also carries
+   .dark — authors add .dark to correct the surrounding section's header text.
+   The s2 ladder in styles.css then styles outline CTAs for a DARK surface
+   (white text + translucent white stroke, `.s2.dark ...outline`), so they
+   vanish on the white card. Re-assert the block's filled-primary treatment
+   (matches .con-button.fill / the pre-s2 look) so the CTA stays legible.
+   Selector mirrors the s2 rule's shape (:is/.button, :not(.fill), :any-link)
+   plus .ax-columns.highlight to outrank main .s2.dark ...outline (0,6,2). */
+main .ax-columns.s2.dark.highlight a:is(.con-button, .button).outline:not(.fill):any-link {
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+  border-radius: 999px;
+  color: var(--color-white);
+}
+
+main .ax-columns.s2.dark.highlight a:is(.con-button, .button).outline:not(.fill):any-link:hover,
+main .ax-columns.s2.dark.highlight a:is(.con-button, .button).outline:not(.fill):any-link:active {
+  background-color: var(--color-info-accent-hover);
+  border-color: var(--color-info-accent-hover);
+}
