@@ -1049,6 +1049,101 @@ export const style = css`
     cursor: default;
     padding-left: var(--hex-code-static-padding-left);
   }
+
+  .bottom-info--multi {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+  }
+  .hex-code-multi {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 2px;
+  }
+  /* Stacked layout (mobile/tablet): channels in a single row, no per-swatch
+     copy-all button — stacked-row__icons already has one copy icon that
+     copies the joined code in this mode instead of the hex. */
+  .hex-code-multi--inline {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    min-width: 0;
+    gap: var(--spacing-200);
+    overflow: hidden;
+    padding-left: var(--spacing-80);
+  }
+  .hex-code-multi--inline .hex-code-row {
+    flex-shrink: 0;
+    padding-left: 0;
+    gap: 0;
+  }
+  .hex-code-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2px;
+    color: var(--swatch-text-color);
+    text-shadow: var(--swatch-text-shadow);
+    /* Figma's "Codes" layer (the column wrapping the stacked rows, desktop
+       only) carries this left inset; it isn't its own element in this
+       codebase (the rows render directly into .hex-code-multi), so it's
+       applied per-row here instead. Zeroed out for the inline mobile/tablet
+       layout above, which gets the same inset once on the shared row
+       instead (its own "Codes" layer sits inline, not stacked). */
+    padding-left: 6px;
+  }
+  .hex-code-row__label {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    flex-shrink: 0;
+  }
+  /* The value itself is the copy target (click the number, no icon) — only
+     the full-code button below the rows gets an icon. Figma's "Color-value-
+     button" is a quiet Action Button (Content stack + Text Frame, flattened
+     here into one element): 32px tall, 8px corner radius, 12px/7px padding —
+     matching button.hex-code's own quiet-button treatment below, since it's
+     the same component reused per-channel instead of for one hex string. */
+  .hex-code-row__value {
+    background: none;
+    border: none;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    color: inherit;
+    text-shadow: inherit;
+    text-align: start;
+    cursor: pointer;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    height: 32px;
+    padding: 7px 12px;
+    box-sizing: border-box;
+    border-radius: var(--Corner-radius-corner-radius-100);
+  }
+  @media (hover: hover) {
+    .swatch-column[data-contrast="dark"] .hex-code-row__value:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    .swatch-column[data-contrast="light"] .hex-code-row__value:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+    }
+  }
+  .hex-code-row__value:focus-visible {
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: 2px;
+  }
+  .hex-code-multi__copy-all {
+    align-self: flex-start;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+  }
   .icon-button {
     background: none;
     border: none;

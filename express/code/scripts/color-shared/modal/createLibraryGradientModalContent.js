@@ -4,6 +4,8 @@ import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { setupSwatchColumnNav } from './createPaletteModalContent.js';
+import { createColorModesHeader } from './createColorModesHeader.js';
+import { getPreferredColorMode } from '../utils/colorModePreference.js';
 import { libraryGradientToModalGradient } from '../components/libraries/libraryDownloadUtils.js';
 import {
   createTagField,
@@ -17,6 +19,12 @@ function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
 }
 
+// The swatch rail (color-swatch-rail/index.js) is built around a hard
+// 10-swatch ceiling (its own MAX_SWATCHES) and doesn't support more — the
+// gradient editor above it and the toolbar's download/copy-as-code data have
+// no such limit, so only the rail's own input gets capped.
+const MAX_SWATCH_RAIL_STOPS = 10;
+
 const LIBRARY_GRADIENT_STYLES = [
   'scripts/color-shared/modal/modal-palette-content.css',
   'scripts/color-shared/components/strips/color-strip.css',
@@ -25,6 +33,7 @@ const LIBRARY_GRADIENT_STYLES = [
   'scripts/color-shared/toolbar/drawer.css',
   'scripts/color-shared/components/libraries/libraries.css',
   'scripts/color-shared/modal/modal-library-gradient.css',
+  'scripts/color-shared/modal/modal-color-modes-header.css',
 ];
 
 let stylesLoaded = false;
@@ -94,10 +103,11 @@ function createRailSection(
 
 /**
  * Editable "libraries saved gradients" modal content. Renders a read-only
- * gradient preview (copyable handles), the stop swatch rail (hex + copy), an
- * editable tag field, and the library-variant toolbar (name + Share/Download/
- * Delete + Save changes). The Color-mode HEX picker + code view and the
- * "Edit" button from the Figma frame are intentionally omitted.
+ * gradient preview (copyable handles), a Color mode + Copy-as-code header, the
+ * stop swatch rail (hex + copy, or per-channel codes when a non-HEX mode is
+ * selected), an editable tag field, and the library-variant toolbar (name +
+ * Share/Download/Delete + Save changes). The "Edit" button from the Figma
+ * frame is intentionally omitted.
  *
  * @param {Object} item - library gradient item ({ id, name, colorStops, tags, ... })
  * @param {Object} [options]
@@ -128,7 +138,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
   if (!colorStops.length) {
     colorStops = [{ color: '#cccccc', position: 0 }, { color: '#999999', position: 1 }];
   }
-  const stopColors = colorStops.map((s) => s.color);
+  const stopColors = colorStops.slice(0, MAX_SWATCH_RAIL_STOPS).map((s) => s.color);
 
   let originalName = (item.name || '').trim();
   let originalTags = [...(item.tags || [])].map(String).sort();
@@ -138,7 +148,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
   let tagObserver = null;
 
   const root = createTag('main', { class: 'modal-content modal-library-gradient', 'daa-lh': 'library-gradient-modal' });
-  const contentScroll = createTag('div', { class: 'modal-lib-scroll' });
+  const contentScroll = createTag('div', { class: 'modal-content-scroll' });
 
   /* ── Gradient preview (read-only, copyable handles) ── */
   const previewSection = createTag('section', { class: 'modal-palette-container' });
@@ -159,18 +169,39 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
     draggable: false,
     copyable: true,
     ariaLabel: interpolate(strings.librariesModalGradientAria, { count: colorStops.length }),
+    colorMode: getPreferredColorMode(),
   });
   previewWrap.appendChild(gradientEditor.element);
   previewSection.appendChild(previewWrap);
-  contentScroll.appendChild(previewSection);
 
-  /* ── Stop rail (hex + copy) ── */
+  /* ── Stop rail (hex + copy, or per-channel codes) ── */
   const { railSection, railWrap, railAdapter } = createRailSection(
     { ...item, colors: stopColors },
     interpolate(strings.librariesModalGradientAria, { count: stopColors.length }),
     colorSwatchRailStrings,
     verticalMaxPerRow,
   );
+  railAdapter.rail.colorMode = getPreferredColorMode();
+
+  /* ── Color mode + Copy as code ── */
+  const colorModesHeader = createColorModesHeader(
+    { name: item?.name ?? 'Gradient', colors: stopColors, colorStops },
+    {
+      type: 'gradient',
+      strings: {
+        ...strings,
+        colorModeLabel: strings.librariesColorModeLabel,
+        codesToggleLabel: strings.librariesCodesToggleLabel,
+        codesDisabledTooltip: strings.librariesCodesDisabledTooltip,
+      },
+      onModeChange: (mode) => {
+        railAdapter.rail.colorMode = mode;
+        gradientEditor.setColorMode(mode);
+      },
+    },
+  );
+  contentScroll.appendChild(colorModesHeader.element);
+  contentScroll.appendChild(previewSection);
   contentScroll.appendChild(railSection);
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
@@ -322,9 +353,11 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
   return {
     element: root,
     initNav: initTabIndexes,
+    waitForColorModesReady: () => colorModesHeader.waitForReady(),
     destroy: () => {
       tagObserver?.disconnect();
       tagObserver = null;
+      colorModesHeader.destroy();
       gradientEditor?.destroy?.();
       railAdapter?.destroy?.();
       toolbarHandle?.destroy?.();

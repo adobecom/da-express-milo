@@ -1,5 +1,6 @@
 import { createTag } from '../../../utils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
+import { createThemeWrapper } from '../../spectrum/utils/theme.js';
 
 let actionMenuIdCounter = 0;
 
@@ -72,9 +73,15 @@ export function getLibraryCardActionMenuCoordinator() {
  * Shared action-only sp-menu popover for library card icon buttons.
  *
  * @param {Object} options
- * @param {string} options.triggerIcon - Spectrum icon element name
- * @param {string} options.triggerLabel - aria-label / tooltip for trigger
+ * @param {string} [options.triggerIcon] - Spectrum icon element name. Ignored if renderTrigger is provided.
+ * @param {string} options.triggerLabel - aria-label for trigger
+ * @param {string} [options.tooltipLabel] - visible tooltip text (defaults to triggerLabel) —
+ *   split out since the aria-label is often more descriptive than what should show on hover
+ *   (e.g. aria-label "Download this color palette" but tooltip just "Download").
  * @param {string} [options.menuLabel] - sp-menu label (defaults to triggerLabel)
+ * @param {() => HTMLElement} [options.renderTrigger] - build a custom trigger element
+ *   (e.g. a value + chevron picker button) instead of the default icon-only button.
+ *   The returned element still gets the popover's aria/click/coordinator wiring applied.
  * @param {Array<{ value: string, label: string }>} options.items
  * @param {Function} [options.onSelect] - (value) => void
  * @param {ReturnType<typeof createLibraryCardActionMenuCoordinator>} [options.coordinator]
@@ -82,7 +89,9 @@ export function getLibraryCardActionMenuCoordinator() {
 export function createLibraryCardActionMenu({
   triggerIcon,
   triggerLabel,
+  tooltipLabel,
   menuLabel,
+  renderTrigger,
   items = [],
   onSelect = () => {},
   coordinator,
@@ -97,21 +106,23 @@ export function createLibraryCardActionMenu({
   actionMenuIdCounter += 1;
   const menuId = `ax-lib-action-menu-${actionMenuIdCounter}`;
 
-  // sp-action-button gives hover/focus states for free (no bespoke CSS needed).
-  const trigger = createTag('sp-action-button', {
+  const trigger = renderTrigger ? renderTrigger() : createTag('sp-action-button', {
     quiet: '',
     size: 'm',
     class: 'ax-lib-card__action',
     label: triggerLabel,
-    'aria-haspopup': 'menu',
-    'aria-expanded': 'false',
-    'aria-controls': menuId,
-    'data-tooltip-content': triggerLabel,
   });
-  const triggerIconEl = document.createElement(triggerIcon);
-  triggerIconEl.setAttribute('slot', 'icon');
-  triggerIconEl.setAttribute('aria-hidden', 'true');
-  trigger.appendChild(triggerIconEl);
+  trigger.setAttribute('aria-haspopup', 'menu');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('aria-controls', menuId);
+  if (!renderTrigger) {
+    trigger.setAttribute('data-tooltip-content', tooltipLabel || triggerLabel);
+    // sp-action-button gives hover/focus states for free (no bespoke CSS needed).
+    const triggerIconEl = document.createElement(triggerIcon);
+    triggerIconEl.setAttribute('slot', 'icon');
+    triggerIconEl.setAttribute('aria-hidden', 'true');
+    trigger.appendChild(triggerIconEl);
+  }
   decorateAnalyticsAttributes(trigger, { linkLabel: triggerLabel });
 
   const popover = createTag('div', {
@@ -127,16 +138,27 @@ export function createLibraryCardActionMenu({
     label,
   });
 
-  items.forEach((entry) => {
-    if (!entry?.value || !entry?.label) return;
-    const menuItem = createTag('sp-menu-item', { value: entry.value });
-    menuItem.textContent = entry.label;
-    decorateAnalyticsAttributes(menuItem, { linkLabel: entry.label });
-    menu.appendChild(menuItem);
-  });
+  function renderItems(list) {
+    menu.replaceChildren();
+    list.forEach((entry) => {
+      if (!entry?.value || !entry?.label) return;
+      const menuItem = createTag('sp-menu-item', { value: entry.value });
+      menuItem.textContent = entry.label;
+      decorateAnalyticsAttributes(menuItem, { linkLabel: entry.label });
+      menu.appendChild(menuItem);
+    });
+  }
+  renderItems(items);
 
   popover.appendChild(menu);
-  wrapper.append(trigger, popover);
+  // Without an sp-theme ancestor, sp-menu-item falls back to unstyled sizing
+  // (16px font, no padding, no corner-radius) — this component is often
+  // mounted outside any page-level theme wrapper (e.g. inside a modal header).
+  // Nested one level in (rather than wrapping `wrapper` itself) so the
+  // returned element/class/structure callers rely on is unchanged.
+  const themeRoot = createThemeWrapper();
+  themeRoot.append(trigger, popover);
+  wrapper.appendChild(themeRoot);
 
   function setExpanded(expanded) {
     trigger.setAttribute('aria-expanded', String(expanded));
@@ -199,15 +221,25 @@ export function createLibraryCardActionMenu({
     const onDocumentClick = (event) => {
       if (!wrapper.contains(event.target)) closePopover();
     };
+    // Capture phase + stopPropagation: this popover can be open inside a modal
+    // that has its own Escape handler on the overlay (see createModalManager.js's
+    // handleEscapeClose). That listener is a closer ancestor of the focused menu
+    // item than this one (bubble-phase on document), so without this it fires
+    // first and closes the whole modal before this handler ever runs. Capturing
+    // on document runs before the overlay's bubble-phase listener, and
+    // stopPropagation keeps the event from reaching it at all.
     const onDocumentKeydown = (event) => {
-      if (event.key === 'Escape') closePopover({ focusTrigger: true });
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        closePopover({ focusTrigger: true });
+      }
     };
 
     document.addEventListener('click', onDocumentClick);
-    document.addEventListener('keydown', onDocumentKeydown);
+    document.addEventListener('keydown', onDocumentKeydown, true);
     detachDocumentHandlers = () => {
       document.removeEventListener('click', onDocumentClick);
-      document.removeEventListener('keydown', onDocumentKeydown);
+      document.removeEventListener('keydown', onDocumentKeydown, true);
     };
 
     if (focusMenu) {
@@ -256,6 +288,7 @@ export function createLibraryCardActionMenu({
   const menuApi = {
     element: wrapper,
     closePopover,
+    setItems: renderItems,
     destroy() {
       menuCoordinator.unregister(menuApi);
       closePopover();

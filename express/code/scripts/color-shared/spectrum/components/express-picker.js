@@ -27,7 +27,18 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/picker.c
 
 const DEFAULT_MENU_TOKENS = {
   '--mod-menu-item-label-inline-edge-to-content': '12px',
-  '--mod-menu-item-selectable-edge-to-text-not-selected': '12px',
+  /* Spectrum only renders the checkmark icon element for [selected] items —
+     there's no CSS-hidden placeholder for it to reserve space on the rest —
+     so an unselected item's label sits flush at the edge token above (12px)
+     while a selected item's label is pushed out to edge + checkmark width +
+     icon-to-label gap (12 + 10 + 10 = 32px), a real ~20px jump between
+     selected and unselected rows. Reserving that same total here for every
+     row (not just selected ones) keeps every label's x-position identical
+     regardless of selection state. Shared by every sp-picker built through
+     this file (Color Mode picker, Explore/Library filter dropdowns), so this
+     one change fixes the indentation everywhere at once. */
+  '--mod-menu-item-selectable-edge-to-text-not-selected':
+    'calc(var(--mod-menu-item-label-inline-edge-to-content) + var(--mod-menu-item-checkmark-width) + var(--mod-menu-item-text-to-control))',
   '--mod-menu-item-checkmark-width': '10px',
   '--mod-menu-item-text-to-control': '10px',
   '--mod-menu-item-corner-radius': '8px',
@@ -86,6 +97,9 @@ async function withRetry(task, attempts = 3) {
  * @param {boolean}   [config.disabled]  — disable the picker
  * @param {Object.<string,string>} [config.menuTokens]
  *   optional CSS token overrides for picker menu internals
+ * @param {string}    [config.ariaLabel=`Filter by ${label}`]
+ *   accessible name for the trigger — must be final at construction time (see
+ *   note above the aria-label assignment below; it cannot be changed later)
  * @returns {Promise<{element: HTMLElement, getValue: () => string,
  *   setValue: (v:string) => void, destroy: () => void}>}
  */
@@ -100,6 +114,7 @@ export async function createExpressPicker(config) {
     id,
     disabled = false,
     menuTokens = {},
+    ariaLabel = `Filter by ${label}`,
   } = config;
 
   // 1. Ensure Spectrum picker components are loaded
@@ -120,7 +135,10 @@ export async function createExpressPicker(config) {
   const picker = document.createElement('sp-picker');
   if (id) picker.id = `express-picker-${id}`;
   picker.setAttribute('label', label);
-  picker.setAttribute('aria-label', `Filter by ${label}`);
+  // Set once, before this connects — a vendored PendingStateController caches
+  // whatever aria-label is present at first connectedCallback and re-applies
+  // it on every later Lit update, so setting/changing it after mount is a no-op.
+  picker.setAttribute('aria-label', ariaLabel);
   picker.setAttribute('size', 'm');
   picker.setAttribute('placement', placement);
   picker.placement = placement;

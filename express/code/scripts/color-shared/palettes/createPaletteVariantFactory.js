@@ -18,6 +18,12 @@ export const PALETTE_VARIANT = {
   HORIZONTAL_CONTAINER: 'horizontal-container',
 };
 
+// Explore grid cards cap the visual swatch preview at 10 colors, even though
+// the palette itself may have more — the modal opened from this same card
+// still shows every color (see below: only the strip's own data is capped,
+// not the `palette` object closed over by the click/edit/share handlers).
+const MAX_STRIP_COLORS = 10;
+
 export function createRailControllerFromPalette(palette) {
   const colors = palette?.colors || [];
   let swatches = colors.map((c) => ({ hex: c?.startsWith('#') ? c : `#${c}` }));
@@ -52,8 +58,14 @@ export function createPaletteVariant(palette, variant, options = {}) {
     const stripVariant = variant === PALETTE_VARIANT.COMPACT
       ? PALETTE_STRIP_VARIANTS.COMPACT
       : PALETTE_STRIP_VARIANTS.EXPLORE;
+    // Capped copy for the strip's own rendering only — `palette` itself
+    // (below, in the click/edit/share closures) stays uncapped so opening
+    // the modal from this card still shows every color.
+    const stripPalette = palette.colors?.length > MAX_STRIP_COLORS
+      ? { ...palette, colors: palette.colors.slice(0, MAX_STRIP_COLORS) }
+      : palette;
     const strip = createPaletteStrip(
-      palette,
+      stripPalette,
       {},
       stripVariant,
     );

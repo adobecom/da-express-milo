@@ -414,9 +414,10 @@ export default async function decorate(block) {
               liked: content.liked ?? false,
               creatorName: content.creator?.name ?? '',
               creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
-              tags: item.tags ?? [],
+              description: item.description ?? '',
               onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
               strings: modalStrings,
+              verticalMaxPerRow: config.swatchVerticalMaxPerRow,
             });
           },
         });

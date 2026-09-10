@@ -20,7 +20,6 @@ sp-picker.filter-picker {
   --mod-picker-spacing-bottom-to-text: 0;
   --mod-picker-focus-indicator-color: var(--color-blue-800);
   --mod-picker-focus-indicator-thickness: var(--border-width-2);
-  --mod-picker-focus-indicator-border-radius: var(--mod-picker-border-radius);
 
   --mod-picker-background-color: var(--color-light-gray);
   --mod-picker-background-color-default: var(--color-light-gray);
@@ -29,7 +28,12 @@ sp-picker.filter-picker {
   --mod-picker-background-color-active: var(--color-gray-250);
   --mod-picker-background-color-disabled: var(--color-gray-200);
 
-  --mod-picker-border-width: 0;
+  /* Unitless 0 (not 0px): the focus ring's ::after is sized/positioned via
+     calc() expressions that add this value to px lengths (gap, radius). A
+     unitless <number> operand makes those calc()s type-invalid, silently
+     collapsing the ring to 0 border-radius and 0 offset — this must stay a
+     <length> for the ring to render with its intended radius and gap. */
+  --mod-picker-border-width: 0px;
   --mod-picker-border-color: transparent;
   --mod-picker-border-color-hover: transparent;
   --mod-picker-border-color-key-focus: transparent;
@@ -41,6 +45,40 @@ sp-picker.filter-picker {
   --mod-picker-icon-color: var(--color-gray-800-variant);
   --mod-picker-icon-color-hover: var(--color-gray-800-variant);
   --mod-picker-icon-color-key-focus: var(--color-gray-800-variant);
+
+  /* Popover (internal to sp-picker's shadow tree, not reachable by an outer
+     sp-popover selector — only custom properties inherit across that boundary,
+     so these live on the host and cascade down). Matches
+     .ax-lib-card__action-menu-popover (the Codes menu's popover) rather than
+     an invented radius/shadow, so every popover in the app reads as the same
+     design-system component. */
+  --mod-popover-border-width: 0;
+  --mod-popover-corner-radius: var(--Corner-radius-corner-radius-100);
+  /* --mod-popover-dialog-padding only affects popover's "dialog" sub-mode, not
+     this menu-in-a-popover case — the host's own padding shorthand is
+     `padding: var(--mod-popover-content-area-spacing-vertical) 0` (horizontal
+     is hardcoded to 0 in popover.js), so vertical is set here and horizontal
+     is added directly to the sp-menu-item rule below. */
+  --mod-popover-content-area-spacing-vertical: 6px;
+  /* Confusingly named: this is the resting gap between trigger and popover,
+     not just an animation-only value (Spectrum uses it for both). */
+  --mod-popover-animation-distance: 4px;
+  /* sp-popover paints its elevation via `filter` (chained drop-shadow()), not
+     box-shadow — --mod-popover-shadow-* only composes a single layer, so the
+     elevation is expressed directly as a filter override instead. Matches
+     .ax-lib-card__action-menu-popover's `box-shadow: var(--Alias-drop-shadow-
+     ambient), var(--Alias-drop-shadow-elevated-key)` (that rule can use a
+     plain box-shadow because it's a bare <div>, not a shadow-DOM host) —
+     same two token values here, converted to their equivalent drop-shadow()
+     layers since a direct box-shadow declaration from this outer stylesheet
+     can't reach sp-popover.
+     Uses --spectrum-popover-filter (not --mod-popover-filter): popover.js
+     resets --mod-popover-filter to `none` on every descendant inside its own
+     shadow tree, which blocks inheriting an override through that token, but
+     --spectrum-popover-filter (its fallback) isn't touched by that reset. */
+  --spectrum-popover-filter:
+    drop-shadow(0 0 2px rgba(0, 0, 0, 0.12))
+    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
 
   width: var(--express-picker-width, 100%);
   max-width: var(--express-picker-max-width, none);
@@ -100,7 +138,13 @@ sp-picker.filter-picker::part(chevron) {
   flex-shrink: 0;
 }
 
-/* ---- Popover / menu — global defaults for light-DOM menus (non-picker uses) ---- */
+/* ---- Popover / menu — global defaults for light-DOM menus ----
+   sp-menu-item is reachable here because express-picker.js appends items as
+   light-DOM children of sp-picker (slotted into its internal popover/menu).
+   There's no light-DOM sp-menu for the picker case — sp-picker's own internal
+   menu wrapper lives entirely inside its shadow tree, same as sp-popover
+   above, so this sp-menu rule only affects OTHER bare sp-menu usage on the
+   page (e.g. createFiltersComponent.js's mobile filter panels). */
 sp-menu {
   --mod-menu-background-color: var(--color-white);
   --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
@@ -109,22 +153,61 @@ sp-menu {
   overflow-y: auto;
 }
 
+/* Universal sp-menu-item treatment, shared regardless of which picker it's
+   in. Every picker's items — including the Color Modes picker — use
+   Spectrum's untouched default "M" size (14px), matching the trigger's own
+   size="m", per design: the dropdown field and its menu items should read
+   at the same text size. */
 sp-menu-item {
-  --mod-menu-item-min-height: var(--spacing-500);
-  --mod-menu-item-font-color: var(--color-gray-800-variant);
+  --mod-menu-item-label-content-color-default: var(--Alias-content-neutral-default);
+  --mod-menu-item-label-content-color-hover: var(--Alias-content-neutral-default);
+  --mod-menu-item-label-content-color-focus: var(--Alias-content-neutral-default);
+  --mod-menu-item-label-content-color-down: var(--Alias-content-neutral-default);
+  --mod-menu-item-background-color-default: transparent;
   --mod-menu-item-background-color-hover: var(--color-gray-150);
-  --mod-menu-item-background-color-key-focus: var(--color-gray-150);
+  --mod-menu-item-background-color-key-focus: transparent;
   --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
   --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
   font-family: var(--body-font-family);
+  font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
+  box-sizing: border-box;
+  /* sp-menu-item's own grid reserves a whole row above the checkmark/label
+     row for a collapsible-submenu chevron, heading icon, and section heading
+     — none of which this app's flat, single-level menus ever use — so it
+     still takes up space despite being empty, pushing the checkmark and
+     label down out of vertical center ("riding low"). Collapse it (and the
+     equally unused description/submenu rows below) to 0 so the checkmark/
+     label row is the only one that actually takes space. */
+  grid-template-rows: 0px auto 0px 0px;
+  /* No vertical margin — this is what made the item's own box, and thus its
+     hover/selected background fill, taller than its actual content. */
+  margin-block: 0;
+}
+
+/* sp-picker's own internal popover hardcodes horizontal padding to 0 (see the
+   --mod-popover-content-area-spacing-vertical note above) — its menu items
+   need this margin so their hover/selected background pill doesn't touch the
+   popover's edges. Scoped to sp-picker specifically (every express-picker.js
+   picker appends its items as light-DOM children of an sp-picker, so this
+   reaches the Color Modes picker and the Explore/Library filter pickers alike)
+   rather than applied to the base sp-menu-item rule above: popovers built via
+   createLibraryCardActionMenu.js (.ax-lib-card__action-menu-popover — the
+   Codes/Download/etc. menus) supply their own real horizontal padding, so
+   adding this margin there on top would double the edge spacing instead of
+   filling a gap. */
+sp-picker sp-menu-item {
+  margin-inline: 8px;
 }
 
 sp-menu-item[selected],
 sp-menu-item[aria-selected="true"] {
-  --mod-menu-item-background-color: var(--color-white);
-  font-weight: 400;
+  font-weight: 500;
+  --mod-menu-checkmark-icon-color-default: #3B63FB;
+  --mod-menu-checkmark-icon-color-hover: #3B63FB;
+  --mod-menu-checkmark-icon-color-focus: #3B63FB;
+  --mod-menu-checkmark-icon-color-down: #3B63FB;
 }
 
 sp-menu-item[disabled] {

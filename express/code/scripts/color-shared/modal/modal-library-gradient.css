@@ -3,7 +3,8 @@
    the palette modal's swatch-rail styles (modal-palette-content.css), and the
    ax-drawer-tag-section tag field (drawer.css); this file adds the in-modal tag
    section and the library toolbar wrapper.
-   (Color-mode HEX picker + code view and the "Edit" button are intentionally omitted.) */
+   Color mode + Copy-as-code header: see .modal-color-modes-header rules
+   (modal-color-modes-header.css). The "Edit" button is intentionally omitted. */
 
 .ax-color-modal-content .modal-library-gradient {
   /* Tag-field tokens (defined on .ax-drawer-panel in drawer.css) redeclared so
@@ -22,15 +23,16 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--spacing-300);
   inline-size: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 /* 16px strip corners: override the component's --Corner-radius-bar (8px) so the
    editor, bar-wrap, bar fill/stroke, and focus outline all round consistently. */
 .ax-color-modal-content .modal-library-gradient .modal-gradient-preview
   .gradient-editor {
-  --Corner-radius-bar: var(--spacing-300);
+  --Corner-radius-bar: var(--Corner-radius-corner-radius-200);
 }
 
 /* Gradient preview: 156px on mobile + tablet, 250px on desktop. */
@@ -48,7 +50,7 @@
   }
 }
 
-/* Stop rail: 248px on tablet, 158px on desktop; expands to fit all stops on
+/* Stop rail: 248px on tablet, 160px on desktop; expands to fit all stops on
    mobile, where the modal content scrolls beneath the sticky toolbar. */
 .ax-color-modal-content .modal-library-gradient
   .modal-palette-container--color-rail .modal-color-rail-wrap {
@@ -57,10 +59,21 @@
 }
 
 @media (min-width: 1200px) {
+  /* The [data-color-count-range] qualifier isn't for targeting — the rail
+     wrap always has this attribute once rendered — it's there so this
+     selector's specificity beats modal-palette-content.css's same-breakpoint
+     "large" rule outright, instead of the two depending on which stylesheet's
+     <link> happens to land in <head> last (LIBRARY_GRADIENT_STYLES loads both
+     via Promise.all, with no guaranteed insertion order).
+     160px (not 158px) — see modal-gradient-content.css's matching rule for
+     why: a 3-row RGB/HSB/Lab swatch-column's own content needs exactly
+     160px, and min-height:auto won't let it shrink below that, so 158px
+     let it overflow .swatch-rail's overflow:hidden by 2px, clipping the
+     bottom of its (inset) focus ring. */
   .ax-color-modal-content .modal-library-gradient
-    .modal-palette-container--color-rail .modal-color-rail-wrap {
-    height: 158px;
-    min-height: 158px;
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] {
+    height: 160px;
+    min-height: 160px;
     aspect-ratio: auto;
     max-height: none;
   }
@@ -98,7 +111,7 @@
   .ax-color-modal-content .modal-library-gradient
     .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
     height: auto;
-    min-height: 248px;
+    min-height: 0;
     max-height: none;
     overflow: visible;
   }
@@ -124,6 +137,18 @@
   max-height: 95dvh;
 }
 
+/* Tablet doesn't use the flat 95vh/95dvh cap above (unlike mobile/desktop) —
+   the unconditional rule still applies at every breakpoint including this
+   one, so it needs overriding here. Matches modal-styles.css's own tablet
+   .ax-color-modal-container rule: sized against the viewport minus a
+   guaranteed var(--spacing-500) gap on every side, not an arbitrary fixed
+   cap. */
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-container:has(.modal-library-gradient) {
+    max-height: calc(100vh - 2 * var(--spacing-500));
+  }
+}
+
 /* Only the content above the toolbar scrolls; the toolbar is a fixed footer so it
    never jumps and the whole modal never grows a scrollbar. */
 .ax-color-modal-content:has(.modal-library-gradient) {
@@ -132,26 +157,14 @@
   overflow: hidden;
 }
 
-.ax-color-modal-content .modal-library-gradient {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.ax-color-modal-content .modal-library-gradient .modal-lib-scroll {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-200);
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  /* overflow-y:auto promotes overflow-x to auto; the gradient editor's edge
-     handles poke past the content box, so clip x to avoid a stray horizontal
-     scrollbar. The scroller can't be overflow:visible (its sibling toolbar is a
-     sticky footer), so reserve an inline gutter instead: the edge handles'
-     focus rings and the gradient strip's focus outline paint into the gutter
-     rather than being clipped at the scroll edge. The negative margin keeps the
-     bar visually flush (no layout shift). */
-  overflow-x: hidden;
+/* The shared rule (modal-styles.css) already clips overflow-x, but the
+   gradient editor's edge handles poke past the content box, so reserve an
+   inline gutter here too: the edge handles' focus rings and the gradient
+   strip's focus outline paint into the gutter rather than being clipped at
+   the scroll edge. The negative margin keeps the bar visually flush (no
+   layout shift). The scroller can't be overflow:visible instead — its
+   sibling toolbar is a sticky footer, so overflow needs to stay clipped. */
+.ax-color-modal-content .modal-library-gradient .modal-content-scroll {
   box-sizing: border-box;
   inline-size: auto;
   padding-inline: var(--spacing-200);
@@ -171,13 +184,6 @@
   inline-size: 100%;
 }
 
-/* Fixed toolbar footer; the content above it scrolls. */
-.ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
-  flex: 0 0 auto;
-  inline-size: 100%;
-  background: var(--color-white);
-}
-
 .ax-color-modal-content .modal-library-gradient .ax-lib-card__action-menu {
   z-index: 5;
 }
@@ -187,35 +193,15 @@
   inline-size: 100%;
 }
 
-/* ── Full-bleed footer divider (mobile + tablet; desktop unchanged) ── */
-@media (max-width: 1199px) {
-  .ax-color-modal-content .modal-library-gradient {
-    gap: 0;
-  }
-
-  .ax-color-modal-content .modal-library-gradient .modal-lib-scroll {
-    padding-block-end: var(--spacing-200);
-  }
-
-  .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
-    border-block-start: 1px solid var(--color-gray-150);
-  }
-
-  .ax-color-modal-content .modal-library-gradient .ax-toolbar.ax-toolbar-library {
-    border-block-start: none;
-  }
-}
-
-@media (max-width: 599px) {
-  .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
-    margin-inline: calc(-1 * var(--spacing-300));
-    padding-inline: var(--spacing-300);
-  }
-}
-
-@media (min-width: 600px) and (max-width: 1199px) {
-  .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
-    margin-inline: calc(-1 * var(--spacing-400));
-    padding-inline: var(--spacing-400);
+@media (min-width: 1200px) {
+  /* This modal's swatch rail has no sizing of its own — it inherits
+   modal-palette-content.css's shared desktop rule (aspect-ratio: 834/400,
+   max-height: min(400px, 50vh)), which was tuned for the Explore palette
+   modal's own wider preview area, not this one. Cap it at 320px here
+   instead. Scoped with the extra .modal-library-gradient class (not just a
+   higher-specificity guess) so this reliably wins over the shared rule
+   regardless of which stylesheet's <link> the page happens to load last. */
+  .ax-color-modal-content .modal-library-gradient .modal-palette-container--color-rail .modal-color-rail-wrap {
+    max-height: 320px;
   }
 }
