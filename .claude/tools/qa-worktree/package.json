@@ -1,0 +1,13 @@
+{
+  "name": "qa-worktree",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Spin up a disposable stage worktree, find pages affected by a block, and screenshot all of them.",
+  "bin": {
+    "qa-worktree": "./qa-worktree.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}
