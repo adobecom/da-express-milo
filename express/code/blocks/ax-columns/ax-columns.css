@@ -852,6 +852,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   width: 46%;
 }
 
+.ax-columns.color .color-svg-img.color-bistro {
+  height: 100%;
+  width: 100%;
+}
+
 .ax-columns.color>div {
   padding: var(--spacing-900) 0 0 0;
   gap: 15px;

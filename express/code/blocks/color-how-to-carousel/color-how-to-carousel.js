@@ -8,7 +8,7 @@ import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { wrapInTheme } from '../../scripts/color-shared/spectrum/utils/theme.js';
 
-const GRAPH_SYMBOLS = ['hero-marquee', 'hero-marquee-localized', 'hands-and-heart', 'color-how-to-graph'];
+const GRAPH_SYMBOLS = ['hero-marquee', 'hero-marquee-localized', 'hands-and-heart', 'color-how-to-graph', 'color-bistro', 'color-how-to-bento'];
 
 let createTag;
 let getConfig;
@@ -396,6 +396,7 @@ function buildGraphic(payload) {
 
   const svg = graphic.querySelector('svg');
   if (svg && payload.secondaryHex) svg.style.fill = payload.secondaryHex;
+  if (svg && payload.primaryHex) svg.style.setProperty('--chtc-graph-accent-color', payload.primaryHex);
 
   return graphic;
 }
@@ -452,7 +453,7 @@ function buildHowToCard(block, rows, payload) {
   return card;
 }
 
-async function decorateHowToBlock(block) {
+async function decorateSpecsCard(block) {
   block.classList.add('temporary-specs-card');
   addTempWrapperDeprecated(block, 'color-how-to-carousel');
   await Promise.all([
@@ -508,6 +509,8 @@ async function decorateHowToBlock(block) {
   const container = createTag('div', { class: 'chtc-container' });
   container.append(buildGraphic(payload), content);
 
+  if (isDarkOverlayReadable(payload.primaryHex)) block.classList.add('shadow');
+
   block.replaceChildren(heading, container);
 
   activate(block, block.querySelector('.tip-number.tip-1'));
@@ -523,7 +526,7 @@ async function decorateHowToBlock(block) {
 export default async function decorate(block) {
   const isColorSite = getMetadata('pagetype')?.toLowerCase() === 'color';
   if (isColorSite) {
-    await decorateHowToBlock(block);
+    await decorateSpecsCard(block);
     return;
   }
   await decorateLegacy(block);
