@@ -7,9 +7,17 @@ const [, { default: decorate }] = await Promise.all([import('../../../express/co
 const redBody = await readFile({ path: './mocks/body.html' });
 const blackBody = await readFile({ path: './mocks/body-dark.html' });
 
+function setColorPageType() {
+  const meta = document.createElement('meta');
+  meta.name = 'pagetype';
+  meta.content = 'color';
+  document.head.appendChild(meta);
+}
+
 describe('Color How To Carousel', () => {
   afterEach(() => {
     document.head.querySelectorAll('script[type="application/ld+json"]').forEach((s) => s.remove());
+    document.head.querySelectorAll('meta[name="pagetype"]').forEach((m) => m.remove());
   });
 
   describe('with 6 lines in the first row', () => {
@@ -63,16 +71,17 @@ describe('Color How To Carousel', () => {
     });
   });
 
-  describe('specs-card variant (opt-in via the temporary-specs-card class)', () => {
+  describe('specs-card variant (opt-in via pagetype=color metadata)', () => {
     async function prepBlock(mock = './mocks/specs-basic.html') {
       window.isTestEnv = true;
       document.body.innerHTML = await readFile({ path: mock });
+      setColorPageType();
       const block = document.querySelector('.color-how-to-carousel');
       await decorate(block);
       return block;
     }
 
-    it('does not activate without the temporary-specs-card class (legacy rendering is untouched)', async () => {
+    it('does not activate without pagetype=color metadata (legacy rendering is untouched)', async () => {
       window.isTestEnv = true;
       document.body.innerHTML = redBody;
       const block = document.querySelector('.color-how-to-carousel');

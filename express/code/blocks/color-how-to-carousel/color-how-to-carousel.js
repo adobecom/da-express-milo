@@ -1,4 +1,6 @@
-import { getLibs, fixIcons, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import {
+  getLibs, fixIcons, addTempWrapperDeprecated, getMetadata,
+} from '../../scripts/utils.js';
 import isDarkOverlayReadable from '../../scripts/color-tools.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
@@ -450,7 +452,8 @@ function buildHowToCard(block, rows, payload) {
   return card;
 }
 
-async function decorateSpecsCard(block) {
+async function decorateHowToBlock(block) {
+  block.classList.add('temporary-specs-card');
   addTempWrapperDeprecated(block, 'color-how-to-carousel');
   await Promise.all([
     import(`${getLibs()}/utils/utils.js`).then((utils) => {
@@ -517,15 +520,10 @@ async function decorateSpecsCard(block) {
   new IntersectionObserver(onIntersect, { threshold: 0 }).observe(block);
 }
 
-// TEMP: `temporary-specs-card` opt-in variant (author as
-// "Color How To Carousel (temporary-specs-card)" in DA) so live pages keep the
-// current (legacy) rendering untouched while the new specs-card layout is
-// validated on color-seo-hero. Remove this branch, decorateLegacy(), and the
-// `.temporary-specs-card`-scoped CSS once the specs-card layout is confirmed and
-// promoted to a permanent variant name.
 export default async function decorate(block) {
-  if (block.classList.contains('temporary-specs-card')) {
-    await decorateSpecsCard(block);
+  const isColorSite = getMetadata('pagetype')?.toLowerCase() === 'color';
+  if (isColorSite) {
+    await decorateHowToBlock(block);
     return;
   }
   await decorateLegacy(block);

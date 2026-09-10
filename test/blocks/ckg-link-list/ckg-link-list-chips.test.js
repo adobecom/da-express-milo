@@ -35,12 +35,18 @@ const VALID_PILL_COUNT = VALID_PILLS.length;
 
 let fetchStub;
 let tasksMeta;
+let pageTypeMeta;
 
 beforeEach(() => {
   tasksMeta = document.createElement('meta');
   tasksMeta.name = 'tasks-x';
   tasksMeta.content = 'green';
   document.head.append(tasksMeta);
+
+  pageTypeMeta = document.createElement('meta');
+  pageTypeMeta.name = 'pagetype';
+  pageTypeMeta.content = 'color';
+  document.head.append(pageTypeMeta);
 
   fetchStub = sinon.stub(window, 'fetch').resolves({
     ok: true,
@@ -54,6 +60,7 @@ beforeEach(() => {
 afterEach(() => {
   fetchStub.restore();
   tasksMeta.remove();
+  pageTypeMeta.remove();
 });
 
 async function prepBlock(filePath) {
@@ -88,7 +95,7 @@ function restoreRowOverflow() {
   Object.defineProperty(Element.prototype, 'clientWidth', originalClientWidth);
 }
 
-describe('CKG Link List / chips variant (opt-in via an authored heading)', () => {
+describe('CKG Link List / chips variant (opt-in via pagetype=color metadata)', () => {
   it('decorates without error', async () => {
     const block = await prepBlock('./mocks/chips.html');
     expect(block).to.exist;
@@ -135,12 +142,19 @@ describe('CKG Link List / chips variant (opt-in via an authored heading)', () =>
     expect(block.querySelectorAll('.explore-more-colors-chip').length).to.equal(VALID_PILL_COUNT);
   });
 
-  it('does nothing when the heading is missing (and never calls the API)', async () => {
+  it('does nothing when the heading is missing, even on a color page (and never calls the API)', async () => {
     document.body.innerHTML = '<div class="ckg-link-list"><div><div>Not a heading</div></div></div>';
     const block = document.querySelector('.ckg-link-list');
     await decorate(block);
     expect(block.querySelector('.explore-more-colors-chip')).to.not.exist;
     expect(fetchStub.called).to.be.false;
+  });
+
+  it('falls back to the legacy pill carousel when pagetype is not color, even with a heading authored', async () => {
+    pageTypeMeta.remove();
+    const block = await prepBlock('./mocks/chips.html');
+    expect(block.classList.contains('ckg-link-list-chips')).to.be.false;
+    expect(block.querySelector('.explore-more-colors-chip')).to.not.exist;
   });
 });
 

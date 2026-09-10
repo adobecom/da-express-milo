@@ -1,4 +1,4 @@
-import { getLibs, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import { getLibs, decorateButtonsDeprecated, getMetadata } from '../../scripts/utils.js';
 import getData from '../../scripts/utils/browse-api-controller.js';
 import buildCarousel from '../../scripts/widgets/carousel.js';
 import { titleCase } from '../../scripts/utils/string.js';
@@ -77,6 +77,8 @@ async function decorateLegacy(block) {
 }
 
 async function decorateChips(block, heading) {
+  if (!heading) return;
+
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   ({ replaceKey } = await import(`${getLibs()}/features/placeholders.js`));
 
@@ -136,10 +138,11 @@ async function decorateChips(block, heading) {
 }
 
 export default async function decorate(block) {
-  const [headingRow] = [...block.querySelectorAll(':scope > div')];
-  const heading = headingRow?.querySelector('h1, h2, h3, h4, h5, h6');
+  const isColorSite = getMetadata('pagetype')?.toLowerCase() === 'color';
 
-  if (heading) {
+  if (isColorSite) {
+    const [headingRow] = [...block.querySelectorAll(':scope > div')];
+    const heading = headingRow?.querySelector('h1, h2, h3, h4, h5, h6');
     await decorateChips(block, heading);
     return;
   }
