@@ -15,6 +15,7 @@ const { default: decorateHero } = imports[2];
 const oldAuthoring = await readFile({ path: './mocks/old-authoring.html' });
 const newAuthoring = await readFile({ path: './mocks/new-authoring.html' });
 const newAuthoringPicture = await readFile({ path: './mocks/new-authoring-picture.html' });
+const newAuthoringStaticImage = await readFile({ path: './mocks/new-authoring-static-image.html' });
 
 describe('Grid Marquee - Legacy vs New Authoring', () => {
   let originalRAF;
@@ -148,5 +149,33 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     const video = await waitForVideo(gm);
     expect(video.poster).to.include('/express/code/img/favicons/favicon-32.png');
     expect(video.poster).to.not.include('format=');
+  });
+
+  it('Card authored with a static image (no video anchor) opens the drawer with an image instead of a video', async () => {
+    document.body.innerHTML = newAuthoringStaticImage;
+    const gm = document.querySelector('.grid-marquee');
+    await decorateGrid(gm);
+
+    const card = gm.querySelector('.card');
+    expect(card).to.exist;
+    card.dispatchEvent(new MouseEvent('mouseenter'));
+
+    const waitForVideoContainer = async (root, timeoutMs = 2000) => {
+      const start = performance.now();
+      let container = root.querySelector('.drawer .video-container');
+      while (!container?.firstElementChild && performance.now() - start < timeoutMs) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => { setTimeout(resolve, 20); });
+        container = root.querySelector('.drawer .video-container');
+      }
+      if (!container?.firstElementChild) throw new Error('Timeout waiting for drawer video-container');
+      return container;
+    };
+
+    const videoContainer = await waitForVideoContainer(gm);
+    expect(videoContainer.querySelector('video')).to.not.exist;
+    const img = videoContainer.querySelector('img');
+    expect(img).to.exist;
+    expect(img.src).to.not.be.empty;
   });
 });
