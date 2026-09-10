@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@ax-marquee-has-mobile-animation-has-desktop-animation-appear",
       "selector": "div.ax-marquee.has-mobile-animation.has-desktop-animation.appear",
-      "path": "/drafts/nala/test-gen/ax-marquee/ax-marquee-default",
+      "path": "/drafts/nala/blocks/ax-marquee/ax-marquee-default",
       "data": {
         "semantic": {
           "texts": [
@@ -71,7 +71,7 @@
               "selector": ".content-wrapper a.quick-link.button.accent.primaryCTA.xlarge",
               "nth": 0,
               "text": "Get Adobe Express free",
-              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-marquee%2Fax-marquee-default&placement=ax-marquee&locale=en-US&contentRegion=us",
+              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Fblocks%2Fax-marquee%2Fax-marquee-default&placement=ax-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Get Adobe Express free",
@@ -82,7 +82,7 @@
               "selector": ".content-wrapper a.quick-link.button.accent.secondary.xlarge",
               "nth": 0,
               "text": "Non-video secondary button",
-              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-marquee%2Fax-marquee-default&placement=ax-marquee&locale=en-US&contentRegion=us",
+              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Fblocks%2Fax-marquee%2Fax-marquee-default&placement=ax-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Non-video secondary button",
@@ -101,7 +101,7 @@
       "tcid": "1",
       "name": "@ax-marquee-dark-has-mobile-animation-has-desktop-animation-appear",
       "selector": "div.ax-marquee.dark.has-mobile-animation.has-desktop-animation.appear",
-      "path": "/drafts/nala/test-gen/ax-marquee/ax-marquee-dark",
+      "path": "/drafts/nala/blocks/ax-marquee/ax-marquee-dark",
       "data": {
         "semantic": {
           "texts": [
@@ -160,7 +160,7 @@
               "selector": ".content-wrapper a.quick-link.button.accent.primaryCTA.xlarge",
               "nth": 0,
               "text": "Get Adobe Express free",
-              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-marquee%2Fax-marquee-dark&placement=ax-marquee&locale=en-US&contentRegion=us",
+              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Fblocks%2Fax-marquee%2Fax-marquee-dark&placement=ax-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Get Adobe Express free",
@@ -179,7 +179,7 @@
       "tcid": "2",
       "name": "@ax-marquee-short-has-mobile-animation-has-desktop-animation-appear",
       "selector": "div.ax-marquee.short.has-mobile-animation.has-desktop-animation.appear",
-      "path": "/drafts/nala/test-gen/ax-marquee/ax-marquee-short",
+      "path": "/drafts/nala/blocks/ax-marquee/ax-marquee-short",
       "data": {
         "semantic": {
           "texts": [
@@ -245,7 +245,7 @@
               "selector": ".content-wrapper a.quick-link.button.accent.primaryCTA.xlarge",
               "nth": 0,
               "text": "Get Adobe Express free",
-              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-marquee%2Fax-marquee-short&placement=ax-marquee&locale=en-US&contentRegion=us",
+              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Fblocks%2Fax-marquee%2Fax-marquee-short&placement=ax-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Get Adobe Express free",
@@ -275,7 +275,7 @@
       "tcid": "3",
       "name": "@ax-marquee-narrow-has-mobile-animation-has-desktop-animation-appear",
       "selector": "div.ax-marquee.narrow.has-mobile-animation.has-desktop-animation.appear",
-      "path": "/drafts/nala/test-gen/ax-marquee/ax-marquee-narrow",
+      "path": "/drafts/nala/blocks/ax-marquee/ax-marquee-narrow",
       "data": {
         "semantic": {
           "texts": [
@@ -341,7 +341,7 @@
               "selector": ".content-wrapper a.quick-link.button.accent.primaryCTA.xlarge",
               "nth": 0,
               "text": "Get Adobe Express free",
-              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-marquee%2Fax-marquee-narrow&placement=ax-marquee&locale=en-US&contentRegion=us",
+              "href": "/arCdwGikflb?url=%2Fdrafts%2Fnala%2Fblocks%2Fax-marquee%2Fax-marquee-narrow&placement=ax-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Get Adobe Express free",

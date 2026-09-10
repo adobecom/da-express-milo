@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@highlight-default",
       "selector": "div.highlight",
-      "path": "/drafts/nala/test-gen/highlight/highlight",
+      "path": "/drafts/nala/blocks/highlight/highlight",
       "data": {
         "semantic": {
           "texts": [

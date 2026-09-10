@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@quick-action-hub-default",
       "selector": "div.quick-action-hub",
-      "path": "/drafts/nala/test-gen/quick-action-hub/quick-action-hub",
+      "path": "/drafts/nala/blocks/quick-action-hub/quick-action-hub",
       "data": {
         "semantic": {
           "texts": [
