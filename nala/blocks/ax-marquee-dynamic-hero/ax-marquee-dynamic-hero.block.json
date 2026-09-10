@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@ax-marquee-dynamic-hero-default",
       "selector": "div.ax-marquee-dynamic-hero",
-      "path": "/drafts/nala/test-gen/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero",
+      "path": "/drafts/nala/blocks/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero",
       "data": {
         "semantic": {
           "texts": [
@@ -46,7 +46,7 @@
               "selector": "a.quick-link.button.accent",
               "nth": 0,
               "text": "Design with your message",
-              "href": "/8JaoEy0DrSb?q=Anniversary+messages&unit=in&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-marquee-dynamic-hero%2Fax-marquee-dynamic-hero&placement=ax-marquee-dynamic-hero&locale=en-US&contentRegion=us",
+              "href": "/8JaoEy0DrSb?q=Anniversary+messages&unit=in&url=%2Fdrafts%2Fnala%2Fblocks%2Fax-marquee-dynamic-hero%2Fax-marquee-dynamic-hero&placement=ax-marquee-dynamic-hero&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,

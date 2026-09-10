@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@feature-list-default",
       "selector": "div.feature-list",
-      "path": "/drafts/nala/test-gen/ax-feature-list/feature-list",
+      "path": "/drafts/nala/blocks/ax-feature-list/feature-list",
       "data": {
         "semantic": {
           "texts": [

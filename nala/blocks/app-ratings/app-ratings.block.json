@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@app-ratings-default",
       "selector": "div.app-ratings",
-      "path": "/drafts/nala/test-gen/app-ratings/app-ratings",
+      "path": "/drafts/nala/blocks/app-ratings/app-ratings",
       "data": {
         "semantic": {
           "texts": [],
@@ -31,7 +31,7 @@
               "selector": "a",
               "nth": 0,
               "text": "",
-              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fapp-ratings%2Fapp-ratings&placement=outside-blocks&locale=en-US&contentRegion=us",
+              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Fblocks%2Fapp-ratings%2Fapp-ratings&placement=outside-blocks&locale=en-US&contentRegion=us",
               "ariaLabel": "Download on the app store",
               "rel": "nofollow",
               "title": null,
@@ -42,7 +42,7 @@
               "selector": "a",
               "nth": 1,
               "text": "",
-              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fapp-ratings%2Fapp-ratings&placement=outside-blocks&locale=en-US&contentRegion=us",
+              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Fblocks%2Fapp-ratings%2Fapp-ratings&placement=outside-blocks&locale=en-US&contentRegion=us",
               "ariaLabel": "Get it on Google Play",
               "rel": "nofollow",
               "title": null,
