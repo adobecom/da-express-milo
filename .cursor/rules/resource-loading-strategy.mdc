@@ -32,11 +32,11 @@ Based on [AEM's performance guidelines](https://www.aem.live/developer/keeping-i
 const loadPhaseL = () => {
   // Load next sections and their blocks
   loadBelowFoldSections();
-  
+
   // Load remaining images with lazy loading
   const lazyImages = document.querySelectorAll('img[loading="lazy"]');
   lazyImages.forEach(img => observeImage(img));
-  
+
   // Load non-blocking JavaScript libraries
   loadNonCriticalModules();
 };
@@ -56,16 +56,16 @@ const loadPhaseD = (DELAY = 3000) => new Promise(resolve => {
     loadAnalytics();
     loadTagManager();
     loadConsentManagement();
-    
+
     // Interactive features
     loadChatSupport();
     loadSocialMediaEmbeds();
     loadA11yTools();
-    
+
     // Heavy third-party integrations
     loadCommentSystems();
     loadVideoEmbeds();
-    
+
     resolve();
   }, DELAY);
 });
@@ -80,7 +80,7 @@ const preloadCriticalResources = () => {
   // Only preload if essential for LCP and under bandwidth budget
   const criticalCSS = '/express/code/styles/critical.css'; // ~15kb
   const criticalJS = '/express/code/scripts/core.js';      // ~25kb
-  
+
   // Total payload calculation MUST stay under 100kb
   if (calculateTotalPayload() < 100000) {
     loadLink(criticalCSS, { rel: 'preload', as: 'style' });
@@ -99,11 +99,11 @@ const loadFontsAfterLCP = () => {
   const observer = new PerformanceObserver((list) => {
     const entries = list.getEntries();
     const lcpEntry = entries[entries.length - 1];
-    
+
     if (lcpEntry) {
       // LCP achieved, now safe to load fonts
       setTimeout(() => {
-        loadLink('https://use.typekit.net/jdq5hay.css', { 
+        loadLink('https://use.typekit.net/iwo3rvz.css', {
           rel: 'stylesheet',
           media: 'print',
           onload: 'this.media="all"' // Non-blocking load
@@ -111,7 +111,7 @@ const loadFontsAfterLCP = () => {
       }, 100); // Small delay to ensure LCP is stable
     }
   });
-  
+
   observer.observe({ entryTypes: ['largest-contentful-paint'] });
 };
 
@@ -138,7 +138,7 @@ const loadFontsAfterLCP = () => {
 ### 3. Phase D - Delayed (Third-Party, 3+ Seconds)
 - Analytics and tracking scripts
 - Marketing automation tools
-- Social media widgets  
+- Social media widgets
 - Chat and support systems
 - A11y enhancement tools
 - Consent management platforms
@@ -150,7 +150,7 @@ const loadFontsAfterLCP = () => {
 const payloadTracker = {
   totalBytes: 0,
   budget: 100000, // 100kb limit
-  
+
   addResource(url, estimatedSize) {
     if (this.totalBytes + estimatedSize > this.budget) {
       console.warn(`Resource ${url} exceeds bandwidth budget. Moving to Phase L.`);
@@ -159,7 +159,7 @@ const payloadTracker = {
     this.totalBytes += estimatedSize;
     return true;
   },
-  
+
   canLoadResource(estimatedSize) {
     return (this.totalBytes + estimatedSize) <= this.budget;
   }
@@ -181,13 +181,13 @@ if (payloadTracker.canLoadResource(15000)) { // 15kb resource
 function removePerformanceAntiPatterns() {
   // NO early resource hints
   // document.head.appendChild(createLink({ rel: 'preconnect', href: external }));
-  
-  // NO font preloading  
+
+  // NO font preloading
   // document.head.appendChild(createLink({ rel: 'preload', href: fontUrl }));
-  
+
   // NO external origins before LCP
   // loadScript('https://external-cdn.com/widget.js');
-  
+
   // NO h2-push or early hints
   // Link: </font.woff2>; rel=preload; as=font; crossorigin
 }
@@ -201,7 +201,7 @@ function loadScript(src, phase = 'L', options = {}) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = src;
-    
+
     switch (phase) {
       case 'E': // Critical path - must be under bandwidth budget
         if (!payloadTracker.canLoadResource(options.estimatedSize)) {
@@ -210,12 +210,12 @@ function loadScript(src, phase = 'L', options = {}) {
         }
         script.async = false; // Load in order for critical scripts
         break;
-        
+
       case 'L': // Lazy loading
         script.async = true;
         script.defer = true;
         break;
-        
+
       case 'D': // Delayed loading
         setTimeout(() => {
           script.async = true;
@@ -223,7 +223,7 @@ function loadScript(src, phase = 'L', options = {}) {
         }, 3000);
         return;
     }
-    
+
     script.onload = resolve;
     script.onerror = reject;
     document.head.appendChild(script);
@@ -271,7 +271,7 @@ const establishExternalConnections = () => {
         .forEach(addPreconnect);
     }
   });
-  
+
   observer.observe({ entryTypes: ['largest-contentful-paint'] });
 };
 
@@ -287,7 +287,7 @@ const phaseMetrics = {
   phaseE: { startTime: performance.now(), endTime: null, payloadSize: 0 },
   phaseL: { startTime: null, endTime: null, payloadSize: 0 },
   phaseD: { startTime: null, endTime: null, payloadSize: 0 },
-  
+
   markPhaseComplete(phase) {
     this[phase].endTime = performance.now();
     console.log(`${phase} completed in ${this[phase].endTime - this[phase].startTime}ms`);
@@ -311,7 +311,7 @@ Based on [keeping it 100](https://www.aem.live/developer/keeping-it-100) best pr
 // Network budget is strictly bandwidth-constrained on mobile
 ```
 
-### ❌ FORBIDDEN: Redirects for Path Resolution  
+### ❌ FORBIDDEN: Redirects for Path Resolution
 ```javascript
 // BAD: Multiple redirects add penalty for each hop
 www.domain.com → www.domain.com/en → www.domain.com/en/home
