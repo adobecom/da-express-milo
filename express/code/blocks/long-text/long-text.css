@@ -9,7 +9,7 @@ main .section div.long-text-wrapper.plain {
 }
 
 main .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .long-text-wrapper:first-child {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .long-text-wrapper:first-child:not(.plain) {
     padding-top: 60px;
 }
 

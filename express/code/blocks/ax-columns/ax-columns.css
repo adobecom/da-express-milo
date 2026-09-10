@@ -117,7 +117,7 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child:not(.v2) {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child:not(.v2):not(.color) {
   padding-top: 60px;
 }
 
@@ -421,7 +421,7 @@ main .section .ax-columns.enterprise .column h2 {
   flex-direction: column;
   justify-content: center;
 }
-.section .ax-columns:not(.v2)>div {
+.section .ax-columns:not(.v2):not(.color)>div {
   padding: var(--spacing-600) 0;
 }
 
@@ -858,7 +858,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 .ax-columns.color>div {
-  padding: var(--spacing-900) 0 0 0;
+  padding: var(--section-padding-m) 0;
   gap: 15px;
 }
 
@@ -887,12 +887,14 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 @media (min-width: 600px) and (max-width: 1199px) {
   .ax-columns.color > div {
+    padding: var(--spacing-900) 0;
     gap: var(--spacing-700);
   }
 }
 
 @media (min-width: 1200px) {
   .ax-columns.color > div {
+    padding: var(--section-padding-xl) 0;
     gap: var(--spacing-800);
   }
 }
@@ -1251,7 +1253,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     align-items: flex-start;
   }
 
-  .section .ax-columns,
+  .section .ax-columns:not(.color),
   .ax-columns.top.center,
   .ax-columns.fullsize.center,
   .ax-columns.light,

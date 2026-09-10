@@ -4,7 +4,7 @@
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .color-how-to-carousel-wrapper:first-child {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .color-how-to-carousel-wrapper:first-child:not(:has(.color-how-to-carousel.temporary-specs-card)) {
     padding-top: 60px;
 }
 
@@ -317,6 +317,11 @@
 }
 
 @media (max-width: 599px) {
+    .color-how-to-carousel.temporary-specs-card {
+        padding-top: var(--section-padding-m);
+        padding-bottom: var(--section-padding-m);
+    }
+
     .color-how-to-carousel.temporary-specs-card .chtc-heading {
         align-self: flex-start;
         text-align: left;
