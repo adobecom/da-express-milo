@@ -14,10 +14,22 @@ const { default: decorateHero } = imports[2];
 
 const oldAuthoring = await readFile({ path: './mocks/old-authoring.html' });
 const newAuthoring = await readFile({ path: './mocks/new-authoring.html' });
+const newAuthoringPicture = await readFile({ path: './mocks/new-authoring-picture.html' });
+const newAuthoringStaticImage = await readFile({ path: './mocks/new-authoring-static-image.html' });
 
 describe('Grid Marquee - Legacy vs New Authoring', () => {
+  let originalRAF;
   before(() => {
     window.isTestEnv = true;
+    originalRAF = window.requestAnimationFrame;
+    window.requestAnimationFrame = (cb) => {
+      cb(performance.now());
+      return 0;
+    };
+  });
+
+  after(() => {
+    window.requestAnimationFrame = originalRAF;
   });
 
   it('Legacy mode (h1 inside grid-marquee) decorates headline and CTAs', async () => {
@@ -59,30 +71,111 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     await decorateHero(hero);
     await decorateGrid(gm);
 
-    // Wait for async RAF-driven rendering of cards in new mode
-    // Poll briefly until cards container appears
-    const waitForCards = async (root, timeoutMs = 4000) => {
-      const start = performance.now();
-      return new Promise((resolve, reject) => {
-        const check = () => {
-          const el = root.querySelector('.cards-container');
-          if (el) return resolve(el);
-          if (performance.now() - start > timeoutMs) return reject(new Error('Timeout waiting for .cards-container'));
-          requestAnimationFrame(check);
-          return undefined;
-        };
-        check();
-      });
+    const waitForCards = (root) => {
+      const el = root.querySelector('.cards-container');
+      if (!el) throw new Error('.cards-container not found after decorateGrid');
+      return el;
     };
 
     const headlineInGM = gm.querySelector('.headline');
     const h1InGM = gm.querySelector('h1');
     const heroH1 = hero.querySelector('h1');
-    const cards = await waitForCards(gm);
+    const cards = waitForCards(gm);
 
     expect(heroH1).to.exist;
     expect(headlineInGM).to.not.exist;
     expect(h1InGM).to.not.exist;
     expect(cards).to.exist;
+  });
+
+  const waitForVideo = async (root, timeoutMs = 2000) => {
+    const start = performance.now();
+    let video = root.querySelector('.drawer video');
+    while (!video && performance.now() - start < timeoutMs) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => { setTimeout(resolve, 20); });
+      video = root.querySelector('.drawer video');
+    }
+    if (!video) throw new Error('Timeout waiting for drawer video');
+    return video;
+  };
+
+  it('Drawer video poster reuses the optimized card face image, not the PNG fallback', async () => {
+    document.body.innerHTML = newAuthoringPicture;
+    const gm = document.querySelector('.grid-marquee');
+    await decorateGrid(gm);
+
+    const card = gm.querySelector('.card');
+    expect(card).to.exist;
+    card.dispatchEvent(new MouseEvent('mouseenter'));
+
+    const video = await waitForVideo(gm);
+    expect(video.poster).to.not.be.empty;
+    expect(video.poster).to.not.include('format=png');
+    expect(video.poster).to.include('format=webply');
+  });
+
+  it('Drawer video poster matches the webp source the face will use when currentSrc is empty', async () => {
+    document.body.innerHTML = newAuthoringPicture;
+    const gm = document.querySelector('.grid-marquee');
+    await decorateGrid(gm);
+
+    const faceImg = gm.querySelector('.face img');
+    expect(faceImg).to.exist;
+    Object.defineProperty(faceImg, 'currentSrc', { get: () => '', configurable: true });
+
+    const sources = [...faceImg.closest('picture').querySelectorAll('source[type="image/webp"]')];
+    const expected = sources.find((s) => !s.media || window.matchMedia(s.media).matches).srcset;
+
+    gm.querySelector('.card').dispatchEvent(new MouseEvent('mouseenter'));
+
+    const video = await waitForVideo(gm);
+    expect(video.poster).to.not.include('format=png');
+    expect(video.poster).to.equal(new URL(expected, window.location.href).href);
+  });
+
+  it('Drawer video poster leaves non-pipeline image URLs untouched', async () => {
+    document.body.innerHTML = newAuthoringPicture;
+    const gm = document.querySelector('.grid-marquee');
+    await decorateGrid(gm);
+
+    const faceImg = gm.querySelector('.face img');
+    Object.defineProperty(faceImg, 'currentSrc', { get: () => '', configurable: true });
+    faceImg.closest('picture').querySelectorAll('source').forEach((s) => s.remove());
+    faceImg.setAttribute('src', '/express/code/img/favicons/favicon-32.png');
+
+    gm.querySelector('.card').dispatchEvent(new MouseEvent('mouseenter'));
+
+    const video = await waitForVideo(gm);
+    expect(video.poster).to.include('/express/code/img/favicons/favicon-32.png');
+    expect(video.poster).to.not.include('format=');
+  });
+
+  it('Card authored with a static image (no video anchor) opens the drawer with an image instead of a video', async () => {
+    document.body.innerHTML = newAuthoringStaticImage;
+    const gm = document.querySelector('.grid-marquee');
+    await decorateGrid(gm);
+
+    const card = gm.querySelector('.card');
+    expect(card).to.exist;
+    card.dispatchEvent(new MouseEvent('mouseenter'));
+
+    const waitForVideoContainer = async (root, timeoutMs = 2000) => {
+      const start = performance.now();
+      let container = root.querySelector('.drawer .video-container');
+      while (!container?.firstElementChild && performance.now() - start < timeoutMs) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) => { setTimeout(resolve, 20); });
+        container = root.querySelector('.drawer .video-container');
+      }
+      if (!container?.firstElementChild) throw new Error('Timeout waiting for drawer video-container');
+      return container;
+    };
+
+    const videoContainer = await waitForVideoContainer(gm);
+    expect(videoContainer.querySelector('video')).to.not.exist;
+    const img = videoContainer.querySelector('img');
+    expect(img).to.exist;
+    expect(img.src).to.not.be.empty;
   });
 });

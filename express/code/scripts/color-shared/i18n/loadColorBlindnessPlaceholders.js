@@ -65,7 +65,7 @@ const BLOCK_KEY_MAP = Object.freeze({
 });
 
 function isResolvedPlaceholder(value, key) {
-  return value && value !== key.replaceAll('-', ' ');
+  return value && value !== key && value !== key.replaceAll('-', ' ');
 }
 
 function resolveMap(keyMap, values, startIndex) {

@@ -204,9 +204,7 @@ function makeRatings() {
   const ratings = createTag('div', { class: 'ratings' });
   const userAgent = getMobileOperatingSystem();
   const cb = (el) => el && ratings.append(el);
-  // eslint-disable-next-line chai-friendly/no-unused-expressions
   userAgent !== 'Android' && makeRating('apple').then(cb);
-  // eslint-disable-next-line chai-friendly/no-unused-expressions
   userAgent !== 'iOS' && makeRating('google').then(cb);
   return ratings;
 }

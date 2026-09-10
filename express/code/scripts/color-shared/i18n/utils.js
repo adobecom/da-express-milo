@@ -1,7 +1,7 @@
 import { getLibs } from '../../utils.js';
 
 function isResolvedPlaceholder(value, key) {
-  return value && value !== key.replaceAll('-', ' ');
+  return value && value !== key && value !== key.replaceAll('-', ' ');
 }
 
 export default async function loadPlaceholders(keyMap, createFn) {

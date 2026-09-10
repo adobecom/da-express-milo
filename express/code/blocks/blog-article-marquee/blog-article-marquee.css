@@ -134,7 +134,7 @@ main .section .blog-article-marquee p {
   box-sizing: border-box;
 }
 
-@media (min-width: 800px) {
+@media (min-width: 600px) {
   .blog-article-marquee {
     padding: var(--spacing-600) var(--spacing-500);
   }

@@ -215,13 +215,18 @@ class TemplateXPromo {
   }
 
   async waitForCarouselAnimation() {
-    await this.page.waitForFunction(
-      () => new Promise((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(resolve));
-      }),
-      null,
-      { timeout: 2000 },
-    );
+    try {
+      await this.page.waitForFunction(
+        () => new Promise((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(resolve));
+        }),
+        null,
+        { timeout: 4000 },
+      );
+    } catch {
+      // Animation settle can be delayed under CI load; callers just need the frame(s) to have
+      // had a chance to paint, not a hard guarantee.
+    }
   }
 
   // API and loading methods

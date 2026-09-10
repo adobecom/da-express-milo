@@ -1,5 +1,5 @@
 import { EasyUploadControls, EasyUploadVariants, EasyUploadVariantsPromoidMap } from '../../../scripts/utils/easy-upload-utils.js';
-import { getIconElementDeprecated } from '../../../scripts/utils.js';
+import { getIconElementDeprecated, getLibs } from '../../../scripts/utils.js';
 import { adjustElementPosition } from '../../../scripts/widgets/tooltip.js';
 import {
   DEBUG_MODES,
@@ -19,12 +19,17 @@ function trackListener(el, type, fn) {
 
 const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload-files/easy-upload.css';
 const TOOLTIP_CSS_PATH = '/scripts/widgets/tooltip.css';
+const EASY_UPLOAD_SDK_INITIALIZED_EVENT = 'easyupload:sdk-initialized';
 const AUTOLOAD_QR_CODE = false;
 const DISABLE_QR_CODE_RENDER = false;
 let easyUploadInstance = null;
 let easyUploadStylesLoaded = false;
 let tooltipStylesLoaded = false;
 let activeDebugMode = DEBUG_MODES.NONE;
+let deferredInitContext = null;
+let sharedCreateTag = null;
+let sharedShowErrorToast = null;
+let sharedReplaceKey = null;
 const easyUploadPaneContent = {
   hasContent: false,
   primary: {
@@ -381,158 +386,360 @@ function setupEasyUploadFirstPane(block, createTag) {
   });
 }
 
-let deferredInitContext = null;
+export function notifyEasyUploadSdkInitialization(block) {
+  if (!block) return;
+  window.dispatchEvent(new CustomEvent(EASY_UPLOAD_SDK_INITIALIZED_EVENT, {
+    detail: { block },
+  }));
+}
 
-function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
-  if (!easyUploadPaneContent.hasContent) {
+function getDropzoneContainer(block) {
+  return block.querySelector('.dropzone-container');
+}
+
+function getQrPane(block) {
+  return block.querySelector('.qr-code-container.dropzone-container');
+}
+
+function navigateToQrPane(block) {
+  const dropzoneContainer = getDropzoneContainer(block);
+  const qrPane = getQrPane(block);
+  if (!dropzoneContainer || !qrPane) {
+    return;
+  }
+  dropzoneContainer.classList.add('hidden');
+  qrPane.classList.remove('hidden');
+}
+
+function navigateAwayFromQrPane(block) {
+  const dropzoneContainer = getDropzoneContainer(block);
+  const qrPane = getQrPane(block);
+  if (!dropzoneContainer || !qrPane) {
+    return;
+  }
+  qrPane.classList.add('hidden');
+  dropzoneContainer.classList.remove('hidden');
+}
+
+async function resolveQrInitFailedMessage(fallbackMessage) {
+  const getConfig = deferredInitContext?.getConfig;
+  if (!getConfig) {
+    return fallbackMessage;
+  }
+
+  try {
+    if (!sharedReplaceKey) {
+      ({ replaceKey: sharedReplaceKey } = await import(`${getLibs()}/features/placeholders.js`));
+    }
+    const translated = await sharedReplaceKey('qr-init-failed', getConfig());
+    if (!translated || translated === 'qr-init-failed') {
+      return fallbackMessage;
+    }
+    return translated;
+  } catch (error) {
+    window.lana?.log(
+      `[EasyUpload-UI] Failed to resolve qr-init-failed placeholder: ${error?.message || error}`,
+      { severity: 'warning' },
+    );
+    return fallbackMessage;
+  }
+}
+
+async function ensureEasyUploadInstance(block, createTag, showErrorToast) {
+  if (easyUploadInstance) {
+    return true;
+  }
+  if (!deferredInitContext) {
+    return false;
+  }
+
+  try {
+    const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
+    const { env } = deferredInitContext.getConfig();
+    const uploadService = await deferredInitContext.initializeUploadService();
+    if (!uploadService) {
+      throw new Error('Upload service not initialized');
+    }
+
+    easyUploadInstance = new EasyUpload(
+      uploadService,
+      env.name,
+      deferredInitContext.quickAction,
+      block,
+      deferredInitContext.startSDKWithUnconvertedFiles,
+      createTag,
+      showErrorToast,
+      easyUploadPaneContent.secondary.qrErrorText,
+    );
+    return true;
+  } catch (error) {
+    window.lana?.log(
+      `[EasyUpload-UI] Deferred initialization failed: ${error?.message || error}`,
+      { severity: 'error' },
+    );
+    const errorMessage = await resolveQrInitFailedMessage('Failed to initialize QR code upload.');
+    showErrorToast?.(block, errorMessage);
+    return false;
+  }
+}
+
+function applyDebugPaneState({ qrPane, createTag, showErrorToast, block }) {
+  if (PLACEHOLDER_DEBUG_MODES.has(activeDebugMode)) {
+    if (activeDebugMode === DEBUG_MODES.AUTOFAIL) {
+      renderDebugAutofailVariant({
+        qrPane,
+        createTag,
+        showErrorToast,
+        block,
+        paneContent: easyUploadPaneContent,
+      });
+    } else if (activeDebugMode === DEBUG_MODES.UPLOADING) {
+      renderDebugPendingUploadVariant({
+        qrPane,
+        createTag,
+        showErrorToast,
+        block,
+        paneContent: easyUploadPaneContent,
+      });
+    } else {
+      renderDebugPlaceholderVariant({ qrPane, createTag });
+    }
+    return true;
+  }
+
+  if (activeDebugMode === DEBUG_MODES.LOADER) {
+    renderDebugLoaderPaneState({ qrPane, createTag });
+    return true;
+  }
+
+  return false;
+}
+
+function bindConfirmButton(qrPane) {
+  const confirmButton = qrPane.querySelector('.confirm-import-button');
+  if (!confirmButton || !easyUploadInstance) {
+    window.lana?.log(
+      '[EasyUpload-UI] Could not find confirm button or EasyUpload instance',
+      { severity: 'warning' },
+    );
+    return;
+  }
+
+  easyUploadInstance.confirmButton = confirmButton;
+  easyUploadInstance.updateConfirmButtonState(true);
+
+  const confirmTooltipElement = confirmButton
+    .closest('.tooltip')?.querySelector('.tooltip-text');
+  easyUploadInstance.setConfirmTooltipConfig({
+    element: confirmTooltipElement,
+    messages: {
+      pending: easyUploadPaneContent.primary.tooltipText,
+      failed: easyUploadPaneContent.primary.errorText,
+    },
+  });
+
+  if (!confirmButton.dataset.easyUploadConfirmBound) {
+    const handleConfirmClick = async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (confirmButton.classList.contains('disabled')) {
+        easyUploadInstance.showConfirmTooltip?.('pending');
+        return;
+      }
+      await easyUploadInstance.handleConfirmImport();
+    };
+    trackListener(confirmButton, 'click', handleConfirmClick);
+    confirmButton.dataset.easyUploadConfirmBound = 'true';
+  }
+}
+
+async function initializeQrPane(block, qrPane, createTag, showErrorToast, options = {}) {
+  const { forceRefresh = false } = options;
+  if (!qrPane) {
+    return false;
+  }
+
+  if (applyDebugPaneState({
+    qrPane,
+    createTag,
+    showErrorToast,
+    block,
+  })) {
+    return true;
+  }
+
+  const hasInstance = await ensureEasyUploadInstance(block, createTag, showErrorToast);
+  if (!hasInstance) {
+    return false;
+  }
+
+  if (forceRefresh || easyUploadInstance?.isQrCodeConsumed?.()) {
+    delete qrPane.dataset.qrInitialized;
+  }
+
+  if (qrPane.dataset.qrInitialized) {
+    bindConfirmButton(qrPane);
+    easyUploadInstance.startUploadDetectionPolling();
+    return true;
+  }
+
+  try {
+    qrPane.dataset.qrInitialized = 'true';
+    if (DISABLE_QR_CODE_RENDER) {
+      easyUploadInstance.showLoader?.();
+      bindConfirmButton(qrPane);
+      return true;
+    }
+
+    if (easyUploadInstance?.isQrCodeConsumed?.() && easyUploadInstance?.resetUploadSession) {
+      await easyUploadInstance.resetUploadSession();
+    }
+
+    await easyUploadInstance.initializeQRCode();
+    bindConfirmButton(qrPane);
+    easyUploadInstance.startUploadDetectionPolling();
+    return true;
+  } catch (error) {
+    delete qrPane.dataset.qrInitialized;
+    window.lana?.log(
+      `[EasyUpload-UI] initializeQRCode failed: ${error?.name} ${error?.message}`,
+      { severity: 'error' },
+    );
+    const errorMessage = await resolveQrInitFailedMessage('Failed to load QR code.');
+    showErrorToast?.(block, errorMessage);
+    return false;
+  }
+}
+
+function setupQrPane(block, createTag) {
+  const dropzoneContainer = getDropzoneContainer(block);
+  if (!dropzoneContainer) {
+    return null;
+  }
+
+  const existingPane = getQrPane(block);
+  if (existingPane) {
+    return existingPane;
+  }
+
+  const qrPane = createTag('div', { class: 'qr-code-container dropzone-container hidden' });
+  const rect = dropzoneContainer.getBoundingClientRect();
+  if (rect.width) {
+    qrPane.style.width = `${rect.width}px`;
+  }
+  if (rect.height) {
+    qrPane.style.height = `${rect.height}px`;
+  }
+
+  const qrDropzone = createTag('div', { class: 'dropzone qr-code-dropzone' });
+  const handleBack = () => navigateAwayFromQrPane(block);
+  qrDropzone.append(buildQrPaneContent(createTag, handleBack));
+  qrPane.append(qrDropzone);
+  dropzoneContainer.insertAdjacentElement('afterend', qrPane);
+  return qrPane;
+}
+
+function bindEasyUploadSdkInitListener(block, createTag, showErrorToast) {
+  const handleSdkInitialized = (event) => {
+    const eventBlock = event?.detail?.block;
+    if (!easyUploadInstance || (eventBlock && eventBlock !== block)) {
+      return;
+    }
+
+    easyUploadInstance.markQrCodeConsumed?.();
+    const qrPane = getQrPane(block);
+    if (!qrPane) {
+      return;
+    }
+
+    delete qrPane.dataset.qrInitialized;
+    if (!qrPane.classList.contains('hidden')) {
+      initializeQrPane(block, qrPane, createTag, showErrorToast, { forceRefresh: true })
+        .catch((error) => window.lana?.log(
+          `[EasyUpload-UI] Failed eager consumed QR refresh: ${error?.message || error}`,
+          { severity: 'warning' },
+        ));
+    }
+  };
+
+  trackListener(window, EASY_UPLOAD_SDK_INITIALIZED_EVENT, handleSdkInitialized);
+}
+
+function attachSecondaryCtaHandler(block, qrPane, createTag, showErrorToast) {
+  if (!easyUploadPaneContent.hasContent || !qrPane) {
     return;
   }
 
   const dropzone = block.querySelector('.dropzone');
-  const dropzoneContainer = block.querySelector('.dropzone-container');
-  if (!dropzone || !dropzoneContainer) {
+  if (!dropzone) {
     return;
   }
 
-  const ctas = dropzone.querySelectorAll('a.button, a.con-button');
-  const secondaryCta = ctas[1];
+  const secondaryButtonContainer = dropzone.querySelector('.easy-upload-cta-row > p.button-container:nth-child(2)');
+  const secondaryCta = secondaryButtonContainer?.querySelector('a.button, a.con-button');
   if (!secondaryCta) {
     return;
   }
 
   const handleSecondaryCta = async (event) => {
     event.preventDefault();
-    event.stopPropagation();
-
-    dropzoneContainer.classList.add('hidden');
-
-    let qrPane = dropzoneContainer.parentElement?.querySelector('.qr-code-container');
-    if (!qrPane) {
-      qrPane = createTag('div', { class: 'qr-code-container dropzone-container' });
-      const rect = dropzoneContainer.getBoundingClientRect();
-      if (rect.width) {
-        qrPane.style.width = `${rect.width}px`;
-      }
-      if (rect.height) {
-        qrPane.style.height = `${rect.height}px`;
-      }
-      dropzoneContainer.insertAdjacentElement('afterend', qrPane);
-    } else {
-      qrPane.classList.remove('hidden');
-    }
-
-    if (!qrPane.querySelector('.qr-code-dropzone')) {
-      qrPane.innerHTML = '';
-      const qrDropzone = createTag('div', { class: 'dropzone qr-code-dropzone' });
-      const handleBack = () => {
-        dropzoneContainer.classList.remove('hidden');
-        qrPane.classList.add('hidden');
-      };
-      qrDropzone.append(buildQrPaneContent(createTag, handleBack));
-      qrPane.append(qrDropzone);
-      delete qrPane.dataset.qrInitialized;
-    }
-
-    if (PLACEHOLDER_DEBUG_MODES.has(activeDebugMode)) {
-      if (activeDebugMode === DEBUG_MODES.AUTOFAIL) {
-        renderDebugAutofailVariant({
-          qrPane,
-          createTag,
-          showErrorToast,
-          block,
-          paneContent: easyUploadPaneContent,
-        });
-      } else if (activeDebugMode === DEBUG_MODES.UPLOADING) {
-        renderDebugPendingUploadVariant({
-          qrPane,
-          createTag,
-          showErrorToast,
-          block,
-          paneContent: easyUploadPaneContent,
-        });
-      } else {
-        renderDebugPlaceholderVariant({ qrPane, createTag });
-      }
-      return;
-    }
-
-    if (activeDebugMode === DEBUG_MODES.LOADER) {
-      renderDebugLoaderPaneState({ qrPane, createTag });
-      return;
-    }
-
-    if (!easyUploadInstance && deferredInitContext) {
-      try {
-        const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
-        const { env } = deferredInitContext.getConfig();
-
-        const uploadService = await deferredInitContext.initializeUploadService();
-
-        if (!uploadService) {
-          throw new Error('Upload service not initialized');
-        }
-
-        easyUploadInstance = new EasyUpload(
-          uploadService,
-          env.name,
-          deferredInitContext.quickAction,
-          block,
-          deferredInitContext.startSDKWithUnconvertedFiles,
-          createTag,
-          showErrorToast,
-          easyUploadPaneContent.secondary.qrErrorText,
-        );
-      } catch (error) {
-        window.lana?.log(`[EasyUpload-UI] Deferred initialization failed: ${error?.message || error}`, { severity: 'error' });
-        showErrorToast?.(block, 'Failed to initialize QR code upload.');
-        return;
-      }
-    }
-
-    if (!qrPane.dataset.qrInitialized && easyUploadInstance?.initializeQRCode) {
-      try {
-        qrPane.dataset.qrInitialized = 'true';
-        if (DISABLE_QR_CODE_RENDER) {
-          easyUploadInstance.showLoader?.();
-          return;
-        }
-
-        await easyUploadInstance.initializeQRCode();
-
-        const confirmButton = qrPane.querySelector('.confirm-import-button');
-        if (confirmButton && easyUploadInstance) {
-          easyUploadInstance.confirmButton = confirmButton;
-
-          easyUploadInstance.updateConfirmButtonState(true);
-
-          const confirmTooltipElement = confirmButton
-            .closest('.tooltip')?.querySelector('.tooltip-text');
-          easyUploadInstance.setConfirmTooltipConfig({
-            element: confirmTooltipElement,
-            messages: {
-              pending: easyUploadPaneContent.primary.tooltipText,
-              failed: easyUploadPaneContent.primary.errorText,
-            },
-          });
-
-          const handleConfirmClick = async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            await easyUploadInstance.handleConfirmImport();
-          };
-          trackListener(confirmButton, 'click', handleConfirmClick);
-
-          easyUploadInstance.startUploadDetectionPolling();
-        } else {
-          window.lana?.log('[EasyUpload-UI] Could not find confirm button or EasyUpload instance', { severity: 'warning' });
-        }
-      } catch (error) {
-        window.lana?.log(`[EasyUpload-UI] initializeQRCode failed: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { severity: 'error' });
-        showErrorToast?.(block, 'Failed to load QR code.');
-      }
-    }
+    navigateToQrPane(block);
+    await initializeQrPane(block, qrPane, createTag, showErrorToast);
   };
+
   trackListener(secondaryCta, 'click', handleSecondaryCta);
+}
+
+function attachPrimaryCtaHandler(block) {
+  if (!easyUploadPaneContent.hasContent) {
+    return;
+  }
+
+  const dropzone = block.querySelector('.dropzone');
+  if (!dropzone) {
+    return;
+  }
+
+  const primaryButtonContainer = dropzone.querySelector('.easy-upload-cta-row > p.button-container:nth-child(1)');
+  const primaryCta = primaryButtonContainer?.querySelector('a.button, a.con-button');
+  if (!primaryCta) {
+    return;
+  }
+
+  const handlePrimaryCta = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const inputElement = block.querySelector('input[type="file"]');
+    inputElement?.click();
+  };
+
+  trackListener(primaryCta, 'click', handlePrimaryCta);
+}
+
+export async function refreshEasyUploadQrIfConsumed(block) {
+  const activeBlock = block || easyUploadInstance?.block;
+  const qrPane = activeBlock ? getQrPane(activeBlock) : null;
+  if (
+    !easyUploadInstance
+    || !sharedCreateTag
+    || !sharedShowErrorToast
+    || !activeBlock
+    || !qrPane
+    || qrPane.classList.contains('hidden')
+  ) {
+    return false;
+  }
+  if (!easyUploadInstance.isQrCodeConsumed?.()) {
+    return false;
+  }
+
+  return initializeQrPane(
+    activeBlock,
+    qrPane,
+    sharedCreateTag,
+    sharedShowErrorToast,
+    { forceRefresh: true },
+  );
 }
 
 export async function setupEasyUploadUI({
@@ -548,6 +755,8 @@ export async function setupEasyUploadUI({
   if (!isEasyUploadExperimentEnabled(quickAction)) {
     return null;
   }
+  sharedCreateTag = createTag;
+  sharedShowErrorToast = showErrorToast;
   activeDebugMode = getDebugMode(block);
   await loadEasyUploadStyles(getConfig, loadStyle);
   extractEasyUploadPaneContent(block);
@@ -560,44 +769,25 @@ export async function setupEasyUploadUI({
       initializeUploadService,
       startSDKWithUnconvertedFiles,
     };
-  attachSecondaryCtaHandler(block, createTag, showErrorToast);
+
+  const qrPane = setupQrPane(block, createTag);
+  bindEasyUploadSdkInitListener(block, createTag, showErrorToast);
+  attachPrimaryCtaHandler(block);
+  attachSecondaryCtaHandler(block, qrPane, createTag, showErrorToast);
 
   if (AUTOLOAD_QR_CODE && activeDebugMode === DEBUG_MODES.NONE) {
-    setTimeout(async () => {
-      try {
-        const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
-        const { env } = getConfig();
-
-        const uploadService = await initializeUploadService();
-        if (!uploadService) {
-          throw new Error('Upload service not initialized');
-        }
-
-        easyUploadInstance = new EasyUpload(
-          uploadService,
-          env.name,
-          quickAction,
-          block,
-          startSDKWithUnconvertedFiles,
-          createTag,
-          showErrorToast,
-          easyUploadPaneContent.secondary.qrErrorText,
-        );
-
-        await easyUploadInstance.setupQRCodeInterface();
-      } catch (error) {
-        window.lana?.log(`[EasyUpload-UI] Autoload initialization failed: ${error?.message || error}`, { severity: 'error' });
-        easyUploadInstance?.showFailedQR();
-      }
-    }, 100);
+    await initializeQrPane(block, qrPane, createTag, showErrorToast);
   }
 
   return easyUploadInstance;
 }
-
 export function cleanupEasyUpload() {
   registeredListeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn));
   registeredListeners.length = 0;
+  deferredInitContext = null;
+  sharedCreateTag = null;
+  sharedShowErrorToast = null;
+  sharedReplaceKey = null;
   if (easyUploadInstance) {
     easyUploadInstance.cleanup();
     easyUploadInstance = null;

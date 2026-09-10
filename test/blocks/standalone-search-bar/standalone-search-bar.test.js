@@ -140,4 +140,104 @@ describe('standalone-search-bar', () => {
     expect(inputWrapper).to.exist;
     expect(form.tagName.toLowerCase()).to.equal('form');
   });
+
+  describe('trending searches arrow key navigation', () => {
+    let focusSpy;
+
+    beforeEach(() => {
+      focusSpy = sinon.spy(HTMLElement.prototype, 'focus');
+    });
+
+    afterEach(() => {
+      focusSpy.restore();
+    });
+
+    it('focuses the first trend link on ArrowDown from the search bar', () => {
+      const searchInput = block.querySelector('input.search-bar');
+      const trendLinks = block.querySelectorAll('.trend-link');
+
+      searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(focusSpy.getCalls().some((call) => call.thisValue === trendLinks[0])).to.be.true;
+    });
+
+    it('focuses the first suggestion (not a trend link) on ArrowDown when suggestions are visible', () => {
+      const searchInput = block.querySelector('input.search-bar');
+      const trendsContainer = block.querySelector('.trends-container');
+      const suggestionsContainer = block.querySelector('.suggestions-container');
+      const suggestionsList = block.querySelector('.suggestions-list');
+
+      const suggestionLi = document.createElement('li');
+      suggestionLi.tabIndex = -1;
+      suggestionsList.appendChild(suggestionLi);
+      trendsContainer.classList.add('hidden');
+      suggestionsContainer.classList.remove('hidden');
+
+      searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(focusSpy.getCalls().some((call) => call.thisValue === suggestionLi)).to.be.true;
+
+      suggestionLi.remove();
+      trendsContainer.classList.remove('hidden');
+      suggestionsContainer.classList.add('hidden');
+    });
+
+    it('keeps only the focused trend link in the tab sequence (roving tabindex)', () => {
+      const trendLinks = block.querySelectorAll('.trend-link');
+
+      trendLinks[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(trendLinks[0].tabIndex).to.equal(-1);
+      expect(trendLinks[1].tabIndex).to.equal(0);
+
+      // Reset back to the initial roving state for subsequent tests
+      trendLinks[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    });
+
+    it('focuses the next trend link on ArrowDown from a trend link', () => {
+      const trendLinks = block.querySelectorAll('.trend-link');
+
+      trendLinks[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(focusSpy.getCalls().some((call) => call.thisValue === trendLinks[1])).to.be.true;
+    });
+
+    it('focuses the previous trend link on ArrowUp', () => {
+      const trendLinks = block.querySelectorAll('.trend-link');
+
+      trendLinks[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+
+      expect(focusSpy.getCalls().some((call) => call.thisValue === trendLinks[0])).to.be.true;
+    });
+
+    it('focuses the search bar on ArrowUp from the first trend link', () => {
+      const searchInput = block.querySelector('input.search-bar');
+      const trendLinks = block.querySelectorAll('.trend-link');
+
+      trendLinks[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+
+      expect(focusSpy.getCalls().some((call) => call.thisValue === searchInput)).to.be.true;
+    });
+
+    it('does not move focus past the last trend link on ArrowDown', () => {
+      const trendLinks = block.querySelectorAll('.trend-link');
+      const lastTrendLink = trendLinks[trendLinks.length - 1];
+
+      lastTrendLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(focusSpy.called).to.be.false;
+    });
+
+    it('closes the dropdown and focuses the search bar on Escape from a trend link', () => {
+      const searchInput = block.querySelector('input.search-bar');
+      const dropdown = block.querySelector('.search-dropdown-container');
+      const trendLinks = block.querySelectorAll('.trend-link');
+
+      dropdown.classList.remove('hidden');
+      trendLinks[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+
+      expect(dropdown.classList.contains('hidden')).to.be.true;
+      expect(focusSpy.getCalls().some((call) => call.thisValue === searchInput)).to.be.true;
+    });
+  });
 });

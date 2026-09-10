@@ -199,6 +199,31 @@ describe('Blog Article Marquee block', () => {
     expect(buttonContainer).to.not.exist;
   });
 
+  it('formats a unix timestamp publication date using the locale formatter', async () => {
+    const block = document.getElementById('blog-article-marquee-block');
+    const dateMeta = document.head.querySelector('meta[name="publication-date"]');
+    dateMeta?.setAttribute('content', '1729382400');
+
+    await decorate(block);
+
+    const productDate = block.querySelector('.blog-article-marquee-product-date');
+    expect(productDate).to.exist;
+    const expected = Intl.DateTimeFormat('en-US', {
+      day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC',
+    }).format(new Date(1729382400 * 1000));
+    expect(productDate.textContent.trim()).to.equal(expected);
+  });
+
+  it('suppresses the date element when publication date is unparseable', async () => {
+    const block = document.getElementById('blog-article-marquee-block');
+    const dateMeta = document.head.querySelector('meta[name="publication-date"]');
+    dateMeta?.setAttribute('content', 'not-a-date');
+
+    await decorate(block);
+
+    expect(block.querySelector('.blog-article-marquee-product-date')).to.not.exist;
+  });
+
   it('omits product highlight when product metadata is absent', async () => {
     const block = document.getElementById('blog-article-marquee-block');
     ['author', 'publication-date', 'description', 'tags']

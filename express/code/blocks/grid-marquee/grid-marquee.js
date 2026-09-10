@@ -1,4 +1,12 @@
-import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
+import {
+  getLibs,
+  yieldToMain,
+  getMobileOperatingSystem,
+  getIconElementDeprecated,
+  createTag,
+  formatDynamicCartLink,
+  getMetadata,
+} from '../../scripts/utils.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
@@ -73,18 +81,20 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
     }
   });
 
-  const video = createTag('video', {
-    playsinline: '',
-    muted: '',
-    loop: '',
-    preload: 'metadata',
-    title: titleText,
-    poster,
-  }, `<source src="${videoSrc}" type="video/mp4">`);
-  const videoWrapper = createTag('button', { class: 'video-container' }, video);
+  const media = videoSrc
+    ? createTag('video', {
+      playsinline: '',
+      muted: '',
+      loop: '',
+      preload: 'metadata',
+      title: titleText,
+      poster,
+    }, `<source src="${videoSrc}" type="video/mp4">`)
+    : createTag('img', { src: poster, alt: titleText });
+  const videoWrapper = createTag('button', { class: 'video-container' }, media);
   // link video to first anchor
   videoWrapper.addEventListener('click', () => anchors[0]?.click());
-  videoWrapper.setAttribute('title', anchors[0]?.title);
+  if (anchors[0]?.title) videoWrapper.setAttribute('title', anchors[0].title);
 
   content.append(titleRow, videoWrapper, panelsFrag);
   drawer.append(content);
@@ -157,14 +167,38 @@ function addCardInteractions(card, drawer, lazyCB) {
   });
 }
 
+function getPosterSrc(img) {
+  if (img.currentSrc) return img.currentSrc;
+  const sources = [...(img.closest('picture')?.querySelectorAll('source[type="image/webp"]') || [])];
+  const match = sources.find((source) => !source.media || window.matchMedia(source.media).matches);
+  const candidate = match?.srcset.split(',')[0].trim().split(/\s+/)[0];
+  if (candidate) return new URL(candidate, window.location.href).href;
+  if (!img.src) return '';
+  const url = new URL(img.src, window.location.href);
+  if (url.searchParams.get('format') === 'png') url.searchParams.set('format', 'webply');
+  return url.href;
+}
+
 function toCard(drawer) {
   const titleText = drawer.querySelector('strong').textContent.trim();
   const [face, ...panels] = [...drawer.querySelectorAll(':scope > div')];
   const panelsFrag = new DocumentFragment();
   panelsFrag.append(...panels);
   panels.forEach((panel) => panel.classList.add('panel'));
-  const videoAnchor = face.querySelector('a');
-  videoAnchor?.remove();
+  // The drawer video is authored in the face as an <a href="*.mp4">. But if
+  // Express's auto-video decoration ran first (e.g. inside an MEP replacePage
+  // fragment where #_dnb wasn't applied to the link), it arrives as an inlined
+  // <video> instead. Capture the source from whichever form is present and
+  // remove BOTH so the face video can never duplicate the drawer video.
+  const faceAnchor = face.querySelector('a');
+  const faceVideo = face.querySelector('video');
+  const videoSrc = faceAnchor?.href
+    || faceVideo?.querySelector('source')?.src
+    || faceVideo?.currentSrc
+    || faceVideo?.getAttribute('src')
+    || faceVideo?.dataset?.videoSource;
+  faceAnchor?.remove();
+  faceVideo?.remove();
 
   // Use createTag like hero-marquee does (now available)
   const card = createTag('button', {
@@ -175,7 +209,7 @@ function toCard(drawer) {
   }, [face, drawer]);
 
   face.classList.add('face');
-  const lazyCB = () => decorateDrawer(videoAnchor.href, face.querySelector('img').src, titleText, panels, panelsFrag, drawer);
+  const lazyCB = () => decorateDrawer(videoSrc, getPosterSrc(face.querySelector('img')), titleText, panels, panelsFrag, drawer);
   addCardInteractions(card, drawer, lazyCB);
   drawer.classList.add('drawer', 'hide');
   drawer.id = `drawer-${titleText}`;
@@ -192,6 +226,7 @@ async function makeRating(
   starsPlaceholder,
   playStoreLabelPlaceholder,
   appleStoreLabelPlaceholder,
+  config,
 ) {
   const ratings = ratingPlaceholder?.split(';') || [];
   const link = ratings[2]?.trim();
@@ -202,17 +237,26 @@ async function makeRating(
   const storeTypeIndex = [APPLE, GOOGLE].indexOf(store);
   const [score, cnt] = ratings[storeTypeIndex].split(',').map((str) => str.trim());
   const ariaLabel = store === APPLE ? appleStoreLabelPlaceholder : playStoreLabelPlaceholder;
+  const { locale: { region } } = config;
+  // ToDo: Add support for all regions and remove Hardcoded Arabic region
   const storeLink = createTag('a', {
     href: link,
-  }, getIconElementDeprecated(`${store}-store`));
+  }, getIconElementDeprecated(`${store}-store${region === 'ara' ? `-${region}` : ''}`));
   storeLink.setAttribute('aria-label', ariaLabel);
   const { default: trackBranchParameters } = await import('../../scripts/branchlinks.js');
   await trackBranchParameters([storeLink]);
 
   const star = getIconElementDeprecated('star');
-  star.setAttribute('role', 'img');
-  star.setAttribute('aria-label', starsPlaceholder);
-  return createTag('div', { class: 'ratings-container' }, [score, star, cnt, storeLink]);
+  const ratingsLabel = `${score} ${starsPlaceholder}, ${cnt}`;
+  const ratingsText = createTag('span', {
+    class: 'ratings-metric',
+    role: 'img',
+    'aria-label': ratingsLabel,
+  }, [
+    createTag('span', { class: 'rating-visual', 'aria-hidden': 'true' }, [score, star]),
+    createTag('span', { 'aria-hidden': 'true' }, cnt),
+  ]);
+  return createTag('div', { class: 'ratings-container' }, [ratingsText, storeLink]);
 }
 
 async function makeRatings(
@@ -220,6 +264,7 @@ async function makeRatings(
   starsPlaceholder,
   playStoreLabelPlaceholder,
   appleStoreLabelPlaceholder,
+  config,
 ) {
   const ratings = createTag('div', { class: 'ratings' });
   const userAgent = getMobileOperatingSystem();
@@ -230,6 +275,7 @@ async function makeRatings(
       starsPlaceholder,
       playStoreLabelPlaceholder,
       appleStoreLabelPlaceholder,
+      config,
     );
     appleElement && ratings.append(appleElement);
   }
@@ -240,6 +286,7 @@ async function makeRatings(
       starsPlaceholder,
       playStoreLabelPlaceholder,
       appleStoreLabelPlaceholder,
+      config,
     );
     googleElement && ratings.append(googleElement);
   }
@@ -270,15 +317,31 @@ export default async function init(el) {
       return headline;
     }
     ctas[0].parentElement.classList.add('ctas');
+    const heading = headline.querySelector('h1, h2, h3, h4, h5, h6');
     ctas.forEach((cta) => {
       cta.classList.add('button');
+      if (cta.querySelector('.icon')) return;
+      const icon = cta.parentElement?.querySelector(':scope > .icon');
+      const match = icon && iconRegex.exec(icon.className);
+      if (match?.[1]) {
+        const hasExistingGraphic = icon.querySelector('svg, img');
+        if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
+        const ctaText = cta.textContent.trim();
+        cta.textContent = '';
+        cta.title = cta.title || ctaText;
+        cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
+      }
+      if (!cta.getAttribute('aria-label') && heading) {
+        cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
+      }
     });
     ctas[0].classList.add('primaryCTA');
     // Defer pricing formatting to idle time
-    const idleCb = (cb) => (
-      window.requestIdleCallback
-        ? window.requestIdleCallback(cb, { timeout: 3000 })
-        : setTimeout(cb, 3000)
+    // eslint-disable-next-line compat/compat
+    const idleCb = (cb) => (window.requestIdleCallback
+      // eslint-disable-next-line compat/compat
+      ? window.requestIdleCallback(cb, { timeout: 3000 })
+      : setTimeout(cb, 3000)
     );
     idleCb(() => {
       ctas.forEach((cta) => formatDynamicCartLink(cta));
@@ -298,7 +361,13 @@ export default async function init(el) {
   // Legacy mode: headline + background + items inside this block
   if (hasLegacyHeadline) {
     const [headline, background, ...items] = rows;
-    const logo = getIconElementDeprecated('adobe-express-logo');
+    const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
+      || (['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
+      || null;
+    const logo = brandingLogoName
+      ? getIconElementDeprecated(brandingLogoName)
+      : getIconElementDeprecated('adobe-express-logo');
+
     logo.classList.add('express-logo');
 
     background.classList.add('background');
@@ -317,14 +386,15 @@ export default async function init(el) {
     if (el.classList.contains('ratings')) {
       const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
       const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+      const config = getConfig();
       const [ratingPlaceholder,
         starsPlaceholder,
         playStoreLabelPlaceholder,
         appleStoreLabelPlaceholder] = await Promise.all([
-        replaceKey('app-store-ratings', getConfig()),
-        replaceKey('app-store-stars', getConfig()),
-        replaceKey('app-store-ratings-play-store', getConfig()),
-        replaceKey('app-store-ratings-apple-store', getConfig()),
+        replaceKey('app-store-ratings', config),
+        replaceKey('app-store-stars', config),
+        replaceKey('app-store-ratings-play-store', config),
+        replaceKey('app-store-ratings-apple-store', config),
       ]);
 
       const ratingsElement = await makeRatings(
@@ -332,6 +402,7 @@ export default async function init(el) {
         starsPlaceholder,
         playStoreLabelPlaceholder,
         appleStoreLabelPlaceholder,
+        config,
       );
       foreground.append(ratingsElement);
     }
@@ -384,14 +455,15 @@ export default async function init(el) {
           setTimeout(async () => {
             const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
             const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+            const config = getConfig();
             const [ratingPlaceholder,
               starsPlaceholder,
               playStoreLabelPlaceholder,
               appleStoreLabelPlaceholder] = await Promise.all([
-              replaceKey('app-store-ratings', getConfig()),
-              replaceKey('app-store-stars', getConfig()),
-              replaceKey('app-store-ratings-play-store', getConfig()),
-              replaceKey('app-store-ratings-apple-store', getConfig()),
+              replaceKey('app-store-ratings', config),
+              replaceKey('app-store-stars', config),
+              replaceKey('app-store-ratings-play-store', config),
+              replaceKey('app-store-ratings-apple-store', config),
             ]);
 
             const ratingsElement = await makeRatings(
@@ -399,6 +471,7 @@ export default async function init(el) {
               starsPlaceholder,
               playStoreLabelPlaceholder,
               appleStoreLabelPlaceholder,
+              config,
             );
             ratingsPlaceholder.replaceWith(ratingsElement);
           }, 1000);

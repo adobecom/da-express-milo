@@ -19,7 +19,7 @@ export default async function decorate(block) {
     block.closest('.section').remove();
   }
 
-  const data = collectFloatingButtonData(createTag, getIconElementDeprecated, eligible);
+  const data = collectFloatingButtonData(createTag, getIconElementDeprecated, eligible, {}, eligible ? 'mobile-fqa-upload' : '');
   const blockWrapper = await createMultiFunctionButton(
     createTag,
     createFloatingButton,

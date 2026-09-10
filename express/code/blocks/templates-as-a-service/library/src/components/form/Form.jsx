@@ -114,6 +114,14 @@ export default function Form() {
       />
 
       <TextField
+        label="Locales:"
+        name="locales"
+        value={formData.locales}
+        onChange={createFieldChangeHandler('locales')}
+        info="Region filter values, for example IN. These are sent as applicableRegions filters."
+      />
+
+      <TextField
         label="Tasks:"
         name="tasks"
         value={formData.tasks}

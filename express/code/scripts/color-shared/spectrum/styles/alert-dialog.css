@@ -1,0 +1,104 @@
+/* ============================================================================
+   Express Alert Dialog Override Styles
+   Matches Libraries Figma delete confirmation (sp-alert-dialog, node 2231:297600).
+   ============================================================================ */
+
+/* ── Centered modal shell ─────────────────────────────────────────── */
+
+.express-alert-dialog-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.express-alert-dialog-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--spectrum-transparent-black-500);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ── Alert dialog panel ───────────────────────────────────────────── */
+
+.express-alert-dialog {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  inline-size: calc(100vw - 48px);
+  max-inline-size: 480px;
+  border-radius: var(--Corner-radius-corner-radius-200);
+  background: var(--color-white);
+  box-shadow: var(--Elevation-Dialog);
+  font-family: var(--body-font-family);
+  overflow: hidden;
+
+  --mod-alert-dialog-padding: 32px;
+  --mod-alert-dialog-min-width: 320px;
+  --mod-alert-dialog-max-width: 480px;
+  --mod-alert-dialog-title-font-size: var(--font-size-500);
+  --mod-alert-dialog-title-line-height: var(--line-height-300);
+  --mod-alert-dialog-title-font-weight: 700;
+  --mod-alert-dialog-title-color: #131313;
+  --mod-alert-dialog-body-font-size: var(--Global-Typography-Size-Title-Title-2XS);
+  --mod-alert-dialog-body-line-height: 1.5;
+  --mod-alert-dialog-body-color: #292929;
+  --mod-alert-dialog-title-to-divider: 0;
+  --mod-alert-dialog-divider-to-description: var(--spacing-300);
+  --mod-alert-dialog-description-to-buttons: var(--spacing-500);
+  --mod-buttongroup-spacing: 12px;
+  --spectrum-divider-thickness: 0;
+}
+
+.express-alert-dialog [slot="heading"] {
+  font-size: var(--font-size-500);
+  font-weight: 700;
+  line-height: var(--line-height-300);
+  color: #131313;
+  margin: 0;
+}
+
+.express-alert-dialog p {
+  font-size: var(--Global-Typography-Size-Title-Title-2XS);
+  line-height: 1.5;
+  color: #292929;
+  margin: 0;
+}
+
+.express-alert-dialog sp-button {
+  --spectrum-button-border-radius: var(--Corner-radius-corner-radius-200);
+}
+
+/* ── Responsive: mobile ───────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .express-alert-dialog {
+    inline-size: calc(100vw - 32px);
+    --mod-alert-dialog-padding: 24px;
+  }
+
+  .express-alert-dialog-wrapper {
+    align-items: flex-end;
+  }
+}
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .express-alert-dialog,
+  .express-alert-dialog-overlay {
+    transition: none !important;
+    animation: none !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .express-alert-dialog {
+    border: 2px solid var(--color-gray-800);
+  }
+}

@@ -3,8 +3,14 @@ set -e
 
 TAGS=""
 REPORTER=""
-EXCLUDE_TAGS="--grep-invert nopr"
-EXCLUDE_MONITORING="--grep-invert @monitoring"
+# Single combined --grep-invert: Playwright applies only the LAST --grep-invert
+# flag, so every exclusion must live in one regex. nopr = never run in PR/CI;
+# @monitoring = synthetic monitors. Sharded lanes additionally pass
+# NALA_EXTRA_GREP_INVERT="@color" to hand the heavy color blocks off to their
+# own serial lane (they starve each other's decoration when clustered).
+GREP_INVERT="nopr|@monitoring"
+[[ -n "$NALA_EXTRA_GREP_INVERT" ]] && GREP_INVERT="${GREP_INVERT}|${NALA_EXTRA_GREP_INVERT}"
+EXCLUDE_TAGS="--grep-invert ${GREP_INVERT}"
 EXIT_STATUS=0
 
 echo "GITHUB_REF: $GITHUB_REF"
@@ -74,32 +80,45 @@ done
 # Remove first pipe if TAGS not empty
 [[ ! -z "$TAGS" ]] && TAGS="${TAGS:1}" && TAGS="-g $TAGS"
 
+# Positive grep. A lane override (NALA_GREP, e.g. "@color" for the serial color
+# lane) takes precedence over PR-label tags.
+GREP_ARG="$TAGS"
+[[ -n "$NALA_GREP" ]] && GREP_ARG="-g $NALA_GREP"
+
 # Reporter (override if provided)
 REPORTER=$reporter
 [[ ! -z "$REPORTER" ]] && REPORTER="--reporter $REPORTER"
 
 echo "Running Nala on branch: $FEATURE_BRANCH"
 echo "Tags: ${TAGS:-"No @tags or annotations on this PR"}"
-echo "Run Command: npx playwright test ${TAGS} ${EXCLUDE_TAGS} ${EXCLUDE_MONITORING} ${REPORTER}"
+echo "Run Command: npx playwright test ${GREP_ARG} ${EXCLUDE_TAGS} ${REPORTER}"
 echo -e "\n"
 echo "*******************************"
 
 # Move to repo root
 cd "$GITHUB_ACTION_PATH" || exit
 
-# Install dependencies
-npm ci
-npx playwright install --with-deps
+# Dependencies and browsers are installed by the calling workflow steps.
+# (Re-installing here duplicated `npm ci` and pulled every browser + OS deps
+# on every run, adding several minutes for no benefit.)
 
-# Run Playwright tests on all browsers
-echo "*** Running tests on Chromium + Firefox + WebKit ***"
-echo "*** Excluding monitoring tests (@monitoring) ***"
+# Browsers to run. Default: chromium only (fast PR gate). Override with
+# NALA_PROJECTS to run the full cross-browser matrix, e.g.
+# "--project=express-live-chromium --project=express-live-firefox --project=express-live-webkit"
+PROJECTS="${NALA_PROJECTS:---project=express-live-chromium}"
+
+# Optional sharding across parallel runner jobs, e.g. SHARD="1/4"
+SHARD_ARG=""
+[[ -n "$SHARD" ]] && SHARD_ARG="--shard=$SHARD"
+
+# Run Playwright tests
+echo "*** Running tests on projects: ${PROJECTS} ${SHARD_ARG:-"(no shard)"} ***"
+echo "*** grep-invert: ${GREP_INVERT} ***"
+[[ -n "$NALA_GREP" ]] && echo "*** grep (include only): ${NALA_GREP} — workers: ${NALA_WORKERS:-config default} ***"
 npx playwright test \
   --config=./playwright.config.cjs \
-  ${TAGS} ${EXCLUDE_TAGS} ${EXCLUDE_MONITORING} ${REPORTER} \
-  --project=express-live-chromium \
-  --project=express-live-firefox \
-  --project=express-live-webkit || EXIT_STATUS=$?
+  ${GREP_ARG} ${EXCLUDE_TAGS} ${REPORTER} \
+  ${PROJECTS} ${SHARD_ARG} || EXIT_STATUS=$?
 
 # Exit status
 if [ $EXIT_STATUS -ne 0 ]; then

@@ -1,0 +1,60 @@
+{
+  "block": "font-bento",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@font-bento-default",
+      "selector": "div.font-bento",
+      "path": "/drafts/nala/blocks/font-bento",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".font-bento-text h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Lorem ipsum."
+            },
+            {
+              "selector": ".font-bento-text p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Felis interdum neque enim pretium hendrerit metus ornare vel malesuada."
+            }
+          ],
+          "media": [
+            {
+              "selector": ".font-bento-card-first .font-bento-card-media picture",
+              "nth": 0,
+              "tag": "picture"
+            },
+            {
+              "selector": ".font-bento-card:nth-child(2) .font-bento-card-media picture",
+              "nth": 0,
+              "tag": "picture"
+            },
+            {
+              "selector": ".font-bento-card-last .font-bento-card-media picture",
+              "nth": 0,
+              "tag": "picture"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".font-bento-header .con-button",
+              "nth": 0,
+              "text": "Create now",
+              "href": "https://www.adobe.com/",
+              "ariaLabel": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@font-bento",
+        "@express"
+      ]
+    }
+  ]
+}

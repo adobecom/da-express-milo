@@ -1,3 +1,9 @@
+import {
+  getPreferredColorMode,
+  setPreferredColorMode,
+  subscribeColorMode,
+} from '../utils/colorModePreference.js';
+
 export default function createBaseColorAdapter(
   initialColor,
   colorMode,
@@ -8,7 +14,7 @@ export default function createBaseColorAdapter(
 
   const element = document.createElement('base-color');
   element.color = initialColor;
-  element.setAttribute('color-mode', colorMode);
+  element.setAttribute('color-mode', getPreferredColorMode(colorMode));
 
   if (callbacks.strings) {
     element.strings = callbacks.strings;
@@ -18,11 +24,21 @@ export default function createBaseColorAdapter(
     element.controller = options.controller;
   }
 
+  let rafId = null;
+  let pendingDetail = null;
   element.addEventListener('color-change', (e) => {
-    callbacks.onColorChange?.(e.detail);
+    if (!callbacks.onColorChange) return;
+    pendingDetail = e.detail;
+    if (rafId !== null) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      callbacks.onColorChange(pendingDetail);
+      pendingDetail = null;
+    });
   });
 
   element.addEventListener('mode-change', (e) => {
+    setPreferredColorMode(e.detail?.mode);
     callbacks.onModeChange?.(e.detail);
   });
 
@@ -32,6 +48,10 @@ export default function createBaseColorAdapter(
 
   element.addEventListener('color-change-end', (e) => {
     callbacks.onColorChangeEnd?.(e.detail);
+  });
+
+  const unsubscribe = subscribeColorMode((mode) => {
+    if (element.colorMode !== mode) element.colorMode = mode;
   });
 
   return {
@@ -44,6 +64,8 @@ export default function createBaseColorAdapter(
     },
     getController: () => options.controller,
     destroy: () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      unsubscribe();
       element.remove();
     },
   };

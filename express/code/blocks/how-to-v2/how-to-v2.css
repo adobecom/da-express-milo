@@ -18,6 +18,21 @@ main .section > .content:has( + .how-to-v2) h2 {
   padding-bottom: var(--spacing-200);
 }
 
+/* No ::before glow to compensate for on this variant (see .no-background-image
+   .media-container::before above) — plain spacing-400 gap instead of the
+   negative-margin offset used for the with-background layout. */
+main .section > .content:has( + .how-to-v2.no-background-image) h2 {
+  margin-top: 0;
+  padding-bottom: var(--spacing-400);
+}
+
+/* Overrides styles.css's global first-content-in-section rule (flat 60px)
+   for sections leading into this variant — higher specificity than that
+   rule (extra :not/:has classes) so it wins regardless of stylesheet order. */
+main .section:not([data-padding='none']):has(.how-to-v2.no-background-image) > .content:first-child {
+  padding-top: var(--section-padding-xl);
+}
+
 .how-to-v2 ol {
   list-style-type: none;
   font-size: 21px;
@@ -25,7 +40,6 @@ main .section > .content:has( + .how-to-v2) h2 {
 }
 
 .how-to-v2 ol li {
-  padding: var(--spacing-100) 0;
   cursor: pointer;
   transition: all 0.21s;
   display: flex;
@@ -83,6 +97,7 @@ main .section > .content:has( + .how-to-v2) h2 {
   max-width: 400px;
   max-height: 300px;
   width: 100%;
+  object-fit: cover;
 }
 
 main .section:has(.how-to-v2) .content em {
@@ -125,6 +140,51 @@ main .section:has(.how-to-v2) .content em {
   padding: 0 var(--spacing-400);
 }
 
+/* picture and img are inline by default, each leaving their own baseline
+   whitespace gap below (picture-in-container, then img-in-picture). */
+.how-to-v2 .steps-content .media-container picture,
+.how-to-v2 .steps-content .media-container picture img {
+  display: block;
+}
+
+@media (max-width: 1199px) {
+  .how-to-v2.no-background-image .steps-content .media-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* Media/steps gap and steps inline spacing — stacked (mobile) values here;
+   row-layout (tablet/desktop/widescreen) values are set alongside their
+   respective breakpoints below. */
+.how-to-v2.no-background-image .steps-content {
+  gap: var(--spacing-400);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.how-to-v2.no-background-image {
+  padding-bottom: var(--section-padding-xl);
+}
+
+.how-to-v2.no-background-image .steps-content .steps {
+  padding-left: 0;
+  padding-right: 0;
+  margin-top: 0;
+}
+
+.how-to-v2.no-background-image .milo-video,
+.how-to-v2.no-background-image picture img {
+  max-width: none;
+  max-height: none;
+}
+
+/* No authored background image to show through, so the decorative glow
+   behind the media has nothing to render — drop it entirely. */
+.how-to-v2.no-background-image .steps-content .media-container::before {
+  content: none;
+}
+
 .how-to-v2 .steps-content .media-container::before {
   content: '';
   position: absolute;
@@ -143,15 +203,23 @@ main .section:has(.how-to-v2) .content em {
   background-position: center;
 }
 
-.how-to-v2 .ol.steps {
+.how-to-v2 ol.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
   margin: var(--spacing-200) 0 0;
   padding: 0;
 }
 
-.how-to-v2 ol.steps .step .step-content:has(.detail-container.closed) h3:not(:has(picture), :has(.milo-video)):hover {
+/* Hover only shows on non-expanded steps (Figma: Open?=No). Highlights the
+   whole row — indicator bar and text alike — not just the title text.
+   The picture/video exclusion only looks at the title (h3), not the whole
+   step, so steps with plain-text titles still hover-highlight even when
+   their (collapsed) detail body holds an image or video. */
+.how-to-v2 ol.steps .step:has(.detail-container.closed):not(:has(h3 picture), :has(h3 .milo-video)):hover {
   background-color: var(--color-gray-100);
-  margin: -8px 0 -8px -16px; 
-  padding: 8px 0 8px 16px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  transition: background-color 0.3s ease-out;
 }
 
 .how-to-v2 .video-container {
@@ -184,12 +252,20 @@ main .section:has(.how-to-v2) .content em {
   margin-right: auto;
 }
 
-@media (min-width: 400px) {
-  main:has(.how-to-v2) .content {
-    max-width: unset;
-    margin-left: 20px;
-    margin-right: 20px;
-  }
+main:has(.how-to-v2) .content {
+  max-width: unset;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+/* Mirrors .how-to-v2.no-background-image's own box model exactly (same
+   max-width/margin/padding at each breakpoint below) so the section heading
+   lines up with the block's content instead of using the flat 20px above. */
+main:has(.how-to-v2.no-background-image) .content {
+  max-width: unset;
+  margin: 0;
+  padding-left: var(--spacing-300);
+  padding-right: var(--spacing-300);
 }
 
 @media (min-width: 768px) {
@@ -208,6 +284,13 @@ main .section:has(.how-to-v2) .content em {
     margin: auto;
   }
 
+  main:has(.how-to-v2.no-background-image) .content {
+    max-width: 1252px;
+    margin-inline: auto;
+    padding-left: var(--spacing-500);
+    padding-right: var(--spacing-500);
+  }
+
   .how-to-v2 .steps-content {
     display: flex;
     flex-direction: row;
@@ -218,6 +301,10 @@ main .section:has(.how-to-v2) .content em {
 
   .how-to-v2 .steps-content:has(.media-container .milo-video) {
     display: flex;
+  }
+
+  .how-to-v2.no-background-image .steps-content {
+    gap: var(--Grid-grid-gutter);
   }
 
   .how-to-v2 .steps-content > * {
@@ -280,5 +367,28 @@ main .section:has(.how-to-v2) .content em {
   .how-to-v2 picture img {
     max-width: 533px;
     max-height: 300px;
+  }
+
+  .how-to-v2.no-background-image {
+    max-width: var(--ax-grid-container-width);
+    margin-inline: auto;
+    padding-inline: var(--Grid-container-padding-side);
+  }
+
+  .how-to-v2.no-background-image .steps-content .media-container {
+    padding: var(--spacing-400);
+  }
+
+  main:has(.how-to-v2.no-background-image) .content {
+    max-width: var(--ax-grid-container-width);
+    margin-inline: auto;
+    padding-left: var(--Grid-container-padding-side);
+    padding-right: var(--Grid-container-padding-side);
+  }
+}
+
+@media (min-width: 1680px) {
+  .how-to-v2.no-background-image .steps-content {
+    gap: var(--spacing-500);
   }
 }

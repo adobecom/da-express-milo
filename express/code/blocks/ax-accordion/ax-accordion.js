@@ -21,7 +21,7 @@ async function initUtils() {
   }
 }
 
-function createAccordionItem(container, { title, content }, index) {
+function createAccordionItem(container, { title, content }, index, options = {}) {
   const itemContainer = createTag('div', { class: 'ax-accordion-item-container' });
   const instanceId = accordionInstanceCounter;
   accordionInstanceCounter += 1;
@@ -69,7 +69,7 @@ function createAccordionItem(container, { title, content }, index) {
     const isExpanded = itemButton.getAttribute('aria-expanded') === 'true';
     itemButton.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
     itemDescription.setAttribute('aria-hidden', isExpanded ? 'true' : 'false');
-    if (!isExpanded) {
+    if (!isExpanded && !options.disableScrollAfterExpand) {
       setTimeout(() => {
         requestAnimationFrame(() => {
           // Find scrollable parent container
@@ -113,7 +113,7 @@ function createAccordionItem(container, { title, content }, index) {
   return itemContainer;
 }
 
-function buildAccordion(block, items, forceExpandTitle = null) {
+function buildAccordion(block, items, forceExpandTitle = null, options = {}) {
   const existingItems = block.querySelectorAll('.ax-accordion-item-container');
   const existingTitles = Array.from(existingItems).map((item) => {
     const titleElement = item.querySelector('.ax-accordion-item-title');
@@ -159,7 +159,7 @@ function buildAccordion(block, items, forceExpandTitle = null) {
   existingItems.forEach((item) => item.remove());
   buttonCache.delete(block);
   items.forEach((item, index) => {
-    const accordionItem = createAccordionItem(block, item, index);
+    const accordionItem = createAccordionItem(block, item, index, options);
     block.appendChild(accordionItem);
     if (expandedTitle && item.title === expandedTitle) {
       const button = accordionItem.querySelector('.ax-accordion-item-title-container');
@@ -223,7 +223,7 @@ function setupAutoCollapse(block) {
   window.addEventListener('scroll', scrollHandler, { passive: true });
 }
 
-export default async function decorate(block) {
+export default async function decorate(block, options = {}) {
   await initUtils();
   const config = getConfig();
   await new Promise((resolve) => {
@@ -236,9 +236,9 @@ export default async function decorate(block) {
     items = extractItemsFromBlock(block);
   }
   setupAutoCollapse(block);
-  buildAccordion(block, items);
+  buildAccordion(block, items, null, options);
   block.updateAccordion = (newItems, forceExpandTitle = null) => {
-    buildAccordion(block, newItems, forceExpandTitle);
+    buildAccordion(block, newItems, forceExpandTitle, options);
   };
   block.destroyAccordion = () => {
     const handlers = eventHandlers.get(block);

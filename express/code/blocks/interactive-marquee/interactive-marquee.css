@@ -709,13 +709,13 @@ main .interactive-marquee .foreground .express-logo {
   padding-bottom: 20px;
 }
 
-main .interactive-marquee .foreground .acrobat-express-lockup {
+main .interactive-marquee .foreground .marquee-eyebrow-logo-wide {
   width: fit-content;
   height: 20px;
   padding-bottom: 0px;
 }
 @media screen and (max-width: 1200px) {
-  main .interactive-marquee .foreground .acrobat-express-lockup {
+  main .interactive-marquee .foreground .marquee-eyebrow-logo-wide {
     padding-bottom: 10px;
   }
 }

@@ -1,4 +1,3 @@
-/* eslint-enable chai-friendly/no-unused-expressions */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { throttle, debounce } from '../../scripts/utils/hofs.js';
 
@@ -6,8 +5,6 @@ let createTag;
 let loadStyle;
 let getConfig;
 const iconRegex = /icon-([^\s]+)/;
-
-const scrollPadding = 16;
 
 function createChevronButton(direction, ariaLabel) {
   const button = createTag('button', {
@@ -30,59 +27,100 @@ function createControl(items, container) {
   const prevButton = createChevronButton('prev', 'Previous');
   const nextButton = createChevronButton('next', 'Next');
 
-  const intersecting = Array.from(items).fill(false);
-
-  const len = items.length;
-  const pageInc = throttle((inc) => {
-    const first = intersecting.indexOf(true);
-    if (first === -1) return; // middle of swapping only page
-    if (first + inc < 0 || first + inc >= len) return; // no looping
-    const target = items[(first + inc + len) % len];
-    target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-  }, 200);
-  prevButton.addEventListener('click', () => pageInc(-1));
-  nextButton.addEventListener('click', () => pageInc(1));
-
-  const dots = items.map(() => {
-    const dot = createTag('div', { class: 'dot' });
-    status.append(dot);
-    return dot;
-  });
-
-  const updateDOM = debounce((first, last) => {
-    prevButton.disabled = first === 0;
-    nextButton.disabled = last === items.length - 1;
-    dots.forEach((dot, i) => {
-      /* eslint-disable chai-friendly/no-unused-expressions */
-      i === first ? dot.classList.add('curr') : dot.classList.remove('curr');
-      i === first ? items[i].classList.add('curr') : items[i].classList.remove('curr');
-      i > first && i <= last ? dot.classList.add('hide') : dot.classList.remove('hide');
-      /* eslint-disable chai-friendly/no-unused-expressions */
-    });
-    if (items.length === last - first + 1) {
-      control.classList.add('hide');
-      container.classList.add('gallery--all-displayed');
-    } else {
-      control.classList.remove('hide');
-      container.classList.remove('gallery--all-displayed');
-    }
-    control.classList.remove('loading');
-  }, 300);
-
-  const reactToChange = (entries) => {
-    entries.forEach((entry) => {
-      intersecting[items.indexOf(entry.target)] = entry.isIntersecting;
-    });
-    const [first, last] = [intersecting.indexOf(true), intersecting.lastIndexOf(true)];
-    if (first === -1) return; // middle of swapping only page
-    updateDOM(first, last);
+  // Step = one card (card width + gap). A pip's canonical scroll position is
+  // pip * step, so page count and current pip use the same rounding and always
+  // agree — the last pip is reachable and buttons never gray with pips remaining.
+  const getStep = () => {
+    if (!items.length) return 0;
+    const cardWidth = items[0].getBoundingClientRect().width;
+    const { columnGap, gap } = getComputedStyle(container);
+    const itemGap = parseFloat(columnGap || gap) || 0;
+    return cardWidth + itemGap;
+  };
+  // The last card carries a decorative trailing margin-right. The container can
+  // scroll into it, but it reveals no content, so it must be excluded from the
+  // overflow measurement — otherwise, when every card already fits, that phantom
+  // whitespace reads as a second page and the control shows (notably >=1680px,
+  // where the block caps and the cards exactly fill it).
+  const tailGap = () => {
+    const last = items[items.length - 1];
+    return last ? parseFloat(getComputedStyle(last).marginRight) || 0 : 0;
+  };
+  const maxScroll = () => Math.max(
+    0,
+    container.scrollWidth - container.clientWidth - tailGap(),
+  );
+  // Sub-pixel layout rounding (widths/gaps from getBoundingClientRect summed
+  // across several cards) routinely leaves maxScroll a hair past an exact
+  // multiple of step. atEnd() and pageCount() must resolve that slop the same
+  // way, or a near-exact fit manufactures a redundant last pip that sits on
+  // top of the real one and traps navigation at the end.
+  const EDGE_SLOP = 1;
+  const atEnd = () => container.scrollLeft >= maxScroll() - EDGE_SLOP;
+  const pageCount = () => {
+    const step = getStep();
+    const overflow = maxScroll();
+    if (step <= 0 || overflow <= EDGE_SLOP) return 1;
+    // Any real overflow yields at least two pips; a partial trailing step still
+    // gets its own pip so the remaining content is always reachable.
+    return Math.ceil((overflow - EDGE_SLOP) / step) + 1;
+  };
+  const pipAt = (count) => {
+    if (count <= 1) return 0;
+    // The last pip maps to the clamped end (a possibly-partial final step); all
+    // earlier pips map to whole-card offsets.
+    if (atEnd()) return count - 1;
+    const step = getStep();
+    if (step <= 0) return 0;
+    return Math.max(0, Math.min(count - 2, Math.round(container.scrollLeft / step)));
   };
 
-  const scrollObserver = new IntersectionObserver((entries) => {
-    reactToChange(entries);
-  }, { root: container, threshold: 1, rootMargin: `0px ${scrollPadding}px 0px ${scrollPadding}px` });
+  const dots = [];
+  const syncDots = (count) => {
+    while (dots.length < count) {
+      const dot = createTag('div', { class: 'dot' });
+      status.append(dot);
+      dots.push(dot);
+    }
+    while (dots.length > count) dots.pop().remove();
+  };
 
-  items.forEach((item) => scrollObserver.observe(item));
+  // The single integrated state. Recomputed from the scroll position; dots, both
+  // buttons and the click handlers all read from it.
+  let count = 1;
+  let pip = 0;
+  const render = () => {
+    count = pageCount();
+    pip = pipAt(count);
+    syncDots(count);
+    prevButton.disabled = pip <= 0;
+    nextButton.disabled = pip >= count - 1;
+    dots.forEach((dot, i) => dot.classList.toggle('curr', i === pip));
+    const allDisplayed = count <= 1;
+    control.classList.toggle('hide', allDisplayed);
+    container.classList.toggle('gallery--all-displayed', allDisplayed);
+    control.classList.remove('loading');
+  };
+
+  const goToPip = (index) => {
+    const target = Math.max(0, Math.min(count - 1, index));
+    // Clamp to the content end so the last pip lands the last card flush at the
+    // edge rather than scrolling into the trailing whitespace.
+    container.scrollTo({ left: Math.min(target * getStep(), maxScroll()), behavior: 'smooth' });
+  };
+  prevButton.addEventListener('click', () => goToPip(pip - 1));
+  nextButton.addEventListener('click', () => goToPip(pip + 1));
+
+  container.addEventListener('scroll', throttle(render, 100, { trailing: true }), { passive: true });
+  window.addEventListener('resize', debounce(render, 150));
+
+  // Trigger (not state): render once laid out, and again if the block starts
+  // hidden (e.g. inside a tab panel) and later becomes visible.
+  const visObserver = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) render();
+  }, { threshold: 0 });
+  visObserver.observe(container);
+  requestAnimationFrame(render);
 
   control.append(status, prevButton, nextButton);
   return control;

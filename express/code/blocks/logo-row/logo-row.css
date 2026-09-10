@@ -16,10 +16,9 @@ main .logo-row .block-layout {
     font-family: Arial, sans-serif;
 }
 
-main .logo-row.block-layout .text-column {
-    font-size: 22px;
+main .logo-row .text-column :where(h1, h2, h3, h4, h5, h6) {
+    font-size: var(--heading-font-size-s);
     font-style: normal;
-    font-weight: 900;
 }
 
 main .logo-row .block-row {
@@ -31,8 +30,7 @@ main .logo-row .block-row {
 main .logo-row .text-column {
     margin: auto auto var(--spacing-300) auto;
     text-align: center;
-    padding-left: var(--spacing-300);
-    padding-right: var(--spacing-300);
+    padding-inline: var(--spacing-300);
 }
 
 main .logo-row .text-content {
@@ -46,8 +44,7 @@ main .logo-row .image-column {
     flex-wrap: wrap;
     gap: var(--border-radius-10);
     justify-content: center;
-    padding-left: var(--spacing-300);
-    padding-right: var(--spacing-300);
+    padding-inline: var(--spacing-300);
     margin: auto;
 }
 
@@ -84,11 +81,11 @@ main .logo-row .brand-image {
 
     main .logo-row .text-column  {
         margin: auto auto var(--spacing-300) auto;
-        padding-right: initial;
+        padding-inline-end: initial;
         max-width: 300px;
     }
     main .logo-row .text-column > * {
-        text-align: left;
+        text-align: start;
         font-size: 20px;
     }
 
@@ -102,9 +99,9 @@ main .logo-row .brand-image {
 @media (min-width: 1280px) {
     main .logo-row .text-column {
         margin: auto 0 16px auto;
-        padding-right: 40px;
+        padding-inline-end: 40px;
         max-width: 320px;
-        text-align: left;
+        text-align: start;
     }
 
     main .logo-row .block-row {
@@ -112,7 +109,7 @@ main .logo-row .brand-image {
     }
 
     main .logo-row .text-column > * {
-        text-align: left;
+        text-align: start;
     }
     main .logo-row .image-column {
         max-width: unset;

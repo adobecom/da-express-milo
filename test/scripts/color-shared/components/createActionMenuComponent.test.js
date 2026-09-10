@@ -1,7 +1,10 @@
 /* eslint-env mocha */
 import { expect } from '@esm-bundle/chai';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
-import { createActionMenuComponent } from '../../../../express/code/scripts/color-shared/components/createActionMenuComponent.js';
+import {
+  createActionMenuComponent,
+  buildNavLinkTarget,
+} from '../../../../express/code/scripts/color-shared/components/createActionMenuComponent.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
@@ -54,6 +57,32 @@ describe('createActionMenuComponent', () => {
     expect(instance.element.querySelector('.action-menu-controls')).to.exist;
     expect(instance.element.querySelector('.undo-btn')).to.exist;
     expect(instance.element.querySelector('.redo-btn')).to.exist;
+  });
+
+  it('expand control updates aria-label when toggled', async () => {
+    let expandedValue = null;
+    instance = await createActionMenuComponent({
+      type: 'controls-only',
+      controls: [{ id: 'expand', label: 'Maximize', expandedLabel: 'Minimize' }],
+      onExpand: (isExpanded) => {
+        expandedValue = isExpanded;
+      },
+    });
+
+    const expandBtn = instance.element.querySelector('.expand-btn');
+    expect(expandBtn).to.exist;
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Maximize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
+
+    expandBtn.click();
+    expect(expandedValue).to.equal(true);
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Minimize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
+
+    expandBtn.click();
+    expect(expandedValue).to.equal(false);
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Maximize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
   });
 
   it('destroy() removes element from DOM', async () => {
@@ -116,5 +145,50 @@ describe('createActionMenuComponent', () => {
     }));
     expect(undoBtn.getAttribute('aria-disabled')).to.equal('true');
     expect(redoBtn.getAttribute('aria-disabled')).to.equal('false');
+  });
+});
+
+// Extracted from the click handler (which navigates directly) to test without a real navigation.
+describe('buildNavLinkTarget', () => {
+  const base = 'https://example.com/create/color-wheel';
+
+  it('carries colors, name and tags onto the destination URL', () => {
+    const target = buildNavLinkTarget('/create/color-contrast-analyzer', base, ['#FF0000', '#00FF00'], {
+      name: 'Sunset',
+      tags: ['warm', 'bold'],
+    });
+
+    const url = new URL(target);
+    expect(url.pathname).to.equal('/create/color-contrast-analyzer');
+    expect(url.searchParams.get('color-palette')).to.equal('FF0000,00FF00');
+    expect(url.searchParams.get('color-palette-name')).to.equal('Sunset');
+    expect(url.searchParams.get('color-palette-tags')).to.equal('warm,bold');
+  });
+
+  it('carries id and libraryId onto the destination URL when editing a saved item', () => {
+    const target = buildNavLinkTarget('/create/color-accessibility', base, ['#FF0000'], {
+      name: 'Sunset',
+      tags: ['warm'],
+      id: 'theme-1',
+      libraryId: 'lib-1',
+    });
+
+    const url = new URL(target);
+    expect(url.searchParams.get('color-palette-id')).to.equal('theme-1');
+    expect(url.searchParams.get('color-library-id')).to.equal('lib-1');
+  });
+
+  it('omits id/libraryId when there is no saved-item context', () => {
+    const target = buildNavLinkTarget('/create/color-wheel', base, ['#FF0000'], { name: 'Untitled' });
+
+    const url = new URL(target);
+    expect(url.searchParams.has('color-palette-id')).to.be.false;
+    expect(url.searchParams.has('color-library-id')).to.be.false;
+  });
+
+  it('resolves an href relative to the current page', () => {
+    const target = buildNavLinkTarget('color-wheel', 'https://example.com/create/color-accessibility', ['#FF0000'], {});
+    const url = new URL(target);
+    expect(url.pathname).to.equal('/create/color-wheel');
   });
 });

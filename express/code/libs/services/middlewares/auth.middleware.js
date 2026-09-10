@@ -114,6 +114,38 @@ export function ensureIms(timeoutMs = DEFAULT_IMS_TIMEOUT_MS) {
 }
 
 /**
+ * Wait until `adobeIMS.isSignedInUser()` returns true.
+ *
+ * After a sign-in redirect, `ensureIms()` resolves as soon as the IMS object
+ * exists, but IMS still needs time to process the OAuth callback and restore
+ * the session. This helper polls until the session is ready or times out.
+ *
+ * @param {number} [timeoutMs=5000] - Max ms to wait for session restoration
+ * @param {number} [intervalMs=100] - Polling interval in ms
+ * @returns {Promise<Object>} Resolves with the `window.adobeIMS` instance
+ * @throws {AuthenticationError} If IMS times out before session is restored
+ */
+export async function waitForSignedInUser(timeoutMs = 5000, intervalMs = 100) {
+  const ims = await ensureIms();
+  if (ims.isSignedInUser()) return ims;
+
+  return new Promise((resolve, reject) => {
+    const deadline = Date.now() + timeoutMs;
+    const interval = setInterval(() => {
+      if (ims.isSignedInUser()) {
+        clearInterval(interval);
+        resolve(ims);
+      } else if (Date.now() >= deadline) {
+        clearInterval(interval);
+        reject(new AuthenticationError('Timed out waiting for IMS session after redirect', {
+          code: 'IMS_SIGNIN_TIMEOUT',
+        }));
+      }
+    }, intervalMs);
+  });
+}
+
+/**
  * Check if a token is expiring within the buffer window.
  * @param {number} expireTimestamp - Token expiry time (ms since epoch)
  * @param {number} [bufferMs=300000] - Buffer window in milliseconds

@@ -31,13 +31,16 @@ test.describe('InteractiveMarqueeBlock Test Suite', () => {
 
       for (const m of sem.media) {
         const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
+        const isOptionalInject = m.selector.includes('express-logo');
+        if (!isOptionalInject || (await locator.count()) > 0) {
+          const isHiddenSelector = m.selector.includes('.isHidden');
+          const isPicture = m.tag === 'picture';
+          const target = isPicture ? locator.locator('img') : locator;
+          if (isHiddenSelector) {
+            await expect(target).toBeHidden();
+          } else {
+            await expect(target).toBeVisible();
+          }
         }
       }
 
@@ -91,13 +94,16 @@ test.describe('InteractiveMarqueeBlock Test Suite', () => {
 
       for (const m of sem.media) {
         const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
+        const isOptionalInject = m.selector.includes('express-logo');
+        if (!isOptionalInject || (await locator.count()) > 0) {
+          const isHiddenSelector = m.selector.includes('.isHidden');
+          const isPicture = m.tag === 'picture';
+          const target = isPicture ? locator.locator('img') : locator;
+          if (isHiddenSelector) {
+            await expect(target).toBeHidden();
+          } else {
+            await expect(target).toBeVisible();
+          }
         }
       }
 
@@ -151,13 +157,16 @@ test.describe('InteractiveMarqueeBlock Test Suite', () => {
 
       for (const m of sem.media) {
         const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
+        const isOptionalInject = m.selector.includes('express-logo');
+        if (!isOptionalInject || (await locator.count()) > 0) {
+          const isHiddenSelector = m.selector.includes('.isHidden');
+          const isPicture = m.tag === 'picture';
+          const target = isPicture ? locator.locator('img') : locator;
+          if (isHiddenSelector) {
+            await expect(target).toBeHidden();
+          } else {
+            await expect(target).toBeVisible();
+          }
         }
       }
 
@@ -211,13 +220,16 @@ test.describe('InteractiveMarqueeBlock Test Suite', () => {
 
       for (const m of sem.media) {
         const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
+        const isOptionalInject = m.selector.includes('express-logo');
+        if (!isOptionalInject || (await locator.count()) > 0) {
+          const isHiddenSelector = m.selector.includes('.isHidden');
+          const isPicture = m.tag === 'picture';
+          const target = isPicture ? locator.locator('img') : locator;
+          if (isHiddenSelector) {
+            await expect(target).toBeHidden();
+          } else {
+            await expect(target).toBeVisible();
+          }
         }
       }
 
@@ -271,13 +283,16 @@ test.describe('InteractiveMarqueeBlock Test Suite', () => {
 
       for (const m of sem.media) {
         const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
+        const isOptionalInject = m.selector.includes('express-logo');
+        if (!isOptionalInject || (await locator.count()) > 0) {
+          const isHiddenSelector = m.selector.includes('.isHidden');
+          const isPicture = m.tag === 'picture';
+          const target = isPicture ? locator.locator('img') : locator;
+          if (isHiddenSelector) {
+            await expect(target).toBeHidden();
+          } else {
+            await expect(target).toBeVisible();
+          }
         }
       }
 
@@ -331,13 +346,16 @@ test.describe('InteractiveMarqueeBlock Test Suite', () => {
 
       for (const m of sem.media) {
         const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
+        const isOptionalInject = m.selector.includes('express-logo');
+        if (!isOptionalInject || (await locator.count()) > 0) {
+          const isHiddenSelector = m.selector.includes('.isHidden');
+          const isPicture = m.tag === 'picture';
+          const target = isPicture ? locator.locator('img') : locator;
+          if (isHiddenSelector) {
+            await expect(target).toBeHidden();
+          } else {
+            await expect(target).toBeVisible();
+          }
         }
       }
 

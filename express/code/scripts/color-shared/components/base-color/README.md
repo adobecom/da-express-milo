@@ -73,6 +73,8 @@ Open / close programmatically via `el.show()` and `el.hide()`.
 
 ## Usage — Factory method
 
+> Note: when instantiated through `createBaseColorAdapter`, the `colorMode` you pass is treated as a fallback. The adapter initializes from the user's persisted preference (`express-color-mode` in localStorage) when one exists and writes back to it on every `mode-change`, keeping other live pickers in sync.
+
 ```js
 import { createBaseColorComponent } from 'path/to/color-shared/components/createBaseColorComponent.js';
 

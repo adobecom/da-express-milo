@@ -44,6 +44,7 @@ const allowedColorKeywords = [
   'unset',
   'currentColor',
   'none',
+  '0',
 ];
 
 // Helper function to determine which variable name is more semantically correct
@@ -212,6 +213,9 @@ function checkFile(filePath, colorVars, spacingVars) {
       const replacements = [];
 
       spacingMatches.forEach((spacingValue) => {
+        // Skip bare zero values (0, 0px, 0rem, etc.)
+        if (/^0/.test(spacingValue)) return;
+
         // Check if this spacing has a corresponding variable
         if (spacingVars[spacingValue]) {
           replacements.push({

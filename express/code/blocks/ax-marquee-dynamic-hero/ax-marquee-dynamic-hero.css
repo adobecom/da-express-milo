@@ -130,6 +130,12 @@ main .ax-marquee-dynamic-hero p.button-container {
   text-align: left;
 }
 
+@media (min-width: 900px) {
+  .ax-marquee-dynamic-hero .button-container.free-plan-container a.button.same-fcta {
+    display: flex;
+  }
+}
+
 /* Media query for ax-columns-dynamic-hero on tablet */
 @media (min-width: 768px) and (max-width: 899px) {
   .ax-marquee-dynamic-hero {

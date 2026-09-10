@@ -67,26 +67,36 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
     faderRight.classList.toggle('arrow-hidden', isAtEnd);
   };
 
-  let scrollTimeout;
-  const throttledUpdate = () => {
-    if (scrollTimeout) return;
-    scrollTimeout = setTimeout(() => {
+  let arrowUpdateFrame = null;
+  const scheduleArrowVisibilityUpdate = () => {
+    if (arrowUpdateFrame !== null) return;
+    arrowUpdateFrame = requestAnimationFrame(() => {
+      arrowUpdateFrame = null;
       updateArrowVisibility();
-      scrollTimeout = null;
-    }, 50);
+    });
   };
   faderLeft.append(arrowLeft);
   faderRight.append(arrowRight);
   parent.append(platform, faderLeft, faderRight);
 
-  platform.addEventListener('scroll', throttledUpdate, { passive: true });
-  window.addEventListener('resize', throttledUpdate, { passive: true });
+  platform.addEventListener('scroll', scheduleArrowVisibilityUpdate, { passive: true });
+  window.addEventListener('resize', scheduleArrowVisibilityUpdate, { passive: true });
 
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      updateArrowVisibility();
-    }, 150);
+  const resizeObserver = 'ResizeObserver' in window
+    ? new ResizeObserver(scheduleArrowVisibilityUpdate)
+    : null;
+  resizeObserver?.observe(parent);
+  resizeObserver?.observe(platform);
+  carouselContent.forEach((el) => resizeObserver?.observe(el));
+
+  const contentObserver = new MutationObserver(scheduleArrowVisibilityUpdate);
+  contentObserver.observe(platform, {
+    attributes: true,
+    childList: true,
+    subtree: true,
   });
+
+  scheduleArrowVisibilityUpdate();
 
   let isManualScroll = false;
 
@@ -205,8 +215,14 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
   });
 
   const cleanup = () => {
-    platform.removeEventListener('scroll', throttledUpdate);
-    window.removeEventListener('resize', throttledUpdate);
+    platform.removeEventListener('scroll', scheduleArrowVisibilityUpdate);
+    window.removeEventListener('resize', scheduleArrowVisibilityUpdate);
+    resizeObserver?.disconnect();
+    contentObserver.disconnect();
+    if (arrowUpdateFrame !== null) {
+      cancelAnimationFrame(arrowUpdateFrame);
+      arrowUpdateFrame = null;
+    }
     if (centerActive && activeObserver) {
       activeObserver.disconnect();
     }
@@ -216,6 +232,7 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
     platform,
     items: carouselContent,
     cleanup,
+    updateArrowVisibility: scheduleArrowVisibilityUpdate,
     scrollTo: (index) => {
       if (index >= 0 && index < carouselContent.length) {
         carouselContent[index].scrollIntoView({

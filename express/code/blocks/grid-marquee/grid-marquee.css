@@ -6,12 +6,23 @@
   text-align: center;
 }
 
+/* Anti-FOUC: hide only the raw, un-decorated video source authored under each
+   card face (mp4 link, or MEP-inlined <video> if auto-video-decoration ran
+   first) so it never paints before toCard() removes it. Scoped to the element
+   itself, not gated on .foreground existing, so a JS failure can't leave the
+   whole block - including the authored LCP headline - hidden forever. */
+.grid-marquee > div > div:first-child > p > a[href*=".mp4"],
+.grid-marquee > div > div:first-child > p > video {
+  visibility: hidden;
+}
+
 
 
 .grid-marquee .express-logo {
   width: initial;
   height: 30px;
-  padding: 1rem 0 1rem;
+  padding: 2rem 0 1rem;
+  max-width: 340px;
 }
 
 main .section .grid-marquee h1 {
@@ -44,6 +55,17 @@ main .section .grid-marquee h1 {
   border-color: var(--color-black);
 }
 
+/* adobe-clean-arabic's ascent/descent metrics differ from the Latin body font,
+   so the line-height-based centering used elsewhere pushes Arabic CTA text
+   above the button's vertical midline. Center on the flex box instead, which
+   is font-metric agnostic. */
+:lang(ar) .grid-marquee .headline a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+}
+
 .grid-marquee .background  {
   width: 100%
 }
@@ -58,6 +80,7 @@ main .section .grid-marquee h1 {
 .grid-marquee .background img {
   position: absolute;
   top: 50%;
+  left: 50%;
   object-fit: fill;
   width: 250%;
   transform: translate(-50%, -35%);
@@ -93,7 +116,7 @@ main .section .grid-marquee h1 {
   border-radius: var(--spacing-100);
   border: 1px solid #fff;
   background: linear-gradient(170.96deg, rgba(255, 255, 255, 0.6) 18.95%, rgba(255, 255, 255, 0.2) 99.73%);
-  text-align: left;
+  text-align: start;
   display: flex;
   color: initial;
 }
@@ -182,7 +205,8 @@ main .section .grid-marquee h1 {
   background: none;
 }
 
-.grid-marquee .drawer video {
+.grid-marquee .drawer video,
+.grid-marquee .drawer .video-container img {
   border-radius: var(--spacing-100);
   width: 328px;
   z-index: 0;
@@ -246,7 +270,7 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .drawer [role='tablist'] {
-  padding: 0 0 var(--spacing-100) var(--spacing-300);
+  padding: 0 var(--spacing-300) var(--spacing-100);
 }
 
 .grid-marquee .drawer [role='tab'] {
@@ -276,7 +300,7 @@ main .section .grid-marquee h1 {
   font-size: 1rem;
   border: initial;
   padding: initial;
-  text-align: left;
+  text-align: start;
   margin: initial;
 }
 
@@ -296,9 +320,17 @@ main .section .grid-marquee h1 {
   gap: var(--spacing-75);
 }
 
+.grid-marquee .ratings-metric,
+.grid-marquee .rating-visual {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-75);
+}
+
 .grid-marquee .ratings img {
   height: 35px;
-  padding-left: var(--spacing-200);
+  width: auto;
+  padding-inline-start: var(--spacing-200);
   margin: 0;
 }
 
@@ -318,7 +350,7 @@ main .section .grid-marquee.pricing-page h1 {
   line-height: 130%;
   text-align: center;
   padding-bottom: var(--padding-bottom);
- 
+
 }
 .grid-marquee.pricing-page .express-logo {
   padding: 0px 0px var(--spacing-300) 0px
@@ -332,8 +364,7 @@ main .section .grid-marquee.pricing-page h1 {
   }
   .grid-marquee .headline {
     max-width: 1200px;
-    padding-left: var(--spacing-500);
-    padding-right: var(--spacing-500);
+    padding-inline: var(--spacing-500);
   }
   .grid-marquee .headline .ctas {
     display: flex;
@@ -345,6 +376,10 @@ main .section .grid-marquee.pricing-page h1 {
 
   .grid-marquee .headline a.button {
     margin: 0;
+  }
+
+  .grid-marquee.cta-alignment .headline a.button {
+    padding-top: var(--spacing-100);
   }
 
   .grid-marquee .cards-container {
@@ -367,7 +402,8 @@ main .section .grid-marquee.pricing-page h1 {
   .grid-marquee .drawer .title-row {
     width: 480px;
   }
-  .grid-marquee .drawer video {
+  .grid-marquee .drawer video,
+  .grid-marquee .drawer .video-container img {
     width: 480px;
   }
   .grid-marquee .drawer [role='tablist'] {
@@ -416,6 +452,10 @@ main .section .grid-marquee.pricing-page h1 {
     border-radius: 50px;
     line-height: 23.4px;
   }
+
+  .grid-marquee.cta-alignment .headline a.button {
+    padding-top: var(--spacing-300);
+  }
   .grid-marquee .cards-container {
     grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
     width: 1200px;
@@ -450,6 +490,7 @@ main .section .grid-marquee.pricing-page h1 {
 
   .grid-marquee .drawer .content {
     display: block;
+    overflow: visible;
   }
 
   .grid-marquee .drawer.hide {
@@ -467,13 +508,14 @@ main .section .grid-marquee.pricing-page h1 {
     padding: 0 0 12px 0;
   }
 
-  .grid-marquee .drawer video {
+  .grid-marquee .drawer video,
+  .grid-marquee .drawer .video-container img {
     width: var(--d-img-w);
     height: initial;
   }
 
   .grid-marquee .drawer div[role='tablist'] {
-    padding: 0 0 16px 16px;
+    padding: 0 16px 16px;
     display: block;
   }
 
@@ -499,7 +541,7 @@ main .section .grid-marquee.pricing-page h1 {
   .grid-marquee.pricing-page .headline {
     max-width: var(--ax-grid-6-col-width);
   }
-  
+
 }
 
 
@@ -509,7 +551,69 @@ main .section .grid-marquee.pricing-page h1 {
   }
 }
 
+/* narrow variant — centered headline + content, capped at 666px */
+.grid-marquee.resume-builder .foreground {
+  --top-padding: var(--spacing-300);
+  --bottom-padding: var(--spacing-400);
 
+  max-width: 666px;
+  margin-inline: auto;
+  text-align: center;
+  padding: var(--top-padding) var(--spacing-300) var(--bottom-padding);
+  box-sizing: content-box;
+}
 
+.grid-marquee.resume-builder .icon-adobe-brand-logo {
+  height: 20px;
+  padding-block-start: 0;
+  padding-block-end: var(--spacing-300);
+}
 
+.grid-marquee.resume-builder .headline {
+  padding: 0;
+}
 
+main .section .grid-marquee.resume-builder h1 {
+  font-size: var(--typography-headings-xl);
+  line-height: 104%;
+  font-weight: 900;
+  color: var(--color-content-neutral);
+}
+
+.grid-marquee.resume-builder .headline p {
+  font-size: var(--typography-body-s);
+  line-height: 130%;
+  color: var(--Alias-content-typography-Body);
+}
+
+.grid-marquee.resume-builder .headline .ctas {
+  margin-top: 0;
+}
+
+@media screen and (min-width: 600px) {
+  .grid-marquee.resume-builder .foreground {
+    --bottom-padding: var(--spacing-500);
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .grid-marquee.resume-builder .foreground {
+    --top-padding: var(--spacing-600);
+  }
+}
+
+.grid-marquee.resume-builder .headline a.button .text-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.grid-marquee.resume-builder .headline a.button .icon {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .grid-marquee.resume-builder .headline .ctas {
+    margin-top: 0;
+  }
+}

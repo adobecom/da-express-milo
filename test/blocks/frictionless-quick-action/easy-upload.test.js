@@ -2,12 +2,15 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
 import {
+  EasyUpload,
   EasyUploadVariants,
   EasyUploadControls,
 } from '../../../express/code/scripts/utils/easy-upload-utils.js';
 import {
   isEasyUploadExperimentEnabled,
   isEasyUploadControlExperimentEnabled,
+  notifyEasyUploadSdkInitialization,
+  refreshEasyUploadQrIfConsumed,
   setupEasyUploadUI,
   cleanupEasyUpload,
 } from '../../../express/code/blocks/frictionless-quick-action/easy-upload-files/easy-upload.js';
@@ -59,7 +62,24 @@ function buildEasyUploadBlock() {
   return block;
 }
 
+async function waitFor(condition, attempts = 20) {
+  for (let index = 0; index < attempts; index += 1) {
+    if (condition()) {
+      return true;
+    }
+    // Allow async listeners/imports to settle.
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+  }
+  return false;
+}
+
 describe('Easy Upload module', () => {
+  beforeEach(() => {
+    if (!window.QRCodeStyling) {
+      window.QRCodeStyling = class {};
+    }
+  });
+
   afterEach(() => {
     cleanupEasyUpload();
     document.body.innerHTML = '';
@@ -117,5 +137,76 @@ describe('Easy Upload module', () => {
 
     expect(result).to.equal(null);
     expect(block.querySelector('.easy-upload-cta-row')).to.be.null;
+  });
+
+  it('refreshes QR state when QR is consumed and pane is visible', async () => {
+    const block = buildEasyUploadBlock();
+    sinon.stub(EasyUpload.prototype, 'initializeQRCode').resolves();
+    sinon.stub(EasyUpload.prototype, 'startUploadDetectionPolling');
+    const resetUploadSessionStub = sinon.stub(EasyUpload.prototype, 'resetUploadSession').resolves();
+    const consumedStub = sinon.stub(EasyUpload.prototype, 'isQrCodeConsumed');
+    consumedStub.onFirstCall().returns(false);
+    consumedStub.onSecondCall().returns(true);
+    consumedStub.onThirdCall().returns(true);
+
+    await setupEasyUploadUI({
+      quickAction: EasyUploadVariants.removeBackgroundEasyUploadVariant,
+      block,
+      getConfig: () => ({ codeRoot: '/express/code', env: { name: 'stage' } }),
+      loadStyle: sinon.stub().callsFake((href, callback) => callback?.()),
+      initializeUploadService: sinon.stub().resolves({}),
+      startSDKWithUnconvertedFiles: sinon.stub(),
+      createTag,
+      showErrorToast: sinon.stub(),
+    });
+
+    const secondaryCta = block.querySelector('.easy-upload-cta-row > p.button-container:nth-child(2) a.button');
+    secondaryCta.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    const qrPaneReady = await waitFor(() => {
+      const qrPane = block.querySelector('.qr-code-container.dropzone-container');
+      return qrPane && !qrPane.classList.contains('hidden') && qrPane.dataset.qrInitialized === 'true';
+    });
+    expect(qrPaneReady).to.be.true;
+
+    const refreshed = await refreshEasyUploadQrIfConsumed(block);
+
+    expect(refreshed).to.be.true;
+    expect(resetUploadSessionStub.calledOnce).to.be.true;
+    expect(EasyUpload.prototype.initializeQRCode.callCount).to.equal(2);
+  });
+
+  it('handles sdk initialized event by forcing QR pane refresh', async () => {
+    const block = buildEasyUploadBlock();
+    sinon.stub(EasyUpload.prototype, 'initializeQRCode').resolves();
+    sinon.stub(EasyUpload.prototype, 'startUploadDetectionPolling');
+    const markConsumedSpy = sinon.spy(EasyUpload.prototype, 'markQrCodeConsumed');
+
+    await setupEasyUploadUI({
+      quickAction: EasyUploadVariants.removeBackgroundEasyUploadVariant,
+      block,
+      getConfig: () => ({ codeRoot: '/express/code', env: { name: 'stage' } }),
+      loadStyle: sinon.stub().callsFake((href, callback) => callback?.()),
+      initializeUploadService: sinon.stub().resolves({}),
+      startSDKWithUnconvertedFiles: sinon.stub(),
+      createTag,
+      showErrorToast: sinon.stub(),
+    });
+
+    const secondaryCta = block.querySelector('.easy-upload-cta-row > p.button-container:nth-child(2) a.button');
+    secondaryCta.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    const qrPaneReady = await waitFor(() => {
+      const qrPane = block.querySelector('.qr-code-container.dropzone-container');
+      return qrPane && !qrPane.classList.contains('hidden') && qrPane.dataset.qrInitialized === 'true';
+    });
+    expect(qrPaneReady).to.be.true;
+
+    notifyEasyUploadSdkInitialization(block);
+    const refreshedByEvent = await waitFor(
+      () => EasyUpload.prototype.initializeQRCode.callCount === 2,
+      100,
+    );
+
+    expect(markConsumedSpy.called).to.be.true;
+    expect(refreshedByEvent).to.be.true;
   });
 });

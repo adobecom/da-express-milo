@@ -42,7 +42,15 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/collapsibl
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/collapsible-rows/collapsible-rows
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color-wheel
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-blindness
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-contrast-checker
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-explore
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-extract-gradient
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-extract-palette
+https://main--da-express-milo--adobecom.aem.page/drafts/nala/blocks/color/color-headline-extract
+https://main--da-express-milo--adobecom.aem.page/drafts/nala/blocks/color/color-headline-tools
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-search-marquee
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-wheel
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/content-toggle/content-toggle
 
@@ -103,6 +111,9 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-how-to-
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-cards/how-to-cards-summary
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-steps-carousel/how-to-steps-carousel-image-schema
+
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-v2/how-to-v2
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-v2/how-to-v2-no-background
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/how-to-v3/how-to-v3
 

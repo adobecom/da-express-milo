@@ -10,9 +10,17 @@ describe('createFiltersComponent', () => {
   beforeEach(() => {
     originalLana = window.lana;
     window.lana = { log: sinon.spy() };
+    // requestAnimationFrame is throttled to ~1fps in background browser tabs
+    // (concurrent WTR sessions). Use queueMicrotask so rAF-based retry loops
+    // in waitUntilConnected / express-picker resolve immediately under load.
+    sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      queueMicrotask(() => cb(0));
+      return 0;
+    });
   });
 
   afterEach(() => {
+    sinon.restore();
     document.body.innerHTML = '';
     if (originalLana === undefined) delete window.lana;
     else window.lana = originalLana;
@@ -56,5 +64,23 @@ describe('createFiltersComponent', () => {
     expect(duplicateLog).to.equal(true);
 
     component.reset();
+  });
+
+  it('does not duplicate desktop pickers when readiness is awaited more than once', async () => {
+    const component = await createFiltersComponent({
+      variant: 'strips',
+    });
+
+    document.body.appendChild(component.element);
+    await Promise.all([
+      component.waitForReady(),
+      component.waitForReady(),
+    ]);
+
+    const desktopPickers = component.element.querySelectorAll('.filters-desktop sp-picker');
+    expect(desktopPickers.length).to.equal(3);
+
+    component.reset();
+    expect(component.element.querySelectorAll('sp-picker').length).to.equal(0);
   });
 });

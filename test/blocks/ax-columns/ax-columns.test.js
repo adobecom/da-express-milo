@@ -16,12 +16,15 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 const { default: decorate } = await import('../../../express/code/blocks/ax-columns/ax-columns.js');
 
 // eslint-disable-next-line max-len
-const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons] = await Promise.all(
+const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons, injectLogo] = await Promise.all(
   [readFile({ path: './mocks/button-light.html' }), readFile({ path: './mocks/color.html' }), readFile({ path: './mocks/fullsize.html' }), readFile({ path: './mocks/highlight.html' }),
     readFile({ path: './mocks/icon.html' }), readFile({ path: './mocks/icon-with-sibling.html' }), readFile({ path: './mocks/icon-list.html' }), readFile({ path: './mocks/not-highlight.html' }), readFile({ path: './mocks/numbered-30.html' }),
     readFile({ path: './mocks/offer.html' }), readFile({ path: './mocks/offer-icon.html' }), readFile({ path: './mocks/picture.html' }), readFile({ path: './mocks/video.html' }),
-    readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' })],
+    readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' }),
+    readFile({ path: './mocks/inject-logo.html' })],
 );
+
+const marqueeNoBackground = await readFile({ path: './mocks/marquee-no-background.html' });
 
 describe('Columns', () => {
   before(() => {
@@ -183,5 +186,104 @@ describe('Columns', () => {
     const secondaryButton = buttons[1];
     expect(secondaryButton.classList.contains('primary')).to.be.true;
     expect(secondaryButton.classList.contains('reverse')).to.be.true;
+  });
+});
+
+describe('Logo injection', () => {
+  function addMeta(name, content) {
+    const meta = document.createElement('meta');
+    meta.name = name;
+    meta.content = content;
+    document.head.appendChild(meta);
+  }
+
+  afterEach(() => {
+    document.head.querySelectorAll('meta[name^="marquee-inject"]').forEach((m) => m.remove());
+  });
+
+  it('Should inject the regular logo when marquee-inject-logo is on', async () => {
+    document.body.innerHTML = injectLogo;
+    addMeta('marquee-inject-logo', 'on');
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+    const logo = block.querySelector('.express-logo');
+    expect(logo).to.exist;
+    expect(logo.classList.contains('icon-adobe-express-logo')).to.be.true;
+  });
+
+  it('Should inject the photo logo when marquee-inject-photo-logo is on', async () => {
+    document.body.innerHTML = injectLogo;
+    addMeta('marquee-inject-photo-logo', 'on');
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+    const logo = block.querySelector('.express-logo');
+    expect(logo).to.exist;
+    expect(logo.classList.contains('icon-adobe-express-photos-logo')).to.be.true;
+  });
+
+  it('Should inject the acrobat co-brand logo when marquee-inject-acrobat-logo is on', async () => {
+    document.body.innerHTML = injectLogo;
+    addMeta('marquee-inject-acrobat-logo', 'on');
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+    const logo = block.querySelector('.express-logo');
+    expect(logo).to.exist;
+    expect(logo.classList.contains('marquee-eyebrow-logo-wide')).to.be.true;
+    expect(logo.alt).to.equal('Adobe Acrobat X Adobe Express co-brand logo');
+  });
+});
+
+describe('Marquee LCP background preload', () => {
+  const imagePreloads = () => [...document.head.querySelectorAll('link[rel="preload"][as="image"]')];
+  const bgUrlOf = (block) => block.style.getPropertyValue('--bg-image').replace(/^url\("|"\)$/g, '');
+
+  beforeEach(() => {
+    imagePreloads().forEach((link) => link.remove());
+  });
+
+  after(() => {
+    imagePreloads().forEach((link) => link.remove());
+  });
+
+  it('Preloads the background image at high priority, since it is the LCP element', async () => {
+    document.body.innerHTML = marquee;
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+
+    const preloads = imagePreloads();
+    expect(preloads.length).to.equal(1);
+    expect(preloads[0].getAttribute('fetchpriority')).to.equal('high');
+    expect(preloads[0].getAttribute('href')).to.equal(bgUrlOf(block));
+  });
+
+  it('Preloads a viewport appropriate variant rather than the raw authored asset', async () => {
+    document.body.innerHTML = marquee;
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+
+    const href = imagePreloads()[0].getAttribute('href');
+    expect(href).to.contain('format=webply');
+    expect(href).to.match(/width=\d+/);
+  });
+
+  it('Does not append a duplicate preload when the same block is decorated twice', async () => {
+    document.body.innerHTML = marquee;
+    await decorate(document.querySelector('.ax-columns'));
+    document.body.innerHTML = marquee;
+    await decorate(document.querySelector('.ax-columns'));
+
+    expect(imagePreloads().length).to.equal(1);
+  });
+
+  it('Falls back to preloading the first picture when there is no background image', async () => {
+    document.body.innerHTML = marqueeNoBackground;
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+
+    expect(bgUrlOf(block)).to.equal('');
+    const preloads = imagePreloads();
+    expect(preloads.length).to.equal(1);
+    expect(preloads[0].getAttribute('fetchpriority')).to.equal('high');
+    expect(preloads[0].getAttribute('href')).to.contain('fallback-image.jpg');
   });
 });

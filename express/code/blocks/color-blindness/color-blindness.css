@@ -3,8 +3,10 @@
 .color-blindness .ax-color-tool-layout {
   --ax-layout-inline-size: auto;
   --ax-text-content-gap: var(--spacing-100);
-  --ax-padding-sidebar-mobile: 0;
-  --ax-padding-canvas-mobile: 0;
+  --ax-padding-topbar-mobile: 0 0 var(--spacing-400);
+  --ax-padding-sidebar-mobile: 0 0 var(--spacing-300);
+  --ax-padding-canvas-mobile: 0 0 var(--spacing-300);
+  --ax-padding-sidebar-desktop: var(--spacing-100) 0 0;
 }
 
 .color-blindness .ax-shell-slot--sidebar {
@@ -81,7 +83,6 @@
 
   .color-blindness .ax-color-tool-layout {
     grid-template-rows: auto 1fr auto;
-    --ax-padding-sidebar-desktop: var(--spacing-100) 0 0;
     --ax-footer-margin-top: 0;
   }
 

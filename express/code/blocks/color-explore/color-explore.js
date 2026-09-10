@@ -222,9 +222,6 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
 }
 
 async function createBlockFilterControl(container, variant, onFilterChange, strings) {
-  const header = container.querySelector('.explore-header, .gradients-header');
-  if (!header) return null;
-
   const filters = await createFiltersComponent({
     variant,
     onFilterChange,
@@ -233,19 +230,26 @@ async function createBlockFilterControl(container, variant, onFilterChange, stri
 
   if (!(filters?.element instanceof Node)) return null;
   filters.element.setAttribute('data-owner', 'color-explore-filters');
-  header.querySelectorAll(':scope > .filters-container').forEach((node) => node.remove());
-  header.appendChild(filters.element);
-  try {
-    await filters.waitForReady?.();
-  } catch (error) {
-    window.lana?.log(`[ColorExplore] Filters waitForReady failed: ${error?.message}`, {
-      tags: 'color-explore,filters',
-      severity: 'warning',
-    });
-  }
 
   return {
     element: filters.element,
+    async attachToHeader() {
+      const header = container.querySelector('.explore-header, .gradients-header');
+      if (!header) return false;
+      header.querySelectorAll(':scope > .filters-container').forEach((node) => {
+        if (node !== filters.element) node.remove();
+      });
+      if (filters.element.parentElement !== header) header.appendChild(filters.element);
+      try {
+        await filters.waitForReady?.();
+      } catch (error) {
+        window.lana?.log(`[ColorExplore] Filters waitForReady failed: ${error?.message}`, {
+          tags: 'color-explore,filters',
+          severity: 'warning',
+        });
+      }
+      return true;
+    },
     destroy() {
       filters.reset?.();
       filters.element?.remove?.();
@@ -458,6 +462,9 @@ export default async function decorate(block) {
           } else {
             allData = await activeDataService.fetchData();
           }
+          if (!isSearchActive) {
+            allData = activeDataService.filter({ sort: 'most-popular' });
+          }
           visibleCount = alignToFullRow(
             Math.min(config.initialLoad, allData.length),
             allData.length,
@@ -491,11 +498,7 @@ export default async function decorate(block) {
 
           await activeRenderer.render();
 
-          const gradientHeader = container.querySelector('.explore-header, .gradients-header');
-          if (gradientHeader && filtersControl?.element) {
-            gradientHeader.querySelectorAll(':scope > .filters-container').forEach((n) => n.remove());
-            gradientHeader.appendChild(filtersControl.element);
-          }
+          await filtersControl?.attachToHeader?.();
 
           // Explore contract: filters are always rendered for gradients/palettes.
           gradientFilterHandler = async (filters) => {
@@ -639,6 +642,9 @@ export default async function decorate(block) {
           } else {
             allData = await activeDataService.fetchData();
           }
+          if (!isSearchActive) {
+            allData = activeDataService.filter({ sort: 'most-popular' });
+          }
           const alignedCount = Math.min(config.initialLoad, allData.length);
           visibleCount = alignToFullRow(alignedCount, allData.length);
 
@@ -656,11 +662,7 @@ export default async function decorate(block) {
           });
           await activeRenderer.render?.(container);
 
-          const stripsHeader = container.querySelector('.explore-header, .gradients-header');
-          if (stripsHeader && filtersControl?.element) {
-            stripsHeader.querySelectorAll(':scope > .filters-container').forEach((n) => n.remove());
-            stripsHeader.appendChild(filtersControl.element);
-          }
+          await filtersControl?.attachToHeader?.();
 
           stripsFilterHandler = async (filters) => {
             filterInteractionSuppressUntil = Date.now() + 350;
@@ -700,6 +702,8 @@ export default async function decorate(block) {
               {
                 verticalMaxPerRow: config.swatchVerticalMaxPerRow,
                 onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+                modalStrings: await colorModalStringsPromise,
+                colorSwatchRailStrings: await colorSwatchRailStringsPromise,
               },
             );
           });
@@ -715,6 +719,8 @@ export default async function decorate(block) {
               {
                 verticalMaxPerRow: config.swatchVerticalMaxPerRow,
                 onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+                modalStrings: await colorModalStringsPromise,
+                colorSwatchRailStrings: await colorSwatchRailStringsPromise,
               },
             );
           });
@@ -782,6 +788,8 @@ export default async function decorate(block) {
                   onLikeToggle: async ({ id, liked }) => (
                     activeDataService.toggleLike({ id, liked })
                   ),
+                  modalStrings: await colorModalStringsPromise,
+                  colorSwatchRailStrings: await colorSwatchRailStringsPromise,
                   initialFocusSelector: () => null,
                 });
               }
