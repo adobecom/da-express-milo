@@ -186,7 +186,6 @@ describe('Grid Marquee - Ratings store icon localization', () => {
   const localesForTest = {
     '': { ietf: 'en-US', tk: 'hah7vzn.css' },
     ara: { ietf: 'ar', tk: 'cbp4pzm.css', dir: 'rtl' },
-    fr: { ietf: 'fr-FR', tk: 'vrk5vyv.css' },
     mx: { ietf: 'es-MX', tk: 'oln4yqj.css' },
     ch_it: { ietf: 'it-CH', tk: 'bbf5pok.css' },
   };
@@ -230,23 +229,20 @@ describe('Grid Marquee - Ratings store icon localization', () => {
     expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store.svg');
   });
 
-  it('resolves the badge by language, not URL region, for country locales', async () => {
-    const [mxApple, mxGoogle] = await renderRatings('/mx/express/');
-    expect(mxApple.getAttribute('src')).to.equal('/express/code/icons/apple-store-es-419.svg');
-    expect(mxGoogle.getAttribute('src')).to.equal('/express/code/icons/google-store-es-419.svg');
-
-    const [itApple, itGoogle] = await renderRatings('/ch_it/express/');
-    expect(itApple.getAttribute('src')).to.equal('/express/code/icons/apple-store-it.svg');
-    expect(itGoogle.getAttribute('src')).to.equal('/express/code/icons/google-store-it.svg');
+  it('resolves the badge by language, not URL region (ch_it -> it)', async () => {
+    const [apple, google] = await renderRatings('/ch_it/express/');
+    expect(apple.getAttribute('src')).to.equal('/express/code/icons/apple-store-it.svg');
+    expect(google.getAttribute('src')).to.equal('/express/code/icons/google-store-it.svg');
   });
 
-  it('falls back to the English badge when a localized asset is missing', async () => {
-    const [apple, google] = await renderRatings('/fr/express/');
-    // alt keeps the originally requested localized icon name (the fallback swaps
-    // only src), proving the localized badge was attempted. src is asserted after
-    // the error below to stay deterministic regardless of the real 404's timing.
-    expect(apple.getAttribute('alt')).to.equal('apple-store-fr');
-    expect(google.getAttribute('alt')).to.equal('google-store-fr');
+  it('requests the base-language badge and falls back to English when unshipped (mx -> es-419)', async () => {
+    const [apple, google] = await renderRatings('/mx/express/');
+    // es-MX resolves to the es-419 badge by language (not the URL region "mx").
+    // We do not ship es-419 assets, so the <img> 404s and the handler swaps to
+    // English. alt keeps the originally requested name; src is asserted after the
+    // error to stay deterministic regardless of the real 404's timing.
+    expect(apple.getAttribute('alt')).to.equal('apple-store-es-419');
+    expect(google.getAttribute('alt')).to.equal('google-store-es-419');
 
     apple.dispatchEvent(new Event('error'));
     google.dispatchEvent(new Event('error'));
