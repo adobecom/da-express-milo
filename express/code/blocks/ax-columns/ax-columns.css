@@ -971,7 +971,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   gap: var(--spacing-300);
 }
 
-.ax-columns.fullsize .button-container.two-ctas .con-button {
+.ax-columns.fullsize .button-container.two-ctas .button {
   margin: 0;
 }
 
@@ -1328,11 +1328,12 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     display: none;
   }
 
-  .ax-columns.marquee .button-container.free-plan-container a.con-button {
+  .ax-columns.marquee .button-container.free-plan-container a.button {
     width: 137px;
     height: 48px;
     font-size: var(--body-font-size-l);
-    border-radius: 999px;
+    padding-bottom: 10px;
+    border-radius: 24px;
     display: inline-block;
   }
 
@@ -1708,7 +1709,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   text-align: center;
 }
 
-.ax-columns.slim-button a.con-button {
+.ax-columns.slim-button a.button {
   padding: 5px 19.5px;
 }
 
@@ -1940,6 +1941,7 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
 
 /* Temporary styles for the Font Generator SEO page's ax-columns instance.
    Not a long-term variant — remove once a permanent layout solution lands. */
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button,
 .section .ax-columns.temporary-font-generator-styles a.con-button {
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
@@ -1947,6 +1949,8 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   color: var(--color-white);
 }
 
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button:hover,
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button:active,
 .section .ax-columns.temporary-font-generator-styles a.con-button:hover,
 .section .ax-columns.temporary-font-generator-styles a.con-button:active {
   background-color: var(--Background-Primary-Hover);
@@ -1985,15 +1989,15 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   }
 }
 
-main .ax-columns a.con-button.fill {
+main .ax-columns a.button.fill {
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
   border-radius: 999px;
   color: var(--color-white);
 }
 
-main .ax-columns a.con-button.fill:any-link:hover,
-main .ax-columns a.con-button.fill:any-link:active {
+main .ax-columns a.button.fill:any-link:hover,
+main .ax-columns a.button.fill:any-link:active {
      background-color: var(--color-info-accent-hover);
     border-color: var(--color-info-accent-hover);
 }
