@@ -534,27 +534,45 @@ export default async function decorate(block) {
   const possibleBreakpoints = breakpointConfig.map((bp) => bp.typeHint);
   const possibleOptions = ['shadow', 'background'];
   const animations = {};
+  // Breakpoint directives, in ascending-width order, for positional recovery
+  // when the authored label was translated post-localization.
+  const orderedBreakpoints = ['mobile', 'desktop', 'hd'];
+  const isColorValue = (text) => /^(#|rgb|hsl|linear-gradient)/.test(text);
+  let nextBreakpointIndex = 0;
   const rows = [...block.children];
   for (let index = 0; index < rows.length; index += 1) {
     const div = rows[index];
-    let rowType = 'animation';
+    const isContentRow = index + 1 === rows.length;
     let typeHint;
-    if ([...div.children].length > 1) typeHint = div.children[0].textContent.trim().toLowerCase();
-    if (index + 1 === rows.length) {
-      rowType = 'content';
-    }
-    if (typeHint && possibleOptions.includes(typeHint)) {
-      rowType = 'option';
-    } else if (!typeHint || !possibleBreakpoints.includes(typeHint)) {
-      typeHint = 'default';
-    }
+    if (div.children.length > 1) typeHint = div.children[0].textContent.trim().toLowerCase();
 
-    if (rowType === 'animation') {
-      handleAnimation(div, typeHint, block, animations);
-    } else if (rowType === 'content') {
+    if (isContentRow) {
       handleContent(rows[rows.length - 1], block, animations);
-    } else if (rowType === 'option') {
+    } else if (typeHint && possibleOptions.includes(typeHint)) {
       handleOptions(div, typeHint, block);
+    } else if (possibleBreakpoints.includes(typeHint)) {
+      handleAnimation(div, typeHint, block, animations);
+      const bpPos = orderedBreakpoints.indexOf(typeHint);
+      if (bpPos >= 0) nextBreakpointIndex = bpPos + 1;
+    } else if (typeHint) {
+      // Labeled directive cell that no longer matches a known keyword: it was
+      // translated during localization. Recover intent from the value cell so
+      // the marquee layout survives instead of collapsing every row to
+      // 'default' (which drops per-breakpoint art and misreads option rows).
+      const valueCell = div.children[1];
+      const valueText = valueCell?.textContent.trim().toLowerCase() || '';
+      if (isColorValue(valueText)) {
+        handleOptions(div, 'background', block);
+      } else if (valueCell?.querySelector('a, picture, video, img')) {
+        const breakpoint = orderedBreakpoints[nextBreakpointIndex] || 'default';
+        nextBreakpointIndex += 1;
+        handleAnimation(div, breakpoint, block, animations);
+      } else {
+        handleAnimation(div, 'default', block, animations);
+      }
+    } else {
+      // Single-cell row with no directive label: the default animation.
+      handleAnimation(div, 'default', block, animations);
     }
   }
 

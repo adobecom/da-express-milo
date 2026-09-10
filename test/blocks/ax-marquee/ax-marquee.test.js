@@ -157,6 +157,18 @@ describe('ax-marquee', () => {
     });
   });
 
+  describe('localized directive labels', () => {
+    // Post-localization the "Mobile"/"Desktop" directive cells get translated,
+    // so keyword matching fails. The block must recover each breakpoint from
+    // row order/content instead of collapsing every animation row to 'default'.
+    it('recovers per-breakpoint animations when labels are translated', async () => {
+      const marquee = await prepBlock('./mocks/translated.html');
+      expect(marquee.querySelector('video.marquee-background')).to.exist;
+      expect(marquee.classList.contains('has-mobile-animation')).to.be.true;
+      expect(marquee.classList.contains('has-desktop-animation')).to.be.true;
+    });
+  });
+
   describe('Additional Coverage Tests', () => {
     it('should handle empty marquee block', async () => {
       document.body.innerHTML = '<div class="ax-marquee"></div>';

@@ -61,13 +61,14 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
       setActiveButton(index);
       if (updateUrl) updateURLParameter(index + 1); // write 1-based index to URL
       let newlyActiveSection = null;
-      sections.forEach((section) => {
+      sections.forEach((section, sectionIndex) => {
         // Ensure no lingering native hidden attribute (iOS Safari may skip CSS loads)
         if (section.hasAttribute('hidden')) section.removeAttribute('hidden');
-        const isActive = (
-          buttons[index].innerText.toLowerCase()
-          === section.dataset.toggle.toLowerCase()
-        );
+        // Match by position, not heading text: post-localization the tab
+        // headings are translated while the section toggle metadata may not
+        // be, so a text comparison would fail. The i-th tab drives the i-th
+        // [data-toggle] section.
+        const isActive = sectionIndex === index;
         section.classList.toggle('content-toggle-hidden', !isActive);
         section.classList.toggle('content-toggle-active', isActive);
         // Prevent keyboard focus inside inactive panels without affecting CSS loading
@@ -217,8 +218,7 @@ export default function decorate(block) {
       btn.setAttribute('role', 'tab');
       btn.setAttribute('aria-selected', 'false');
       btn.setAttribute('tabindex', '-1');
-      const label = btn.innerText.trim().toLowerCase();
-      const panel = Array.from(sections).find((s) => s.dataset.toggle?.toLowerCase() === label);
+      const panel = sections[i];
       if (panel) {
         const panelId = `tab-${i + 1}`;
         panel.id = panelId;
