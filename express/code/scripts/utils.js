@@ -309,7 +309,7 @@ export async function decorateButtonsDeprecated(el, size) {
   const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
   // eslint-disable-next-line max-len
   // DO NOT add any more exceptions here. Authors must learn to author buttons the new milo way, even with old blocks
-  if (!el.closest('.ax-columns') && !el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
+  if (!el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
   // DO NOT add any more exceptions above. We should be removing the exceptions and not adding more.
   el.querySelectorAll(':scope a:not(.con-button, .social-link)').forEach(($a) => {
     // Mirrors decorateButtons' own #_button-<name> handling (milo's utils/decorate.js)
@@ -363,6 +363,24 @@ export async function decorateButtonsDeprecated(el, size) {
               && $twoup.children.length === 1 && $twoup.tagName === 'P') {
             $a.classList.add('button', 'accent', 'light');
             $twoup.classList.add('button-container');
+          }
+          // Custom button variants authored the milo way via `#_button-<class>`
+          // hashes on the href (e.g. `#_button-fill`, `#_button-outline`). The
+          // blocks that reach this fallback (ax-columns, banner,
+          // fullscreen-marquee, link-list) bypass milo's decorateButtons, which
+          // would normally strip these hashes and add the classes — so replicate
+          // that here: add each class, strip the hash, and drop the default
+          // `accent` when an explicit fill/outline variant is requested.
+          // Additive and hash-gated: no effect on content without these hashes.
+          if ($a.classList.contains('button')) {
+            const customClasses = [...originalHref.matchAll(/#_button-([a-zA-Z-]+)/g)];
+            customClasses.forEach(([token, cls]) => {
+              $a.classList.add(cls);
+              $a.setAttribute('href', $a.href.replace(token, ''));
+            });
+            if ($a.classList.contains('fill') || $a.classList.contains('outline')) {
+              $a.classList.remove('accent');
+            }
           }
         }
         if (linkText.startsWith('{{icon-') && linkText.endsWith('}}')) {
