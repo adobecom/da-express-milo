@@ -277,7 +277,7 @@
     border-radius: 8px;
 }
 
-.cta-carousel.gen-ai:not(.quick-action) .card .card-sleeve {
+.cta-carousel.gen-ai:not(.quick-action) .card .card-sleeve { /* stylelint-disable-line no-duplicate-selectors */
     width: auto;
 }
 

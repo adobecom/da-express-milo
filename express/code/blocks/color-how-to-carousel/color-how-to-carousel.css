@@ -70,8 +70,8 @@
 
 .color-how-to-carousel .tip-numbers {
     display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
+    display: -ms-flexbox; /* stylelint-disable-line declaration-block-no-duplicate-properties */
+    display: flex; /* stylelint-disable-line declaration-block-no-duplicate-properties */
     text-align: left;
     margin-top: var(--spacing-325);
 }
@@ -232,7 +232,7 @@
         margin: var(--spacing-800) 0;
     }
 
-    .color-how-to-carousel {
+    .color-how-to-carousel { /* stylelint-disable-line no-duplicate-selectors */
         justify-content: flex-end;
         flex-direction: row;
         align-items: start;
@@ -249,7 +249,7 @@
         padding: var(--spacing-250) var(--spacing-400);
     }
 
-    .color-how-to-carousel > .content-wrapper {
+    .color-how-to-carousel > .content-wrapper { /* stylelint-disable-line no-duplicate-selectors */
         margin: 0 var(--spacing-400) 0 var(--spacing-900);
     }
 

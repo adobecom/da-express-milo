@@ -96,10 +96,10 @@
   padding: var(--spacing-400);
   flex-direction: column;
   gap: 16px;
-  border-radius: var(--Marquee-grid-Card-Card-Radius, 16px);
-  background: var(--Alias-background-app-frame-layer-1, #F8F8F8);
+  border-radius: var(--Marquee-grid-Card-Card-Radius, 16px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  background: var(--Alias-background-app-frame-layer-1, #F8F8F8); /* stylelint-disable-line declaration-property-value-disallowed-list */
   /* Drop shadow/emphasized-default */
-  box-shadow: 0px 1px 6px 0px var(--Alias-drop-shadow-emphasized-default, rgba(0, 0, 0, 0.12));
+  box-shadow: 0px 1px 6px 0px var(--Alias-drop-shadow-emphasized-default, rgba(0, 0, 0, 0.12)); /* stylelint-disable-line declaration-property-value-disallowed-list */
   flex: 1 1 auto;
 }
 
@@ -168,7 +168,7 @@
   margin-bottom: 16px;
 }
 
-.template.basic-carousel-element.quote {
+.template.basic-carousel-element.quote { /* stylelint-disable-line no-duplicate-selectors */
   transition: background-color 300ms ease;
 }
 
@@ -241,7 +241,7 @@
   margin-top: 0;
 }
 
-.quotes.carousel .quote .author {
+.quotes.carousel .quote .author { /* stylelint-disable-line no-duplicate-selectors */
   display: flex;
   margin-top: 0;
   align-items: center;

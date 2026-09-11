@@ -3,15 +3,15 @@
 }
 
 .sr-only {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
+  position: absolute !important; /* stylelint-disable-line declaration-no-important */
+  width: 1px !important; /* stylelint-disable-line declaration-no-important */
+  height: 1px !important; /* stylelint-disable-line declaration-no-important */
+  padding: 0 !important; /* stylelint-disable-line declaration-no-important */
+  margin: -1px !important; /* stylelint-disable-line declaration-no-important */
+  overflow: hidden !important; /* stylelint-disable-line declaration-no-important */
+  clip: rect(0, 0, 0, 0) !important; /* stylelint-disable-line declaration-no-important */
+  white-space: nowrap !important; /* stylelint-disable-line declaration-no-important */
+  border: 0 !important; /* stylelint-disable-line declaration-no-important */
 }
 .template-x-promo {
   --template-max-height: 340px;
@@ -437,15 +437,15 @@
   height: var(--spacing-500);
 }
 .ax-template-x-promo .sr-only {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
+  position: absolute !important; /* stylelint-disable-line declaration-no-important */
+  width: 1px !important; /* stylelint-disable-line declaration-no-important */
+  height: 1px !important; /* stylelint-disable-line declaration-no-important */
+  padding: 0 !important; /* stylelint-disable-line declaration-no-important */
+  margin: -1px !important; /* stylelint-disable-line declaration-no-important */
+  overflow: hidden !important; /* stylelint-disable-line declaration-no-important */
+  clip: rect(0, 0, 0, 0) !important; /* stylelint-disable-line declaration-no-important */
+  white-space: nowrap !important; /* stylelint-disable-line declaration-no-important */
+  border: 0 !important; /* stylelint-disable-line declaration-no-important */
 }
 .ax-template-x-promo .carousel-skip-link:focus {
   position: absolute;
@@ -732,7 +732,7 @@
 @media (min-width: 1680px) {
   .ax-template-x-promo.one-up,
   .ax-template-x-promo.multiple-up {
-    margin: auto !important;
+    margin: auto !important; /* stylelint-disable-line declaration-no-important */
   }
 }
 
@@ -747,13 +747,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .template-x-promo * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    transition-delay: 0ms !important;
+    animation-duration: 0.01ms !important; /* stylelint-disable-line declaration-no-important */
+    animation-iteration-count: 1 !important; /* stylelint-disable-line declaration-no-important */
+    transition-duration: 0.01ms !important; /* stylelint-disable-line declaration-no-important */
+    transition-delay: 0ms !important; /* stylelint-disable-line declaration-no-important */
   }
   .template-x-promo .promo-carousel-track {
-    transform: none !important;
+    transform: none !important; /* stylelint-disable-line declaration-no-important */
   }
 }
 

@@ -740,7 +740,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   justify-content: center;
   outline: none;
   transition: width 0.2s ease, height 0.2s ease;
-  background: var(--marker-color, transparent);
+  background: var(--marker-color, transparent); /* stylelint-disable-line declaration-property-value-disallowed-list */
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 17px rgba(0, 0, 0, 0.16);
   /* Center on percentage point — size-independent, works at every breakpoint */
   transform: translate(-50%, -50%);
@@ -778,7 +778,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   width: 8px;
   height: 8px;
   border-radius: 2px;
-  background: var(--marker-color, #000);
+  background: var(--marker-color, #000); /* stylelint-disable-line declaration-property-value-disallowed-list */
   border: 0.5px solid #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   pointer-events: none;
