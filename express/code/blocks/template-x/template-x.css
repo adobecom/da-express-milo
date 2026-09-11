@@ -294,8 +294,8 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   display: flex;
 }
 
-.template-x .template-link::after,
-.template-x .template-title-link::after {
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-link::after,
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title-link::after {
   display: flex;
   width: 6px;
   height: 6px;
@@ -313,7 +313,7 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   margin-right: 2.25px;
 }
 
-.template-x .template-title-link::after {
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title-link::after {
   margin-top: 7px;
 }
 
@@ -1881,28 +1881,28 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   margin: 0 0 0 20px;
 }
 
-.template-x .template-title.with-link.horizontal {
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.horizontal {
   padding-right: var(--Grid-container-padding-side);
 }
 
 @media (min-width: 600px) {
-  .template-x .template-title.with-link.horizontal {
+  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.horizontal {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     gap: var(--spacing-300);
   }
 
-  .template-x .template-title.with-link>div {
+  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link>div {
     flex-direction: row;
     justify-content: space-between;
   }
 
-  .template-x .template-title.with-link.link-only {
+  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.link-only {
     justify-content: flex-end;
   }
 
-  .template-x:not(.holiday) .template-title.horizontal .view-all-link-wrapper {
+  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.horizontal .view-all-link-wrapper {
     margin: 0;
   }
 }
@@ -2798,6 +2798,25 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
 
   .template-x.sixcols:not(.horizontal) {
     max-width: 748px;
+  }
+
+  .template-x.horizontal:not(.fullwidth) .template-title.with-link.horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .template-x.horizontal:not(.fullwidth) .template-title.with-link > div {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .template-x.horizontal:not(.fullwidth) .template-title.with-link.link-only {
+    justify-content: flex-end;
+  }
+
+  .template-x.horizontal:not(.fullwidth):not(.holiday) .template-title.horizontal .view-all-link-wrapper {
+    margin: 0;
   }
 
   .template-x .template-title.horizontal > div > * {
