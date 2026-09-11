@@ -508,6 +508,19 @@ function buildMotionBg() {
   return motionBg;
 }
 
+function buildPreviewSkeleton() {
+  const skeleton = createTag('div', { class: 'color-seo-hero-preview color-seo-hero-preview-skeleton', 'aria-hidden': 'true' });
+  const canvas = createTag('div', { class: 'color-seo-hero-canvas color-seo-hero-sk' });
+  const stripHost = createTag('div', { class: 'color-seo-hero-strip-host color-seo-hero-sk' });
+  const actionsRow = createTag('div', { class: 'color-seo-hero-actions-row' });
+  actionsRow.append(
+    createTag('div', { class: 'color-seo-hero-sk color-seo-hero-sk-pill' }),
+    createTag('div', { class: 'color-seo-hero-sk color-seo-hero-sk-pill color-seo-hero-sk-pill-wide' }),
+  );
+  skeleton.append(canvas, stripHost, actionsRow);
+  return skeleton;
+}
+
 function attachGradientPointerTracking(block) {
   const glows = block.querySelector('.color-seo-hero-glows');
   if (!glows) return;
@@ -543,7 +556,7 @@ function attachGradientPointerTracking(block) {
   block.addEventListener('mouseleave', () => setTarget({ x: 0, y: 0 }));
 }
 
-async function decorateAsync(block, layout, colorName, hex, colorWheelHref) {
+async function decorateAsync(block, layout, previewSkeleton, colorName, hex, colorWheelHref) {
   const [{ decorateButtons }] = await Promise.all([
     import(`${getLibs()}/utils/decorate.js`),
     loadIconsRail(),
@@ -573,7 +586,7 @@ async function decorateAsync(block, layout, colorName, hex, colorWheelHref) {
     buildPreview(context),
     buildFloatingToolbar(context),
   ]);
-  layout.append(preview);
+  previewSkeleton.replaceWith(preview);
   block.append(toolbarMount);
 
   block.classList.add('is-ready');
@@ -607,6 +620,8 @@ export default function decorate(block) {
 
   const layout = createTag('div', { class: 'color-seo-hero-layout' });
   layout.append(contentRow);
+  const previewSkeleton = buildPreviewSkeleton();
+  layout.append(previewSkeleton);
   block.append(buildMotionBg(), layout);
-  decorateAsync(block, layout, colorName, hex, colorWheelHref);
+  decorateAsync(block, layout, previewSkeleton, colorName, hex, colorWheelHref);
 }

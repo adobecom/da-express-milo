@@ -184,6 +184,44 @@
   width: 100%;
 }
 
+.color-seo-hero-preview-skeleton .color-seo-hero-strip-host {
+  height: 60px;
+}
+
+@media (min-width: 900px) {
+  .color-seo-hero-preview-skeleton .color-seo-hero-strip-host {
+    height: 84px;
+  }
+}
+
+@media (max-width: 599px) {
+  .color-seo-hero-preview-skeleton .color-seo-hero-actions-row {
+    height: 48px;
+  }
+}
+
+.color-seo-hero-sk {
+  border-radius: var(--spacing-300);
+  background: linear-gradient(90deg, #ebebeb 25%, #f5f5f5 50%, #ebebeb 75%);
+  background-size: 200% 100%;
+  animation: color-seo-hero-sk-shimmer 1.5s linear infinite;
+}
+
+.color-seo-hero-sk-pill {
+  height: 100%;
+  flex: 1;
+  border-radius: 999px;
+}
+
+.color-seo-hero-sk-pill-wide {
+  flex: 2;
+}
+
+@keyframes color-seo-hero-sk-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
 .color-seo-hero-editor-popover {
   left: 75px;
   position: absolute;

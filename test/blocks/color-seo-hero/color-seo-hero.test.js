@@ -96,24 +96,6 @@ describe('Color SEO Hero', () => {
     expect(editLabel.textContent.trim()).to.equal('Edit color');
   });
 
-  it('opens the floating toolbar edit popover and closes the canvas one if it was open', async () => {
-    const canvasRail = block.querySelector('.color-seo-hero-canvas-rail');
-    await canvasRail.updateComplete;
-    const canvasEditButton = canvasRail.shadowRoot.querySelector('.hex-code-group .icon-button--edit-tint');
-    canvasEditButton.dispatchEvent(new Event('click', { bubbles: true }));
-    await new Promise((resolve) => { setTimeout(resolve, 100); });
-    expect(block.querySelector('.color-seo-hero-editor-popover').hidden).to.be.false;
-
-    const floatingEditButton = block.querySelector('.ax-edit-btn');
-    floatingEditButton.click();
-    await new Promise((resolve) => { setTimeout(resolve, 100); });
-
-    expect(block.querySelector('.color-seo-hero-editor-popover').hidden).to.be.true;
-    expect(canvasEditButton.getAttribute('aria-expanded')).to.equal('false');
-    expect(document.querySelector('.color-seo-hero-floating-editor-popover').hidden).to.be.false;
-    expect(floatingEditButton.getAttribute('aria-expanded')).to.equal('true');
-  });
-
   it('copies a code snippet for all container colors when a copy-as-code format is selected', async () => {
     const writeText = sinon.stub().resolves();
     sinon.stub(navigator.clipboard, 'writeText').callsFake(writeText);

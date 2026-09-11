@@ -85,7 +85,10 @@ async function decorateChips(block, heading) {
   block.classList.add('ckg-link-list-chips');
 
   const pills = await getData();
-  if (!pills?.length) return;
+  if (!pills?.length) {
+    block.closest('.section')?.remove();
+    return;
+  }
 
   const { prefix } = getConfig().locale;
 
@@ -95,7 +98,10 @@ async function decorateChips(block, heading) {
     return { name: titleCase(canonicalName), hex: hexCode, href };
   }).filter((color) => color && HEX_PATTERN.test(color.hex));
 
-  if (!colors.length) return;
+  if (!colors.length) {
+    block.closest('.section')?.remove();
+    return;
+  }
 
   const headingText = heading.textContent.trim();
 
