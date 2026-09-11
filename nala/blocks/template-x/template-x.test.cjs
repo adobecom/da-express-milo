@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../utils/test.cjs';
 import { features } from './template-x.spec.cjs';
 import TemplateX from './template-x.page.cjs';
 

@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./template-x-carousel.spec.cjs');
 const TemplateXCarouselBlock = require('./template-x-carousel.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');

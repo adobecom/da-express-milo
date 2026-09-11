@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./color-search-marquee.spec.cjs');
 const ColorSearchMarqueeBlock = require('./color-search-marquee.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
