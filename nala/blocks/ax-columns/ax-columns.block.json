@@ -325,7 +325,7 @@
           "interactives": [
             {
               "type": "link",
-              "selector": "a.button.accent.xlarge.primaryCTA",
+              "selector": "a.con-button.blue.xlarge.primaryCTA",
               "nth": 0,
               "text": "Start designing",
               "href": "https://adobesparkpost.app.link/c4bWARQhWAb",
@@ -336,7 +336,7 @@
             },
             {
               "type": "link",
-              "selector": "a.button.primary.reverse.xlarge",
+              "selector": "a.con-button.outline.reverse.xlarge",
               "nth": 0,
               "text": "Get Adobe Express Free",
               "href": "https://www.adobe.com/express/",

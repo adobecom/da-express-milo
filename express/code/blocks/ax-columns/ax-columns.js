@@ -1,4 +1,6 @@
-import { getLibs, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import {
+  getLibs, toClassName, getIconElementDeprecated, decorateLegacyButtonFallbacks,
+} from '../../scripts/utils.js';
 
 import {
   addAnimationToggle,
@@ -21,7 +23,7 @@ import {
 } from '../../scripts/instrument.js';
 
 let createTag; let getMetadata;
-let getConfig;
+let getConfig; let decorateButtons;
 
 function replaceHyphensInText(area) {
   [...area.querySelectorAll('h1, h2, h3, h4, h5, h6')]
@@ -36,7 +38,7 @@ function transformToVideoColumn(cell, aTag, block) {
   const title = aTag.textContent.trim();
   // gather video urls from all links in cell
   const vidUrls = [];
-  cell.querySelectorAll(':scope a.button, :scope a.con-button').forEach((button) => {
+  cell.querySelectorAll(':scope a.con-button').forEach((button) => {
     vidUrls.push(button.href);
     if (button !== aTag) {
       const buttonContainer = button.closest('.button-container');
@@ -223,27 +225,29 @@ function injectLogo(block) {
 
 const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   if (rowNum + cellNum !== 0) return;
-  const italicAnchor = cell.querySelector('p > em > a');
-  if (!italicAnchor) return;
-  const boldAnchor = italicAnchor.parentElement?.previousElementSibling?.querySelector('a');
   const block = cell.closest('.ax-columns');
 
-  if (boldAnchor && block?.className.includes('fullsize')) {
-    boldAnchor.classList.add('button', 'accent', 'xlarge', 'primaryCTA');
-    BlockMediator.set('primaryCtaUrl', boldAnchor.href);
-    italicAnchor.classList.add('button', 'primary', 'reverse', 'xlarge');
-    boldAnchor.parentElement?.replaceWith(boldAnchor);
-    italicAnchor.parentElement?.replaceWith(italicAnchor);
-    boldAnchor.closest('p')?.classList.add('button-container', 'two-ctas');
+  // Post milo-decoration the primary CTA (authored bold/strong) is `a.con-button.blue`
+  // and the secondary (authored italic/em) is `a.con-button.outline`; milo has
+  // already unwrapped the <em>/<strong> and moved each anchor into its <p>.
+  const primaryAnchor = cell.querySelector('a.con-button.blue');
+  const secondaryAnchor = cell.querySelector('a.con-button.outline');
+  if (!secondaryAnchor && !primaryAnchor) return;
+
+  if (block?.classList.contains('fullsize') && primaryAnchor) {
+    primaryAnchor.classList.add('xlarge', 'primaryCTA');
+    BlockMediator.set('primaryCtaUrl', primaryAnchor.href);
+    secondaryAnchor?.classList.add('reverse', 'xlarge');
+    primaryAnchor.closest('p')?.classList.add('button-container', 'two-ctas');
     return;
   }
 
-  const links = italicAnchor.parentElement?.querySelectorAll('a');
-  if (links.length < 2) return;
-  italicAnchor.parentElement?.classList.add('phone-number-cta-row');
-  links[0].classList.add('button', 'xlarge', 'trial-cta');
+  const links = secondaryAnchor?.closest('p')?.querySelectorAll('a');
+  if (!links || links.length < 2) return;
+  secondaryAnchor.closest('p')?.classList.add('phone-number-cta-row');
+  links[0].classList.add('con-button', 'xlarge', 'trial-cta');
   links[1].classList.add('phone');
-  italicAnchor.closest('p')?.prepend(links[0]);
+  secondaryAnchor.closest('p')?.prepend(links[0]);
 };
 
 function addHeaderClass(block, size) {
@@ -349,15 +353,51 @@ function markVideoToGifImagesDecorative(scope) {
 }
 
 export default async function decorate(block) {
-  await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
+  await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/utils/decorate.js`),
+  ]).then(([utils, decorateUtils]) => {
     ({ createTag, getMetadata, getConfig } = utils);
+    ({ decorateButtons } = decorateUtils);
   });
 
   if (document.body.dataset.device === 'mobile') replaceHyphensInText(block);
   const colorProperties = extractProperties(block);
   splitAndAddVariantsWithDash(block);
+  // Verified against the Spectrum-2 button system (see styles.css) — see
+  // that comment block for the other blocks in this rollout. Added after
+  // splitAndAddVariantsWithDash so it doesn't shift the positional index the
+  // numbered-list total-count parsing below relies on (block.classList[3]).
+  block.classList.add('s2');
   decorateSocialIcons(block);
-  await decorateButtonsDeprecated(block, 'button-xxl');
+  await decorateButtons(block, 'button-xxl');
+  // Milo's decorateButtons only matches `em a, strong a, p > a strong` — it
+  // has no equivalent for content authored the older Express way (a bare
+  // link alone in its own <p>/<div> auto-buttonizing, `#_button-<name>`
+  // hashes, `<u>`-stripping, `{{icon-name}}` CTA icons). Carry those
+  // conventions forward for existing content instead of silently dropping
+  // support for them.
+  decorateLegacyButtonFallbacks(block);
+
+  // This block's CSS/JS is written against `.button-container` and `.xlarge`;
+  // bridge milo's output (`.con-button`, `.action-area`) and the legacy
+  // fallback's output (`.button`) back onto that existing contract instead
+  // of rewriting every rule. Idempotent and scoped to this block's already-
+  // decorated buttons.
+  block.querySelectorAll('a.con-button, a.button').forEach((btn) => {
+    btn.classList.add('xlarge');
+    btn.closest('p, div')?.classList.add('button-container');
+  });
+
+  // Restores video-modal state on browser back/forward. Registered once per
+  // block instance (not per cell/row — the handler doesn't depend on either).
+  window.addEventListener('popstate', ({ state }) => {
+    hideVideoModal();
+    const { url, title } = state || {};
+    if (url) {
+      displayVideoModal(url, title);
+    }
+  });
 
   const rows = Array.from(block.children);
 
@@ -457,7 +497,11 @@ export default async function decorate(block) {
           // regular ordered list style for 1 to 9 items
           num = `${num}.`;
         }
-        cell.innerHTML = `<span class="num">${num}</span>${cell.innerHTML}`;
+        // Was `cell.innerHTML = ...`, which silently detached the aTag/pics
+        // references already captured above for any numbered-list first cell
+        // containing a link.
+        const numSpan = createTag('span', { class: 'num' }, num);
+        cell.prepend(numSpan);
       }
 
       if (pics.length === 1 && pics[0].parentElement.tagName === 'P') {
@@ -482,8 +526,8 @@ export default async function decorate(block) {
         }
       }
 
-      if (aTag && (aTag.classList.contains('button') || aTag.classList.contains('con-button'))) {
-        if (block.className.includes('fullsize')) {
+      if (aTag?.classList.contains('con-button')) {
+        if (block.classList.contains('fullsize')) {
           aTag.classList.add('xlarge');
           BlockMediator.set('primaryCtaUrl', aTag.href);
           aTag.classList.add('primaryCTA');
@@ -497,15 +541,6 @@ export default async function decorate(block) {
           }
         }
       }
-
-      // handle history events
-      window.addEventListener('popstate', ({ state }) => {
-        hideVideoModal();
-        const { url, title } = state || {};
-        if (url) {
-          displayVideoModal(url, title);
-        }
-      });
 
       cell.querySelectorAll(':scope p:empty').forEach(($p) => {
         if ($p.innerHTML.trim() === '') {
@@ -616,7 +651,7 @@ export default async function decorate(block) {
   // decorate offer
   if (block.classList.contains('offer')) {
     block
-      .querySelectorAll('a.button, a.con-button')
+      .querySelectorAll('a.con-button')
       .forEach((aTag) => aTag.classList.add('large', 'wide'));
     if (rows.length > 1) {
       // move all content into first row
@@ -669,67 +704,9 @@ export default async function decorate(block) {
 
   // invert buttons in regular columns inside columns-highlight-container
   if (sectionContainer && !block.classList.contains('highlight')) {
-    block.querySelectorAll('a.button, a.con-button').forEach((button) => {
+    block.querySelectorAll('a.con-button').forEach((button) => {
       button.classList.add('dark');
     });
-  }
-
-  if (block.className === 'columns fullsize top block width-3-columns') {
-    const setElementsHeight = (columns) => {
-      const elementsMinHeight = {
-        PICTURE: 0,
-        H3: 0,
-        'columns-iconlist': 0,
-      };
-
-      const onIntersect = (entries, observer) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && columns.length) {
-            columns.forEach((col) => {
-              const childDivs = col.querySelectorAll(':scope > *');
-              if (!childDivs.length) return;
-
-              childDivs.forEach((div) => {
-                const referrer = div.className || div.tagName;
-                const targetEl = referrer === 'PICTURE' ? div.querySelector('img') : div;
-                elementsMinHeight[referrer] = Math.max(
-                  elementsMinHeight[referrer],
-                  targetEl.offsetHeight,
-                );
-              });
-            });
-
-            columns.forEach((col) => {
-              const childDivs = col.querySelectorAll(':scope > *');
-              if (!childDivs.length) return;
-
-              childDivs.forEach((div) => {
-                const referrer = div.className || div.tagName;
-                if (!elementsMinHeight[referrer]) return;
-
-                if (div.offsetHeight < elementsMinHeight[referrer]) {
-                  if (referrer === 'PICTURE') {
-                    const img = div.querySelector('img');
-                    if (!img) return;
-                    img.style.objectFit = 'contain';
-                    img.style.minHeight = `${elementsMinHeight[referrer]}px`;
-                  } else {
-                    div.style.minHeight = `${elementsMinHeight[referrer]}px`;
-                  }
-                }
-              });
-            });
-
-            observer.unobserve(block);
-          }
-        });
-      };
-
-      const observer = new IntersectionObserver(onIntersect, { threshold: 0 });
-      observer.observe(block);
-    };
-
-    setElementsHeight(block.querySelectorAll('.column'));
   }
 
   // variant for the colors pages

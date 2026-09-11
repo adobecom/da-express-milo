@@ -24,3 +24,5 @@ actionlint
 .playwright-mcp/
 !.eslintrc-code-compatibility.js
 !.browserslistrc
+
+content

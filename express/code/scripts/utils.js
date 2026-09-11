@@ -303,14 +303,15 @@ export async function fixIcons(el = document) {
   });
 }
 
-// This was only added for the blocks premigration.
-// For new blocks they should only use the decorateButtons method from milo.
-export async function decorateButtonsDeprecated(el, size) {
-  const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
-  // eslint-disable-next-line max-len
-  // DO NOT add any more exceptions here. Authors must learn to author buttons the new milo way, even with old blocks
-  if (!el.closest('.ax-columns') && !el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
-  // DO NOT add any more exceptions above. We should be removing the exceptions and not adding more.
+// Content-compat shims predating this repo's adoption of milo's own
+// decorateButtons: bare-anchor auto-buttonize (a lone link alone in its own
+// <p>/<div> becomes a button, opt-out via `#_cls`), `#_button-<name>` hash
+// mirroring, `<u>`-stripping, and `{{icon-name}}` CTA-icon conversion. Milo's
+// decorateButtons has no equivalent for any of these — it only ever matches
+// `em a, strong a, p > a strong` — so any block moving off
+// decorateButtonsDeprecated (calling milo's decorateButtons directly) still
+// needs to call this too if its content relies on these conventions.
+export function decorateLegacyButtonFallbacks(el) {
   el.querySelectorAll(':scope a:not(.con-button, .social-link)').forEach(($a) => {
     // Mirrors decorateButtons' own #_button-<name> handling (milo's utils/decorate.js)
     // since this deprecated path never calls it for these blocks.
@@ -364,6 +365,24 @@ export async function decorateButtonsDeprecated(el, size) {
             $a.classList.add('button', 'accent', 'light');
             $twoup.classList.add('button-container');
           }
+          // Custom button variants authored the milo way via `#_button-<class>`
+          // hashes on the href (e.g. `#_button-fill`, `#_button-outline`). The
+          // blocks that reach this fallback (ax-columns, banner,
+          // fullscreen-marquee, link-list) bypass milo's decorateButtons, which
+          // would normally strip these hashes and add the classes — so replicate
+          // that here: add each class, strip the hash, and drop the default
+          // `accent` when an explicit fill/outline variant is requested.
+          // Additive and hash-gated: no effect on content without these hashes.
+          if ($a.classList.contains('button')) {
+            const customClasses = [...originalHref.matchAll(/#_button-([a-zA-Z-]+)/g)];
+            customClasses.forEach(([token, cls]) => {
+              $a.classList.add(cls);
+              $a.setAttribute('href', $a.href.replace(token, ''));
+            });
+            if ($a.classList.contains('fill') || $a.classList.contains('outline')) {
+              $a.classList.remove('accent');
+            }
+          }
         }
         if (linkText.startsWith('{{icon-') && linkText.endsWith('}}')) {
           const $iconName = /{{icon-([\w-]+)}}/g.exec(linkText)[1];
@@ -378,6 +397,17 @@ export async function decorateButtonsDeprecated(el, size) {
       window.lana?.log(`Ignoring button due to error: ${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
     }
   });
+}
+
+// This was only added for the blocks premigration.
+// For new blocks they should only use the decorateButtons method from milo.
+export async function decorateButtonsDeprecated(el, size) {
+  const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+  // eslint-disable-next-line max-len
+  // DO NOT add any more exceptions here. Authors must learn to author buttons the new milo way, even with old blocks
+  if (!el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
+  // DO NOT add any more exceptions above. We should be removing the exceptions and not adding more.
+  decorateLegacyButtonFallbacks(el);
 }
 
 export function addTempWrapperDeprecated($block, blockName) {
