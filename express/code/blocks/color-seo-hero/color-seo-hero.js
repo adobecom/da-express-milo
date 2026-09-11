@@ -552,7 +552,15 @@ function attachGradientPointerTracking(block) {
   block.addEventListener('mouseleave', () => setTarget({ x: 0, y: 0 }));
 }
 
-async function decorateAsync(block, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref, ctaLink) {
+async function decorateAsync(
+  block,
+  previewSkeleton,
+  toolbarMount,
+  colorName,
+  hex,
+  colorWheelHref,
+  ctaLink,
+) {
   const [{ decorateButtons }] = await Promise.all([
     import(`${getLibs()}/utils/decorate.js`),
     loadIconsRail(),
