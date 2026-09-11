@@ -168,12 +168,12 @@ describe('Color How To Carousel', () => {
       expect(block.querySelector('.tip-number.tip-1').classList.contains('active')).to.be.false;
     });
 
-    it('renders the CTA as a styled button inside the how-to card', async () => {
+    it('renders the CTA as a styled button inside the how-to card, with the current color injected into its href', async () => {
       const block = await prepBlock();
       const cta = block.querySelector('.chtc-how-to-card a.chtc-cta');
       expect(cta).to.exist;
       expect(cta.classList.contains('button')).to.be.true;
-      expect(cta.getAttribute('href')).to.equal('https://example.com/create-now');
+      expect(cta.getAttribute('href')).to.equal('https://adobesparkpost.app.link/c4bWARQhWAb?url=%2F&placement=outside-blocks&locale=en-US&contentRegion=us&q=jade&searchCategory=templates');
     });
 
     it('computes RGB/CMYK/HSL specs from the authored primary hex', async () => {
@@ -212,7 +212,7 @@ describe('Color How To Carousel', () => {
       expect(block.querySelectorAll('.tip-number')).to.have.lengthOf(5);
       const cta = block.querySelector('.chtc-how-to-card a.chtc-cta');
       expect(cta).to.exist;
-      expect(cta.getAttribute('href')).to.equal('https://example.com/create-now');
+      expect(cta.getAttribute('href')).to.equal('https://adobesparkpost.app.link/c4bWARQhWAb?url=%2F&placement=outside-blocks&locale=en-US&contentRegion=us&q=jade&searchCategory=templates');
       expect(block.querySelector('.chtc-specs-row .chtc-specs-value').textContent.trim())
         .to.equal('#1FA774');
     });

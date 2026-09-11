@@ -1,5 +1,5 @@
 import { getLibs, getIconElementDeprecated, createTag } from '../../scripts/utils.js';
-import { buildColorToolUrl } from '../../scripts/color-shared/utils/utilities.js';
+import { buildColorToolUrl, applyCreateNowLink } from '../../scripts/color-shared/utils/utilities.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -552,10 +552,11 @@ function attachGradientPointerTracking(block) {
   block.addEventListener('mouseleave', () => setTarget({ x: 0, y: 0 }));
 }
 
-async function decorateAsync(block, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref) {
+async function decorateAsync(block, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref, ctaLink) {
   const [{ decorateButtons }] = await Promise.all([
     import(`${getLibs()}/utils/decorate.js`),
     loadIconsRail(),
+    applyCreateNowLink(ctaLink, colorName),
   ]);
   decorateButtons(block);
 
@@ -617,5 +618,5 @@ export default function decorate(block) {
   layout.append(previewSkeleton);
   const toolbarMount = createTag('div', { class: 'color-seo-hero-toolbar-mount' });
   block.append(buildMotionBg(), layout, toolbarMount);
-  decorateAsync(block, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref);
+  decorateAsync(block, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref, ctaLink);
 }
