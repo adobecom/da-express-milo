@@ -552,7 +552,7 @@ function attachGradientPointerTracking(block) {
   block.addEventListener('mouseleave', () => setTarget({ x: 0, y: 0 }));
 }
 
-async function decorateAsync(block, layout, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref) {
+async function decorateAsync(block, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref) {
   const [{ decorateButtons }] = await Promise.all([
     import(`${getLibs()}/utils/decorate.js`),
     loadIconsRail(),
@@ -594,8 +594,6 @@ export default function decorate(block) {
   const colorCells = colorRow ? [...colorRow.children] : [];
   const colorName = getText(colorCells[0]);
   const hex = getText(colorCells[1]);
-  // Authored as a real link (e.g. "https://color.adobe.com/create/color-wheel?tab=primary-color")
-  // so the color-wheel domain/path/tab live in DA content, not hardcoded here (see colorWheelUrl).
   const colorWheelHref = colorCells[2]?.querySelector('a')?.href;
 
   if (!contentRow || !colorName || !HEX_PATTERN.test(hex) || !colorWheelHref) return;
@@ -619,5 +617,5 @@ export default function decorate(block) {
   layout.append(previewSkeleton);
   const toolbarMount = createTag('div', { class: 'color-seo-hero-toolbar-mount' });
   block.append(buildMotionBg(), layout, toolbarMount);
-  decorateAsync(block, layout, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref);
+  decorateAsync(block, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref);
 }
