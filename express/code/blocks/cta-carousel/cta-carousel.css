@@ -5,6 +5,7 @@
 .cta-carousel {
     padding: var(--section-padding-xl) 0 var(--section-padding-xl) var(--Grid-container-padding-side);
     max-width: 1440px;
+    margin: auto;
 }
 
 @media (min-width: 600px) {
@@ -359,20 +360,15 @@
     border-radius: 4px;
 }
 
+.cta-carousel.create .carousel-container .carousel-fader-left a,
 .cta-carousel.create .carousel-container .carousel-fader-right a,
+.cta-carousel.quick-action .carousel-container .carousel-fader-left a,
 .cta-carousel.quick-action .carousel-container .carousel-fader-right a {
     position: absolute;
     top: 64px;
-    right: 20px;
 }
 
-.cta-carousel.create .carousel-container .carousel-fader-left a,
-.cta-carousel.quick-action .carousel-container .carousel-fader-left a {
-    position: absolute;
-    top: 64px;
-}
-
-.cta-carousel:not(.create):not(.quick-action) .carousel-container a.button.carousel-arrow-right {
+.cta-carousel .carousel-container a.button.carousel-arrow-right {
     margin-right: 20px;
 }
 
