@@ -190,14 +190,20 @@ describe('CKG Link List / chips variant / overflowing (infinite carousel)', () =
     expect(chips.length % VALID_PILL_COUNT).to.equal(0);
   });
 
-  it('shows both fade arrows (infinite carousels always have more to scroll to)', async () => {
+  it('shows the right fade arrow immediately but defers the left one until the user scrolls (deferLeftArrow)', async () => {
     const block = await prepBlock('./mocks/chips.html');
     const left = block.querySelector('.carousel-fader-left');
     const right = block.querySelector('.carousel-fader-right');
     expect(left).to.exist;
     expect(right).to.exist;
-    expect(left.classList.contains('arrow-hidden')).to.be.false;
+    expect(left.classList.contains('arrow-hidden')).to.be.true;
     expect(right.classList.contains('arrow-hidden')).to.be.false;
+
+    const platform = block.querySelector('.carousel-platform');
+    Object.defineProperty(platform, 'scrollLeft', { value: 40, configurable: true });
+    platform.dispatchEvent(new Event('scroll'));
+
+    expect(left.classList.contains('arrow-hidden')).to.be.false;
   });
 
   it('patches localized aria-labels onto the arrow buttons', async () => {

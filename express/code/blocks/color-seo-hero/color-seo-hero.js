@@ -445,11 +445,9 @@ async function buildPreview(context) {
   return preview;
 }
 
-async function buildFloatingToolbar(context) {
+async function buildFloatingToolbar(context, mount) {
   const { strings } = context;
   const { initFloatingToolbar } = await import('../../scripts/color-shared/toolbar/createFloatingToolbar.js');
-
-  const mount = createTag('div', { class: 'color-seo-hero-toolbar-mount' });
 
   const toolbarHandle = await initFloatingToolbar(mount, {
     type: 'palette',
@@ -483,13 +481,11 @@ async function buildFloatingToolbar(context) {
       { element: buildDownloadMenu(context).element },
     ],
   });
-  if (!toolbarHandle) return mount;
+  if (!toolbarHandle) return;
 
   context.floatingToolbarHandle = toolbarHandle;
   context.floatingToolbar = toolbarHandle.wrapper;
   context.floatingEditButtonEl = toolbarHandle.wrapper.querySelector('.ax-edit-btn');
-
-  return mount;
 }
 
 const GRADIENT_MOVEMENT_PX = 200;
@@ -556,7 +552,7 @@ function attachGradientPointerTracking(block) {
   block.addEventListener('mouseleave', () => setTarget({ x: 0, y: 0 }));
 }
 
-async function decorateAsync(block, layout, previewSkeleton, colorName, hex, colorWheelHref) {
+async function decorateAsync(block, layout, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref) {
   const [{ decorateButtons }] = await Promise.all([
     import(`${getLibs()}/utils/decorate.js`),
     loadIconsRail(),
@@ -582,12 +578,11 @@ async function decorateAsync(block, layout, previewSkeleton, colorName, hex, col
     }
   });
 
-  const [preview, toolbarMount] = await Promise.all([
+  const [preview] = await Promise.all([
     buildPreview(context),
-    buildFloatingToolbar(context),
+    buildFloatingToolbar(context, toolbarMount),
   ]);
   previewSkeleton.replaceWith(preview);
-  block.append(toolbarMount);
 
   block.classList.add('is-ready');
   attachGradientPointerTracking(block);
@@ -622,6 +617,7 @@ export default function decorate(block) {
   layout.append(contentRow);
   const previewSkeleton = buildPreviewSkeleton();
   layout.append(previewSkeleton);
-  block.append(buildMotionBg(), layout);
-  decorateAsync(block, layout, previewSkeleton, colorName, hex, colorWheelHref);
+  const toolbarMount = createTag('div', { class: 'color-seo-hero-toolbar-mount' });
+  block.append(buildMotionBg(), layout, toolbarMount);
+  decorateAsync(block, layout, previewSkeleton, toolbarMount, colorName, hex, colorWheelHref);
 }
