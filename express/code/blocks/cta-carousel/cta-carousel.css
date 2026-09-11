@@ -3,14 +3,14 @@
 }
 
 .cta-carousel {
-    padding: 0 28px;
+    padding: var(--section-padding-xl) 0 var(--section-padding-xl) var(--Grid-container-padding-side);
     max-width: 1440px;
-    margin: auto;
 }
 
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .cta-carousel:first-child {
-    padding-top: 60px;
+@media (min-width: 600px) {
+    .cta-carousel {
+        padding: var(--section-padding-m) 0 var(--section-padding-m) var(--Grid-container-padding-side);
+    }
 }
 
 .cta-carousel .cta-carousel-heading-section {
@@ -18,7 +18,8 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
-    margin: auto auto 32px;
+    padding-right: var(--Grid-container-padding-side);
+    margin: auto auto var(--spacing-400);
 }
 
 .cta-carousel .cta-carousel-heading-section h2 {
@@ -358,12 +359,21 @@
     border-radius: 4px;
 }
 
-.cta-carousel.create .carousel-container .carousel-fader-left a,
 .cta-carousel.create .carousel-container .carousel-fader-right a,
-.cta-carousel.quick-action .carousel-container .carousel-fader-left a,
 .cta-carousel.quick-action .carousel-container .carousel-fader-right a {
     position: absolute;
     top: 64px;
+    right: 20px;
+}
+
+.cta-carousel.create .carousel-container .carousel-fader-left a,
+.cta-carousel.quick-action .carousel-container .carousel-fader-left a {
+    position: absolute;
+    top: 64px;
+}
+
+.cta-carousel:not(.create):not(.quick-action) .carousel-container a.button.carousel-arrow-right {
+    margin-right: 20px;
 }
 
 :lang(ja) main .cta-carousel.gen-ai .gen-ai-input,
@@ -371,7 +381,7 @@
     font-size: var(--body-font-size-s);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 600px) {
     .cta-carousel .cta-carousel-heading-section {
         flex-direction: row;
         align-items: flex-end;
