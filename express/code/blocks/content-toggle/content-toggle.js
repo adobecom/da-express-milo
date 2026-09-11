@@ -88,12 +88,12 @@ function initButton($block, $sections, index) {
 
       if ($activeButton !== $buttons[index]) {
         setActiveButton(index);
-        $sections.forEach(($section) => {
-          if ($buttons[index].dataset.text === $section.dataset.toggle.toLowerCase()) {
-            $section.style.display = 'block';
-          } else {
-            $section.style.display = 'none';
-          }
+        $sections.forEach(($section, sectionIndex) => {
+          // Match by position, not heading text: post-localization the toggle
+          // headings are translated while section metadata may not be, so a
+          // text comparison would fail and break the toggle. The i-th button
+          // always drives the i-th [data-toggle] section.
+          $section.style.display = sectionIndex === index ? 'block' : 'none';
         });
         if (!(window.scrollY < offsetPosition + 1 && window.scrollY > offsetPosition - 1)) {
           window.scrollTo({
