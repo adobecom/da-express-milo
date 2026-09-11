@@ -1873,8 +1873,12 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   margin-bottom: 0;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-fader-right a.button.carousel-arrow {
-  margin-right: 20px;
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-fader-right a.button.carousel-arrow-right {
+  margin: 0 20px 0 0;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-fader-left a.button.carousel-arrow-left {
+  margin: 0 0 0 20px;
 }
 
 .template-x .template-title.with-link.horizontal {
