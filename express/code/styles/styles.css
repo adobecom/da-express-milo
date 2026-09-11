@@ -424,6 +424,7 @@
   --Grid-container-padding-side: var(--spacing-300);
   --Grid-grid-gutter: var(--spacing-100);
   --section-padding-xl: var(--spacing-600);
+  --section-padding-m: var(--spacing-700);
 
 }
 

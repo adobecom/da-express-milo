@@ -20,6 +20,8 @@
 
 .express-toast-container > * {
   pointer-events: auto;
+  width: max-content;
+  max-width: 100%;
 }
 
 /* ── Toast base ───────────────────────────────────────────────────── */
@@ -74,6 +76,10 @@ sp-toast[variant="info"] {
     left: 16px;
     right: 16px;
     transform: none;
+  }
+
+  .express-toast-container > * {
+    width: 100%;
   }
 
   sp-toast {

@@ -190,7 +190,7 @@ function onCarouselCSSLoad(selector, parent, options) {
     }
   };
 
-  const infinityScroll = (children) => {
+  const infinityScroll = (children, opts) => {
     const duplicateContent = () => {
       [...children].forEach((child) => {
         const duplicate = child.cloneNode(true);
@@ -212,7 +212,16 @@ function onCarouselCSSLoad(selector, parent, options) {
       duplicateContent();
     }
 
+    let leftArrowArmed = !opts.deferLeftArrow;
+
     platform.addEventListener('scroll', (e) => {
+      if (!leftArrowArmed) {
+        if (platform.scrollLeft <= 30) return;
+        leftArrowArmed = true;
+        faderLeft.classList.remove('arrow-hidden');
+        platform.classList.add('left-fader');
+        return;
+      }
       moveToCenterIfNearTheEdge(e);
     }, { passive: false });
   };
@@ -220,10 +229,13 @@ function onCarouselCSSLoad(selector, parent, options) {
   // set initial states
   const setInitialState = (scrollable, opts) => {
     if (opts.infinityScrollEnabled) {
-      infinityScroll([...carouselContent]);
-      faderLeft.classList.remove('arrow-hidden');
+      infinityScroll([...carouselContent], opts);
       faderRight.classList.remove('arrow-hidden');
-      platform.classList.add('left-fader', 'right-fader');
+      platform.classList.add('right-fader');
+      if (!opts.deferLeftArrow) {
+        faderLeft.classList.remove('arrow-hidden');
+        platform.classList.add('left-fader');
+      }
     }
 
     const onIntersect = ([entry], observer) => {
