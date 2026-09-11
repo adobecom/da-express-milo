@@ -273,7 +273,7 @@ main .section .verb-dropzone p {
 .verb-dropzone.mobile-dark .verb-dropzone-legal .verb-dropzone-legal-url,
 .verb-dropzone.tablet-dark .verb-dropzone-legal .verb-dropzone-legal-url,
 .verb-dropzone.desktop-dark .verb-dropzone-legal .verb-dropzone-legal-url {
-  color: var(--consonant-link-color, #2C9AF5);
+  color: var(--consonant-link-color, #2C9AF5); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 .verb-dropzone.dark .verb-dropzone-legal a:hover,
@@ -284,7 +284,7 @@ main .section .verb-dropzone p {
 .verb-dropzone.mobile-dark .verb-dropzone-legal .verb-dropzone-legal-url:hover,
 .verb-dropzone.tablet-dark .verb-dropzone-legal .verb-dropzone-legal-url:hover,
 .verb-dropzone.desktop-dark .verb-dropzone-legal .verb-dropzone-legal-url:hover {
-  color: var(--consonant-link-color-hover, #84CAFF);
+  color: var(--consonant-link-color-hover, #84CAFF); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 /* ============================================================

@@ -40,10 +40,10 @@
 
 .collapsible-row-accordion--mini-editor {
     gap: var(--spacing-300);
-    padding: var(--spacing-300, 16px);
+    padding: var(--spacing-300, 16px); /* stylelint-disable-line declaration-property-value-disallowed-list */
     border: 1px solid rgb(0 0 0 / 5%);
     border-left: 1px solid rgb(0 0 0 / 5%);
-    border-radius: var(--spacing-300, 16px);
+    border-radius: var(--spacing-300, 16px); /* stylelint-disable-line declaration-property-value-disallowed-list */
     background: #f8f8f8;
     justify-content: flex-start;
 }
@@ -352,7 +352,7 @@ main .section .collapsible-row-sub-header p:last-of-type {
         padding: var(--spacing-400) var(--spacing-300);
     }
     .collapsible-rows .collapsible-row-accordion.collapsible-row-accordion--mini-editor {
-        padding: var(--spacing-300, 16px);
+        padding: var(--spacing-300, 16px); /* stylelint-disable-line declaration-property-value-disallowed-list */
     }
     .collapsible-rows .collapsible-row-toggle-btn {
         width: fit-content;

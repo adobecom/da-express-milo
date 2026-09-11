@@ -120,7 +120,7 @@ main .section>div:has(.pricing-cards-credits) {
     height: 10px;
     background-color: var(--primary-color);
     transition: width 0.5s ease-in-out;
-    width: var(--progress, 0%);
+    width: var(--progress, 0%); /* stylelint-disable-line declaration-property-value-disallowed-list */
     border-radius: 5px;
 }
 

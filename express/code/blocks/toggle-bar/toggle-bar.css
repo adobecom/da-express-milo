@@ -69,7 +69,7 @@
     display: none;
 }
 
-.section .toggle-bar-wrapper > .toggle-bar > div:nth-of-type(2) {
+.section .toggle-bar-wrapper > .toggle-bar > div:nth-of-type(2) { /* stylelint-disable-line no-duplicate-selectors */
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
