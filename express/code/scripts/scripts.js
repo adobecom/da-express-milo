@@ -298,6 +298,19 @@ const CONFIG = {
   },
 };
 
+// Handle dynamic import failures gracefully. Bots are hitting the templates page
+// and causing unhandled rejections that are logged with extreme frequency.
+window.addEventListener('unhandledrejection', (event) => {
+  const { reason } = event;
+  if (reason instanceof TypeError && reason.message.includes('dynamically imported module')) {
+    event.preventDefault();
+    // preventDefault() only suppresses the browser's default console reporting;
+    // lana's own unhandledrejection listener still fires unless propagation is stopped.
+    event.stopImmediatePropagation();
+    window.lana?.log(`Import failed: ${reason.message}`, { errorType: 'i', sampleRate: 1 });
+  }
+});
+
 /*
  * ------------------------------------------------------------
  * Edit below at your own risk
