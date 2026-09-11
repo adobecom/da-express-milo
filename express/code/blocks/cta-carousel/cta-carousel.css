@@ -5,6 +5,7 @@
 .cta-carousel {
     padding: var(--section-padding-xl) 0 var(--section-padding-xl) var(--Grid-container-padding-side);
     max-width: 1440px;
+    margin: auto;
 }
 
 @media (min-width: 600px) {
