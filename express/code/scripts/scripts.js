@@ -307,7 +307,7 @@ window.addEventListener('unhandledrejection', (event) => {
     // preventDefault() only suppresses the browser's default console reporting;
     // lana's own unhandledrejection listener still fires unless propagation is stopped.
     event.stopImmediatePropagation();
-    window.lana?.log(`Import failed: ${reason.message}`, { errorType: 'i', sampleRate: 1 });
+    window.lana?.log(`Import failed: ${reason.message}`, { tags: 'dynamic-import', severity: 'error' });
   }
 });
 
