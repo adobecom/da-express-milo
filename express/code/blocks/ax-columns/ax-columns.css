@@ -531,6 +531,13 @@ main .section .ax-columns.enterprise {
    Fullsize (incl. fullsize+top combo)
    ============================================================ */
 
+.ax-columns.fullsize {
+  padding-top: var(--section-padding-xl);
+  padding-right: var(--Grid-container-padding-side);
+  padding-bottom: var(--section-padding-xl);
+  padding-left: var(--Grid-container-padding-side);
+}
+
 .ax-columns.fullsize .column-picture,
 .ax-columns.fullsize .hero-animation-overlay {
   order: -1;
