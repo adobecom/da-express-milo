@@ -1836,12 +1836,6 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   padding: 32px;
 }
 
-/* Horizontal template list (fullwidth, non-holiday/mini/collaboration) container spacing */
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) {
-  padding-top: var(--section-padding-xl);
-  padding-bottom: var(--section-padding-xl);
-}
-
 .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper) {
   padding-left: var(--Grid-container-padding-side);
 }
