@@ -365,6 +365,7 @@ function preloadLCPImage(img) {
 }());
 
 let fragmentLcpPreloaded = false;
+
 // eslint-disable-next-line import/prefer-default-export
 export function decorateAreaWithLCP(area = document, options = {}) {
   const { fragmentLink } = options;

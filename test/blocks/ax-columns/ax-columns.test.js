@@ -139,7 +139,7 @@ describe('Columns', () => {
     const columns = document.querySelector('.ax-columns');
     await decorate(columns);
 
-    const button = columns.querySelector('.button');
+    const button = columns.querySelector('.con-button');
     expect(button.classList.contains('light')).to.be.true;
     expect(button.classList.contains('primary')).to.be.true;
   });
@@ -167,7 +167,7 @@ describe('Columns', () => {
     const columns = document.querySelector('.ax-columns');
     await decorate(columns);
 
-    const button = columns.querySelector('.button');
+    const button = columns.querySelector('.con-button');
     expect(button.classList.contains('dark')).to.be.true;
   });
 
@@ -176,15 +176,15 @@ describe('Columns', () => {
     const columns = document.querySelector('.ax-columns');
     await decorate(columns);
 
-    const buttons = columns.querySelectorAll('.button');
+    const buttons = columns.querySelectorAll('.con-button');
     expect(buttons.length).to.equal(2);
 
     const primaryButton = buttons[0];
-    expect(primaryButton.classList.contains('accent')).to.be.true;
+    expect(primaryButton.classList.contains('blue')).to.be.true;
     expect(primaryButton.classList.contains('primaryCTA')).to.be.true;
 
     const secondaryButton = buttons[1];
-    expect(secondaryButton.classList.contains('primary')).to.be.true;
+    expect(secondaryButton.classList.contains('outline')).to.be.true;
     expect(secondaryButton.classList.contains('reverse')).to.be.true;
   });
 });
