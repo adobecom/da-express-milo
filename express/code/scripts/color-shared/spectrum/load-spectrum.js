@@ -50,17 +50,13 @@ function installErrorSuppression() {
       || st.includes("reading 'get'");
 
     if (isMenu && isUndef && isWeak) {
-      // [SAFARI-DIAG] Surface (do NOT suppress) the menu.js WeakMap error so its
-      // real stack is visible in Safari. Revert this whole branch before merge.
-      const key = `${s}:${line}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        // eslint-disable-next-line no-console
-        console.error('[SAFARI-DIAG] menu.js WeakMap error (onerror):', {
-          msg: m, src: s, line, col, stack: st,
-        });
-      }
-      return false;
+      // [SAFARI-DIAG] LOG the real stack but KEEP suppressing so the page behaves
+      // exactly like prod (picker still renders). Revert before merge.
+      // eslint-disable-next-line no-console
+      console.error('[SAFARI-DIAG] menu.js WeakMap error (onerror):', {
+        msg: m, src: s, line, col, stack: st,
+      });
+      return true;
     }
     return original ? original.call(this, msg, src, line, col, err) : false;
   };
@@ -83,11 +79,13 @@ function installErrorSuppression() {
       || stack.includes("reading 'set'")
       || stack.includes("reading 'get'");
     if (isMenu && isUndef && isWeak) {
-      // [SAFARI-DIAG] Surface, don't suppress. Revert before merge.
+      // [SAFARI-DIAG] LOG but KEEP suppressing (preserve prod behavior). Revert before merge.
       // eslint-disable-next-line no-console
       console.error('[SAFARI-DIAG] menu.js WeakMap error (error event):', {
         message, filename, lineno: event?.lineno, colno: event?.colno, stack,
       });
+      event.preventDefault();
+      event.stopImmediatePropagation();
       return;
     }
     // "ResizeObserver loop completed with undelivered notifications" is a
@@ -114,9 +112,10 @@ function installErrorSuppression() {
     const isUndef = text.includes('Cannot read properties of undefined');
     const isWeak = text.includes("reading 'set'") || text.includes("reading 'get'");
     if (isMenu && isUndef && isWeak) {
-      // [SAFARI-DIAG] Surface, don't suppress. Revert before merge.
+      // [SAFARI-DIAG] LOG but KEEP suppressing (preserve prod behavior). Revert before merge.
       // eslint-disable-next-line no-console
       console.error('[SAFARI-DIAG] menu.js WeakMap error (unhandledrejection):', { text, stack });
+      event.preventDefault();
     }
   });
 }
