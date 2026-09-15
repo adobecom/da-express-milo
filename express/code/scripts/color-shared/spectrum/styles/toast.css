@@ -93,7 +93,9 @@ sp-toast[variant="info"] {
 
 @media (prefers-reduced-motion: reduce) {
   sp-toast {
+    /* stylelint-disable declaration-no-important */
     transition: none !important;
     animation: none !important;
+    /* stylelint-enable declaration-no-important */
   }
 }
