@@ -4,6 +4,7 @@
    ============================================================================ */
 
 sp-action-button {
+  --mod-actionbutton-border-radius: var(--corner-radius-100, 8px);
   --mod-button-border-radius: var(--corner-radius-100, 8px);
   --mod-button-font-family: var(--body-font-family);
   --mod-button-line-height: var(--line-height-100, 18px);
