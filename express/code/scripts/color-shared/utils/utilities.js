@@ -1,4 +1,5 @@
 import { createTag } from '../../utils.js';
+import trackExportEvent from '../../utils/export-analytics.js';
 
 export function interpolate(template, vars) {
   return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), template);
@@ -23,6 +24,23 @@ export function decorateAnalyticsAttributes(element, { linkLabel } = {}) {
     linkLabel || element.getAttribute('aria-label') || element.textContent || 'action',
   );
   element.setAttribute('daa-ll', value);
+}
+
+const COLOR_EXPORT_TASK_NAME = 'color';
+const COLOR_EXPORT_UI_LOCATION = 'acom-color-page';
+
+/**
+ * Fires the shared export-tracking event (DOTCOM-197011) for a completed
+ * export-style action (download, copy, share) on a color.adobe.com child page.
+ *
+ * @param {string} exportMethod - e.g. 'download', 'copy-clipboard', 'share'
+ */
+export function trackColorExport(exportMethod) {
+  return trackExportEvent({
+    exportMethod,
+    taskName: COLOR_EXPORT_TASK_NAME,
+    uiLocation: COLOR_EXPORT_UI_LOCATION,
+  });
 }
 
 const SWIPE_CLOSE_THRESHOLD_PX = 120;
@@ -346,6 +364,19 @@ export function buildColorToolUrl(
     name, tags, id, libraryId,
   });
   return url.toString();
+}
+
+const CREATE_NOW_BASE_URL = 'https://adobesparkpost.app.link/c4bWARQhWAb';
+
+export async function applyCreateNowLink(anchor, colorName) {
+  if (!anchor || !colorName) return;
+  const { default: trackBranchParameters } = await import('../../branchlinks.js');
+  anchor.href = CREATE_NOW_BASE_URL;
+  await trackBranchParameters([anchor]);
+  const url = new URL(anchor.href);
+  url.searchParams.set('q', colorName.toLowerCase());
+  url.searchParams.set('searchCategory', 'templates');
+  anchor.href = url.toString();
 }
 
 export function navigateToColorTool(href, options = {}) {
