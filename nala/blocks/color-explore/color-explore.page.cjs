@@ -1,3 +1,10 @@
+// WebKit is consistently slower than Chromium/Firefox to finish decorating
+// these color-shared blocks in CI (observed up to ~20s vs ~2-10s), so every
+// wait that depends on that decoration needs real headroom above Playwright's
+// 15s expect-timeout default. Keep these waits driven by one constant so the
+// block-ready wait and the picker-overlay wait can't drift apart.
+const DECORATION_TIMEOUT = 30000;
+
 class ColorExploreBlock {
   constructor(page, selector = '.color-explore', nth = 0) {
     this.page = page;
@@ -11,11 +18,8 @@ class ColorExploreBlock {
     this.filterDropdowns = this.desktopFilters.locator('.filter-dropdown');
   }
 
-  // WebKit is consistently slower than Chromium/Firefox to finish decorating
-  // these color-shared blocks in CI (observed up to ~20s vs ~2-10s), so this
-  // needs real headroom above the 15s expect-timeout default.
   async waitReady() {
-    await this.blockReady.waitFor({ state: 'attached', timeout: 30000 });
+    await this.blockReady.waitFor({ state: 'attached', timeout: DECORATION_TIMEOUT });
   }
 
   // The <sp-picker> trigger for the dropdown at the given index.
@@ -28,11 +32,16 @@ class ColorExploreBlock {
     return this.filterDropdowns.nth(nth).locator('sp-menu-item');
   }
 
-  // Open a desktop picker and wait for its overlay to render its items.
+  // Open a desktop picker and wait for its overlay to render its items. The
+  // click can be dropped if the sp-picker has not hydrated yet, so wait for it
+  // to be visible first, then give the overlay the same WebKit-sized headroom
+  // as the block-ready wait (the menu items are decorated by the same slow SWC
+  // pipeline).
   async openPicker(nth = 0) {
     const picker = this.picker(nth);
+    await picker.waitFor({ state: 'visible', timeout: DECORATION_TIMEOUT });
     await picker.click();
-    await this.menuItems(nth).first().waitFor({ state: 'visible', timeout: 8000 });
+    await this.menuItems(nth).first().waitFor({ state: 'visible', timeout: DECORATION_TIMEOUT });
     return picker;
   }
 }
