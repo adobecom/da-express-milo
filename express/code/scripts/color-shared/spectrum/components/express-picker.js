@@ -191,6 +191,29 @@ export async function createExpressPicker(config) {
   };
   picker.addEventListener('change', onPickerChange);
 
+  // [SAFARI-DIAG] Instrument the open lifecycle to see whether the overlay/menu
+  // ever render in Safari (aria-expanded flips true but the popover may never
+  // paint). Remove this whole block before merge.
+  const diag = (evt) => {
+    try {
+      const shadowOverlay = picker.shadowRoot?.querySelector('sp-overlay');
+      // eslint-disable-next-line no-console
+      console.log('[SAFARI-DIAG]', id || label, evt, {
+        open: picker.open,
+        ariaExpanded: picker.getAttribute('aria-expanded'),
+        lightMenuItems: picker.querySelectorAll('sp-menu-item').length,
+        shadowOverlay: Boolean(shadowOverlay),
+        shadowOverlayOpen: shadowOverlay?.open ?? null,
+        docOverlays: document.querySelectorAll('sp-overlay').length,
+        docPopovers: document.querySelectorAll('sp-popover').length,
+      });
+    } catch (diagErr) {
+      // eslint-disable-next-line no-console
+      console.log('[SAFARI-DIAG] diag failed', diagErr);
+    }
+  };
+  ['click', 'sp-opened', 'sp-closed', 'change'].forEach((evt) => picker.addEventListener(evt, () => diag(evt)));
+
   // 10. Public API
   return {
     /** The <sp-theme> root element — append this to the DOM. */

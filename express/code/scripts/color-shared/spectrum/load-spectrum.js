@@ -50,12 +50,17 @@ function installErrorSuppression() {
       || st.includes("reading 'get'");
 
     if (isMenu && isUndef && isWeak) {
+      // [SAFARI-DIAG] Surface (do NOT suppress) the menu.js WeakMap error so its
+      // real stack is visible in Safari. Revert this whole branch before merge.
       const key = `${s}:${line}`;
       if (!seen.has(key)) {
         seen.add(key);
-        console.warn('[Spectrum] Suppressed non-fatal menu.js error:', m);
+        // eslint-disable-next-line no-console
+        console.error('[SAFARI-DIAG] menu.js WeakMap error (onerror):', {
+          msg: m, src: s, line, col, stack: st,
+        });
       }
-      return true;
+      return false;
     }
     return original ? original.call(this, msg, src, line, col, err) : false;
   };
@@ -78,8 +83,11 @@ function installErrorSuppression() {
       || stack.includes("reading 'set'")
       || stack.includes("reading 'get'");
     if (isMenu && isUndef && isWeak) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
+      // [SAFARI-DIAG] Surface, don't suppress. Revert before merge.
+      // eslint-disable-next-line no-console
+      console.error('[SAFARI-DIAG] menu.js WeakMap error (error event):', {
+        message, filename, lineno: event?.lineno, colno: event?.colno, stack,
+      });
       return;
     }
     // "ResizeObserver loop completed with undelivered notifications" is a
@@ -106,7 +114,9 @@ function installErrorSuppression() {
     const isUndef = text.includes('Cannot read properties of undefined');
     const isWeak = text.includes("reading 'set'") || text.includes("reading 'get'");
     if (isMenu && isUndef && isWeak) {
-      event.preventDefault();
+      // [SAFARI-DIAG] Surface, don't suppress. Revert before merge.
+      // eslint-disable-next-line no-console
+      console.error('[SAFARI-DIAG] menu.js WeakMap error (unhandledrejection):', { text, stack });
     }
   });
 }
