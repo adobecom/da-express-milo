@@ -20,6 +20,7 @@
  */
 
 import { loadPicker } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
@@ -109,9 +110,7 @@ export async function createExpressPicker(config) {
   await loadOverrideStyles('picker', STYLES_PATH);
 
   // 3. Wait for CEs to be ready
-  await customElements.whenDefined('sp-theme');
-  await customElements.whenDefined('sp-picker');
-  await customElements.whenDefined('sp-menu-item');
+  await waitForComponents(['sp-theme', 'sp-picker', 'sp-menu-item']);
 
   // 4. Create theme wrapper
   const theme = createThemeWrapper();
