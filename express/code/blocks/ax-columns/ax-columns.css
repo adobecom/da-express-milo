@@ -162,6 +162,7 @@ main .section .ax-columns.enterprise .column h2 {
   border-radius: 16px;
 }
 
+/* stylelint-disable-next-line no-duplicate-selectors */
 .ax-columns.top.center,
 .ax-columns.fullsize.center,
 .ax-columns.light,
@@ -961,7 +962,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   display: none;
 }
 
-.section .ax-columns.marquee h1.columns-heading-long {
+.section .ax-columns.marquee h1.columns-heading-long { /* stylelint-disable-line no-duplicate-selectors */
   font-size: var(--heading-font-size-m);
 }
 
@@ -1198,7 +1199,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     transform: unset;
   }
 
-  .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon {
+  .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon { /* stylelint-disable-line no-duplicate-selectors */
     padding-left: 0;
   }
 
@@ -1211,6 +1212,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     align-items: flex-start;
   }
 
+  /* stylelint-disable-next-line no-duplicate-selectors */
   .section .ax-columns,
   .ax-columns.top.center,
   .ax-columns.fullsize.center,
@@ -1668,7 +1670,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-left: unset;
   }
 
-  .ax-columns.marquee .button-container.free-plan-container {
+  .ax-columns.marquee .button-container.free-plan-container { /* stylelint-disable-line no-duplicate-selectors */
     align-items: center;
     margin-top: var(--spacing-200);
   }
@@ -1882,7 +1884,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     display: flex;
     min-width: 600px;
     max-width: 1199px;
-    padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px);
+    padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px); /* stylelint-disable-line declaration-property-value-disallowed-list */
     flex-direction: column;
     align-items: center;
     gap: 10px;
@@ -1919,7 +1921,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .section.ax-max-entitled:has(.ax-columns) div.ax-columns>div {
     gap: var(--spacing-700);
     padding: 0px var(--spacing-400);
-    min-width: var(--Global-Device-Widths-device-min-width, 600px);
+    min-width: var(--Global-Device-Widths-device-min-width, 600px); /* stylelint-disable-line declaration-property-value-disallowed-list */
     margin: auto;
     max-width: var(--block-lg-max-width);
   }

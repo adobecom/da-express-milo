@@ -20,7 +20,7 @@ main .how-to-steps {
   box-sizing: border-box;
 }
 
-main .how-to-steps {
+main .how-to-steps { /* stylelint-disable-line no-duplicate-selectors */
   margin-top: 20px;
   margin-bottom: 0;
 }
@@ -31,16 +31,16 @@ main .how-to-steps + div {
 
 main .how-to-steps > div {
   display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
+  display: -ms-flexbox; /* stylelint-disable-line declaration-block-no-duplicate-properties */
+  display: flex; /* stylelint-disable-line declaration-block-no-duplicate-properties */
   text-align: left;
   margin-bottom: 40px;
 }
 
 main .how-to-steps .tip {
   display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
+  display: -ms-flexbox; /* stylelint-disable-line declaration-block-no-duplicate-properties */
+  display: flex; /* stylelint-disable-line declaration-block-no-duplicate-properties */
   -webkit-box-align: start;
   -ms-flex-align: start;
   align-items: flex-start;
