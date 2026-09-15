@@ -98,6 +98,17 @@ function colorWheelUrl(context, colors) {
   return buildColorToolUrl(context.colorWheelHref, { colors });
 }
 
+function computeShadesForHex(hex) {
+  const controller = new ColorThemeExpressController({
+    swatches: [hex, hex, hex, hex],
+    harmonyRule: 'CUSTOM',
+    baseColorIndex: 0,
+  });
+  controller.setHarmonyRule('SHADES');
+  controller.setBaseColor(hex);
+  return controller.getState().swatches.map((swatch) => swatch.hex);
+}
+
 function showColorCopiedToast(context, hex) {
   const { strings } = context;
   showExpressToast({
@@ -106,7 +117,7 @@ function showColorCopiedToast(context, hex) {
     timeout: 4000,
     action: {
       label: strings.createAPalette,
-      href: colorWheelUrl(context, [hex]),
+      href: colorWheelUrl(context, computeShadesForHex(hex)),
       sameTab: true,
     },
   });

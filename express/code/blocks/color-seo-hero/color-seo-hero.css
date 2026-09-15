@@ -453,7 +453,8 @@
   }
 
   .color-seo-hero-canvas {
-    max-height: 540px;
+    aspect-ratio: unset;
+    height: 540px;
   }
 
   .color-seo-hero-swatch-strip {
