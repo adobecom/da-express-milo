@@ -294,6 +294,29 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   display: flex;
 }
 
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-link::after,
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title-link::after {
+  display: flex;
+  width: 6px;
+  height: 6px;
+  border-top-width: 0;
+  border-left-width: 0;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+  border-style: solid;
+  border-color: var(--color-info-accent);
+  transform-origin: 75% 75%;
+  transform: rotate( -45deg );
+  content: "";
+  margin-top: 5px;
+  margin-inline-start: 5px;
+  margin-inline-end: 2.25px;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title-link::after {
+  margin-top: 7px;
+}
+
 .template-x .template-link:hover,
 .template-x .template-title-link:hover {
   color: var(--palette-indigo-1000)
@@ -1814,6 +1837,70 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   padding: 32px;
 }
 
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper) {
+  padding-inline-start: var(--Grid-container-padding-side);
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper):not(.template-title) {
+  padding-inline-end: 0;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > .template-x-inner-wrapper {
+  padding-inline: 0;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-platform {
+  padding-left: var(--Grid-container-padding-side);
+  padding-right: 0;
+  scroll-padding-left: var(--Grid-container-padding-side);
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template.is-first-card {
+  margin-left: 0;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template {
+  margin-top: 0;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title {
+  margin-bottom: 0;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-fader-right a.button.carousel-arrow-right {
+  margin: 0 20px 0 0;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-fader-left a.button.carousel-arrow-left {
+  margin: 0 0 0 20px;
+}
+
+.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.horizontal {
+  padding-inline-end: var(--Grid-container-padding-side);
+}
+
+@media (min-width: 600px) {
+  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--spacing-300);
+  }
+
+  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link>div {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.link-only {
+    justify-content: flex-end;
+  }
+
+  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.horizontal .view-all-link-wrapper {
+    margin: 0;
+  }
+}
+
 .template-x.horizontal.fullwidth.holiday .carousel-container .carousel-fader-right {
   transform: translate3d(0, 0, 0);
   height: 232px;
@@ -2708,22 +2795,26 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
     max-width: 748px;
   }
 
-  .template-x .template-title.with-link.horizontal {
+  .template-x.horizontal:not(.fullwidth) .template-title.with-link.horizontal,
+  .template-x.horizontal.fullwidth:is(.holiday, .mini) .template-title.with-link.horizontal {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
   }
 
-  .template-x .template-title.with-link > div {
+  .template-x.horizontal:not(.fullwidth) .template-title.with-link > div,
+  .template-x.horizontal.fullwidth:is(.holiday, .mini) .template-title.with-link > div {
     flex-direction: row;
     justify-content: space-between;
   }
 
-  .template-x .template-title.with-link.link-only {
+  .template-x.horizontal:not(.fullwidth) .template-title.with-link.link-only,
+  .template-x.horizontal.fullwidth:is(.holiday, .mini) .template-title.with-link.link-only {
     justify-content: flex-end;
   }
 
-  .template-x:not(.holiday) .template-title.horizontal .view-all-link-wrapper {
+  .template-x.horizontal:not(.fullwidth):not(.holiday) .template-title.horizontal .view-all-link-wrapper,
+  .template-x.horizontal.fullwidth.mini .template-title.horizontal .view-all-link-wrapper {
     margin: 0;
   }
 
