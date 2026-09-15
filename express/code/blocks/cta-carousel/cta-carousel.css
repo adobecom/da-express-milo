@@ -8,12 +8,6 @@
     margin: auto;
 }
 
-@media (min-width: 600px) {
-    .cta-carousel {
-        padding: var(--section-padding-m) 0 var(--section-padding-m) var(--Grid-container-padding-side);
-    }
-}
-
 .cta-carousel .cta-carousel-heading-section {
     display: flex;
     flex-direction: column;
@@ -378,8 +372,35 @@
 }
 
 @media (min-width: 600px) {
+
+    .cta-carousel {
+        padding: var(--section-padding-m) 0 var(--section-padding-m) var(--Grid-container-padding-side);
+    }
+
     .cta-carousel .cta-carousel-heading-section {
         flex-direction: row;
         align-items: flex-end;
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    .cta-carousel .cta-carousel-heading-section .cta-carousel-link {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+}
+
+@media (min-width: 1440px) {
+    .cta-carousel {
+        padding: 0 28px;
+    }
+
+    .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+        .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .cta-carousel:first-child {
+        padding-top: 60px;
+    }
+
+    .cta-carousel .cta-carousel-heading-section {
+        flex-wrap: nowrap;
     }
 }
