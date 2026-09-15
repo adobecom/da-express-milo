@@ -191,28 +191,49 @@ export async function createExpressPicker(config) {
   };
   picker.addEventListener('change', onPickerChange);
 
-  // [SAFARI-DIAG] Instrument the open lifecycle to see whether the overlay/menu
-  // ever render in Safari (aria-expanded flips true but the popover may never
-  // paint). Remove this whole block before merge.
-  const diag = (evt) => {
+  // [SAFARI-DIAG] Instrument the open lifecycle. The picker toggles open=true but
+  // the sp-overlay never gets created in Safari. Capture whether sp-overlay is even
+  // defined, and re-check ~600ms after click to catch the async overlay creation.
+  // Remove this whole block before merge.
+  const snapshot = (evt, phase) => {
     try {
       const shadowOverlay = picker.shadowRoot?.querySelector('sp-overlay');
       // eslint-disable-next-line no-console
-      console.log('[SAFARI-DIAG]', id || label, evt, {
+      console.log('[SAFARI-DIAG]', id || label, evt, phase, {
         open: picker.open,
-        ariaExpanded: picker.getAttribute('aria-expanded'),
         lightMenuItems: picker.querySelectorAll('sp-menu-item').length,
         shadowOverlay: Boolean(shadowOverlay),
         shadowOverlayOpen: shadowOverlay?.open ?? null,
         docOverlays: document.querySelectorAll('sp-overlay').length,
         docPopovers: document.querySelectorAll('sp-popover').length,
+        spOverlayDefined: Boolean(window.customElements.get('sp-overlay')),
+        spPopoverDefined: Boolean(window.customElements.get('sp-popover')),
+        spMenuDefined: Boolean(window.customElements.get('sp-menu')),
       });
     } catch (diagErr) {
       // eslint-disable-next-line no-console
-      console.log('[SAFARI-DIAG] diag failed', diagErr);
+      console.log('[SAFARI-DIAG] snapshot failed', diagErr);
     }
   };
+  const diag = (evt) => {
+    snapshot(evt, 'sync');
+    if (evt === 'click') setTimeout(() => snapshot(evt, '+600ms'), 600);
+  };
   ['click', 'sp-opened', 'sp-closed', 'change'].forEach((evt) => picker.addEventListener(evt, () => diag(evt)));
+
+  // [SAFARI-DIAG] Catch ANY uncaught error/rejection (e.g. a throw inside the
+  // lazy overlay-creation chain) that would otherwise be invisible. Once/page.
+  if (!window.__SAFARI_DIAG_ERR__) {
+    window.__SAFARI_DIAG_ERR__ = true;
+    window.addEventListener('error', (e) => {
+      // eslint-disable-next-line no-console
+      console.log('[SAFARI-DIAG-ERR] error:', e.message, e.filename, e.error?.stack);
+    }, true);
+    window.addEventListener('unhandledrejection', (e) => {
+      // eslint-disable-next-line no-console
+      console.log('[SAFARI-DIAG-ERR] rejection:', String(e.reason?.message || e.reason), e.reason?.stack);
+    });
+  }
 
   // 10. Public API
   return {
