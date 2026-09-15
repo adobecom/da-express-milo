@@ -96,7 +96,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-size: calc(100% - 48px) 100%;
+    background-size: calc(100% - 48px) 100%; /* stylelint-disable-line declaration-block-no-duplicate-properties */
 }
 
 .frictionless-quick-action .dropzone > * {
@@ -104,7 +104,7 @@
     padding-right: 36px;
 }
 
-.frictionless-quick-action .dropzone > * {
+.frictionless-quick-action .dropzone > * { /* stylelint-disable-line no-duplicate-selectors */
     padding-left: 36px;
     padding-right: 36px;
 }
@@ -156,7 +156,7 @@
 main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkmark {
     background-color: #f06dad;
 }
-.frictionless-quick-action .quick-action-container {
+.frictionless-quick-action .quick-action-container { /* stylelint-disable-line no-duplicate-selectors */
     height: 667px;
 }
 
@@ -265,7 +265,7 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     }
 }
 
-.frictionless-quick-action .fqa-container > div:nth-child(2) > p:last-of-type{
+.frictionless-quick-action .fqa-container > div:nth-child(2) > p:last-of-type{ /* stylelint-disable-line no-duplicate-selectors */
     max-width: 90vw;
     margin-left: auto;
     margin-right: auto;

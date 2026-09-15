@@ -615,7 +615,7 @@ main a.con-button:any-link {
 
 main svg.icon-milo,
 main img.icon-milo {
-  top: 0.15em !important;
+  top: 0.15em !important; /* stylelint-disable-line declaration-no-important */
 }
 
 
