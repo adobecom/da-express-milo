@@ -653,14 +653,18 @@
 }
 
 /*
- * Fixed, uniform styling for every card regardless of which font/theme the
- * fetched template itself uses — the editor (not these decorative previews)
- * is where a different font/colour actually applies. Sizes to its own text
- * content (no fixed height/line-clamp) since DECO_QUOTE_CHAR_LIMIT already
- * caps how much text it can ever hold — see truncateQuote in
- * mini-editor-widget.js — so .me-deco-card-inner (a flex column) simply
- * grows to fit instead of a second, independent CSS-level clamp fighting
- * that already-bounded text.
+ * font-family/style/weight/stretch below are just the default for a card
+ * with no font assigned — buildDecoCards round-robins the loaded font
+ * options across cards and buildDecoCard applies the pick inline (same
+ * pattern as buildArcCard's render), so cards typically differ from each
+ * other. Sizes to its own text content (no fixed height/line-clamp) since
+ * DECO_QUOTE_CHAR_LIMIT already caps how much text it can ever hold — see
+ * truncateQuote in mini-editor-widget.js — so .me-deco-card-inner (a flex
+ * column) simply grows to fit instead of a second, independent CSS-level
+ * clamp fighting that already-bounded text. That growth also has to
+ * accommodate whichever font was assigned: a wider font's glyphs wrap sooner,
+ * needing more lines/height for the same character count, which this
+ * min-height-only sizing (see .me-deco-card-inner) already allows for.
  */
 /* .me-deco-quote (not just .me-deco-quote): .mini-editor-header p — these
    cards are descendants of the header, see the block's init comment on why —
