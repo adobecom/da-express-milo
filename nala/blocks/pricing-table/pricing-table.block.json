@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@pricing-table-sticky-show3-sticky-show3-few-cols",
       "selector": "div.pricing-table.sticky-show3.sticky.show3.few-cols",
-      "path": "/drafts/nala/test-gen/pricing-table/pricing-table-1-col",
+      "path": "/drafts/nala/blocks/pricing-table/pricing-table-1-col",
       "data": {
         "semantic": {
           "texts": [
@@ -1065,7 +1065,7 @@
       "tcid": "1",
       "name": "@pricing-table-sticky-show3-sticky-show3",
       "selector": "div.pricing-table.sticky-show3.sticky.show3",
-      "path": "/drafts/nala/test-gen/pricing-table/pricing-table-2-col",
+      "path": "/drafts/nala/blocks/pricing-table/pricing-table-2-col",
       "data": {
         "semantic": {
           "texts": [
@@ -2169,7 +2169,7 @@
       "tcid": "2",
       "name": "@pricing-table-sticky-show3-sticky-show3-many-cols",
       "selector": "div.pricing-table.sticky-show3.sticky.show3.many-cols",
-      "path": "/drafts/nala/test-gen/pricing-table/pricing-table-3-col",
+      "path": "/drafts/nala/blocks/pricing-table/pricing-table-3-col",
       "data": {
         "semantic": {
           "texts": [

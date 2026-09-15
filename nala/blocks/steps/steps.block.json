@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@steps-default",
       "selector": "div.steps",
-      "path": "/drafts/nala/test-gen/steps/steps",
+      "path": "/drafts/nala/blocks/steps/steps",
       "data": {
         "semantic": {
           "texts": [
@@ -66,7 +66,7 @@
       "tcid": "1",
       "name": "@steps-dark",
       "selector": "div.steps.dark",
-      "path": "/drafts/nala/test-gen/steps/steps-dark",
+      "path": "/drafts/nala/blocks/steps/steps-dark",
       "data": {
         "semantic": {
           "texts": [
@@ -127,7 +127,7 @@
       "tcid": "2",
       "name": "@steps-highlight",
       "selector": "div.steps.highlight",
-      "path": "/drafts/nala/test-gen/steps/steps-highlight",
+      "path": "/drafts/nala/blocks/steps/steps-highlight",
       "data": {
         "semantic": {
           "texts": [
@@ -188,7 +188,7 @@
       "tcid": "3",
       "name": "@steps-schema",
       "selector": "div.steps.schema",
-      "path": "/drafts/nala/test-gen/steps/steps-schema",
+      "path": "/drafts/nala/blocks/steps/steps-schema",
       "data": {
         "semantic": {
           "texts": [

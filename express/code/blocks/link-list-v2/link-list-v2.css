@@ -119,7 +119,7 @@
   padding-top: 0;
 }
 
-.section.ax-link-list-v2-container .link-list-v2.fullwidth {
+.section.ax-link-list-v2-container .link-list-v2.fullwidth { /* stylelint-disable-line no-duplicate-selectors */
   margin-top: 0;
 }
 

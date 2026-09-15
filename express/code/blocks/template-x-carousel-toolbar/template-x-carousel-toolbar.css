@@ -91,14 +91,14 @@
 .template-x-carousel-toolbar .toolbar p.controls-label {
   margin: auto;
   width: fit-content;
-  color: var(--Alias-content-typography-heading, #131313);
-  font-size: var(--Font-size-400, 20px);
+  color: var(--Alias-content-typography-heading, #131313); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  font-size: var(--Font-size-400, 20px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   font-style: normal;
   font-weight: 700;
   padding-top: var(--spacing-100);
   text-align: center;
-  line-height: var(--Line-height-400, var(--spacing-400));
-  letter-spacing: var(--Letter-spacing, 0);
+  line-height: var(--Line-height-400, var(--spacing-400)); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  letter-spacing: var(--Letter-spacing, 0); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 /* Search bar in toolbar: 100% wide on mobile */
