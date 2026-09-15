@@ -1,4 +1,5 @@
 import { createTag } from '../../utils.js';
+import trackExportEvent from '../../utils/export-analytics.js';
 
 export function interpolate(template, vars) {
   return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), template);
@@ -23,6 +24,23 @@ export function decorateAnalyticsAttributes(element, { linkLabel } = {}) {
     linkLabel || element.getAttribute('aria-label') || element.textContent || 'action',
   );
   element.setAttribute('daa-ll', value);
+}
+
+const COLOR_EXPORT_TASK_NAME = 'color';
+const COLOR_EXPORT_UI_LOCATION = 'acom-color-page';
+
+/**
+ * Fires the shared export-tracking event (DOTCOM-197011) for a completed
+ * export-style action (download, copy, share) on a color.adobe.com child page.
+ *
+ * @param {string} exportMethod - e.g. 'download', 'copy-clipboard', 'share'
+ */
+export function trackColorExport(exportMethod) {
+  return trackExportEvent({
+    exportMethod,
+    taskName: COLOR_EXPORT_TASK_NAME,
+    uiLocation: COLOR_EXPORT_UI_LOCATION,
+  });
 }
 
 const SWIPE_CLOSE_THRESHOLD_PX = 120;

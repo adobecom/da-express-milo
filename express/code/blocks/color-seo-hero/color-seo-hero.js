@@ -1,5 +1,8 @@
 import { getLibs, getIconElementDeprecated, createTag } from '../../scripts/utils.js';
-import { buildColorToolUrl, applyCreateNowLink } from '../../scripts/color-shared/utils/utilities.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
+import {
+  buildColorToolUrl, applyCreateNowLink, decorateAnalyticsAttributes, trackColorExport,
+} from '../../scripts/color-shared/utils/utilities.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -100,6 +103,7 @@ function colorWheelUrl(context, colors) {
 
 function showColorCopiedToast(context, hex) {
   const { strings } = context;
+  trackColorExport('copy-clipboard');
   showExpressToast({
     message: strings.colorCopiedToClipboard,
     variant: 'positive',
@@ -120,6 +124,7 @@ async function shareColor(context) {
   if (navigator.share) {
     try {
       await navigator.share({ title: colorName, url: shareUrl });
+      trackColorExport('share');
       return;
     } catch (err) {
       if (err?.name === 'AbortError') return;
@@ -128,6 +133,7 @@ async function shareColor(context) {
 
   try {
     await navigator.clipboard.writeText(shareUrl);
+    trackColorExport('share');
     showExpressToast({ message: strings.linkCopied, variant: 'positive', timeout: 2000 });
     announceToScreenReader(strings.linkCopied);
   } catch (err) {
@@ -147,6 +153,7 @@ function buildCopyCodeMenu(context) {
     getName: () => context.colorName,
     formatLabels: strings.codeFormatLabels,
     onCopied: () => {
+      trackColorExport('copy-clipboard');
       showExpressToast({ message: strings.codeCopied, variant: 'positive', timeout: 2000 });
       announceToScreenReader(strings.codeCopied);
     },
@@ -164,6 +171,7 @@ function buildDownloadMenu(context) {
     getName: () => context.colorName,
     formatLabels: strings.downloadFormatLabels,
     onDownloaded: () => {
+      trackColorExport('download');
       announceToScreenReader(strings.downloadStarted);
     },
     onError: (err) => {
@@ -312,6 +320,7 @@ async function buildActionButton({
     icon, label, size, quiet: true, iconOnly: true, staticColor, onClick,
   });
   if (className) element.classList.add(className);
+  decorateAnalyticsAttributes(element, { linkLabel: label });
   attachTooltip(element, label);
   return element;
 }
@@ -434,6 +443,7 @@ async function buildPreview(context) {
   );
 
   const buildLink = createTag('a', { class: 'color-seo-hero-build-link primary button' }, strings.buildAPalette);
+  decorateAnalyticsAttributes(buildLink, { linkLabel: strings.buildAPalette });
   context.buildLink = buildLink;
 
   actionsGroup.append(icons, buildLink);
@@ -451,6 +461,7 @@ async function buildFloatingToolbar(context, mount) {
 
   const toolbarHandle = await initFloatingToolbar(mount, {
     type: 'palette',
+    daaLh: 'color-seo-hero',
     variant: 'sticky-on-scroll',
     standaloneAppearance: 'raised',
     palette: { colors: [context.hex], name: '' },
@@ -596,6 +607,7 @@ async function decorateAsync(
   block.classList.add('is-ready');
   attachGradientPointerTracking(block);
   updateColor(context, hex);
+  trackColorBlockLoad('color-seo-hero');
 }
 
 export default function decorate(block) {
