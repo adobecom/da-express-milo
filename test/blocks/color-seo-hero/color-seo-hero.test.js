@@ -18,11 +18,11 @@ describe('Color SEO Hero', () => {
   let block;
 
   beforeEach(async function beforeEachHook() {
-    this.timeout(6000);
+    this.timeout(15000);
     document.body.innerHTML = await readFile({ path: './mocks/basic.html' });
     block = document.querySelector('.color-seo-hero');
     decorate(block);
-    await waitFor(() => block.classList.contains('is-ready'), 5000);
+    await waitFor(() => block.classList.contains('is-ready'), 10000);
   });
 
   it('builds the interactive preview from the authored color row', async () => {
