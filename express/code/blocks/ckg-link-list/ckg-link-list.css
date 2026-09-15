@@ -153,7 +153,7 @@
   flex-shrink: 0;
   width: 192px;
   background: var(--color-white);
-  border: 1px solid var(--color-gray-250, #e1e1e1);
+  border: 1px solid var(--color-gray-250);
   border-radius: var(--spacing-300);
   overflow: hidden;
 }

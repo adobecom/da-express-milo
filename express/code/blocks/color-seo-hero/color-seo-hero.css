@@ -16,6 +16,7 @@
 .color-seo-hero-glows {
   position: absolute;
   inset: 0;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
   transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0) scale(var(--gscale, 1));
   transform-origin: 55% 45%;
   filter: blur(64px);
