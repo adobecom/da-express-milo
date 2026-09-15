@@ -309,8 +309,8 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   transform: rotate( -45deg );
   content: "";
   margin-top: 5px;
-  margin-left: 5px;
-  margin-right: 2.25px;
+  margin-inline-start: 5px;
+  margin-inline-end: 2.25px;
 }
 
 .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title-link::after {
@@ -1837,16 +1837,15 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 }
 
 .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper) {
-  padding-left: var(--Grid-container-padding-side);
+  padding-inline-start: var(--Grid-container-padding-side);
 }
 
 .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper):not(.template-title) {
-  padding-right: 0;
+  padding-inline-end: 0;
 }
 
 .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > .template-x-inner-wrapper {
-  padding-left: 0;
-  padding-right: 0;
+  padding-inline: 0;
 }
 
 .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-platform {
@@ -1876,7 +1875,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 }
 
 .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.horizontal {
-  padding-right: var(--Grid-container-padding-side);
+  padding-inline-end: var(--Grid-container-padding-side);
 }
 
 @media (min-width: 600px) {
