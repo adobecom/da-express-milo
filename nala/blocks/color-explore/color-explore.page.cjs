@@ -29,10 +29,34 @@ class ColorExploreBlock {
   }
 
   // Open a desktop picker and wait for its overlay to render its items.
+  // The click reliably flips the picker to aria-expanded, but SWC's
+  // force-popover overlay intermittently fails to paint its menu in headless
+  // WebKit -- the button ends up [expanded] with no listbox and the items stay
+  // hidden. Waiting longer never recovers that load, so re-toggle instead:
+  // Escape closes the stuck-open picker (aria-expanded back to false) and the
+  // next click opens a fresh overlay that paints.
   async openPicker(nth = 0) {
     const picker = this.picker(nth);
-    await picker.click();
-    await this.menuItems(nth).first().waitFor({ state: 'visible', timeout: 8000 });
+    await picker.waitFor({ state: 'visible', timeout: 30000 });
+    const firstItem = this.menuItems(nth).first();
+
+    for (let attempt = 1; attempt <= 4; attempt += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await picker.click();
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await firstItem.waitFor({ state: 'visible', timeout: 3000 });
+        return picker;
+      } catch (overlayNotPainted) {
+        // eslint-disable-next-line no-await-in-loop
+        await this.page.keyboard.press('Escape').catch(() => {});
+        // eslint-disable-next-line no-await-in-loop
+        await this.page.waitForTimeout(250); // let the overlay tear down before reopening
+      }
+    }
+
+    // Surface the real error if the overlay never painted.
+    await firstItem.waitFor({ state: 'visible', timeout: 5000 });
     return picker;
   }
 }
