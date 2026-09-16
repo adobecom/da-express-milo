@@ -12,7 +12,9 @@
 //
 // The Express side is the `@hz/x-acom-mini-editor-entry` feature, which reads:
 //   referrer=express-mini-editor            (activation allow-list)
-//   feature-enable=acom-mini-editor-entry   (enables the hz feature flag)
+//   feature-enable=acom-mini-editor-entry,enable-emoji-clr-support
+//     (enables the hz entry feature + the color-emoji fallback font — scoped to this
+//      session so the quote's emoji render instead of tofu)
 //   miniEditor=<base64url(JSON)>            (background URN + quote + author + font)
 //   width/height/unit                       (blank-canvas size, consumed by /new)
 
@@ -65,6 +67,9 @@ const STAGE_BASE_URL = 'https://stage.projectx.corp.adobe.com/new';
 const PROD_BASE_URL = 'https://adobesparkpost.app.link/JpBOBeJz35b';
 const REFERRER = 'express-mini-editor';
 const FEATURE_FLAG = 'acom-mini-editor-entry';
+// Enables the hz color-emoji fallback font (NotoColorEmoji) for this session so emoji in the quote
+// render instead of tofu; scoped via feature-enable so only the mini-editor entry turns it on.
+const EMOJI_FEATURE_FLAG = 'enable-emoji-clr-support';
 const CANVAS_UNIT = 'px';
 
 // Hosts a ?base= override may point at for non-prod testing: local dev, prenv, and stage.
@@ -168,7 +173,7 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
   };
 
   url.searchParams.set('referrer', REFERRER);
-  url.searchParams.set('feature-enable', FEATURE_FLAG);
+  url.searchParams.set('feature-enable', `${FEATURE_FLAG},${EMOJI_FEATURE_FLAG}`);
   url.searchParams.set('miniEditor', encodePayload(payload));
   // Canvas size for the /new route Express opens.
   url.searchParams.set('width', String(canvasWidth));
