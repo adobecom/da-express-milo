@@ -69,7 +69,7 @@ main .make-a-project .make-a-project-description > p:first-child {
   margin-top: 0;
 }
 
-main .make-a-project .make-a-project-description > p:first-child {
+main .make-a-project .make-a-project-description > p:first-child { /* stylelint-disable-line no-duplicate-selectors */
   margin-bottom: 0;
 }
 
@@ -128,7 +128,7 @@ main .make-a-project li::before {
   margin-bottom: 10px;
 }
 
-main .make-a-project .make-a-project-description {
+main .make-a-project .make-a-project-description { /* stylelint-disable-line no-duplicate-selectors */
   padding: 0 30px;
   text-align: left;
 }
@@ -225,7 +225,7 @@ main .make-a-project .make-a-project-projectlist .carousel-platform {
   align-items: stretch;
 }
 
-main .make-a-project .make-a-project-projectlist .make-a-project-item:first-child {
+main .make-a-project .make-a-project-projectlist .make-a-project-item:first-child { /* stylelint-disable-line no-duplicate-selectors */
   padding-left: 12px;
 }
 
@@ -319,7 +319,7 @@ main .make-a-project .make-a-project-projectlist .make-a-project-item  .make-a-p
   filter: invert(27%) sepia(7%) saturate(3%) hue-rotate(356deg) brightness(97%) contrast(92%);
 }
 
-main .make-a-project .make-a-project-projectlist .make-a-project-item picture {
+main .make-a-project .make-a-project-projectlist .make-a-project-item picture { /* stylelint-disable-line no-duplicate-selectors */
   transition: transform 0.3s ease-in-out;
 }
 
@@ -430,7 +430,7 @@ main .hero-animation-wide-container .hero-animation-wrapper {
 
 main .hero-animation-wide-container .hero-animation-wrapper + .make-a-project-wrapper {
   background: -webkit-linear-gradient(180deg, var(--color-gray-100) 0%, rgba(255,255,255,0) 100%);
-  background: linear-gradient(180deg, var(--color-gray-100) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(180deg, var(--color-gray-100) 0%, rgba(255,255,255,0) 100%); /* stylelint-disable-line declaration-block-no-duplicate-properties */
 }
 
 /* Specific sizing rules for Intent-Driven Home Page desktop version */

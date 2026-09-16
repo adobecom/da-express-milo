@@ -129,7 +129,7 @@
      "Glitch" styles get a much taller line box so their combining-mark
      stacks, which paint above/below the base glyph, don't get clipped by
      this element's own overflow: hidden. */
-  line-height: var(--fc-line-height, 1.1);
+  line-height: var(--fc-line-height, 1.1); /* stylelint-disable-line declaration-property-value-disallowed-list */
   /* Small fixed nudge for the half-leading -webkit-line-clamp doesn't
      reserve above the first line the way normal block flow reserves it
      between every other line. Flat rather than scaled to --fc-line-height
