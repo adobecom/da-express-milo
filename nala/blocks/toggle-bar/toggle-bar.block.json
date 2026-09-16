@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@toggle-bar-default",
       "selector": "div.toggle-bar",
-      "path": "/drafts/nala/test-gen/toggle-bar/toggle-bar",
+      "path": "/drafts/nala/blocks/toggle-bar/toggle-bar",
       "data": {
         "semantic": {
           "texts": [
@@ -173,7 +173,7 @@
       "tcid": "1",
       "name": "@toggle-bar-sticky",
       "selector": "div.toggle-bar.sticky",
-      "path": "/drafts/nala/test-gen/toggle-bar/toggle-bar-sticky",
+      "path": "/drafts/nala/blocks/toggle-bar/toggle-bar-sticky",
       "data": {
         "semantic": {
           "texts": [
@@ -341,7 +341,7 @@
       "tcid": "2",
       "name": "@toggle-bar-float-sticky",
       "selector": "div.toggle-bar.float.sticky",
-      "path": "/drafts/nala/test-gen/toggle-bar/toggle-bar-float-sticky",
+      "path": "/drafts/nala/blocks/toggle-bar/toggle-bar-float-sticky",
       "data": {
         "semantic": {
           "texts": [
