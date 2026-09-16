@@ -182,6 +182,9 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   // Body wraps preview + copy btn so the overlay is bounded above the footer.
   const body = document.createElement('div');
   body.className = 'font-card-body';
+  // Whole-card click-to-copy (below) doesn't go through copyBtn, so it needs
+  // its own daa-ll or clicks landing outside the button go untracked.
+  setDaaLL(body, COPY_LL);
 
   const copyBtn = makeCopyBtn(copyLabel);
   let resetTimer = null;

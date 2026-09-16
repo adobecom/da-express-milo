@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@browse-by-category-default",
       "selector": "div.browse-by-category",
-      "path": "/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-default",
+      "path": "/drafts/nala/blocks/ax-browse-by-category/ax-browse-by-category-default",
       "data": {
         "semantic": {
           "texts": [
@@ -388,7 +388,7 @@
       "tcid": "1",
       "name": "@browse-by-category-card",
       "selector": "div.browse-by-category.card",
-      "path": "/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-card",
+      "path": "/drafts/nala/blocks/ax-browse-by-category/ax-browse-by-category-card",
       "data": {
         "semantic": {
           "texts": [
@@ -771,7 +771,7 @@
       "tcid": "2",
       "name": "@browse-by-category-fullwidth",
       "selector": "div.browse-by-category.fullwidth",
-      "path": "/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-fullwidth",
+      "path": "/drafts/nala/blocks/ax-browse-by-category/ax-browse-by-category-fullwidth",
       "data": {
         "semantic": {
           "texts": [

@@ -17,6 +17,7 @@
 /* eslint-disable import/prefer-default-export */
 
 import { loadButton } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
@@ -62,7 +63,7 @@ export async function createExpressButton(config) {
 
   await loadButton();
   await loadOverrideStyles('button', STYLES_PATH);
-  await customElements.whenDefined('sp-button');
+  await waitForComponents(['sp-button']);
 
   const theme = createThemeWrapper();
   const button = document.createElement('sp-button');

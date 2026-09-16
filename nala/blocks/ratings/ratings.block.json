@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@ratings-ratings_received",
       "selector": "div.ratings.ratings_received",
-      "path": "/drafts/nala/test-gen/ratings/ratings",
+      "path": "/drafts/nala/blocks/ratings/ratings",
       "data": {
         "semantic": {
           "texts": [
@@ -128,7 +128,7 @@
       "tcid": "1",
       "name": "@ratings-show-average-show-average-ratings_received",
       "selector": "div.ratings.show-average.show.average.ratings_received",
-      "path": "/drafts/nala/test-gen/ratings/ratings-show-average",
+      "path": "/drafts/nala/blocks/ratings/ratings-show-average",
       "data": {
         "semantic": {
           "texts": [

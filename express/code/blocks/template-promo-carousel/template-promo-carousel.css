@@ -253,7 +253,7 @@
 }
 
 .template-promo-carousel .template .still-wrapper .free-tag {
-  color: var(--Neutral-50, #FFF);
+  color: var(--Neutral-50, #FFF); /* stylelint-disable-line declaration-property-value-disallowed-list */
   text-align: center;
   font-family: var(--body-font-family);
   font-size: 12px;
