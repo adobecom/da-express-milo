@@ -348,6 +348,19 @@ export function buildColorToolUrl(
   return url.toString();
 }
 
+const CREATE_NOW_BASE_URL = 'https://adobesparkpost.app.link/c4bWARQhWAb';
+
+export async function applyCreateNowLink(anchor, colorName) {
+  if (!anchor || !colorName) return;
+  const { default: trackBranchParameters } = await import('../../branchlinks.js');
+  anchor.href = CREATE_NOW_BASE_URL;
+  await trackBranchParameters([anchor]);
+  const url = new URL(anchor.href);
+  url.searchParams.set('q', colorName.toLowerCase());
+  url.searchParams.set('searchCategory', 'templates');
+  anchor.href = url.toString();
+}
+
 export function navigateToColorTool(href, options = {}) {
   const target = buildColorToolUrl(href, options);
   if (!target) return;
