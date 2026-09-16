@@ -54,18 +54,29 @@
   color: var(--color-text-inverse);
 }
 
-/* Picture styling */
-.resume-hero picture {
-  display: block;
-  max-width: 100%;
+/* Media cell: image with a CTA below it */
+.resume-hero .media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-400);
   margin-top: var(--spacing-500);
 }
 
-.resume-hero picture img {
+.resume-hero .media picture {
+  display: block;
+  max-width: 100%;
+}
+
+.resume-hero .media picture img {
   width: 100%;
   height: auto;
   border-radius: var(--spacing-300);
   display: block;
+}
+
+.resume-hero .media .button-container {
+  margin: 0;
 }
 
 /* Tablet and up */
@@ -95,7 +106,7 @@
     align-items: center;
   }
 
-  .resume-hero picture {
+  .resume-hero .media {
     margin-top: 0;
   }
 

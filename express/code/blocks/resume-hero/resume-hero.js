@@ -11,7 +11,7 @@ let getConfig;
 let loadStyle;
 
 /**
- * Adds button styling classes to the CTA links
+ * Adds button styling classes to every CTA and marks the media cell.
  * @param {Element} block - The main block element
  * @returns {Element|null} The subcopy paragraph (body text without links)
  */
@@ -19,16 +19,16 @@ function setupButtonStyling(block) {
   const heading = block.querySelector('h1,h2,h3:first-of-type');
   heading?.classList.add('heading');
 
-  const pWithLink = block.querySelector('p:has(a)');
-  if (pWithLink) {
-    pWithLink.classList.add(CLASS_NAMES.BUTTON_CONTAINER);
-    pWithLink.querySelectorAll('a').forEach((link) => {
+  block.querySelectorAll('p:has(a)').forEach((p) => {
+    p.classList.add(CLASS_NAMES.BUTTON_CONTAINER);
+    p.querySelectorAll('a').forEach((link) => {
       link.classList.add(CLASS_NAMES.BUTTON, CLASS_NAMES.ACCENT);
     });
-  }
+  });
 
-  const paragraphs = [...block.querySelectorAll('p')];
-  return paragraphs.find((p) => !p.classList.contains(CLASS_NAMES.BUTTON_CONTAINER)) || null;
+  block.querySelector('div:has(> picture)')?.classList.add('media');
+
+  return block.querySelector('p:not(:has(a))') || null;
 }
 
 /**
