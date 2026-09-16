@@ -114,10 +114,13 @@
   --color-background-accent-down: #3236A8;
   --color-background-accent-focus: var(--color-background-accent-hover);
 
+  /* font families */
+  --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+
   /* body */
   --body-background-color: var(--color-white);
   --body-alt-background-color: var(--color-gray-200);
-  --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
   --body-font-weight: normal;
   --body-color: var(--color-gray-800);
   --body-line-height: 1.5;
@@ -424,8 +427,9 @@
   --Grid-container-padding-side: var(--spacing-300);
   --Grid-grid-gutter: var(--spacing-100);
   --section-padding-xl: var(--spacing-600);
+  --section-padding-l: var(--spacing-500);
   --section-padding-m: var(--spacing-400);
-
+  --section-padding-s: var(--spacing-300);
 }
 
 @media (min-width: 600px) {
@@ -437,7 +441,9 @@
     --Grid-container-padding-side: var(--spacing-500);
     --Grid-grid-gutter: var(--spacing-300);
     --section-padding-xl: var(--spacing-600);
+    --section-padding-l: var(--spacing-500);
     --section-padding-m: var(--spacing-400);
+    --section-padding-s: var(--spacing-300);
   }
 }
 
@@ -477,7 +483,9 @@
     --Grid-container-padding-side: var(--spacing-600);
     --Grid-grid-gutter: var(--spacing-400);
     --section-padding-xl: var(--spacing-900);
+    --section-padding-l: var(--spacing-800);
     --section-padding-m: var(--spacing-700);
+    --section-padding-s: var(--spacing-600);
   }
 }
 
