@@ -1,0 +1,311 @@
+/* ── Verb Express Marquee ────────────────────────────────────────────
+ * Spec: Resume Create page hero — Figma node 1637:15131/15132/15134/15133
+ * Breakpoints follow the Figma devices:
+ *   Mobile  <  600px   1-column, image stacked below the copy
+ *   Tablet  600–1199px 1-column below 900px, 2-column from 900px
+ *   Desktop ≥ 1200px   2-column, fixed-size image
+ *   Widescreen ≥ 1680px  same as desktop, content capped at 1600px
+ * ------------------------------------------------------------------ */
+
+.verb-express-marquee {
+  padding-block: var(--spacing-500);
+  padding-inline: var(--spacing-300);
+  box-sizing: border-box;
+}
+
+.verb-express-marquee .foreground {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400) var(--spacing-600);
+  width: 100%;
+}
+
+.verb-express-marquee .copy-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  min-width: 0;
+}
+
+.verb-express-marquee .express-logo {
+  align-self: flex-start;
+  display: block;
+  height: 30px;
+  margin-inline: 0;
+  /* global .icon.icon-adobe-express-logo (styles.css) adds nav-context
+     padding; reset it so it doesn't push the heading down. */
+  padding: 0;
+  width: auto;
+}
+
+.verb-express-marquee .copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+}
+
+.verb-express-marquee .copy :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--color-gray-900);
+  font-family: var(--body-font-family);
+  font-size: var(--heading-font-size-l);
+  font-weight: var(--heading-font-weight-extra);
+  /* Figma spec: 32px on a 36px heading (tight display leading) — no
+     token produces this ratio for --heading-font-size-l. */
+  line-height: 32px;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+.verb-express-marquee .copy p {
+  color: var(--Alias-content-typography-Body);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  /* Figma spec: 20px on a 16px paragraph — tighter than --body-line-height
+     (1.5 / 24px). */
+  line-height: 20px;
+  margin: 0;
+}
+
+.verb-express-marquee .cta-dropzone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  /* Figma fixes the CTA + dropzone column to 335px even when the copy
+     column above it is wider — no token for this one-off width. */
+  max-width: 335px;
+  width: 100%;
+}
+
+.verb-express-marquee .cta-dropzone .button-container {
+  width: 100%;
+}
+
+.verb-express-marquee .cta-dropzone :is(.button, .con-button) {
+  text-align: center;
+  width: 100%;
+}
+
+.verb-express-marquee .mini-dropzone {
+  align-items: center;
+  background-color: var(--color-gray-100);
+  border: 1px dashed var(--Palette-gray-500);
+  border-radius: var(--Corner-radius-corner-radius-200);
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200) var(--spacing-400);
+  width: 100%;
+}
+
+.verb-express-marquee .mini-dropzone-icon {
+  flex-shrink: 0;
+  height: 29px;
+  width: 29px;
+}
+
+.verb-express-marquee .mini-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  text-align: start;
+}
+
+.verb-express-marquee .mini-dropzone-heading {
+  color: var(--c1-text-text);
+  font-family: var(--body-font-family);
+  font-size: 19px;
+  font-weight: var(--heading-font-weight-medium);
+  line-height: 24px;
+  margin: 0;
+}
+
+.verb-express-marquee .mini-dropzone-sub {
+  color: var(--Palette-gray-900);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-xs);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.verb-express-marquee .legal-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.verb-express-marquee .legal-line {
+  align-items: flex-end;
+  display: flex;
+  gap: var(--spacing-50);
+}
+
+.verb-express-marquee .legal-copy p {
+  color: var(--Palette-gray-700);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-xs);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.verb-express-marquee .legal-copy .legal-url {
+  color: var(--link-color);
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+.verb-express-marquee .legal-copy .legal-url:hover {
+  color: var(--link-hover-color);
+}
+
+.verb-express-marquee .info-icon {
+  --tooltip-background-color: var(--color-content-neutral);
+  --tooltip-text-color: var(--color-white);
+
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;
+  flex-shrink: 0;
+  height: 12px;
+  justify-content: center;
+  margin-block-end: 2px;
+  outline: none;
+  padding: 0;
+  width: 12px;
+}
+
+.verb-express-marquee .info-icon .icon {
+  color: var(--tooltip-background-color);
+  height: 12px;
+  width: 12px;
+}
+
+.verb-express-marquee .milo-tooltip {
+  position: relative;
+  text-decoration: none;
+}
+
+.verb-express-marquee .milo-tooltip::before {
+  background: var(--tooltip-background-color);
+  border-radius: 5px;
+  box-sizing: border-box;
+  color: var(--tooltip-text-color);
+  content: attr(data-tooltip);
+  display: none;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-xs);
+  line-height: 130%;
+  max-width: 160px;
+  padding: 3px 8px 5px;
+  position: absolute;
+  text-align: center;
+  width: max-content;
+  z-index: 8;
+}
+
+.verb-express-marquee .milo-tooltip.top::before {
+  bottom: 100%;
+  inset-inline-start: 50%;
+  margin-block-end: 15px;
+  transform: translateX(-50%);
+}
+
+.verb-express-marquee .milo-tooltip:hover::before,
+.verb-express-marquee .milo-tooltip:focus::before {
+  display: block;
+}
+
+.verb-express-marquee .image-column {
+  width: 100%;
+}
+
+.verb-express-marquee .image-column picture {
+  aspect-ratio: 567 / 479;
+  border-radius: var(--Corner-radius-corner-radius-200);
+  box-shadow: var(--Alias-drop-shadow-elevated-key), var(--Alias-drop-shadow-transition), var(--Alias-drop-shadow-ambient);
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+
+.verb-express-marquee .image-column img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+/* ============================================================
+   TABLET — ≥ 600px
+   ============================================================ */
+
+@media screen and (min-width: 600px) {
+  .verb-express-marquee {
+    padding-inline: var(--spacing-500);
+  }
+
+  .verb-express-marquee .info-icon {
+    display: inline-flex;
+  }
+
+  .verb-express-marquee .image-column picture {
+    aspect-ratio: 543.5 / 479;
+  }
+}
+
+/* ============================================================
+   LARGE TABLET — ≥ 900px
+   Side-by-side layout begins here (Figma's copy/image columns
+   need ~740px combined before they fit next to each other).
+   ============================================================ */
+
+@media screen and (min-width: 900px) {
+  .verb-express-marquee .foreground {
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .verb-express-marquee .copy-column {
+    flex: 1 1 0;
+    min-width: 340px;
+  }
+
+  .verb-express-marquee .image-column {
+    flex: 1 1 0;
+    min-width: 350px;
+  }
+}
+
+/* ============================================================
+   DESKTOP — ≥ 1200px
+   ============================================================ */
+
+@media screen and (min-width: 1200px) {
+  .verb-express-marquee {
+    padding-block: var(--spacing-600);
+    padding-inline: var(--spacing-600);
+  }
+
+  .verb-express-marquee .copy-column {
+    flex: 1 1 0;
+    max-width: 553px;
+  }
+
+  .verb-express-marquee .image-column {
+    flex: none;
+    max-width: 668px;
+    width: 543px;
+  }
+}
+
+/* ============================================================
+   WIDESCREEN — ≥ 1680px
+   ============================================================ */
+
+@media screen and (min-width: 1680px) {
+  .verb-express-marquee .foreground {
+    margin-inline: auto;
+    max-width: 1600px;
+  }
+}
