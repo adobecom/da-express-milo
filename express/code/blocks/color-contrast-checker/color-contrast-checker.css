@@ -998,7 +998,7 @@
   line-height: var(--ax-body-s-lh);
   color: var(--color-dark-gray);
   padding-block: var(--cc-set-ratio-label-padding-block);
-  margin: var(--spacing-0) !important;
+  margin: var(--spacing-0) !important; /* stylelint-disable-line declaration-no-important */
 }
 
 /* Button container - aligns button with input field */
@@ -1176,7 +1176,7 @@
   font-size: var(--cc-preview-body-size);
   font-weight: var(--font-weight-medium);
   line-height: 1.25;
-  margin: 0 !important;
+  margin: 0 !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .cc-preview-cta {
