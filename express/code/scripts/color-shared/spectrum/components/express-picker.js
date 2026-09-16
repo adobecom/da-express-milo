@@ -19,7 +19,7 @@
  *   container.appendChild(picker.element);
  */
 
-import { loadPicker } from '../load-spectrum.js';
+import { loadPicker, importOverlay } from '../load-spectrum.js';
 import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
@@ -159,6 +159,15 @@ export async function createExpressPicker(config) {
 
   const readyPromise = (async () => {
     await waitUntilConnected(picker);
+
+    if (picker.strategy && !picker.strategy.overlay) {
+      try {
+        const Overlay = await importOverlay();
+        picker.strategy.overlay = new Overlay();
+      } catch (error) {
+        // Non-fatal: falls back to Spectrum's own lazy overlay creation.
+      }
+    }
 
     let lastError = null;
     for (let attempt = 1; attempt <= 6; attempt += 1) {
