@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@template-x-carousel-toolbar-default",
       "selector": "div.template-x-carousel-toolbar",
-      "path": "/drafts/nala/test-gen/ax-panels/ax-panels",
+      "path": "/drafts/nala/blocks/ax-panels/ax-panels",
       "data": {
         "semantic": {
           "texts": [],

@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@submit-email-default",
       "selector": "div.submit-email",
-      "path": "/drafts/nala/test-gen/submit-email/submit-email",
+      "path": "/drafts/nala/blocks/submit-email/submit-email",
       "data": {
         "semantic": {
           "texts": [

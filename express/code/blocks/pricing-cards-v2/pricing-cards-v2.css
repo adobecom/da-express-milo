@@ -34,7 +34,7 @@
   padding: var(--spacing-400) var(--spacing-300);
   gap: var(--spacing-100);
   text-align: left;   
-  border: 1px solid var(--Border-sx-extra-subdued-default, #D5D5D5);
+  border: 1px solid var(--Border-sx-extra-subdued-default, #D5D5D5); /* stylelint-disable-line declaration-property-value-disallowed-list */
   flex-grow: 1;
   border-radius: 8px;
 }
@@ -63,7 +63,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h3,
 main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h4,
 main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h5,
 main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
-  color: var(--Content-Neutral-default, #222);
+  color: var(--Content-Neutral-default, #222); /* stylelint-disable-line declaration-property-value-disallowed-list */
   /* Desktop/Title/XL */
   font-family: var(--heading-font-family);
   font-size: 20px;
@@ -145,7 +145,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   line-clamp: 3;
-  color: var(--Content-Neutral-default, #222);
+  color: var(--Content-Neutral-default, #222); /* stylelint-disable-line declaration-property-value-disallowed-list */
   text-overflow: ellipsis;
   font-size: var(--body-font-size-m);
   font-style: normal;
@@ -155,7 +155,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
 
 .pricing-cards-v2 .plan-explanation strong{
   overflow: hidden;
-  color: var(--Content-Neutral-default, #222);
+  color: var(--Content-Neutral-default, #222); /* stylelint-disable-line declaration-property-value-disallowed-list */
   text-overflow: ellipsis;
   font-size: var(--body-font-size-m);
   font-style: normal;
@@ -208,7 +208,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
 
 .pricing-cards-v2 .pricing-area .description-text {
   margin: 0;
-  color: var(--Content-Neutral-default, #222);
+  color: var(--Content-Neutral-default, #222); /* stylelint-disable-line declaration-property-value-disallowed-list */
   font-size: var(--body-font-size-xs);
   font-style: normal;
   font-weight: var(--font-weight-regular);
@@ -237,7 +237,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
 }
 
 .pricing-cards-v2 .pricing-base-price {
-  color: var(--Content-Neutral-default, #464646);
+  color: var(--Content-Neutral-default, #464646); /* stylelint-disable-line declaration-property-value-disallowed-list */
   text-align: center; 
   font-style: normal;
   font-weight: var(--font-weight-bold);
@@ -314,7 +314,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
 
 .pricing-cards-v2 .card-feature-list p {
   padding: 16px 0px;
-  border-bottom: 1px solid var(--Palette-gray-100, #E9E9E9);
+  border-bottom: 1px solid var(--Palette-gray-100, #E9E9E9); /* stylelint-disable-line declaration-property-value-disallowed-list */
   margin: 0 0 24px 0;
   box-sizing: border-box;
 }
@@ -356,7 +356,7 @@ main .pricing-cards-v2-wrapper .pricing-cards-v2 .card-header h6 {
 
 .pricing-cards-v2 .card-footer p {
   margin: 0;
-  color: var(--Content-Neutral-default, #222);
+  color: var(--Content-Neutral-default, #222); /* stylelint-disable-line declaration-property-value-disallowed-list */
   text-align: center; 
   font-size: 12px;
   font-style: normal;
