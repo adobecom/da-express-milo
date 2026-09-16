@@ -241,8 +241,14 @@
 .template-x-carousel-toolbar .toolbar p {
   margin: auto;
   line-height: 1.3;
-  text-align: center;
+  text-align: start;
   font-size: var(--body-font-size-m);
+}
+
+/* Description matches heading alignment: centered only in the
+   search-bar / seo-links variants (centered-heading, MWPW-191396). */
+.template-x-carousel-toolbar.search-bar .toolbar p:not(.controls-label) {
+  text-align: center;
 }
 
 .template-x-carousel-toolbar .hidden {
