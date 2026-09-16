@@ -415,7 +415,12 @@ async function buildRuleDropdown(context) {
     onChange: ({ value }) => selectRule(context, value),
     forcePopover: true,
   });
-  await picker.waitForReady();
+  picker.waitForReady().catch((error) => {
+    window.lana?.log(`Rule picker failed to become ready: ${error?.message}`, {
+      tags: 'color-seo-hero,picker',
+      severity: 'warning',
+    });
+  });
   context.rulePicker = picker;
   return picker.element;
 }
