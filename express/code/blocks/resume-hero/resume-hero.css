@@ -29,6 +29,16 @@
   margin-top: var(--spacing-400);
 }
 
+/* Embedded verb-dropzone resume upload widget */
+.resume-hero .verb-dropzone {
+  padding-inline: 0;
+  margin-block: var(--spacing-400);
+}
+
+.resume-hero .verb-dropzone .foreground {
+  max-width: none;
+}
+
 .resume-hero .button {
   display: inline-block;
   padding: var(--spacing-200) var(--spacing-400);
