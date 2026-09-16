@@ -294,8 +294,8 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   display: flex;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-link::after,
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title-link::after {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-link::after,
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-title-link::after {
   display: flex;
   width: 6px;
   height: 6px;
@@ -313,7 +313,7 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   margin-inline-end: 2.25px;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title-link::after {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-title-link::after {
   margin-top: 7px;
 }
 
@@ -1836,66 +1836,66 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   padding: 32px;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper) {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper) {
   padding-inline-start: var(--Grid-container-padding-side);
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper):not(.template-title) {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) > *:not(.template-x.horizontal):not(.template-x-inner-wrapper):not(.template-title) {
   padding-inline-end: 0;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) > .template-x-inner-wrapper {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) > .template-x-inner-wrapper {
   padding-inline: 0;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-platform {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .carousel-platform {
   padding-left: var(--Grid-container-padding-side);
   padding-right: 0;
   scroll-padding-left: var(--Grid-container-padding-side);
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template.is-first-card {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template.is-first-card {
   margin-left: 0;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template {
   margin-top: 0;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-title {
   margin-bottom: 0;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-fader-right a.button.carousel-arrow-right {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .carousel-fader-right a.button.carousel-arrow-right {
   margin: 0 20px 0 0;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .carousel-fader-left a.button.carousel-arrow-left {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .carousel-fader-left a.button.carousel-arrow-left {
   margin: 0 0 0 20px;
 }
 
-.template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.horizontal {
+.template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-title.with-link.horizontal {
   padding-inline-end: var(--Grid-container-padding-side);
 }
 
 @media (min-width: 600px) {
-  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.horizontal {
+  .template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-title.with-link.horizontal {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     gap: var(--spacing-300);
   }
 
-  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link>div {
+  .template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-title.with-link>div {
     flex-direction: row;
     justify-content: space-between;
   }
 
-  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.with-link.link-only {
+  .template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-title.with-link.link-only {
     justify-content: flex-end;
   }
 
-  .template-x.horizontal.fullwidth:not(.holiday):not(.mini):not(.collaboration) .template-title.horizontal .view-all-link-wrapper {
+  .template-x.horizontal.fullwidth:not(.holiday, .mini, .collaboration) .template-title.horizontal .view-all-link-wrapper {
     margin: 0;
   }
 }
