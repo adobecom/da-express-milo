@@ -29,11 +29,18 @@
   margin-bottom: 0;
 }
 
-.resume-hero .button-container {
+.resume-hero .button-group {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-300);
   margin-top: var(--spacing-400);
+}
+
+.resume-hero .button-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  margin: 0;
 }
 
 /* Embedded verb-dropzone resume upload widget */
@@ -92,6 +99,7 @@
     padding: var(--spacing-600) var(--spacing-500);
   }
 
+  .resume-hero .button-group,
   .resume-hero .button-container {
     flex-direction: row;
     flex-wrap: wrap;
@@ -106,7 +114,7 @@
     margin: 0 auto;
   }
 
-  .resume-hero > div {
+  .resume-hero > .resume-hero-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-600);
