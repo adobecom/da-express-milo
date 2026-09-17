@@ -27,21 +27,7 @@
               "selector": "p.button-container",
               "nth": 0,
               "tag": "p",
-              "text": "Get Started Free",
-              "markup": null
-            },
-            {
-              "selector": "p.button-container",
-              "nth": 1,
-              "tag": "p",
-              "text": "Learn More",
-              "markup": null
-            },
-            {
-              "selector": ".resume-hero-content > div:first-child > p:not(.button-container)",
-              "nth": 1,
-              "tag": "p",
-              "text": "Free to use. No credit card required.",
+              "text": "Get Started Free Learn More",
               "markup": null
             }
           ],

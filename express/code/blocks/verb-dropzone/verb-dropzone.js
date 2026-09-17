@@ -97,23 +97,10 @@ function createSvgElement(iconName) {
   return svgDoc.documentElement;
 }
 
-function getPlaceholder(prefix, suffix, fallbackKeys = []) {
-  const keys = [
-    ...(prefix ? [`${prefix}-${suffix}`] : []),
-    ...fallbackKeys,
-  ];
-  return keys.reduce(
-    (value, key) => value ?? window.mph?.[key],
-    undefined,
-  );
-}
-
-const getCTA = (verb, placeholderPrefix) => {
+const getCTA = (verb) => {
   const verbConfig = LIMITS[verb];
-  return getPlaceholder(placeholderPrefix, 'upload-cta', [
-    `verb-dropzone-${verb}-upload-cta`,
-    `verb-widget-cta-${verbConfig?.uploadType}`,
-  ]);
+  return window.mph?.[`verb-dropzone-${verb}-upload-cta`]
+    || window.mph?.[`verb-widget-cta-${verbConfig?.uploadType}`];
 };
 
 function isMobileDevice() {
@@ -292,12 +279,7 @@ function buildDragOverlay(overlayText) {
   return overlay;
 }
 
-/**
- * Initializes a verb dropzone.
- * @param {Element} element The verb-dropzone block element
- * @param {{ placeholderPrefix?: string }} options Initialization options
- */
-export default async function init(element, options = {}) {
+export default async function init(element) {
   ({ createTag, getConfig } = (await import(`${miloLibs}/utils/utils.js`)));
 
   if (isOldBrowser()) {
@@ -305,8 +287,7 @@ export default async function init(element, options = {}) {
     return;
   }
   window.mph = window.mph || {};
-  const placeholderPrefix = options.placeholderPrefix?.trim();
-  await loadPlaceholders(['verb-dropzone', 'verb-widget', placeholderPrefix].filter(Boolean));
+  await loadPlaceholders(['verb-dropzone', 'verb-widget']);
   const rawVerb = element.classList[1];
   const VERB = rawVerb === 'ai-summary-generator' ? 'summarize-pdf' : rawVerb;
   const limits = LIMITS[VERB];
@@ -364,28 +345,17 @@ export default async function init(element, options = {}) {
     headline.classList.add('verb-dropzone-heading');
     headingEl = headline;
   } else {
-    const heading = getPlaceholder(placeholderPrefix, 'heading', [
-      `verb-dropzone-${VERB}-heading`,
-    ]);
-    headingEl = createTag('p', { class: 'verb-dropzone-heading' }, heading);
+    headingEl = createTag('p', { class: 'verb-dropzone-heading' });
   }
   headingEl.id = 'verb-dropzone-heading';
   const subLine = createTag('p', { class: 'verb-dropzone-sub', id: 'file-upload-description' });
-  const dragDesktop = createTag(
-    'span',
-    { class: 'verb-dropzone-subcopy-desktop' },
-    getPlaceholder(placeholderPrefix, 'subcopy-desktop', ['verb-dropzone-subcopy-desktop']),
-  );
-  const dragMobile = createTag(
-    'span',
-    { class: 'verb-dropzone-subcopy-mobile' },
-    getPlaceholder(placeholderPrefix, 'subcopy-mobile', ['verb-dropzone-subcopy-mobile']),
-  );
+  const dragDesktop = createTag('span', { class: 'verb-dropzone-subcopy-desktop' }, window.mph?.['verb-dropzone-subcopy-desktop']);
+  const dragMobile = createTag('span', { class: 'verb-dropzone-subcopy-mobile' }, window.mph?.['verb-dropzone-subcopy-mobile']);
   subLine.append(dragDesktop, dragMobile);
   dzContent.append(headingEl, subLine);
   dzInner.append(iconWrapper, dzContent);
 
-  const ctaButtonLabel = getCTA(VERB, placeholderPrefix);
+  const ctaButtonLabel = getCTA(VERB);
   const ctaButton = createTag('div', {
     class: 'verb-dropzone-cta',
     'aria-hidden': 'true',
@@ -457,46 +427,31 @@ export default async function init(element, options = {}) {
   // Footer with legal
   const footer = createTag('div', { class: 'verb-dropzone-footer' });
   const { locale } = getConfig();
-  const ppURL = getPlaceholder(placeholderPrefix, 'privacy-policy-url', ['verb-widget-privacy-policy-url'])
-    || `https://www.adobe.com${locale.prefix}/privacy/policy.html`;
-  const touURL = getPlaceholder(placeholderPrefix, 'terms-of-use-url', ['verb-widget-terms-of-use-url'])
-    || `https://www.adobe.com${locale.prefix}/legal/terms.html`;
-  const genAIurl = getPlaceholder(placeholderPrefix, 'genai-terms-url', ['verb-widget-genai-terms-url'])
-    || `https://www.adobe.com${locale.prefix}/legal/licenses-terms/adobe-gen-ai-user-guidelines.html`;
-  const legalPart1 = getPlaceholder(placeholderPrefix, 'legal', [
-    'verb-dropzone-legal',
-    'verb-widget-legal',
-  ]);
+  const ppURL = window.mph?.['verb-widget-privacy-policy-url'] || `https://www.adobe.com${locale.prefix}/privacy/policy.html`;
+  const touURL = window.mph?.['verb-widget-terms-of-use-url'] || `https://www.adobe.com${locale.prefix}/legal/terms.html`;
+  const genAIurl = window.mph?.['verb-widget-genai-terms-url'] || `https://www.adobe.com${locale.prefix}/legal/licenses-terms/adobe-gen-ai-user-guidelines.html`;
+  const mph = window.mph || {};
+  const legalPart1 = mph['verb-dropzone-legal'] || mph['verb-widget-legal'];
   const legalPart2 = limits?.genAI
-    ? getPlaceholder(placeholderPrefix, 'legal-2-ai', [
-      'verb-dropzone-legal-2-ai',
-      'verb-widget-legal-2-ai',
-    ])
-    : getPlaceholder(placeholderPrefix, 'legal-2', [
-      'verb-dropzone-legal-2',
-      'verb-widget-legal-2',
-    ]);
+    ? (mph['verb-dropzone-legal-2-ai'] || mph['verb-widget-legal-2-ai'])
+    : (mph['verb-dropzone-legal-2'] || mph['verb-widget-legal-2']);
   const legalText = createTag('div', { class: 'verb-dropzone-legal' });
   const legalPart1El = createTag('p', {}, legalPart1);
   const legalPart2El = createTag('p', {}, legalPart2);
   const createLegalLink = (label, url) => `<a class="verb-dropzone-legal-url" target="_blank" href="${url}">${label}</a>`;
   const legalLinks = [
-    ['terms-of-use', 'verb-widget-terms-of-use', touURL],
-    ['privacy-policy', 'verb-widget-privacy-policy', ppURL],
-    ...(limits?.genAI
-      ? [['genai-guidelines', 'verb-widget-genai-guidelines', genAIurl]]
-      : []),
+    ['verb-widget-terms-of-use', touURL],
+    ['verb-widget-privacy-policy', ppURL],
+    ...(limits?.genAI ? [['verb-widget-genai-guidelines', genAIurl]] : []),
   ];
   legalPart2El.innerHTML = legalLinks.reduce(
-    (html, [suffix, fallbackKey, url]) => {
-      const linkText = getPlaceholder(placeholderPrefix, suffix, [fallbackKey]);
+    (html, [key, url]) => {
+      const linkText = window.mph?.[key];
       return linkText ? html.replace(linkText, createLegalLink(linkText, url)) : html;
     },
     legalPart2El.textContent,
   );
-  const tooltipContent = getPlaceholder(placeholderPrefix, 'tool-tip', [
-    'verb-widget-tool-tip',
-  ]) || '';
+  const tooltipContent = window.mph?.['verb-widget-tool-tip'] || '';
   const infoIcon = createTag('button', {
     class: 'info-icon milo-tooltip top',
     type: 'button',
@@ -608,11 +563,7 @@ export default async function init(element, options = {}) {
     }
   };
   if (useFileUpload && fileInput) {
-    const dragOverlay = buildDragOverlay(getPlaceholder(
-      placeholderPrefix,
-      'drag-overlay',
-      ['verb-dropzone-drag-overlay'],
-    ) || '');
+    const dragOverlay = buildDragOverlay(window.mph?.['verb-dropzone-drag-overlay'] || '');
     document.body.append(dragOverlay);
     const hideDragOverlay = () => dragOverlay.classList.remove('is-dragging');
     let dragLeaveTimer = null;

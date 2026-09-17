@@ -118,40 +118,6 @@ describe('verb-dropzone – DOM structure', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Consumer-specific placeholders
-// ---------------------------------------------------------------------------
-
-describe('verb-dropzone – placeholder prefix', () => {
-  let block;
-
-  before(async () => {
-    stubGlobals();
-    window.mph = {
-      'resume-hero-subcopy-desktop': 'Resume-specific desktop text',
-      'resume-hero-upload-cta': 'Upload your resume',
-      'verb-dropzone-subcopy-mobile': 'Default mobile text',
-    };
-    document.body.innerHTML = basicHtml;
-    block = document.querySelector('.verb-dropzone');
-    await init(block, { placeholderPrefix: 'resume-hero' });
-  });
-
-  after(restoreGlobals);
-
-  it('uses prefixed placeholder values when available', () => {
-    expect(block.querySelector('.verb-dropzone-subcopy-desktop').textContent)
-      .to.equal('Resume-specific desktop text');
-    expect(block.querySelector('.verb-dropzone-cta-label').textContent)
-      .to.equal('Upload your resume');
-  });
-
-  it('falls back to the default placeholder keys', () => {
-    expect(block.querySelector('.verb-dropzone-subcopy-mobile').textContent)
-      .to.equal('Default mobile text');
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Widget icon (upload-document.png)
 // ---------------------------------------------------------------------------
 
