@@ -1,3 +1,5 @@
+/* global page, expect */
+
 const ResumeHeroBlock = require('./resume-hero.page.cjs');
 
 describe('resume-hero block', () => {
@@ -18,15 +20,13 @@ describe('resume-hero block', () => {
   });
 
   test('should have CTA buttons', async () => {
-    const buttons = await block.block.locator('a.button').count();
+    const buttons = await block.block.locator('a.con-button, a.button').count();
     expect(buttons).toBeGreaterThan(0);
   });
 
   test('should have responsive layout', async () => {
     // This test verifies the block adapts to different viewport sizes
-    const blockStyles = await block.block.evaluate((el) => {
-      return window.getComputedStyle(el);
-    });
+    const blockStyles = await block.block.evaluate((el) => window.getComputedStyle(el));
     expect(blockStyles).toBeDefined();
   });
 });
