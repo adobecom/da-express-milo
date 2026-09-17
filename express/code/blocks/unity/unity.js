@@ -113,14 +113,15 @@ export default async function init(el) {
   }
 
   const element = el.querySelector('span');
-  const verbDropzone = el.closest('.section')?.querySelector('.verb-dropzone');
-  if (!element && !verbDropzone) return;
+  const verbUploadBlock = el.closest('.section')?.querySelector('.verb-dropzone, .verb-express-hero');
+  if (!element && !verbUploadBlock) return;
   const unitylibs = getUnityLibs();
-  if (verbDropzone) {
-    const { LIMITS: VERB_DROPZONE_LIMITS } = await import('../verb-dropzone/verb-dropzone.js');
+  if (verbUploadBlock) {
+    const dropzoneModule = verbUploadBlock.classList.contains('verb-express-hero') ? '../verb-express-hero/verb-express-hero.js' : '../verb-dropzone/verb-dropzone.js';
+    const { LIMITS: VERB_DROPZONE_LIMITS } = await import(dropzoneModule);
     Object.assign(LIMITS, VERB_DROPZONE_LIMITS);
   }
-  const verb = (verbDropzone && [...verbDropzone.classList].find((cn) => LIMITS[cn])) || element.classList[1].replace('icon-', '');
+  const verb = (verbUploadBlock && [...verbUploadBlock.classList].find((cn) => LIMITS[cn])) || element.classList[1].replace('icon-', '');
   if (mobileApp && LIMITS[verb]?.mobileApp) return;
   const langFromPath = window.location.pathname.split('/')[1];
   const languageCode = localeMap[langFromPath] ? localeMap[langFromPath].split('-')[0] : 'en';
