@@ -119,18 +119,14 @@ function injectBrandingLogo(block) {
 async function embedResumeDropzone(anchor) {
   if (!anchor) return;
 
-  const backgroundImage = anchor.querySelector(':scope > picture');
-  const dropzoneBlock = createTag('div', { class: 'resume-hero-dropzone resume-builder' });
+  const dropzoneBlock = createTag('div', { class: 'verb-dropzone resume-builder' });
   dropzoneBlock.append(createTag('div'));
   anchor.append(dropzoneBlock);
 
   loadStyle(`${getConfig().codeRoot}/blocks/verb-dropzone/verb-dropzone.css`);
 
   const { default: initDropzone } = await import('../verb-dropzone/verb-dropzone.js');
-  await initDropzone(dropzoneBlock, {
-    placeholderPrefix: 'resume-hero',
-    backgroundImage,
-  });
+  await initDropzone(dropzoneBlock, { placeholderPrefix: 'resume-hero' });
 }
 
 /**
