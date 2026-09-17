@@ -46,6 +46,30 @@
   max-width: none;
 }
 
+/* Resume-hero variant: image + centered copy + narrower widget */
+.resume-hero .resume-hero-dropzone-area {
+  --verb-dropzone-max-width: 480px;
+}
+
+.resume-hero .resume-hero-dropzone-area .verb-dropzone-inner {
+  flex-direction: column;
+}
+
+.resume-hero .resume-hero-dropzone-area .verb-dropzone-content {
+  text-align: center;
+  align-items: center;
+}
+
+.resume-hero .resume-hero-dropzone-area .widget-icon {
+  max-width: none;
+}
+
+.resume-hero .resume-hero-dropzone-area .resume-hero-dropzone-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .resume-hero .button {
   display: inline-block;
   padding: var(--spacing-200) var(--spacing-400);
