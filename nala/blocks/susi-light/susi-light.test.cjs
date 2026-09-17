@@ -127,5 +127,26 @@ test.describe('SusiLightBlock Test Suite', () => {
     await test.step('step-4: SEO validation', async () => {
       await runSeoChecks({ page, feature: features[1], skipSeoTest: false });
     });
+
+    await test.step('step-5: Tab panel min-height reserve (CLS)', async () => {
+      await block.waitForSusiReady();
+      const susiCount = await block.susiComponent.count();
+      if (susiCount < 2) {
+        test.skip(true, 'SUSI CDN unavailable — expected susi-sentry-light in both tab panels');
+      }
+
+      const reservePx = await block.getTabsPanelReservePx();
+      expect(reservePx).toBeGreaterThan(0);
+      expect(await block.getTabPanelsMinHeightPx()).toBe(reservePx);
+      expect(await block.getTabPanelsHeight()).toBeGreaterThanOrEqual(reservePx);
+
+      await block.clickTab(1);
+      await block.waitForActiveSusiReady();
+      expect(await block.getTabPanelsHeight()).toBeGreaterThanOrEqual(reservePx);
+
+      await block.clickTab(0);
+      await block.waitForActiveSusiReady();
+      expect(await block.getTabPanelsHeight()).toBeGreaterThanOrEqual(reservePx);
+    });
   });
 });
