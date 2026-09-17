@@ -327,7 +327,9 @@ function decorateAuthoredLayout(element) {
 
   headerRow.classList.add('resume-hero-header');
   headerCell.classList.add('resume-hero-header-content');
-  actionsRow.classList.add('resume-hero-actions');
+  // Unity resolves its configured upload target with
+  // `.foreground .resume-hero-dropzone-area`.
+  actionsRow.classList.add('resume-hero-actions', 'foreground');
   uploadCell.classList.add('resume-hero-upload');
   createCell?.classList.add('resume-hero-create');
 
@@ -571,6 +573,7 @@ export default async function decorate(element) {
 
   function handleUploadingEvent(data, attempts, cookieExp, canSendDataToSplunk) {
     isUploading = true;
+    console.log('uploading')
     exitFlag = false;
     prefetchTarget();
     const metadata = mergeData({ ...data, userAttempts: attempts });

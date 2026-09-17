@@ -121,6 +121,8 @@ describe('resume-hero', () => {
   it('adds layout classes without inline display overrides', () => {
     const actions = block.querySelector('.resume-hero-actions');
     expect(actions).to.equal(authoredNodes.actionsRow);
+    expect(actions.classList.contains('foreground')).to.be.true;
+    expect(block.querySelector('.foreground .resume-hero-dropzone-area')).to.exist;
     expect(actions.style.display).to.equal('');
     expect(getComputedStyle(actions).display).to.equal('flex');
     expect(authoredNodes.uploadCell.classList.contains('resume-hero-upload')).to.be.true;
