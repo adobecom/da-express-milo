@@ -7,26 +7,6 @@ export const style = css`
     width: 100%;
     height: 100%;
     font-family: var(--body-font-family);
-
-    --swatch-rail-gap: var(--spacing-50);
-    --swatch-rail-horizontal-height: 48px;
-    --swatch-rail-horizontal-padding: 8px 12px;
-    --swatch-column-horizontal-padding: 0;
-    --swatch-column-horizontal-gap: 0;
-    --swatch-column-horizontal-radius: 0;
-    --four-rows-cols: 5;
-    --vertical-max-per-row: 5;
-    --bottom-info-horizontal-height: auto;
-    --bottom-info-horizontal-padding: 0 var(--spacing-100);
-    --bottom-info-horizontal-gap: 0;
-    --bottom-info-horizontal-radius: 0;
-    --bottom-info-horizontal-box-sizing: content-box;
-    --hex-code-group-gap: 6px;
-    --hex-code-edit-tint-background: rgba(0, 0, 0, 0.15);
-    --hex-code-edit-tint-radius: 6px;
-    --hex-code-edit-tint-size: 24px;
-    --swatch-column-stacked-padding: 0 12px;
-    --hex-code-stacked-width: 75px;
   }
   :host([orientation="stacked"]) {
     overflow: visible;
@@ -40,7 +20,7 @@ export const style = css`
     position: relative;
     display: flex;
     flex-direction: row;
-    gap: var(--swatch-rail-gap);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
     width: 100%;
     height: 100%;
     border-radius: var(--figma-strip-radius);
@@ -203,9 +183,9 @@ export const style = css`
 
   
   .swatch-rail[data-orientation="horizontal"] {
-    height: var(--swatch-rail-horizontal-height);
-    padding: var(--swatch-rail-horizontal-padding);
-    gap: var(--swatch-rail-gap);
+    height: 48px;
+    padding: 8px 12px;
+    gap: var(--swatch-rail-gap, var(--spacing-50));
     border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
 
@@ -213,9 +193,7 @@ export const style = css`
     flex: 1 1 0;
     width: auto;
     min-width: 0;
-    padding: var(--swatch-column-horizontal-padding);
-    gap: var(--swatch-column-horizontal-gap);
-    border-radius: var(--swatch-column-horizontal-radius);
+    padding: 0;
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:first-child {
@@ -232,7 +210,7 @@ export const style = css`
     grid-template-columns: repeat(var(--rail-columns), 1fr);
     grid-auto-rows: 1fr;
     flex-direction: unset;
-    gap: var(--swatch-rail-gap);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
   }
 
   .swatch-rail[data-orientation="vertical"] .swatch-column {
@@ -243,9 +221,9 @@ export const style = css`
   
   .swatch-rail[data-orientation="vertical"].vertical--four-rows {
     display: grid;
-    grid-template-columns: repeat(var(--four-rows-cols), 1fr);
+    grid-template-columns: repeat(var(--four-rows-cols, 5), 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: var(--swatch-rail-gap);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
     border-radius: var(--Corner-radius-corner-radius-200);
     overflow: hidden;
   }
@@ -335,9 +313,9 @@ export const style = css`
   
   .swatch-rail[data-orientation="vertical"].vertical--two-rows {
     display: grid;
-    grid-template-columns: repeat(var(--vertical-max-per-row), 1fr);
+    grid-template-columns: repeat(var(--vertical-max-per-row, 5), 1fr);
     grid-template-rows: 1fr 1fr;
-    gap: var(--swatch-rail-gap);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
     border-radius: var(--Corner-radius-corner-radius-200);
     overflow: hidden;
   }
@@ -494,11 +472,7 @@ export const style = css`
     width: 100%;
     justify-content: space-between;
     flex-direction: row;
-    height: var(--bottom-info-horizontal-height);
-    padding: var(--bottom-info-horizontal-padding);
-    gap: var(--bottom-info-horizontal-gap);
-    border-radius: var(--bottom-info-horizontal-radius);
-    box-sizing: var(--bottom-info-horizontal-box-sizing);
+    padding: 0 8px;
   }
 
   .swatch-rail[data-orientation="horizontal"] .hex-code {
@@ -514,27 +488,13 @@ export const style = css`
     margin-left: 0;
   }
 
-  .hex-code-group {
-    display: flex;
-    align-items: center;
-    gap: var(--hex-code-group-gap);
-    min-width: 0;
-  }
-
-  .hex-code-group .icon-button--edit-tint {
-    background: var(--hex-code-edit-tint-background);
-    border-radius: var(--hex-code-edit-tint-radius);
-    width: var(--hex-code-edit-tint-size);
-    height: var(--hex-code-edit-tint-size);
-  }
-
   
   
   .swatch-rail[data-orientation="stacked"] {
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    gap: var(--swatch-rail-gap);
+    gap: var(--swatch-rail-gap, var(--spacing-50));
     padding: 0;
     border-radius: var(--figma-strip-radius);
     overflow: visible;
@@ -545,7 +505,7 @@ export const style = css`
     min-height: 48px;
     width: 100%;
     min-width: 0;
-    padding: var(--swatch-column-stacked-padding);
+    padding: 0 12px;
     border-radius: 0;
     flex-direction: row;
     align-items: center;
@@ -599,10 +559,6 @@ export const style = css`
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
     flex-shrink: 0;
-  }
-
-  .swatch-rail[data-orientation="stacked"] button.hex-code {
-    width: var(--hex-code-stacked-width);
   }
 
   .swatch-rail[data-orientation="stacked"] .stacked-row__icons {
@@ -694,20 +650,6 @@ export const style = css`
   .swatch-column--right-actions-hover-only.locked:not(:hover):not(:focus-visible):not(:has(.swatch-column-focusable:focus-visible)) .top-actions--right > :not(.icon-button--lock) {
     opacity: 0;
     pointer-events: none;
-  }
-
-  @media (hover: hover) {
-    .swatch-column--hex-copy-hover-only .bottom-info {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s ease;
-    }
-
-    .swatch-column--hex-copy-hover-only:hover .bottom-info,
-    .swatch-column--hex-copy-hover-only:focus-within .bottom-info {
-      opacity: 1;
-      pointer-events: auto;
-    }
   }
 
 
