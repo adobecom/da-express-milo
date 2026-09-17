@@ -5,6 +5,13 @@
   text-align: start;
 }
 
+.resume-hero .express-logo {
+  display: block;
+  width: 164px;
+  height: auto;
+  margin: 0 0 var(--spacing-400);
+}
+
 .resume-hero .heading {
   font-size: var(--heading-font-size-l);
   text-align: start;
