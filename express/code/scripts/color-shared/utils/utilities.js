@@ -1,5 +1,5 @@
 import { createTag } from '../../utils.js';
-import trackExportEvent from '../../utils/export-analytics.js';
+import { trackExportComplete } from '../../instrument.js';
 
 export function interpolate(template, vars) {
   return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), template);
@@ -36,7 +36,7 @@ const COLOR_EXPORT_UI_LOCATION = 'acom-color-page';
  * @param {string} exportMethod - e.g. 'download', 'copy-clipboard', 'share', 'save-to-library'
  */
 export function trackColorExport(exportMethod) {
-  return trackExportEvent({
+  return trackExportComplete({
     exportMethod,
     taskName: COLOR_EXPORT_TASK_NAME,
     uiLocation: COLOR_EXPORT_UI_LOCATION,

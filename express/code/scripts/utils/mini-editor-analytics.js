@@ -1,5 +1,5 @@
 import { getMetadata } from '../utils.js';
-import trackExportEvent from './export-analytics.js';
+import { trackExportComplete } from '../instrument.js';
 
 const UI_LOCATION = 'seo-discover-page';
 
@@ -8,7 +8,7 @@ function getMiniEditorTaskName() {
 }
 
 export default function trackMiniEditorExport({ exportMethod } = {}) {
-  return trackExportEvent({
+  return trackExportComplete({
     exportMethod,
     taskName: getMiniEditorTaskName(),
     uiLocation: UI_LOCATION,

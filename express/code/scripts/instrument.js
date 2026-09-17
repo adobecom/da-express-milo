@@ -60,6 +60,32 @@ function toAttachedFormatForMiniEditor(properties) {
     });
 }
 
+function toAttachedFormatForExport(properties) {
+  return toAttachedFormat(properties).map((entry) => {
+    if (entry.propertyName === 'event.event_date') {
+      return {
+        ...entry,
+        propertyName: 'event_date',
+      };
+    }
+
+    return entry;
+  });
+}
+
+function getPageNameFromPathname() {
+  const pathSegments = window.location.pathname.replace(/^\//, '').split('/').filter(Boolean);
+  return `adobe.com:${pathSegments.join(':')}`;
+}
+
+function isAuthenticatedUser() {
+  try {
+    return !!window.adobeIMS?.isSignedInUser?.();
+  } catch {
+    return false;
+  }
+}
+
 let expressLandingPageType;
 switch (true) {
   case (
@@ -616,6 +642,138 @@ export function trackColorBlockLoad(blockType) {
     safelyFireAnalyticsEvent(fireEvent);
   } catch (error) {
     window.lana?.log(`Failed to track color block load: ${error}`, { tags: 'color, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
+}
+
+const EXPORT_EVENT_NAME_AUTH = 'export-project-complete';
+const EXPORT_EVENT_NAME_UNAUTH = 'export-project-complete-unauth';
+
+/**
+ * Fires the shared `export-project-complete[-unauth]` event used to report a
+ * completed export-style action (download, copy, share, save) to Express DE via AEP.
+ *
+ * @param {Object} options
+ * @param {string} options.exportMethod - e.g. 'download', 'copy-clipboard', 'share',
+ *   'save-to-library'
+ * @param {string} options.taskName - value for `custom.task.name`
+ * @param {string} options.uiLocation - value for `custom.ui.location`
+ */
+export async function trackExportComplete({ exportMethod, taskName, uiLocation } = {}) {
+  let userAccountType = 'unknown';
+
+  if (!exportMethod) return;
+
+  const isAuthenticated = isAuthenticatedUser();
+  const eventName = isAuthenticated ? EXPORT_EVENT_NAME_AUTH : EXPORT_EVENT_NAME_UNAUTH;
+  const isMobile = isMobileWeb();
+  const pageUrl = window.location?.href || '';
+  const dtsStart = new Date().toISOString();
+  const eventDate = dtsStart.slice(0, 10);
+  const language = getLanguage();
+  const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
+  const pageName = corpnewData?.page?.pageInfo?.pageName
+    || getPageNameFromPathname();
+  const workflow = 'export';
+  const type = 'success';
+  const subtype = 'export-project';
+  const category = 'WEB';
+  const subcategory = 'document';
+  const mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID;
+  const guid = generateGuid();
+  const accessCountry = await getAccessCountry();
+  const deviceInfo = await getDeviceInfo();
+  let userGuid = '';
+  if (isAuthenticated && window.adobeIMS?.getProfile) {
+    try {
+      const profile = await window.adobeIMS.getProfile();
+      userGuid = profile?.userId || '';
+    } catch {
+      userGuid = '';
+    }
+  }
+  try {
+    userAccountType = window.adobeIMS?.getAccountType?.();
+  } catch (e) {
+    window.lana?.log(`Failed to read account type: ${e}`, { tags: 'export, analytics', errorType: 'i', severity: 'warning', sampleRate: '1' });
+  }
+
+  const sdmPayload = {
+    event: {
+      pagename: eventName,
+      platform_name: isMobile ? 'mobile-web' : 'desktop-web',
+      aa: {
+        page_name: pageName,
+      },
+      url: pageUrl,
+      event_date: eventDate,
+      dts_start: dtsStart,
+      user_agent: navigator.userAgent,
+      guid,
+      user_guid: userGuid,
+      category,
+      subcategory,
+      subtype,
+      type,
+      workflow,
+      is_authenticated: isAuthenticated,
+      mcid_guid: mcidGuid,
+    },
+    user: {
+      aa: {
+        post_page_url: pageUrl,
+      },
+    },
+    source: {
+      name: SOURCE_NAME,
+      client_id: SOURCE_CLIENT_ID,
+    },
+    hz: {
+      source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
+      device_name: deviceInfo.deviceName,
+      user: {
+        access_country: accessCountry,
+        os_name: deviceInfo.osName,
+        os_version: deviceInfo.osVersion,
+      },
+    },
+    custom: {
+      export_method: exportMethod,
+      ui: {
+        location: uiLocation,
+      },
+      displayedLanguage: language,
+      task: {
+        name: taskName,
+      },
+    },
+  };
+
+  addIfDefined(sdmPayload.hz.user, 'account_type', userAccountType);
+
+  const fireEvent = () => {
+    window._satellite.track('event', {
+      xdm: {},
+      data: {
+        eventType: 'web.webinteraction.linkClicks',
+        web: {
+          webInteraction: {
+            name: eventName,
+            linkClicks: { value: 1 },
+            type: 'other',
+          },
+        },
+        _adobe_corpnew: {
+          sdm: sdmPayload,
+          custom: toAttachedFormatForExport(sdmPayload),
+        },
+      },
+    });
+  };
+
+  try {
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track export complete: ${error}`, { tags: 'export, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
   }
 }
 
