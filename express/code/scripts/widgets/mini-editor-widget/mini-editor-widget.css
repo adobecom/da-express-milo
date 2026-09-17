@@ -849,7 +849,7 @@ sp-theme {
 
   .me-deco-card-wrap {
     animation: me-deco-in 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: var(--me-deco-delay, 0ms);
+    animation-delay: var(--me-deco-delay);
   }
 
   /* Per-card delays, assigned by column position left → right.
@@ -974,7 +974,7 @@ sp-theme {
    every breakpoint instead of matching by coincidence at just one. */
 @media (max-width: 1200px) {
   .me-carousel-mode .mini-editor-widget {
-    max-width: var(--me-arc-card-w, 542px);
+    max-width: var(--me-arc-card-w);
   }
 }
 
