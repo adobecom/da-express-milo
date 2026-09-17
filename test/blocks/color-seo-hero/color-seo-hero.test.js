@@ -42,7 +42,7 @@ describe('Color SEO Hero', () => {
     await canvasRail.updateComplete;
     const editButton = canvasRail.shadowRoot.querySelector('.hex-code-group .icon-button--edit-tint');
     editButton.dispatchEvent(new Event('click', { bubbles: true }));
-    await new Promise((resolve) => { setTimeout(resolve, 100); });
+    await waitFor(() => block.querySelector('.color-seo-hero-editor-popover')?.hidden === false, 2000);
 
     expect(block.querySelector('.color-seo-hero-editor-popover').hidden).to.be.false;
     expect(editButton.getAttribute('aria-expanded')).to.equal('true');
