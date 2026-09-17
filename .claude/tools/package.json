@@ -1,0 +1,10 @@
+{
+  "name": "da-express-milo-qa-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone QA/comparison tooling: query-content-blocks, qa-worktree, comparison.",
+  "scripts": {
+    "test": "node --test test/*.test.mjs comparison/test/*.test.mjs"
+  }
+}

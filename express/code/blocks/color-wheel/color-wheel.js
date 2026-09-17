@@ -139,7 +139,6 @@ async function loadPlaceholders() {
     return fallback;
   };
   return {
-    tabPrimaryColor: v(0, 'Primary color'),
     tabImage: v(1, 'Image'),
     tabColorWheel: v(2, 'Color Wheel'),
     harmonyLabels: {
@@ -610,7 +609,7 @@ async function buildTabs(controller, suggestionsRow, {
       size: 'm',
       quiet: true,
       tabs: [
-        { label: strings.tabPrimaryColor || 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
+        { label: strings.baseColorStrings?.title || 'Base color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
         { label: strings.tabImage || 'Image', value: 'image', spIcon: 'sp-icon-image' },
         { label: strings.tabColorWheel || 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
       ],

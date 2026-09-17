@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@faq-default",
       "selector": "div.faq",
-      "path": "/drafts/nala/test-gen/faq/faq",
+      "path": "/drafts/nala/blocks/faq/faq",
       "data": {
         "semantic": {
           "texts": [
