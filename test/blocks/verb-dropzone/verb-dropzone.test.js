@@ -152,6 +152,38 @@ describe('verb-dropzone – placeholder prefix', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Background image content
+// ---------------------------------------------------------------------------
+
+describe('verb-dropzone – background image', () => {
+  let block;
+  let picture;
+
+  before(async () => {
+    stubGlobals();
+    document.body.innerHTML = basicHtml;
+    block = document.querySelector('.verb-dropzone');
+    picture = document.createElement('picture');
+    picture.innerHTML = '<img src="/express/code/blocks/resume-hero/resume-preview.svg" alt="Resume preview">';
+    await init(block, { backgroundImage: picture });
+  });
+
+  after(restoreGlobals);
+
+  it('moves the supplied picture into a decorative background layer', () => {
+    const background = block.querySelector(':scope > .verb-dropzone-background');
+    expect(background).to.exist;
+    expect(background.getAttribute('aria-hidden')).to.equal('true');
+    expect(background.querySelector('picture')).to.equal(picture);
+    expect(block.classList.contains('has-background-image')).to.be.true;
+  });
+
+  it('keeps the interactive foreground above the background layer', () => {
+    expect(block.querySelector(':scope > .foreground .verb-dropzone-area')).to.exist;
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Widget icon (upload-document.png)
 // ---------------------------------------------------------------------------
 

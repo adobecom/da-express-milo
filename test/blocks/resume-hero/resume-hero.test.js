@@ -80,6 +80,15 @@ describe('resume-hero / split-row authoring', () => {
       .to.equal('Upload resume');
   });
 
+  it('uses the authored media picture as the dropzone background', () => {
+    const media = block.querySelector('.media');
+    const background = media.querySelector('.verb-dropzone-background');
+    expect(background).to.exist;
+    expect(background.querySelector('picture img').getAttribute('alt'))
+      .to.equal('Resume preview');
+    expect(media.querySelector(':scope > picture')).to.not.exist;
+  });
+
   it('preserves the trailing disclaimer', () => {
     expect(block.textContent).to.include('Free to use. No credit card required.');
   });

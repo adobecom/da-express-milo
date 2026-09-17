@@ -20,6 +20,31 @@
   gap: 12px;
 }
 
+.verb-dropzone-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.verb-dropzone-background picture,
+.verb-dropzone-background img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.verb-dropzone-background img {
+  object-fit: cover;
+}
+
+.verb-dropzone.has-background-image > .foreground {
+  position: relative;
+  z-index: 1;
+}
+
 main .section .verb-dropzone p {
   margin: 0;
 }

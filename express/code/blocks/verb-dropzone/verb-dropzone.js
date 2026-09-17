@@ -292,10 +292,22 @@ function buildDragOverlay(overlayText) {
   return overlay;
 }
 
+function addBackgroundImage(element, backgroundImage) {
+  if (!backgroundImage) return;
+
+  const background = createTag('div', {
+    class: 'verb-dropzone-background',
+    'aria-hidden': 'true',
+  });
+  background.append(backgroundImage);
+  element.classList.add('has-background-image');
+  element.prepend(background);
+}
+
 /**
  * Initializes a verb dropzone.
  * @param {Element} element The verb-dropzone block element
- * @param {{ placeholderPrefix?: string }} options Initialization options
+ * @param {{ placeholderPrefix?: string, backgroundImage?: Element }} options Initialization options
  */
 export default async function init(element, options = {}) {
   ({ createTag, getConfig } = (await import(`${miloLibs}/utils/utils.js`)));
@@ -307,6 +319,7 @@ export default async function init(element, options = {}) {
   window.mph = window.mph || {};
   const placeholderPrefix = options.placeholderPrefix?.trim();
   await loadPlaceholders(['verb-dropzone', 'verb-widget', placeholderPrefix].filter(Boolean));
+  addBackgroundImage(element, options.backgroundImage);
   const rawVerb = element.classList[1];
   const VERB = rawVerb === 'ai-summary-generator' ? 'summarize-pdf' : rawVerb;
   const limits = LIMITS[VERB];

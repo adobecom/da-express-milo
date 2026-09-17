@@ -45,12 +45,25 @@
 
 /* Embedded verb-dropzone resume upload widget */
 .resume-hero .verb-dropzone {
+  width: 100%;
+  min-width: 0;
+  height: 298px;
   padding-inline: 0;
   margin-block: var(--spacing-400);
+  border-radius: var(--spacing-300);
 }
 
 .resume-hero .verb-dropzone .foreground {
   max-width: none;
+}
+
+.resume-hero .media .verb-dropzone-background picture,
+.resume-hero .media .verb-dropzone-background picture img {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
 }
 
 .resume-hero .button {
@@ -104,10 +117,15 @@
     flex-direction: row;
     flex-wrap: wrap;
   }
+
+  .resume-hero .verb-dropzone {
+    width: 100%;
+    max-width: 783px;
+  }
 }
 
 /* Desktop */
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
   .resume-hero {
     padding: var(--spacing-900) var(--spacing-600);
     max-width: 1440px;
@@ -116,13 +134,20 @@
 
   .resume-hero > .resume-hero-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(783px, 1.5fr);
     gap: var(--spacing-600);
     align-items: center;
   }
 
   .resume-hero .media {
+    min-width: 783px;
     margin-top: 0;
+  }
+
+  .resume-hero .verb-dropzone {
+    width: 100%;
+    min-width: 783px;
+    max-width: none;
   }
 
   .resume-hero .heading {
