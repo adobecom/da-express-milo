@@ -38,10 +38,7 @@ export function installRegistryGuard() {
       try {
         return originalDefine(name, ctor, opts);
       } catch (error) {
-        const message = String(error?.message || '');
-        // In async module races the element may have been defined after our
-        // `get()` check; treat this as non-fatal and continue.
-        if (message.includes('has already been used with this registry')) {
+        if (window.customElements.get(name)) {
           return;
         }
         throw error;

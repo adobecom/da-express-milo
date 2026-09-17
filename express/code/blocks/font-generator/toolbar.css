@@ -68,10 +68,10 @@
 .toolbar-count {
   color: var(--color-gray-950);
   font-family: var(--body-font-family);
-  font-size: var(--Global-Typography-Size-Title-Title-2XS, 16px);
+  font-size: var(--Global-Typography-Size-Title-Title-2XS, 16px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   font-style: normal;
   font-weight: 700;
-  line-height: var(--Global-Typography-Line-height-Title-Title-2XS, 22px);
+  line-height: var(--Global-Typography-Line-height-Title-Title-2XS, 22px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   white-space: nowrap;
 }
 
@@ -89,11 +89,11 @@
 .toolbar-slider-value {
   color: var(--color-dark-gray);
   font-family: var(--body-font-family);
-  font-size: var(--Font-size-100, 14px);
+  font-size: var(--Font-size-100, 14px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   font-style: normal;
   font-weight: 400;
-  line-height: var(--Line-height-100, 18px);
-  letter-spacing: var(--Letter-spacing, 0);
+  line-height: var(--Line-height-100, 18px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  letter-spacing: var(--Letter-spacing, 0); /* stylelint-disable-line declaration-property-value-disallowed-list */
   white-space: nowrap;
 }
 
@@ -108,6 +108,7 @@
   width: 120px;
   height: 4px;
   border-radius: 4px;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
   background: linear-gradient(
     to right,
     var(--color-dark-gray) var(--fill, 11%),

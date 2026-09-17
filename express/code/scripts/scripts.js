@@ -298,6 +298,19 @@ const CONFIG = {
   },
 };
 
+// Handle dynamic import failures gracefully. Bots are hitting the templates page
+// and causing unhandled rejections that are logged with extreme frequency.
+window.addEventListener('unhandledrejection', (event) => {
+  const { reason } = event;
+  if (reason instanceof TypeError && reason.message.includes('dynamically imported module')) {
+    event.preventDefault();
+    // preventDefault() only suppresses the browser's default console reporting;
+    // lana's own unhandledrejection listener still fires unless propagation is stopped.
+    event.stopImmediatePropagation();
+    window.lana?.log(`Import failed: ${reason.message}`, { tags: 'dynamic-import', severity: 'error' });
+  }
+});
+
 /*
  * ------------------------------------------------------------
  * Edit below at your own risk
@@ -388,6 +401,9 @@ CONFIG.decorateArea = decorateAreaWithLCP;
   const paths = [`${miloLibs}/styles/styles.css`];
   if (getMetadata('theme') !== 'doodlebug') {
     paths.push('/express/code/styles/styles.css');
+  }
+  if (getMetadata('font-styling')?.trim().toLowerCase() === 'jp') {
+    paths.push('/express/code/styles/font-styling-jp.css');
   }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {

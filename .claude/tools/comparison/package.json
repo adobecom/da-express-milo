@@ -1,0 +1,15 @@
+{
+  "name": "comparison",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Compare a block's rendering on stage vs. a feature branch across every affected page: screenshots + pixel diffs + a JSON log + a natural-language summary.",
+  "bin": {
+    "comparison": "./compare-branches.mjs"
+  },
+  "dependencies": {
+    "jimp": "^1.6.1",
+    "pixelmatch": "^6.0.0",
+    "pngjs": "^7.0.0"
+  }
+}

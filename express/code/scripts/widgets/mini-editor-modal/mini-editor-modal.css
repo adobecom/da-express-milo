@@ -1,0 +1,194 @@
+/* ============================================================================
+   Mini Editor Modal
+   Wraps mini-editor-widget's centre editor card (decorations disabled) in an
+   animated dialog, per Figma node 54:8824, on desktop/tablet. On mobile
+   (<=767px), the same overlay/dialog/card is restyled as a bottom sheet
+   instead, per Figma node 124:3660 — see the <=767px override below.
+   ============================================================================ */
+
+/* Prevents the modal's scroll-lock (toggling body overflow) from shifting
+   layout by removing/restoring the scrollbar gutter — applies page-wide,
+   not just while the modal is open, so there's never a jump either way. */
+html {
+  scrollbar-gutter: stable;
+}
+
+.me-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-400);
+  background: rgb(0 0 0 / 69%);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.me-modal-overlay--open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.me-modal-overlay--closing {
+  transition-duration: 150ms;
+}
+
+.me-modal {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.me-modal-card {
+  box-sizing: border-box;
+  width: 558px;
+  max-width: 100%;
+  max-height: calc(100vh - 2 * var(--spacing-400));
+  overflow: auto;
+  padding: var(--spacing-100);
+  border-radius: 24px;
+  background: var(--color-white);
+  transform: scale(0.96);
+  opacity: 0;
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.me-modal-overlay--open .me-modal-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.me-modal-overlay--closing .me-modal-card {
+  transition-duration: 150ms;
+}
+
+.me-modal-close {
+  /* Fully outside the card (not overlapping its corner) — per Figma node
+     54:8824, the close button sits an 8px gap to the right of the card,
+     top-aligned with it. */
+  position: absolute;
+  top: 0;
+  left: calc(100% + var(--spacing-100));
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 100px;
+  background: rgb(255 255 255 / 80%);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+/* sp-icon-close sizes/colours itself via these CSS custom property hooks —
+   same pattern as mini-editor-widget.css's .me-action-icon, no Spectrum
+   theme/design tokens required. */
+.me-modal-close-icon {
+  --mod-icon-size: 20px;
+  --mod-icon-color: #292929;
+}
+
+/* Desktop/tablet: dismissal is via me-modal-close only — the mobile sheet's
+   drag handle (<=767px override below) replaces it there. */
+.me-modal-handle {
+  display: none;
+}
+
+.me-modal-close:hover {
+  background: rgb(255 255 255 / 95%);
+}
+
+@media (width <= 900px) {
+  /* Not enough room beside the card at this width — float it over the
+     card's top-right corner instead, half outside/half on the card, so it
+     stays reachable without the modal needing extra horizontal space. */
+  .me-modal-close {
+    top: -22px;
+    left: auto;
+    right: -22px;
+  }
+}
+
+/* Mobile only (<=767px): a bottom sheet instead of a centred dialog, per
+   Figma node 124:3660 — same overlay/dialog/card DOM and open/close JS as
+   desktop/tablet (mini-editor-modal.js), just restyled to slide up from the
+   bottom edge. me-modal-close is replaced by me-modal-handle as the visible
+   dismiss affordance here (outside-tap-to-close still applies either way). */
+@media (width <= 767px) {
+  .me-modal-overlay {
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .me-modal {
+    width: 100%;
+    max-height: 85vh;
+  }
+
+  .me-modal-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 85vh;
+    border-radius: 24px 24px 0 0;
+    padding: 0 var(--spacing-100) var(--spacing-100);
+    transform: translateY(100%);
+    transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 250ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .me-modal-overlay--open .me-modal-card {
+    transform: translateY(0);
+  }
+
+  .me-modal-close {
+    display: none;
+  }
+
+  .me-modal-handle {
+    display: block;
+    width: 50px;
+    height: 4px;
+    margin: var(--spacing-100) auto;
+    background: rgb(0 0 0 / 15%);
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .me-modal-overlay,
+  .me-modal-card {
+    transition: none;
+  }
+}
+
+/* Tablet/desktop only: the inline font/colour row, always open, instead of
+   the collapsible-panel default — overriding mini-editor-widget.css's own
+   .me-panel display. Paired with panelMode: 'always-open-inline' (see
+   mini-editor-modal.js and its own <=767px matchMedia check), which keeps
+   data-me-panel always set to 'fonts' or 'colour' at these widths.
+   Below 767px the modal falls back to the same collapsible-panel +
+   bottom-sheet behaviour as the inline block — no override needed there;
+   mini-editor-widget.css's own breakpoint already handles it. */
+@media (width > 767px) {
+  .me-modal-card-root .me-panel {
+    display: block;
+  }
+
+  .me-modal-card-root .me-sheet-overlay {
+    display: none;
+  }
+}

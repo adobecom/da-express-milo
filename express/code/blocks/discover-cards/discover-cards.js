@@ -203,6 +203,7 @@ export default async function decorate(block) {
     if (isDiscoverFlipCards) {
       decorateFlipCards(card, cardDivs);
     } else {
+      const cardHeaderText = card.querySelector('h1, h2, h3, h4, h5, h6')?.textContent.trim() || '';
       cardDivs.forEach((element) => {
         const img = element.querySelector('picture img');
         const textHeader = element.querySelector('h1, h2, h3, h4, h5, h6');
@@ -217,8 +218,14 @@ export default async function decorate(block) {
         img?.classList.add('short');
         if (element.tagName === 'H2') {
           element.classList.add('card-title');
-        } else if (element.querySelector('a.button')) {
-          element.classList.add('cta-section');
+        } else {
+          const cta = element.querySelector('a.button');
+          if (cta) {
+            element.classList.add('cta-section');
+            if (!cta.getAttribute('aria-label') && cardHeaderText) {
+              cta.setAttribute('aria-label', `${cta.textContent.trim()} ${cardHeaderText}`);
+            }
+          }
         }
       });
     }

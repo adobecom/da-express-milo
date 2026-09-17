@@ -23,6 +23,7 @@
  */
 
 import { loadMenu } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
@@ -57,7 +58,7 @@ export async function createExpressMenu(config) {
 
   await loadMenu();
   await loadOverrideStyles('menu', STYLES_PATH);
-  await customElements.whenDefined('sp-menu');
+  await waitForComponents(['sp-menu']);
 
   const theme = createThemeWrapper();
   const menu = document.createElement('sp-menu');

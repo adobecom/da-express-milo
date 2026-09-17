@@ -1,0 +1,57 @@
+.share-menu-widget {
+  position: relative;
+  display: flex;
+}
+
+.share-menu-popover {
+  position: absolute;
+  top: calc(100% + var(--spacing-100, 8px));
+  right: 0;
+  width: 242px;
+  box-sizing: border-box;
+  padding: var(--spacing-100, 8px);
+  border-radius: 10px;
+  background: var(--color-white, #fff);
+  box-shadow: 0 0 2px rgb(0 0 0 / 12%), 0 2px 6px rgb(0 0 0 / 4%), 0 4px 12px rgb(0 0 0 / 8%);
+}
+
+.share-menu-popover[hidden] {
+  display: none;
+}
+
+.share-menu-list,
+.share-menu-group {
+  display: block;
+  width: 100%;
+  padding: 0;
+}
+
+.share-menu-group {
+  --mod-menu-section-header-color: #292929;
+  --mod-menu-section-header-font-size: 14px;
+  --mod-menu-section-header-font-weight: 700;
+  --mod-menu-section-header-line-height: 18px;
+  --mod-menu-section-header-top-edge-to-text: 7px;
+  --mod-menu-section-header-bottom-edge-to-text: 7px;
+  --mod-menu-item-label-inline-edge-to-content: 12px;
+}
+
+.share-menu-list sp-menu-item {
+  --mod-menu-item-min-height: 32px;
+  --mod-menu-item-label-font-size: 14px;
+  --mod-menu-item-label-line-height: 18px;
+  --mod-menu-item-label-font-weight: 500;
+  --mod-menu-item-top-to-label: 7px;
+  --mod-menu-item-bottom-to-label: 7px;
+  --mod-menu-item-edge-to-text: 12px;
+  --mod-menu-item-icon-to-label: 6px;
+  color: #292929;
+}
+
+.share-menu-icon {
+  --mod-icon-size: 20px;
+  --mod-icon-color: #292929;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
