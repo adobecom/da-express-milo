@@ -85,7 +85,7 @@ main.with-holiday-templates-banner > div.section:has(.template-x) {
 }
 
 .template-x-horizontal-fullwidth-mini-spreadsheet-powered-container p {
-  font-weight: 800;
+  font-weight: 900;
   font-size: var(--body-font-size-m);
   margin: 16px 12px 12px 12px;
   text-align: left;
@@ -1949,7 +1949,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 
 .template-x-horizontal-fullwidth-mini-container .template-x .template-title p:last-of-type {
   margin-top: 16px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .template-x-horizontal-fullwidth-mini-container .template-x .template-title p:first-of-type {
@@ -1958,7 +1958,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 
 .template-x-horizontal-fullwidth-mini-container .template-x .template-title p:last-of-type { /* stylelint-disable-line no-duplicate-selectors */
   margin-top: 16px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .template-x-horizontal-fullwidth-mini-container .template-title .icon {
