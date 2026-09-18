@@ -533,6 +533,13 @@ export default async function init(block) {
       root: block,
       topActions,
       fontOptions,
+      // loadWebFontOptions() is memoized (see mini-editor-fonts-loader.js),
+      // so this is the same in-flight/resolved promise as the prefetch above —
+      // no second kit load. The desktop deco cards (unlike the centre card's
+      // `fontOptions` above) wait on this before ever rendering, so they
+      // always show a real, loaded font instead of the bundled fallback —
+      // see createMiniEditorWidget's decoFontOptionsPromise.
+      decoFontOptionsPromise: loadWebFontOptions(),
       backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
       a11y,
       deps,
@@ -541,16 +548,21 @@ export default async function init(block) {
 
     // Decorations are appended to the header (not the stage) so they can be
     // positioned to span from just below the header down to the editor's
-    // bottom edge, per the Figma reference, without extending past it.
+    // bottom edge, per the Figma reference, without extending past it. Empty
+    // at this point — createMiniEditorWidget populates it once the live font
+    // kit resolves (see decoFontOptionsPromise above) — appended now anyway
+    // so its layout/positioning is already in place the moment it does.
     header.append(editor.decorations);
     themeHost.append(editor.stage);
     wireLandmark(block, header);
 
-    // The card above just mounted with the bundled fallback fonts (see
+    // The centre card above just mounted with the bundled fallback fonts (see
     // getFontOptions/mini-editor-fonts-loader.js) so first paint never
     // waited on the Adobe Fonts kit's network round trip. Load the live kit
     // now, in the background, and swap it into the already-visible font
     // control once it resolves — a no-op if the user already picked a font.
+    // (The deco cards' own live-font upgrade is handled internally by
+    // createMiniEditorWidget via decoFontOptionsPromise above.)
     loadWebFontOptions().then((liveFontOptions) => {
       editor.upgradeFontOptions(liveFontOptions);
     }).catch(() => {});
