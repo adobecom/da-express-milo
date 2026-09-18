@@ -387,3 +387,63 @@ describe('resume-hero legacy authoring', () => {
     expect(createLink.classList.contains('con-button')).to.be.true;
   });
 });
+
+describe('resume-hero placeholder precedence', () => {
+  beforeEach(() => {
+    stubGlobals();
+    // Block-specific keys sit alongside the legacy verb-* / close-dialog
+    // fallbacks (still stubbed by stubGlobals) so we can assert the new keys win.
+    Object.assign(window.mph, {
+      'resume-hero-resume-builder-upload-cta': 'RH upload cta',
+      'resume-hero-resume-builder-file-limit': 'RH file limit',
+      'resume-hero-legal': 'RH legal line',
+      'resume-hero-tool-tip': 'RH tooltip',
+      'resume-hero-close-dialog': 'RH close',
+    });
+    document.body.innerHTML = basicHtml;
+  });
+
+  afterEach(restoreGlobals);
+
+  it('prefers resume-hero-* keys over the legacy verb-* fallbacks', async () => {
+    const block = document.querySelector('.resume-hero');
+    await decorate(block);
+
+    expect(block.querySelector('.verb-dropzone-heading').textContent).to.equal('RH upload cta');
+    expect(block.querySelector('.verb-dropzone-sub').textContent).to.equal('RH file limit');
+    expect(block.querySelector('.verb-dropzone-legal p').firstChild.textContent).to.equal('RH legal line');
+    expect(block.querySelector('.info-icon').getAttribute('aria-label')).to.equal('RH tooltip');
+    expect(block.querySelector('.verb-dropzone-errorBtn').getAttribute('aria-label')).to.equal('RH close');
+  });
+
+  it('lets resume-hero-* page metadata override the fetched sheet values', async () => {
+    const metas = [
+      ['resume-hero-resume-builder-upload-cta', 'Meta upload cta'],
+      ['resume-hero-resume-builder-file-limit', 'Meta file limit'],
+    ].map(([name, content]) => {
+      const meta = document.createElement('meta');
+      meta.name = name;
+      meta.content = content;
+      document.head.append(meta);
+      return meta;
+    });
+
+    const block = document.querySelector('.resume-hero');
+    await decorate(block);
+
+    expect(block.querySelector('.verb-dropzone-heading').textContent).to.equal('Meta upload cta');
+    expect(block.querySelector('.verb-dropzone-sub').textContent).to.equal('Meta file limit');
+
+    metas.forEach((meta) => meta.remove());
+  });
+
+  it('falls back to the legacy verb-* keys when no resume-hero-* key is authored', async () => {
+    delete window.mph['resume-hero-resume-builder-upload-cta'];
+    delete window.mph['resume-hero-legal'];
+    const block = document.querySelector('.resume-hero');
+    await decorate(block);
+
+    expect(block.querySelector('.verb-dropzone-heading').textContent).to.equal('Upload your resume');
+    expect(block.querySelector('.verb-dropzone-legal p').firstChild.textContent).to.equal('Your file will be securely handled.');
+  });
+});

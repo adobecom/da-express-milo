@@ -95,7 +95,8 @@ function createSvgElement(iconName) {
 
 const getCTA = (verb) => {
   const verbConfig = LIMITS[verb];
-  return window.mph?.[`verb-dropzone-${verb}-upload-cta`]
+  return window.mph?.[`resume-hero-${verb}-upload-cta`]
+    || window.mph?.[`verb-dropzone-${verb}-upload-cta`]
     || window.mph?.[`verb-widget-cta-${verbConfig?.uploadType}`];
 };
 
@@ -418,7 +419,14 @@ export default async function decorate(element) {
   // doesn't sit hidden any longer than necessary.
   element.parentElement?.style.setProperty('display', 'block');
   window.mph = window.mph || {};
-  await loadPlaceholders(['verb-dropzone', 'verb-widget', 'close-dialog']);
+  await loadPlaceholders(['resume-hero', 'verb-dropzone', 'verb-widget', 'close-dialog']);
+  // Local placeholder overrides: authors without access to the placeholders
+  // sheet can define any resume-hero-* placeholder as page metadata. These win
+  // over the fetched sheet values.
+  document.head.querySelectorAll('meta[name^="resume-hero-"]').forEach((meta) => {
+    const value = meta.getAttribute('content');
+    if (value) window.mph[meta.getAttribute('name')] = value;
+  });
   const rawVerb = [...element.classList].find((className) => LIMITS[className])
     || 'resume-builder';
   const VERB = rawVerb === 'ai-summary-generator' ? 'summarize-pdf' : rawVerb;
@@ -492,7 +500,7 @@ export default async function decorate(element) {
   // "mini dropzone" component (no separate desktop/mobile drag copy, no
   // extra CTA pill).
   const headingEl = createTag('p', { class: 'verb-dropzone-heading', id: 'verb-dropzone-heading' }, getCTA(VERB));
-  const subLine = createTag('p', { class: 'verb-dropzone-sub', id: 'file-upload-description' }, window.mph?.[`verb-widget-${VERB}-file-limit`]);
+  const subLine = createTag('p', { class: 'verb-dropzone-sub', id: 'file-upload-description' }, window.mph?.[`resume-hero-${VERB}-file-limit`] || window.mph?.[`verb-widget-${VERB}-file-limit`]);
   dzContent.append(headingEl, subLine);
   dzInner.append(iconWrapper, dzContent);
   dropzone.append(dzInner);
@@ -524,7 +532,7 @@ export default async function decorate(element) {
     class: 'verb-dropzone-errorIcon',
     'aria-hidden': 'true',
   });
-  const errorCloseBtn = createTag('div', { class: 'verb-dropzone-errorBtn', role: 'button', tabindex: '0', 'aria-label': window.mph?.['close-dialog'] });
+  const errorCloseBtn = createTag('div', { class: 'verb-dropzone-errorBtn', role: 'button', tabindex: '0', 'aria-label': window.mph?.['resume-hero-close-dialog'] || window.mph?.['close-dialog'] });
   const srAlert = { announceTimer: null, cleanupTimer: null };
   const clearSrAlert = () => {
     clearTimeout(srAlert.announceTimer);
@@ -555,27 +563,27 @@ export default async function decorate(element) {
   // Footer with legal
   const footer = createTag('div', { class: 'verb-dropzone-footer' });
   const { locale } = getConfig();
-  const ppURL = window.mph?.['verb-widget-privacy-policy-url'] || `https://www.adobe.com${locale.prefix}/privacy/policy.html`;
-  const touURL = window.mph?.['verb-widget-terms-of-use-url'] || `https://www.adobe.com${locale.prefix}/legal/terms.html`;
-  const genAIurl = window.mph?.['verb-widget-genai-terms-url'] || `https://www.adobe.com${locale.prefix}/legal/licenses-terms/adobe-gen-ai-user-guidelines.html`;
+  const ppURL = window.mph?.['resume-hero-privacy-policy-url'] || window.mph?.['verb-widget-privacy-policy-url'] || `https://www.adobe.com${locale.prefix}/privacy/policy.html`;
+  const touURL = window.mph?.['resume-hero-terms-of-use-url'] || window.mph?.['verb-widget-terms-of-use-url'] || `https://www.adobe.com${locale.prefix}/legal/terms.html`;
+  const genAIurl = window.mph?.['resume-hero-genai-terms-url'] || window.mph?.['verb-widget-genai-terms-url'] || `https://www.adobe.com${locale.prefix}/legal/licenses-terms/adobe-gen-ai-user-guidelines.html`;
   const mph = window.mph || {};
-  const legalPart1 = mph['verb-dropzone-legal'] || mph['verb-widget-legal'];
+  const legalPart1 = mph['resume-hero-legal'] || mph['verb-dropzone-legal'] || mph['verb-widget-legal'];
   const legalPart2 = limits?.genAI
-    ? (mph['verb-dropzone-legal-2-ai'] || mph['verb-widget-legal-2-ai'])
-    : (mph['verb-dropzone-legal-2'] || mph['verb-widget-legal-2']);
+    ? (mph['resume-hero-legal-2-ai'] || mph['verb-dropzone-legal-2-ai'] || mph['verb-widget-legal-2-ai'])
+    : (mph['resume-hero-legal-2'] || mph['verb-dropzone-legal-2'] || mph['verb-widget-legal-2']);
   const legalText = createTag('div', { class: 'verb-dropzone-legal' });
   const legalPart1El = createTag('p', {}, legalPart1);
   const legalPart2El = createTag('p', {}, legalPart2);
   const legalLinks = [
-    ['verb-widget-terms-of-use', touURL],
-    ['verb-widget-privacy-policy', ppURL],
-    ...(limits?.genAI ? [['verb-widget-genai-guidelines', genAIurl]] : []),
+    ['terms-of-use', touURL],
+    ['privacy-policy', ppURL],
+    ...(limits?.genAI ? [['genai-guidelines', genAIurl]] : []),
   ];
   // Build the linked paragraph from text/anchor nodes (no innerHTML).
   let remaining = legalPart2El.textContent;
   legalPart2El.textContent = '';
-  legalLinks.forEach(([key, url]) => {
-    const linkText = window.mph?.[key];
+  legalLinks.forEach(([suffix, url]) => {
+    const linkText = window.mph?.[`resume-hero-${suffix}`] || window.mph?.[`verb-widget-${suffix}`];
     const idx = linkText ? remaining.indexOf(linkText) : -1;
     if (idx === -1) return;
     legalPart2El.append(document.createTextNode(remaining.slice(0, idx)));
@@ -584,7 +592,7 @@ export default async function decorate(element) {
     remaining = remaining.slice(idx + linkText.length);
   });
   legalPart2El.append(document.createTextNode(remaining));
-  const tooltipContent = window.mph?.['verb-widget-tool-tip'] || '';
+  const tooltipContent = window.mph?.['resume-hero-tool-tip'] || window.mph?.['verb-widget-tool-tip'] || '';
   const infoIcon = createTag('button', {
     class: 'info-icon milo-tooltip top',
     type: 'button',
@@ -697,7 +705,7 @@ export default async function decorate(element) {
     }
   };
   if (useFileUpload && fileInput) {
-    const dragOverlay = buildDragOverlay(window.mph?.['verb-dropzone-drag-overlay'] || '');
+    const dragOverlay = buildDragOverlay(window.mph?.['resume-hero-drag-overlay'] || window.mph?.['verb-dropzone-drag-overlay'] || '');
     document.body.append(dragOverlay);
     const hideDragOverlay = () => dragOverlay.classList.remove('is-dragging');
     let dragLeaveTimer = null;
