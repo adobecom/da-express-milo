@@ -357,7 +357,8 @@ function decorateAuthoredLayout(element) {
 
 function decorateCreateLinks(createCell) {
   createCell?.querySelectorAll('a').forEach((link) => {
-    link.classList.add('con-button', 'blue', 'button-xl');
+    link.classList.add('con-button', 'button-xl');
+    link.classList.remove('blue');
     link.closest('p')?.classList.add('action-area');
   });
 

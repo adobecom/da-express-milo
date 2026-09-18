@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-import { readFile } from '@web/test-runner-commands';
+import { readFile, setViewport } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
@@ -87,6 +87,7 @@ describe('resume-hero', () => {
       uploadCell: block.querySelector('#authored-upload-cell'),
       uploadPicture: block.querySelector('#authored-upload-picture'),
       createCell: block.querySelector('#authored-create-cell'),
+      createMedia: block.querySelector('#authored-create-media'),
       createPicture: block.querySelector('#authored-create-picture'),
       createCopy: block.querySelector('#authored-create-copy'),
       createLink: block.querySelector('#authored-create-link'),
@@ -211,9 +212,9 @@ describe('resume-hero', () => {
     expect(buttonStyles.height).to.equal('24px');
     expect(copyStyles.order).to.equal('2');
     expect(actionStyles.order).to.equal('1');
-    expect(pictureStyles.order).to.equal('0');
+    expect(getComputedStyle(authoredNodes.createMedia).order).to.equal('0');
     expect(authoredNodes.createCopy.classList.contains('resume-hero-create-copy')).to.be.true;
-    expect(authoredNodes.createPicture.classList.contains('resume-hero-create-media')).to.be.true;
+    expect(authoredNodes.createMedia.classList.contains('resume-hero-create-media')).to.be.true;
     expect(authoredNodes.createCopy.getBoundingClientRect().top)
       .to.be.lessThan(authoredNodes.createLink.closest('.action-area').getBoundingClientRect().top);
     expect(authoredNodes.createLink.closest('.action-area').getBoundingClientRect().top)
@@ -222,14 +223,65 @@ describe('resume-hero', () => {
     expect(pictureStyles.maxHeight).to.equal('216px');
     expect(imageStyles.maxHeight).to.equal('216px');
     expect(authoredNodes.createLink.classList.contains('con-button')).to.be.true;
-    expect(authoredNodes.createLink.classList.contains('blue')).to.be.true;
+    expect(authoredNodes.createLink.classList.contains('blue')).to.be.false;
     expect(authoredNodes.createLink.classList.contains('button-xl')).to.be.true;
+  });
+
+  it('uses an eight/four-column grid for the upload and create areas at 900px and above', async () => {
+    await setViewport({ width: 1000, height: 800 });
+    try {
+      const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
+      const uploadStyles = getComputedStyle(authoredNodes.uploadCell);
+      const createStyles = getComputedStyle(authoredNodes.createCell);
+      const dropzoneStyles = getComputedStyle(block.querySelector('.resume-hero-dropzone-area'));
+      const uploadRect = authoredNodes.uploadCell.getBoundingClientRect();
+      const createRect = authoredNodes.createCell.getBoundingClientRect();
+
+      expect(actionsStyles.display).to.equal('grid');
+      expect(uploadStyles.gridColumnEnd).to.equal('span 8');
+      expect(createStyles.gridColumnEnd).to.equal('span 4');
+      expect(uploadRect.width / createRect.width).to.be.closeTo(2, 0.1);
+      expect(createRect.left).to.be.greaterThan(uploadRect.right);
+      expect(dropzoneStyles.height).to.equal('298px');
+      expect(dropzoneStyles.maxWidth).to.equal('none');
+      expect(createStyles.alignSelf).to.equal('start');
+      expect(createStyles.justifyContent).to.equal('flex-start');
+      expect(createStyles.maxWidth).to.equal('323px');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('caps the actions grid at 1130px on desktop', async () => {
+    await setViewport({ width: 1440, height: 900 });
+    try {
+      expect(getComputedStyle(authoredNodes.actionsRow).maxWidth).to.equal('1130px');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
   });
 
   it('moves only the authored upload picture into the dropzone icon', () => {
     const picture = block.querySelector('.widget-icon #authored-upload-picture');
     expect(picture).to.equal(authoredNodes.uploadPicture);
     expect(picture.classList.contains('resume-hero-dropzone-image')).to.be.true;
+  });
+
+  it('resizes the dropzone image horizontally while retaining its fixed height', async () => {
+    const image = authoredNodes.uploadPicture.querySelector('img');
+    await setViewport({ width: 1000, height: 800 });
+    try {
+      const narrowRect = image.getBoundingClientRect();
+      expect(getComputedStyle(image).objectFit).to.equal('fill');
+      expect(narrowRect.height).to.equal(298);
+
+      await setViewport({ width: 1200, height: 800 });
+      const wideRect = image.getBoundingClientRect();
+      expect(wideRect.width).to.be.greaterThan(narrowRect.width);
+      expect(wideRect.height).to.equal(narrowRect.height);
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
   });
 
   it('uses a compact image-free dropzone on mobile', () => {

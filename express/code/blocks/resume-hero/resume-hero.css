@@ -126,7 +126,7 @@ main .section .resume-hero p {
   text-align: start;
 }
 
-.resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area) {
+.resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area):not(.resume-hero-create-media) {
   color: var(--s2a-color-content-default);
   font-family: var(--s2a-font-family-heading);
   font-size: var(--s2a-typography-font-size-heading-6);
@@ -338,7 +338,7 @@ main .section .resume-hero p {
   display: block;
   height: 100%;
   max-height: none;
-  object-fit: cover;
+  object-fit: fill;
   width: 100%;
 }
 
@@ -644,13 +644,12 @@ main .section .resume-hero p {
   .resume-hero {
     padding: var(--spacing-900) var(--Grid-container-padding-side);
   }
-
   .resume-hero .resume-hero-header {
     margin-block-end: var(--spacing-500);
   }
 
   .resume-hero .resume-hero-header-content {
-    gap: var(--spacing-300);
+    gap: 0;
   }
 
   .resume-hero .express-logo {
@@ -659,16 +658,27 @@ main .section .resume-hero p {
 
   .resume-hero .resume-hero-actions {
     align-items: stretch;
-    flex-direction: row;
+    column-gap: var(--Grid-grid-gutter);
+    display: grid;
+    grid-template-columns: repeat(var(--s2a-layout-guide-_columns), minmax(0, 1fr));
+    margin: auto auto 22px;
+    max-width: 1130px;
+    /* max-height: 342px; */
+  }
+
+  .resume-hero .resume-hero-upload {
+    grid-column: auto / span 8;
+    width: auto;
   }
 
   .resume-hero .verb-dropzone-area {
     aspect-ratio: auto;
     background-image: var(--verb-dropzone-background-image);
-    height: 342px;
-    max-width: 783px;
+    height: 298px;
+    max-width: none;
     min-height: 0;
     padding: var(--spacing-400);
+    width: auto;
   }
 
   .resume-hero .widget-icon {
@@ -677,17 +687,19 @@ main .section .resume-hero p {
 
   .resume-hero .resume-hero-create {
     align-items: flex-start;
-    align-self: auto;
-    background: transparent;
+    align-self: start;
     border: 0;
-    border-radius: 0;
     flex-direction: column;
-    height: 296px;
+    grid-column: auto / span 4;
+    height: 298px;
+    justify-content: flex-start;
+    max-width: 323px;
+
     padding: var(--spacing-400);
-    width: 323px;
+    width: auto;
   }
 
-  .resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area) {
+  .resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area):not(.resume-hero-create-media) {
     text-align: start;
   }
 
@@ -697,6 +709,7 @@ main .section .resume-hero p {
     .resume-hero-create-media
   ) {
     order: initial;
+    flex-grow: 1;
   }
 
   .resume-hero .resume-hero-create .action-area {
@@ -716,5 +729,13 @@ main .section .resume-hero p {
 @media screen and (min-width: 1200px) {
   .resume-hero .heading {
     font-size: var(--heading-font-size-xl);
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .resume-hero .resume-hero-actions {
+    max-width: 1130px;
+    margin: auto;
+    margin-bottom: 22px;
   }
 }
