@@ -203,7 +203,7 @@ window.analytics = window.analytics || {
 async function loadAnalyticsAfterLCP(analyticsData) {
   const { verb, userAttempts } = analyticsData;
   try {
-    const analyticsModule = await import('./verb-express-hero-analytics.js');
+    const analyticsModule = await import('../../scripts/utils/verb-analytics.js');
     const { default: verbAnalytics, sendAnalyticsToSplunk } = analyticsModule;
     window.analytics.verbAnalytics = verbAnalytics;
     window.analytics.sendAnalyticsToSplunk = sendAnalyticsToSplunk;
