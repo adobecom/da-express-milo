@@ -117,8 +117,13 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child:not(.v2):not(.color) {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child:not(.v2) {
   padding-top: 60px;
+}
+
+.section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.color:first-child {
+  padding-top: 0;
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -422,7 +427,7 @@ main .section .ax-columns.enterprise .column h2 {
   flex-direction: column;
   justify-content: center;
 }
-.section .ax-columns:not(.v2):not(.color)>div {
+.section .ax-columns:not(.v2)>div {
   padding: var(--spacing-600) 0;
 }
 
@@ -858,7 +863,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   width: 100%;
 }
 
-.ax-columns.color>div {
+.section .ax-columns.color>div {
   padding: var(--section-padding-m) 0;
   gap: 15px;
   justify-content: space-between;
@@ -884,21 +889,21 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--heading-font-size-l);
 }
 
-.ax-columns.color {
+.section .ax-columns.color {
   box-sizing: border-box;
   max-width: var(--block-lg-max-width);
   padding-inline: var(--Grid-container-padding-side);
 }
 
 @media (min-width: 600px) and (max-width: 1199px) {
-  .ax-columns.color > div {
+  .section .ax-columns.color > div {
     padding: var(--spacing-900) 0;
     gap: var(--spacing-700);
   }
 }
 
 @media (min-width: 1200px) {
-  .ax-columns.color > div {
+  .section .ax-columns.color > div {
     padding: var(--section-padding-xl) 0;
     gap: var(--spacing-800);
   }
@@ -1244,7 +1249,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     align-items: flex-start;
   }
 
-  .section .ax-columns:not(.color),
+  .section .ax-columns,
   .ax-columns.top.center,
   .ax-columns.fullsize.center,
   .ax-columns.light {
@@ -1552,7 +1557,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-right: var(--spacing-600);
   }
 
-  .section .ax-columns:not(.color),
+  .section .ax-columns,
   .ax-columns.top.center,
   .ax-columns.light {
     max-width: var(--block-lg-max-width);
