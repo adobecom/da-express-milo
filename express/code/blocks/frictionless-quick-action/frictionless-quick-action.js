@@ -16,6 +16,7 @@ import {
   processFilesForQuickAction,
   ensureCCEverywhere,
   schedulePreloadQuickAction,
+  PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP,
   getErrorMsg,
   initProgressBar,
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
@@ -1091,5 +1092,9 @@ export default async function decorate(block) {
 
   sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
 
-  schedulePreloadQuickAction(quickAction, block, getConfig, createTag);
+  schedulePreloadQuickAction(quickAction, block, {
+    getConfig,
+    createTag,
+    preloadEnabledMap: PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP,
+  });
 }

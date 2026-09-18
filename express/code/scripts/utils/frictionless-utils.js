@@ -664,10 +664,57 @@ export async function ensureCCEverywhere(getConfig) {
   return ccEverywhereInitPromise;
 }
 
-// Quick actions with a preload-capable standalone route. Warming up any other quick
-// action would just open an editor the user never asked for, so keep this list in sync
-// with what the standalone app actually supports (see hz's WarmupAction intent allowlist).
-export const PRELOAD_CAPABLE_QUICK_ACTIONS = ['resize-image'];
+// Per-platform switch maps for quick actions with a preload-capable standalone route.
+// Warming up a quick action whose flag is false here would just open an editor the user
+// never asked for, so keep these in sync with which quick actions have the corresponding
+// `embed-preload-enabled` feature flag turned on in hz (see each quick action's
+// config-interface.ts under apps/quick-actions/modules/src/actions/<id>/). Desktop and
+// mobile are tracked separately since the two blocks can be enabled independently.
+export const PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP = {
+  'convert-to-jpg': false,
+  'convert-to-png': false,
+  'convert-to-svg': false,
+  'crop-image': false,
+  'resize-image': true,
+  'remove-background': false,
+  'compress-image': false,
+  'generate-qr-code': false,
+  'convert-to-gif': false,
+  'crop-video': false,
+  'video-convert': false,
+  'video-compress': false,
+  'trim-video': false,
+  'resize-video': false,
+  'merge-videos': false,
+  'caption-video': false,
+  'heic-to-jpg': false,
+  'heic-to-png': false,
+  'audio-converter': false,
+  'video-to-audio': false,
+};
+
+export const PRELOAD_ENABLED_QUICK_ACTIONS_MOBILE = {
+  'convert-to-jpg': false,
+  'convert-to-png': false,
+  'convert-to-svg': false,
+  'crop-image': false,
+  'resize-image': false,
+  'remove-background': false,
+  'compress-image': false,
+  'generate-qr-code': false,
+  'convert-to-gif': false,
+  'crop-video': false,
+  'video-convert': false,
+  'video-compress': false,
+  'trim-video': false,
+  'resize-video': false,
+  'merge-videos': false,
+  'caption-video': false,
+  'heic-to-jpg': false,
+  'heic-to-png': false,
+  'audio-converter': false,
+  'video-to-audio': false,
+};
 
 /**
  * Eagerly loads the CC Everywhere SDK and warms up the quick action's iframe in the
@@ -680,12 +727,15 @@ export const PRELOAD_CAPABLE_QUICK_ACTIONS = ['resize-image'];
  * file; the real quick action un-hides it on reveal.
  * @param quickAction the quick action id (e.g. 'resize-image')
  * @param block the frictionless block element the container should be appended to
- * @param getConfig milo's getConfig accessor
- * @param createTag milo's createTag helper
+ * @param options.getConfig milo's getConfig accessor
+ * @param options.createTag milo's createTag helper
+ * @param options.preloadEnabledMap PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP or _MOBILE,
+ * whichever matches the calling block
  * @returns the initialized CCEverywhere SDK instance, or undefined if init failed
  */
-export async function preloadQuickAction(quickAction, block, getConfig, createTag) {
-  if (!PRELOAD_CAPABLE_QUICK_ACTIONS.includes(quickAction)) return undefined;
+export async function preloadQuickAction(quickAction, block, options) {
+  const { getConfig, createTag, preloadEnabledMap } = options;
+  if (!preloadEnabledMap[quickAction]) return undefined;
   try {
     const sdk = await ensureCCEverywhere(getConfig);
     const id = `${quickAction}-container`;
@@ -700,8 +750,8 @@ export async function preloadQuickAction(quickAction, block, getConfig, createTa
   }
 }
 
-export function schedulePreloadQuickAction(quickAction, block, getConfig, createTag) {
-  const preload = () => preloadQuickAction(quickAction, block, getConfig, createTag);
+export function schedulePreloadQuickAction(quickAction, block, options) {
+  const preload = () => preloadQuickAction(quickAction, block, options);
   if (document.readyState === 'complete') {
     preload();
   } else {

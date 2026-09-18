@@ -18,6 +18,7 @@ import {
   processFilesForQuickAction,
   ensureCCEverywhere,
   schedulePreloadQuickAction,
+  PRELOAD_ENABLED_QUICK_ACTIONS_MOBILE,
   getErrorMsg,
   shouldShowVideoQuickActionPickerForMobile,
   getVideoConfig,
@@ -351,7 +352,11 @@ export default async function decorate(block) {
     sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
   });
 
-  schedulePreloadQuickAction(quickAction, block, getConfig, createTag);
+  schedulePreloadQuickAction(quickAction, block, {
+    getConfig,
+    createTag,
+    preloadEnabledMap: PRELOAD_ENABLED_QUICK_ACTIONS_MOBILE,
+  });
 
   return block;
 }
