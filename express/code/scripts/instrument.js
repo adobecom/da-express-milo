@@ -442,6 +442,78 @@ function trackColorPageLoad() {
   }
 }
 
+/**
+ * Builds the standard Express AEP event envelope (event/user/source/hz/custom
+ * namespaces) shared by trackExpressFeaturePageLoad and trackExportComplete.
+ * Callers own anything that legitimately differs between event types
+ * (isAuthenticated resolution, pageName resolution, the `custom` block).
+ */
+async function buildExportEventEnvelope({
+  eventName, isAuthenticated, category, subcategory, subtype, type, workflow, pageName, custom,
+}) {
+  const isMobile = isMobileWeb();
+  const dtsStart = new Date().toISOString();
+  const eventDate = dtsStart.slice(0, 10);
+  const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
+  const mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID || '';
+  const guid = generateGuid();
+  const accessCountry = await getAccessCountry();
+  const deviceInfo = await getDeviceInfo();
+
+  let userGuid = '';
+  if (isAuthenticated && window.adobeIMS?.getProfile) {
+    try {
+      const profile = await window.adobeIMS.getProfile();
+      userGuid = profile?.userId || '';
+    } catch {
+      userGuid = '';
+    }
+  }
+
+  let userAccountType = 'unknown';
+  try {
+    userAccountType = window.adobeIMS?.getAccountType?.() || 'unknown';
+  } catch {
+    userAccountType = 'unknown';
+  }
+
+  const payload = {
+    event: {
+      pagename: eventName,
+      platform_name: isMobile ? 'mobile-web' : 'desktop-web',
+      aa: { page_name: pageName },
+      url: loc.href,
+      event_date: eventDate,
+      dts_start: dtsStart,
+      user_agent: navigator.userAgent,
+      guid,
+      user_guid: userGuid,
+      category,
+      subcategory,
+      subtype,
+      type,
+      workflow,
+      is_authenticated: isAuthenticated,
+      mcid_guid: mcidGuid,
+    },
+    user: { aa: { post_page_url: loc.href } },
+    source: { name: SOURCE_NAME, client_id: SOURCE_CLIENT_ID },
+    hz: {
+      source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
+      device_name: deviceInfo.deviceName,
+      user: {
+        access_country: accessCountry,
+        os_name: deviceInfo.osName,
+        os_version: deviceInfo.osVersion,
+      },
+    },
+    custom,
+  };
+
+  addIfDefined(payload.hz.user, 'account_type', userAccountType);
+  return payload;
+}
+
 export async function trackExpressFeaturePageLoad() {
   try {
     const pageType = getMetadata('pagetype');
@@ -457,82 +529,21 @@ export async function trackExpressFeaturePageLoad() {
     } catch { /* no referrer or invalid */ }
 
     const isMiniEditorPage = pageType === 'mini-editor';
-    const isMobile = isMobileWeb();
-    const dtsStart = isMiniEditorPage ? new Date().toISOString() : '';
-    const eventDate = isMiniEditorPage ? dtsStart.slice(0, 10) : '';
-    const guid = isMiniEditorPage ? generateGuid() : '';
     const ims = isMiniEditorPage ? await waitForAdobeIMS() : null;
     const isAuthenticated = isMiniEditorPage
       ? !!ims?.isSignedInUser?.()
       : false;
-    let userGuid = '';
-
-    if (isMiniEditorPage && isAuthenticated && ims?.getProfile) {
-      try {
-        const profile = await ims.getProfile();
-        userGuid = profile?.userId || '';
-      } catch {
-        userGuid = '';
-      }
-    }
-
-    const deviceInfo = isMiniEditorPage ? await getDeviceInfo() : null;
-    const accessCountry = isMiniEditorPage ? await getAccessCountry() : 'Unknown';
-    let userAccountType = 'unknown';
-    let mcidGuid = '';
     const pageName = getPageName();
 
-    if (isMiniEditorPage) {
-      // eslint-disable-next-line no-underscore-dangle
-      const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
-      mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID || '';
-
-      try {
-        userAccountType = ims?.getAccountType?.() || 'unknown';
-      } catch {
-        userAccountType = 'unknown';
-      }
-    }
-
-    const miniEditorSdmPayload = isMiniEditorPage ? {
-      event: {
-        pagename: eventName,
-        platform_name: isMobile ? 'mobile-web' : 'desktop-web',
-        aa: {
-          page_name: pageName,
-        },
-        url: loc.href,
-        event_date: eventDate,
-        dts_start: dtsStart,
-        user_agent: navigator.userAgent,
-        guid,
-        user_guid: userGuid,
-        category: 'WEB',
-        subcategory: 'operations',
-        subtype: 'acom',
-        type: 'render',
-        workflow: 'lifecycle',
-        is_authenticated: isAuthenticated,
-        mcid_guid: mcidGuid,
-      },
-      user: {
-        aa: {
-          post_page_url: loc.href,
-        },
-      },
-      source: {
-        name: SOURCE_NAME,
-        client_id: SOURCE_CLIENT_ID,
-      },
-      hz: {
-        source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
-        device_name: deviceInfo.deviceName,
-        user: {
-          access_country: accessCountry,
-          os_name: deviceInfo.osName,
-          os_version: deviceInfo.osVersion,
-        },
-      },
+    const miniEditorSdmPayload = isMiniEditorPage ? await buildExportEventEnvelope({
+      eventName,
+      isAuthenticated,
+      category: 'WEB',
+      subcategory: 'operations',
+      subtype: 'acom',
+      type: 'render',
+      workflow: 'lifecycle',
+      pageName,
       custom: {
         aa: {
           ref_domain: refDomain,
@@ -547,11 +558,7 @@ export async function trackExpressFeaturePageLoad() {
           name: getMiniEditorTaskName(),
         },
       },
-    } : null;
-
-    if (miniEditorSdmPayload) {
-      addIfDefined(miniEditorSdmPayload.hz.user, 'account_type', userAccountType);
-    }
+    }) : null;
 
     const fireEvent = () => {
       _satellite.track('event', {
@@ -659,96 +666,34 @@ const EXPORT_EVENT_NAME_UNAUTH = 'export-project-complete-unauth';
  * @param {string} options.uiLocation - value for `custom.ui.location`
  */
 export async function trackExportComplete({ exportMethod, taskName, uiLocation } = {}) {
-  let userAccountType = 'unknown';
-
   if (!exportMethod) return;
 
   const isAuthenticated = isAuthenticatedUser();
   const eventName = isAuthenticated ? EXPORT_EVENT_NAME_AUTH : EXPORT_EVENT_NAME_UNAUTH;
-  const isMobile = isMobileWeb();
-  const pageUrl = window.location?.href || '';
-  const dtsStart = new Date().toISOString();
-  const eventDate = dtsStart.slice(0, 10);
-  const language = getLanguage();
   const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
   const pageName = corpnewData?.page?.pageInfo?.pageName
     || getPageNameFromPathname();
-  const workflow = 'export';
-  const type = 'success';
-  const subtype = 'export-project';
-  const category = 'WEB';
-  const subcategory = 'document';
-  const mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID;
-  const guid = generateGuid();
-  const accessCountry = await getAccessCountry();
-  const deviceInfo = await getDeviceInfo();
-  let userGuid = '';
-  if (isAuthenticated && window.adobeIMS?.getProfile) {
-    try {
-      const profile = await window.adobeIMS.getProfile();
-      userGuid = profile?.userId || '';
-    } catch {
-      userGuid = '';
-    }
-  }
-  try {
-    userAccountType = window.adobeIMS?.getAccountType?.();
-  } catch (e) {
-    window.lana?.log(`Failed to read account type: ${e}`, { tags: 'export, analytics', errorType: 'i', severity: 'warning', sampleRate: '1' });
-  }
 
-  const sdmPayload = {
-    event: {
-      pagename: eventName,
-      platform_name: isMobile ? 'mobile-web' : 'desktop-web',
-      aa: {
-        page_name: pageName,
-      },
-      url: pageUrl,
-      event_date: eventDate,
-      dts_start: dtsStart,
-      user_agent: navigator.userAgent,
-      guid,
-      user_guid: userGuid,
-      category,
-      subcategory,
-      subtype,
-      type,
-      workflow,
-      is_authenticated: isAuthenticated,
-      mcid_guid: mcidGuid,
-    },
-    user: {
-      aa: {
-        post_page_url: pageUrl,
-      },
-    },
-    source: {
-      name: SOURCE_NAME,
-      client_id: SOURCE_CLIENT_ID,
-    },
-    hz: {
-      source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
-      device_name: deviceInfo.deviceName,
-      user: {
-        access_country: accessCountry,
-        os_name: deviceInfo.osName,
-        os_version: deviceInfo.osVersion,
-      },
-    },
+  const sdmPayload = await buildExportEventEnvelope({
+    eventName,
+    isAuthenticated,
+    category: 'WEB',
+    subcategory: 'document',
+    subtype: 'export-project',
+    type: 'success',
+    workflow: 'export',
+    pageName,
     custom: {
       export_method: exportMethod,
       ui: {
         location: uiLocation,
       },
-      displayedLanguage: language,
+      displayedLanguage: getLanguage(),
       task: {
         name: taskName,
       },
     },
-  };
-
-  addIfDefined(sdmPayload.hz.user, 'account_type', userAccountType);
+  });
 
   const fireEvent = () => {
     window._satellite.track('event', {
