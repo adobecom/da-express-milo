@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@headline-default",
       "selector": "div.headline",
-      "path": "/drafts/nala/test-gen/headline/headline",
+      "path": "/drafts/nala/blocks/headline/headline",
       "data": {
         "semantic": {
           "texts": [
@@ -31,7 +31,7 @@
       "tcid": "1",
       "name": "@headline-business-hub",
       "selector": "div.headline.business-hub",
-      "path": "/drafts/nala/test-gen/headline/headline-business-hub",
+      "path": "/drafts/nala/blocks/headline/headline-business-hub",
       "data": {
         "semantic": {
           "texts": [

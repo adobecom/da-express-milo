@@ -16,5 +16,9 @@ adobe.com/express — AEM Edge Delivery Services + Milo. Vanilla JS, Lit/Spectru
 - `color.adobe.com` shares this codebase; its blocks are: `color-blindness`, `color-contrast-checker`, `color-explore`, `color-extract`, `color-headline`, `color-wheel`; shared code in `/libs/color-components/` and `/scripts/color-shared/`
 - To run the local dev server against color content (so `color.adobe.com` blocks render real data), use `npm run up:color` instead of plain `aem up`
 
+## Linting
+- Don't add `stylelint-disable`/`eslint-disable` comments unless it's a last resort (e.g. suppressing a pre-existing violation to avoid an unrelated regression-testing pass). Fix the underlying violation instead.
+- If you edit a CSS file that has an existing `stylelint-disable-line`/`stylelint-disable-next-line` comment, fix the violation and remove the comment as part of that change, even if the violation isn't related to what you're editing.
+
 ## Testing
 - No real/staging URLs in test data — use mock HTML files or `sinon` stubs instead.
