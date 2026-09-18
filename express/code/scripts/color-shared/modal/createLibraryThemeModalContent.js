@@ -174,6 +174,7 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
         colorModeLabel: strings.librariesColorModeLabel,
         codesToggleLabel: strings.librariesCodesToggleLabel,
         codesDisabledTooltip: strings.librariesCodesDisabledTooltip,
+        copyAsFormat: strings.librariesCopyAsFormat,
       },
       onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
     },

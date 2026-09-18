@@ -18,6 +18,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   colorModeLabel: 'Color mode',
   codesToggleLabel: 'Copy as code',
   codesDisabledTooltip: 'Copying to code requires RGB, HEX, or Lab',
+  copyAsFormat: 'Copy as {format}',
   noTagsText: 'This color palette has no tags',
 });
 
@@ -39,6 +40,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   colorModeLabel: 'color-mode',
   codesToggleLabel: 'copy-as-code',
   codesDisabledTooltip: 'codes-disabled-tooltip',
+  copyAsFormat: 'copy-as-format',
   noTagsText: 'palette-no-tags',
 });
 

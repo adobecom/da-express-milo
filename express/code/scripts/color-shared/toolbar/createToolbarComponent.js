@@ -53,10 +53,7 @@ const TOOLBAR_DEFAULTS = {
   saveChangesSuccess: 'Changes saved',
   saveChangesFailed: 'Unable to save changes. Please try again.',
   saving: 'Saving\u2026',
-  downloadAsASE: 'Download as ASE',
-  downloadAsJPEG: 'Download as JPEG',
-  downloadAsPNG: 'Download as PNG',
-  downloadAsSVG: 'Download as SVG',
+  downloadAsFormat: 'Download as {format}',
   downloadFailed: 'Download failed. Please try again.',
 };
 
@@ -156,15 +153,18 @@ async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
   await openInExpress({ id, name, colors }, prodBaseUrl);
 }
 
+// `format` is the fixed technical acronym shown in the menu (ASE/JPEG/PNG/SVG)
+// — not translated. Only the surrounding "Download as {format}" template
+// (t.downloadAsFormat) is localized.
 const PALETTE_DOWNLOAD_FORMATS = [
-  { value: 'ase', method: 'downloadASE', labelKey: 'downloadAsASE' },
-  { value: 'jpeg', method: 'downloadJPEG', labelKey: 'downloadAsJPEG' },
+  { value: 'ase', method: 'downloadASE', format: 'ASE' },
+  { value: 'jpeg', method: 'downloadJPEG', format: 'JPEG' },
 ];
 
 const GRADIENT_DOWNLOAD_FORMATS = [
-  { value: 'jpeg', method: 'downloadJPEG', labelKey: 'downloadAsJPEG' },
-  { value: 'png', method: 'downloadPNG', labelKey: 'downloadAsPNG' },
-  { value: 'svg', method: 'downloadSVG', labelKey: 'downloadAsSVG' },
+  { value: 'jpeg', method: 'downloadJPEG', format: 'JPEG' },
+  { value: 'png', method: 'downloadPNG', format: 'PNG' },
+  { value: 'svg', method: 'downloadSVG', format: 'SVG' },
 ];
 
 /** Popover menu exposing every download format the DownloadProvider supports
@@ -178,7 +178,10 @@ function buildDownloadMenu(type, getPalette, t, onDownloaded) {
     triggerIcon: 'sp-icon-download',
     triggerLabel: t.downloadPalette,
     tooltipLabel: t.download,
-    items: formats.map((f) => ({ value: f.value, label: t[f.labelKey] })),
+    items: formats.map((f) => ({
+      value: f.value,
+      label: interpolate(t.downloadAsFormat, { format: f.format }),
+    })),
     onSelect: async (value, { closePopover }) => {
       const entry = formats.find((f) => f.value === value);
       try {

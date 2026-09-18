@@ -64,6 +64,11 @@ export async function attachGradientHandleTooltips(
 
 export function createGradientModalContent(gradient, opts = {}) {
   const strings = opts.strings ?? createColorModalPlaceholders();
+  // Distinct from `strings` above (color-modal placeholders): gradient-editor.js
+  // has its own placeholder set (gradient-editor-* keys) for its copy tooltips/
+  // aria-labels — resolved separately by the caller and passed through here so
+  // the "Copy {value}" bubble tooltip is localized instead of always English.
+  const { gradientEditorStrings } = opts;
   let angle = gradient?.angle ?? 90;
   let colorStops = gradient?.colorStops || [];
   const gradientCss = gradient?.gradient;
@@ -121,6 +126,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     copyable: true,
     ariaLabel: interpolate(strings.gradientPreviewAria, { count: colorStops.length }),
     colorMode: getPreferredColorMode(),
+    ...(gradientEditorStrings ? { strings: gradientEditorStrings } : {}),
   });
   previewWrap.appendChild(gradientEditor.element);
   containerSection.appendChild(previewWrap);
@@ -159,7 +165,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     { name: gradient?.name ?? 'Gradient', colors: stopColors, colorStops },
     {
       type: 'gradient',
-      strings: opts.modalStrings,
+      strings,
       onModeChange: (mode) => {
         railAdapter.rail.colorMode = mode;
         gradientEditor.setColorMode(mode);

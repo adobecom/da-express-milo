@@ -17,6 +17,7 @@ import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadCo
 import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import loadColorFiltersPlaceholders from '../../scripts/color-shared/i18n/loadColorFiltersPlaceholders.js';
 import loadColorModalPlaceholders from '../../scripts/color-shared/i18n/loadColorModalPlaceholders.js';
+import loadGradientEditorPlaceholders from '../../scripts/color-shared/i18n/loadGradientEditorPlaceholders.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -274,6 +275,7 @@ export default async function decorate(block) {
     const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
     const colorFiltersStringsPromise = loadColorFiltersPlaceholders();
     const colorModalStringsPromise = loadColorModalPlaceholders();
+    const gradientEditorStringsPromise = loadGradientEditorPlaceholders();
     block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
@@ -408,7 +410,10 @@ export default async function decorate(block) {
           title: content.name || fallbackTitle,
           showTitle: false,
           content: async () => {
-            const modalStrings = await colorModalStringsPromise;
+            const [modalStrings, gradientEditorStrings] = await Promise.all([
+              colorModalStringsPromise,
+              gradientEditorStringsPromise,
+            ]);
             return createGradientModalContent(content, {
               likesCount: content.likes ?? content.likesCount ?? 0,
               liked: content.liked ?? false,
@@ -417,6 +422,7 @@ export default async function decorate(block) {
               description: item.description ?? '',
               onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
               strings: modalStrings,
+              gradientEditorStrings,
               verticalMaxPerRow: config.swatchVerticalMaxPerRow,
             });
           },

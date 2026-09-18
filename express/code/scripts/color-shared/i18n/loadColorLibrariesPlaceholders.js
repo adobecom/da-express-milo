@@ -79,6 +79,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   librariesColorModeLabel: 'Color mode',
   librariesCodesToggleLabel: 'Copy as code',
   librariesCodesDisabledTooltip: 'Copying to code requires RGB, HEX, or Lab',
+  librariesCopyAsFormat: 'Copy as {format}',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -160,6 +161,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   librariesColorModeLabel: 'color-mode',
   librariesCodesToggleLabel: 'copy-as-code',
   librariesCodesDisabledTooltip: 'codes-disabled-tooltip',
+  librariesCopyAsFormat: 'copy-as-format',
 });
 
 export function createColorLibrariesPlaceholders(overrides = {}) {

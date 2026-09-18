@@ -1,4 +1,5 @@
 import { createTag } from '../../utils.js';
+import { interpolate } from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
@@ -16,6 +17,7 @@ const DEFAULTS = {
   colorModeLabel: 'Color mode',
   codesToggleLabel: 'Copy as code',
   codesDisabledTooltip: 'Copying to code requires RGB, HEX, or Lab',
+  copyAsFormat: 'Copy as {format}',
   copiedToast: 'Copied to clipboard',
   copyFailedToast: 'Failed to copy',
 };
@@ -25,14 +27,24 @@ const DEFAULTS = {
 // rather than just hiding menu items.
 const CODES_ENABLED_MODES = new Set(['HEX', 'RGB', 'Lab']);
 
-// Order + labels match the Figma "Codes" menu exactly (LESS, CSS, SASS, XML —
-// the export produces SCSS-compatible syntax, but Figma's user-facing label is "SASS").
-const EXPORT_FORMATS = [
-  { value: 'less', label: 'Copy as LESS', method: 'exportLESS' },
-  { value: 'css', label: 'Copy as CSS', method: 'exportCSS' },
-  { value: 'scss', label: 'Copy as SASS', method: 'exportSCSS' },
-  { value: 'xml', label: 'Copy as XML', method: 'exportXML' },
-];
+// Order matches the Figma "Codes" menu exactly (LESS, CSS, SASS, XML — the
+// export produces SCSS-compatible syntax, but Figma's user-facing label is
+// "SASS"). These format names are fixed technical acronyms, not translated —
+// only the surrounding "Copy as {format}" template (t.copyAsFormat, resolved
+// at call time in getExportFormats) is localized.
+const EXPORT_METHODS = {
+  less: 'exportLESS',
+  css: 'exportCSS',
+  scss: 'exportSCSS',
+  xml: 'exportXML',
+};
+const EXPORT_FORMAT_NAMES = {
+  less: 'LESS',
+  css: 'CSS',
+  scss: 'SASS',
+  xml: 'XML',
+};
+const EXPORT_VALUES = ['less', 'css', 'scss', 'xml'];
 
 // XML has no gradient-aware branch in DownloadActions.js — its <palette>/
 // <color> schema is a flat list of named swatches with no position/offset
@@ -44,15 +56,20 @@ const EXPORT_FORMATS = [
 // buildGradientCSSValue in helpers.js) — same reasoning Figma's own palette
 // Codes menu already applies per-format, just with XML as the one gradient
 // can't represent.
-const GRADIENT_EXPORT_FORMATS = EXPORT_FORMATS.filter((f) => f.value !== 'xml');
+const GRADIENT_EXPORT_VALUES = EXPORT_VALUES.filter((v) => v !== 'xml');
 
 // exportAsXML is RGB/hex-only (see the copyAsCode comment below) — hide it
 // whenever the selected mode has no XML representation.
 const MODES_WITHOUT_XML = new Set(['HSB', 'Lab']);
 
-function getExportFormats(type, mode) {
-  const formats = type === 'gradient' ? GRADIENT_EXPORT_FORMATS : EXPORT_FORMATS;
-  return MODES_WITHOUT_XML.has(mode) ? formats.filter((f) => f.value !== 'xml') : formats;
+function getExportFormats(type, mode, t) {
+  const values = type === 'gradient' ? GRADIENT_EXPORT_VALUES : EXPORT_VALUES;
+  const filtered = MODES_WITHOUT_XML.has(mode) ? values.filter((v) => v !== 'xml') : values;
+  return filtered.map((value) => ({
+    value,
+    label: interpolate(t.copyAsFormat, { format: EXPORT_FORMAT_NAMES[value] }),
+    method: EXPORT_METHODS[value],
+  }));
 }
 
 function createCodesIcon() {
@@ -87,8 +104,8 @@ export function createModeSelectFallback(options, currentValue, ariaLabel, onCha
 }
 
 async function copyAsCode(palette, type, format, t, mode) {
-  const entry = EXPORT_FORMATS.find((f) => f.value === format);
-  if (!entry) return;
+  const method = EXPORT_METHODS[format];
+  if (!method) return;
   try {
     const themeData = {
       ...paletteToThemeData(palette),
@@ -99,7 +116,7 @@ async function copyAsCode(palette, type, format, t, mode) {
     // instead of every mode at once (see DownloadActions.js). exportXML is
     // HEX/RGB-only — HSB/Lab have no XML representation, so the Codes menu
     // never offers XML in those modes (getExportFormats above).
-    const result = await provider?.[entry.method]?.(themeData, mode);
+    const result = await provider?.[method]?.(themeData, mode);
     showExpressToast({
       message: result?.clipboardSuccess ? t.copiedToast : t.copyFailedToast,
       variant: result?.clipboardSuccess ? 'positive' : 'negative',
@@ -165,7 +182,7 @@ export function createColorModesHeader(palette, options = {}) {
       btn.appendChild(iconEl);
       return btn;
     },
-    items: getExportFormats(type, currentMode),
+    items: getExportFormats(type, currentMode, t),
     onSelect: async (format, { closePopover }) => {
       await copyAsCode(palette, type, format, t, currentMode);
       closePopover({ focusTrigger: true });
@@ -249,7 +266,7 @@ export function createColorModesHeader(palette, options = {}) {
         onChange: ({ value }) => {
           currentMode = value;
           setPreferredColorMode(value);
-          codesMenu.setItems(getExportFormats(type, currentMode));
+          codesMenu.setItems(getExportFormats(type, currentMode, t));
           updateCodesAvailability(currentMode);
           onModeChange?.(value);
         },
@@ -274,7 +291,7 @@ export function createColorModesHeader(palette, options = {}) {
           (value) => {
             currentMode = value;
             setPreferredColorMode(value);
-            codesMenu.setItems(getExportFormats(type, currentMode));
+            codesMenu.setItems(getExportFormats(type, currentMode, t));
             updateCodesAvailability(currentMode);
             onModeChange?.(value);
           },
@@ -288,7 +305,7 @@ export function createColorModesHeader(palette, options = {}) {
     if (currentMode !== mode) {
       currentMode = mode;
       modePicker?.setValue(mode);
-      codesMenu.setItems(getExportFormats(type, currentMode));
+      codesMenu.setItems(getExportFormats(type, currentMode, t));
       updateCodesAvailability(currentMode);
       onModeChange?.(mode);
     }
