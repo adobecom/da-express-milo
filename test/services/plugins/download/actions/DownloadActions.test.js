@@ -54,10 +54,10 @@ describe('ExportActions — Color mode scoping (Copy as CSS/SCSS/LESS)', () => {
       expect(output).to.include('color: lab(70% 14 44);');
     });
 
-    it('defaults to RGB when no mode is given, with no header comment', async () => {
+    it('defaults to HEX when no mode is given, with no header comment', async () => {
       const { output } = await actions.exportAsCSS(themeData);
       expect(output).not.to.include('/*');
-      expect(output).to.include('rgba(217, 159, 89, 1)');
+      expect(output).to.include('#D99F59');
     });
 
     it('gradients: scopes the linear-gradient() to the requested mode, with no header comment', async () => {
@@ -132,10 +132,10 @@ describe('ExportActions — Color mode scoping (Copy as CSS/SCSS/LESS)', () => {
       expect(output).not.to.include('b=');
     });
 
-    it('defaults to RGB when no mode is given', async () => {
+    it('defaults to HEX when no mode is given', async () => {
       const { output } = await actions.exportAsXML(themeData);
-      expect(output).to.include("r='217' g='159' b='89'");
-      expect(output).not.to.include('hex=');
+      expect(output).to.include("hex='D99F59'");
+      expect(output).not.to.include('r=');
     });
 
     it('produces well-formed XML that a strict parser accepts, in both RGB and HEX mode', async () => {
