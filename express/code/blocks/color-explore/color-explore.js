@@ -410,9 +410,14 @@ export default async function decorate(block) {
           title: content.name || fallbackTitle,
           showTitle: false,
           content: async () => {
-            const [modalStrings, gradientEditorStrings] = await Promise.all([
+            const [
+              modalStrings,
+              gradientEditorStrings,
+              colorSwatchRailStrings,
+            ] = await Promise.all([
               colorModalStringsPromise,
               gradientEditorStringsPromise,
+              colorSwatchRailStringsPromise,
             ]);
             return createGradientModalContent(content, {
               likesCount: content.likes ?? content.likesCount ?? 0,
@@ -423,6 +428,7 @@ export default async function decorate(block) {
               onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
               strings: modalStrings,
               gradientEditorStrings,
+              colorSwatchRailStrings,
               verticalMaxPerRow: config.swatchVerticalMaxPerRow,
             });
           },

@@ -155,6 +155,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     ...(Number.isFinite(opts.verticalMaxPerRow)
       ? { verticalMaxPerRow: opts.verticalMaxPerRow }
       : {}),
+    ...(opts.colorSwatchRailStrings ? { strings: opts.colorSwatchRailStrings } : {}),
   });
   railAdapter.rail.colorMode = getPreferredColorMode();
   railWrap.appendChild(railAdapter.element);
