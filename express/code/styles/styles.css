@@ -139,7 +139,7 @@
   /* headings */
   --heading-font-weight-regular: 400;
   --heading-font-weight-medium: 700;
-  --heading-font-weight: 800;
+  --heading-font-weight: 900;
   --heading-font-weight-extra: 900;
   --subheading-font-weight: 700;
   --heading-color: var(--color-gray-800);
