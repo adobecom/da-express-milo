@@ -16,7 +16,8 @@ import {
   createMobileExportConfig,
   executeQuickAction,
   processFilesForQuickAction,
-  loadAndInitializeCCEverywhere,
+  ensureCCEverywhere,
+  schedulePreloadQuickAction,
   getErrorMsg,
   shouldShowVideoQuickActionPickerForMobile,
   getVideoConfig,
@@ -79,8 +80,15 @@ export async function runQuickAction(quickActionId, data, block) {
   const exportConfig = await createMobileExportConfig(quickActionId, downloadText, editText);
 
   const id = `${quickActionId}-container`;
-  quickActionContainer = createTag('div', { id, class: 'quick-action-container' });
-  block.append(quickActionContainer);
+  // Reuse the container preloadQuickAction() already created (and warmed up the SDK against) if
+  // present, instead of appending a duplicate with the same id - the warmed-up iframe is attached
+  // under that exact element, and moving it to a new one would reload it, discarding the warmup.
+  // preloadQuickAction() creates it with the `hidden` class (out of flow, invisible) so it doesn't
+  // disturb the upload page's layout before the user picks a file; reveal it now.
+  quickActionContainer = block.querySelector(`#${id}`)
+    ?? createTag('div', { id, class: 'quick-action-container' });
+  quickActionContainer.classList.remove('hidden');
+  if (!quickActionContainer.isConnected) block.append(quickActionContainer);
 
   ui2SDK();
 
@@ -142,9 +150,7 @@ export async function runQuickAction(quickActionId, data, block) {
 
 // eslint-disable-next-line default-param-last
 async function startSDK(data = [''], quickAction, block) {
-  if (!ccEverywhere) {
-    ccEverywhere = await loadAndInitializeCCEverywhere(getConfig);
-  }
+  ccEverywhere = await ensureCCEverywhere(getConfig);
 
   document.body.dataset.suppressfloatingcta = 'true';
   runQuickAction(quickAction, data, block);
@@ -344,5 +350,8 @@ export default async function decorate(block) {
   import('../../scripts/instrument.js').then(({ sendFrictionlessEventToAdobeAnaltics }) => {
     sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
   });
+
+  schedulePreloadQuickAction(quickAction, block, getConfig, createTag);
+
   return block;
 }

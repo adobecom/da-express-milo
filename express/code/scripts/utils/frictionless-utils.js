@@ -651,6 +651,64 @@ export async function loadAndInitializeCCEverywhere(getConfig) {
   return window.CCEverywhere.initialize(...Object.values(ccEverywhereConfig));
 }
 
+let ccEverywhereInitPromise;
+
+// Ensures the CC Everywhere SDK is loaded and initialized only once for the page, even if
+// desktop and mobile frictionless blocks (or a background preload and a user-triggered
+// startSDK) race each other. Shared across both blocks since only one SDK instance should
+// ever exist per page; each caller still keeps its own local reference to the resolved value.
+export async function ensureCCEverywhere(getConfig) {
+  if (!ccEverywhereInitPromise) {
+    ccEverywhereInitPromise = loadAndInitializeCCEverywhere(getConfig);
+  }
+  return ccEverywhereInitPromise;
+}
+
+// Quick actions with a preload-capable standalone route. Warming up any other quick
+// action would just open an editor the user never asked for, so keep this list in sync
+// with what the standalone app actually supports (see hz's WarmupAction intent allowlist).
+export const PRELOAD_CAPABLE_QUICK_ACTIONS = ['resize-image'];
+
+/**
+ * Eagerly loads the CC Everywhere SDK and warms up the quick action's iframe in the
+ * background, so it's already loaded by the time the user picks a file. The warmed-up
+ * container is created under the same #<quickAction>-container element the real quick
+ * action later reuses, in its final on-page position - the SDK can't move a live iframe's
+ * DOM parent afterwards without reloading it, so it has to be right from this first, hidden
+ * open() call. Created with the `hidden` class (visibility: hidden, out of flow) so its
+ * normal min-height doesn't push down the upload page's layout before the user picks a
+ * file; the real quick action un-hides it on reveal.
+ * @param quickAction the quick action id (e.g. 'resize-image')
+ * @param block the frictionless block element the container should be appended to
+ * @param getConfig milo's getConfig accessor
+ * @param createTag milo's createTag helper
+ * @returns the initialized CCEverywhere SDK instance, or undefined if init failed
+ */
+export async function preloadQuickAction(quickAction, block, getConfig, createTag) {
+  if (!PRELOAD_CAPABLE_QUICK_ACTIONS.includes(quickAction)) return undefined;
+  try {
+    const sdk = await ensureCCEverywhere(getConfig);
+    const id = `${quickAction}-container`;
+    const quickActionContainer = block.querySelector(`#${id}`)
+      ?? createTag('div', { id, class: 'quick-action-container hidden' });
+    if (!quickActionContainer.isConnected) block.append(quickActionContainer);
+    sdk?.quickAction.warmup(quickAction, 'preload', createContainerConfig(quickAction));
+    return sdk;
+  } catch (error) {
+    window.lana?.log(`[FrictionlessQA] Failed to preload quick action: ${error?.message || error}`, { tags: 'frictionless-utils', severity: 'warning' });
+    return undefined;
+  }
+}
+
+export function schedulePreloadQuickAction(quickAction, block, getConfig, createTag) {
+  const preload = () => preloadQuickAction(quickAction, block, getConfig, createTag);
+  if (document.readyState === 'complete') {
+    preload();
+  } else {
+    window.addEventListener('load', preload, { once: true });
+  }
+}
+
 export async function initProgressBar(replaceKey, getConfig) {
   const { default: ProgressBar } = await import('./createProgressBar.js');
   const progressBar = new ProgressBar();

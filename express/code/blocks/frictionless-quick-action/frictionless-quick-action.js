@@ -14,7 +14,8 @@ import {
   createDefaultExportConfig,
   executeQuickAction,
   processFilesForQuickAction,
-  loadAndInitializeCCEverywhere,
+  ensureCCEverywhere,
+  schedulePreloadQuickAction,
   getErrorMsg,
   initProgressBar,
   FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
@@ -222,8 +223,16 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
   const exportConfig = createDefaultExportConfig();
 
   const id = `${quickActionId}-container`;
-  quickActionContainer = createTag('div', { id, class: 'quick-action-container' });
-  block.append(quickActionContainer);
+  // Reuse the container preloadQuickAction() already created (and warmed up the SDK against) if
+  // present, instead of appending a duplicate with the same id - the warmed-up iframe is attached
+  // under that exact element, and moving it to a new one would reload it, discarding the warmup.
+  // preloadQuickAction() creates it with the `hidden` class (out of flow, invisible) so it doesn't
+  // disturb the upload page's layout before the user picks a file; reveal it now, instantly
+  // (no fade) since the dropzone's own fadeOut below already animates the visible transition.
+  quickActionContainer = block.querySelector(`#${id}`)
+    ?? createTag('div', { id, class: 'quick-action-container' });
+  quickActionContainer.classList.remove('hidden');
+  if (!quickActionContainer.isConnected) block.append(quickActionContainer);
   const divs = block.querySelectorAll(':scope > div');
   if (divs[1]) [, uploadContainer] = divs;
   fadeOut(uploadContainer);
@@ -337,9 +346,7 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
 
 // eslint-disable-next-line default-param-last
 async function startSDK(data = [''], quickAction, block, fromQrCode = false) {
-  if (!ccEverywhere) {
-    ccEverywhere = await loadAndInitializeCCEverywhere(getConfig);
-  }
+  ccEverywhere = await ensureCCEverywhere(getConfig);
   await runQuickAction(quickAction, data, block, fromQrCode);
 }
 
@@ -1083,4 +1090,6 @@ export default async function decorate(block) {
   }
 
   sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
+
+  schedulePreloadQuickAction(quickAction, block, getConfig, createTag);
 }
