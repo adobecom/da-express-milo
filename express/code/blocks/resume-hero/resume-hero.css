@@ -10,7 +10,7 @@
   margin-inline: auto;
   max-width: 1600px;
   min-width: 320px;
-  padding: var(--spacing-600) var(--Grid-container-padding-side);
+  padding: var(--spacing-500) var(--spacing-300);
   position: relative;
 }
 
@@ -18,11 +18,36 @@ main .section .resume-hero p {
   margin: 0;
 }
 
+.resume-hero .resume-hero-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 var(--spacing-500);
+}
+
+.resume-hero .resume-hero-benefit {
+  align-items: center;
+  color: var(--s2a-color-content-default);
+  display: flex;
+  font-family: var(--s2a-font-family-label);
+  font-size: var(--s2a-typography-font-size-label);
+  font-style: normal;
+  font-weight: 700;
+  gap: var(--spacing-100);
+  justify-content: center;
+  leading-trim: both;
+  letter-spacing: var(--s2a-typography-letter-spacing-label);
+  line-height: var(--s2a-typography-line-height-label);
+  padding: var(--spacing-200) var(--spacing-200) var(--spacing-200) var(--spacing-100);
+  text-edge: cap;
+  width: fit-content;
+}
+
 /* Authored headline/subcopy row. */
 .resume-hero .resume-hero-header {
   display: flex;
   justify-content: center;
-  margin-block-end: var(--spacing-500);
+  margin-block-end: var(--spacing-300);
   width: 100%;
 }
 
@@ -30,7 +55,7 @@ main .section .resume-hero p {
   align-items: center;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-300);
+  gap: var(--spacing-100);
   max-width: 900px;
   text-align: center;
 }
@@ -38,7 +63,7 @@ main .section .resume-hero p {
 .resume-hero .express-logo {
   display: block;
   height: 20px;
-  margin: 0 0 var(--spacing-100);
+  margin: 0;
   padding: 0;
   width: auto;
 }
@@ -87,31 +112,77 @@ main .section .resume-hero p {
 
 .resume-hero .resume-hero-create {
   align-items: center;
+  align-self: stretch;
+  background: var(--S2AC-Palette-gray-50, #F8F8F8); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  border: 1px solid rgb(0 0 0 / 3%);
+  border-radius: 24px;
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-400);
-  justify-content: center;
+  flex: 0 0 auto;
+  flex-direction: column-reverse;
+  gap: var(--spacing-100);
+  justify-content: flex-end;
+  max-width: 100%;
+  padding: var(--spacing-600) var(--spacing-400);
+  text-align: start;
+}
+
+.resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area) {
+  color: var(--s2a-color-content-default);
+  font-family: var(--s2a-font-family-heading);
+  font-size: var(--s2a-typography-font-size-heading-6);
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: var(--s2a-typography-letter-spacing-heading-6);
+  line-height: var(--s2a-typography-line-height-title-6, var(--spacing-325)); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  margin: 0;
   text-align: center;
+  text-wrap-style: balance;
+}
+
+.resume-hero .resume-hero-create > .resume-hero-create-copy {
+  order: 2;
+}
+
+.resume-hero .resume-hero-create > .action-area {
+  order: 1;
+}
+
+.resume-hero .resume-hero-create > .resume-hero-create-media {
+  order: 0;
 }
 
 .resume-hero .resume-hero-create picture {
   display: block;
+  margin-block-start: var(--spacing-400);
+  max-height: 216px;
   max-width: 100%;
 }
 
 .resume-hero .resume-hero-create img {
   display: block;
   height: auto;
+  max-height: 216px;
   max-width: 100%;
   width: 100%;
 }
 
 .resume-hero .resume-hero-create .action-area {
+  display: flex;
+  justify-content: center;
   margin: 0;
+  width: 100%;
 }
 
-.resume-hero .resume-hero-create .con-button {
+.resume-hero .resume-hero-create a.con-button:any-link {
+  align-items: center;
+  box-sizing: border-box;
+  display: inline-flex;
+  height: var(--spacing-400);
+  justify-content: center;
   margin: 0;
+  min-height: 0;
+  padding-block: 0;
+  padding: 4px 12px;
 }
 
 /* ============================================================
@@ -119,9 +190,11 @@ main .section .resume-hero p {
    ============================================================ */
 
 .verb-dropzone-area {
+  --verb-dropzone-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' rx='24' ry='24' fill='none' stroke='%23868686' stroke-width='2' stroke-dasharray='4%2C 4'/%3E%3C/svg%3E");
+
   border: none;
   border-radius: 24px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' rx='24' ry='24' fill='none' stroke='%23868686' stroke-width='2' stroke-dasharray='4%2C 4'/%3E%3C/svg%3E");
+  background-image: var(--verb-dropzone-background-image);
   padding: 21px var(--spacing-400);
   background-color: var(--color-gray-100);
   display: flex;
@@ -183,13 +256,17 @@ main .section .resume-hero p {
    HEADING
    ============================================================ */
 
-.verb-dropzone-heading {
-  font-family: var(--body-font-family);
-  font-size: 19px;
-  font-weight: 700;
-  line-height: 24px;
-  color: inherit;
+.resume-hero .verb-dropzone-heading {
+  color: var(--C1-Text-text, #2C2C2C); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  font-family: var(--s2a-font-family-heading);
+  font-size: var(--s2a-typography-font-size-heading-5);
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: var(--s2a-font-letter-spacing-4xl);
+  line-height: var(--s2a-typography-line-height-heading-5);
   margin: 0;
+  text-align: center;
+  text-wrap-style: balance;
   word-break: break-word;
 }
 
@@ -197,19 +274,26 @@ main .section .resume-hero p {
    SUB LINE — file-type/size limit
    ============================================================ */
 
-.verb-dropzone-sub {
-  font-size: 12px;
+.resume-hero .verb-dropzone-sub {
+  color: #000; /* stylelint-disable-line color-no-hex */
+  font-family: var(--s2a-font-family-body);
+  font-size: var(--s2a-typography-font-size-body-md);
+  font-style: normal;
   font-weight: 400;
-  line-height: 140%;
-  color: inherit;
+  letter-spacing: var(--s2a-typography-letter-spacing-body-md);
+  line-height: var(--s2a-typography-line-height-body-md);
   margin: 0;
-  opacity: 0.85;
+  text-align: center;
+  text-wrap-style: pretty;
 }
 
 /* Resume-specific dropzone composition: authored preview, heading, and copy. */
 .resume-hero .verb-dropzone-area {
-  min-height: 260px;
-  padding: var(--spacing-400);
+  background-image: none;
+  min-height: 0;
+  overflow: hidden;
+  padding: 51px 15px;
+  position: relative;
 }
 
 .resume-hero .verb-dropzone-inner {
@@ -217,40 +301,52 @@ main .section .resume-hero p {
   flex-direction: column;
   justify-content: center;
   text-align: center;
+  z-index: 1;
 }
 
 .resume-hero .widget-icon {
   align-items: center;
-  display: flex;
+  display: none;
+  height: 100%;
+  inset: 0;
   justify-content: center;
-  max-height: 160px;
-  max-width: 240px;
+  max-height: none;
+  max-width: none;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
   width: 100%;
+  z-index: 0;
 }
 
 .resume-hero .widget-icon > img {
-  height: 64px;
-  width: 64px;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
 }
 
 .resume-hero .resume-hero-dropzone-image {
   display: block;
-  max-height: 160px;
-  max-width: 240px;
+  height: 100%;
+  max-height: none;
+  max-width: none;
+  overflow: hidden;
   width: 100%;
 }
 
 .resume-hero .resume-hero-dropzone-image img {
   display: block;
-  height: auto;
-  max-height: 160px;
-  object-fit: contain;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
   width: 100%;
 }
 
 .resume-hero .verb-dropzone-content {
   align-items: center;
+  position: relative;
   text-align: center;
+  z-index: 1;
 }
 
 /* ============================================================
@@ -546,7 +642,19 @@ main .section .resume-hero p {
 
 @media screen and (min-width: 900px) {
   .resume-hero {
-    padding-block: var(--spacing-900);
+    padding: var(--spacing-900) var(--Grid-container-padding-side);
+  }
+
+  .resume-hero .resume-hero-header {
+    margin-block-end: var(--spacing-500);
+  }
+
+  .resume-hero .resume-hero-header-content {
+    gap: var(--spacing-300);
+  }
+
+  .resume-hero .express-logo {
+    margin-block-end: var(--spacing-100);
   }
 
   .resume-hero .resume-hero-actions {
@@ -556,9 +664,52 @@ main .section .resume-hero p {
 
   .resume-hero .verb-dropzone-area {
     aspect-ratio: auto;
+    background-image: var(--verb-dropzone-background-image);
     height: 342px;
     max-width: 783px;
     min-height: 0;
+    padding: var(--spacing-400);
+  }
+
+  .resume-hero .widget-icon {
+    display: flex;
+  }
+
+  .resume-hero .resume-hero-create {
+    align-items: flex-start;
+    align-self: auto;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    flex-direction: column;
+    height: 296px;
+    padding: var(--spacing-400);
+    width: 323px;
+  }
+
+  .resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area) {
+    text-align: start;
+  }
+
+  .resume-hero .resume-hero-create > :is(
+    .resume-hero-create-copy,
+    .action-area,
+    .resume-hero-create-media
+  ) {
+    order: initial;
+  }
+
+  .resume-hero .resume-hero-create .action-area {
+    justify-content: flex-start;
+  }
+
+  .resume-hero .resume-hero-create picture {
+    margin-block-start: 0;
+    max-height: none;
+  }
+
+  .resume-hero .resume-hero-create img {
+    max-height: none;
   }
 }
 

@@ -1,4 +1,9 @@
-import { setLibs, getIconElementDeprecated, getMetadata } from '../../scripts/utils.js';
+import {
+  setLibs,
+  getIconElementDeprecated,
+  getMetadata,
+  decorateMiloIcons,
+} from '../../scripts/utils.js';
 import trackBranchParameters from '../../scripts/branchlinks.js';
 
 function isOldBrowser() {
@@ -350,6 +355,54 @@ function decorateAuthoredLayout(element) {
   };
 }
 
+function decorateCreateLinks(createCell) {
+  createCell?.querySelectorAll('a').forEach((link) => {
+    link.classList.add('con-button', 'blue', 'button-xl');
+    link.closest('p')?.classList.add('action-area');
+  });
+
+  [...(createCell?.children || [])].forEach((child) => {
+    if (child.matches('picture') || child.querySelector(':scope > picture')) {
+      child.classList.add('resume-hero-create-media');
+    } else if (child.matches('a') || child.querySelector('a')) {
+      child.classList.add('action-area');
+    } else {
+      child.classList.add('resume-hero-create-copy');
+    }
+  });
+}
+
+function decorateBenefitItems(element) {
+  const benefitsCell = element.querySelector(':scope > div:nth-child(3) > div:first-child');
+  if (!benefitsCell) return;
+  benefitsCell.classList.add('resume-hero-benefits');
+
+  const directNodes = [...benefitsCell.childNodes];
+  const hasDirectIcons = directNodes.some((node) => node.nodeType === Node.ELEMENT_NODE
+    && node.matches('span.icon'));
+
+  if (hasDirectIcons) {
+    const fragment = document.createDocumentFragment();
+    let benefit = null;
+    directNodes.forEach((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE && node.matches('span.icon')) {
+        benefit = createTag('div', { class: 'resume-hero-benefit' });
+        fragment.append(benefit);
+      }
+      (benefit || fragment).append(node);
+    });
+    benefitsCell.replaceChildren(fragment);
+    return;
+  }
+
+  benefitsCell.querySelectorAll(':scope > p').forEach((paragraph) => {
+    if (!paragraph.querySelector(':scope > span.icon')) return;
+    const benefit = createTag('div', { class: 'resume-hero-benefit' });
+    benefit.append(...paragraph.childNodes);
+    paragraph.replaceWith(benefit);
+  });
+}
+
 export default async function decorate(element) {
   ({ createTag, getConfig } = (await import(`${miloLibs}/utils/utils.js`)));
 
@@ -402,8 +455,13 @@ export default async function decorate(element) {
   // remain intact.
   const { decorateButtons } = await import(`${miloLibs}/utils/decorate.js`);
   decorateButtons(element, 'button-xl');
+  await decorateMiloIcons(element, '/express/code/icons', {
+    'one-tap-pay': 'card-tap-payment',
+  });
+  decorateBenefitItems(element);
   const authoredLinks = [...element.querySelectorAll('a')];
   const { uploadCell, createCell, picture } = decorateAuthoredLayout(element);
+  decorateCreateLinks(createCell);
 
   // Dropzone
   const dropzone = createTag('button', {
