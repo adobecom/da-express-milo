@@ -96,18 +96,35 @@ function truncateQuote(quote, limit) {
 const QUOTE_CHANGE_EASE_IN = 'cubic-bezier(0.55, 0.055, 0.675, 0.19)';
 const QUOTE_CHANGE_EASE_OUT = 'cubic-bezier(0.215, 0.61, 0.355, 1)';
 
+// Total timeline duration and the offset/time the fade-out segment ends at —
+// applyChange (below) waits for this instant so the swap lands exactly when
+// the old text has finished fading out, never mid-fade.
+const QUOTE_CHANGE_DURATION_MS = 400;
+const QUOTE_CHANGE_FADE_OUT_OFFSET = 0.3;
+const QUOTE_CHANGE_FADE_OUT_MS = QUOTE_CHANGE_DURATION_MS * QUOTE_CHANGE_FADE_OUT_OFFSET;
+
+// Tracks each element's own pending applyChange timeout (below), so a second
+// call on the same element (rapid clicks) can clear the first's before it
+// fires — otherwise the first call's stale applyChange would still run after
+// the second one's, clobbering the newer text/font with the older one.
+const pendingQuoteChanges = new WeakMap();
+
 /**
- * Applies a font or quote-text change to `el` — via `applyChange`, run
- * synchronously and immediately, same as any other state update — wrapped in
- * a purely cosmetic fade-out/fade-in "soft swap": a quick fade+slide down
+ * Applies a font or quote-text change to `el` — via `applyChange` — wrapped
+ * in a purely cosmetic fade-out/fade-in "soft swap": a quick fade+slide down
  * (0.12s, ease-in) covers the swap, then a fade+slide back in from 10px below
- * (0.28s, ease-out) reveals the result. Any in-flight run on the same element
- * is cancelled first so rapid clicks restart cleanly instead of stacking.
+ * (0.28s, ease-out) reveals the result. `applyChange` only runs once that
+ * fade-out has actually finished (QUOTE_CHANGE_FADE_OUT_MS), not synchronously
+ * up front — otherwise the text/font swap and the fade-back-in would both be
+ * visible while the fade-out was still playing, instead of the swap being
+ * hidden by it as intended. Any in-flight run on the same element is
+ * cancelled first so rapid clicks restart cleanly instead of stacking.
  * Skipped entirely under prefers-reduced-motion: reduce, where only
- * `applyChange` runs, with no animation.
+ * `applyChange` runs immediately, with no animation.
  */
 function animateQuoteChange(el, applyChange) {
   el.getAnimations().forEach((anim) => anim.cancel());
+  clearTimeout(pendingQuoteChanges.get(el));
 
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
     applyChange();
@@ -121,13 +138,17 @@ function animateQuoteChange(el, applyChange) {
   el.animate(
     [
       { opacity: 1, transform: 'translateY(0)', easing: QUOTE_CHANGE_EASE_IN },
-      { opacity: 0, transform: 'translateY(6px)', offset: 0.3, easing: QUOTE_CHANGE_EASE_OUT },
-      { opacity: 0, transform: 'translateY(10px)', offset: 0.3 },
+      { opacity: 0, transform: 'translateY(6px)', offset: QUOTE_CHANGE_FADE_OUT_OFFSET, easing: QUOTE_CHANGE_EASE_OUT },
+      { opacity: 0, transform: 'translateY(10px)', offset: QUOTE_CHANGE_FADE_OUT_OFFSET },
       { opacity: 1, transform: 'translateY(0)' },
     ],
-    { duration: 400, fill: 'forwards' },
+    { duration: QUOTE_CHANGE_DURATION_MS, fill: 'forwards' },
   );
-  applyChange();
+  const timeoutId = setTimeout(() => {
+    pendingQuoteChanges.delete(el);
+    applyChange();
+  }, QUOTE_CHANGE_FADE_OUT_MS);
+  pendingQuoteChanges.set(el, timeoutId);
 }
 
 /**
@@ -1319,7 +1340,9 @@ async function buildWidget(
 }
 
 function buildDecoCard(a11y, entry, useQuote) {
-  const { card, quote, author } = entry;
+  const {
+    card, quote, author, font,
+  } = entry;
   const deco = createTag('div', { class: 'me-deco', tabindex: '-1' });
   const cardWrap = createTag('div', { class: 'me-deco-card-wrap' });
   // .me-deco-card is the outer sizing/rotation box and anchors the actions
@@ -1333,8 +1356,9 @@ function buildDecoCard(a11y, entry, useQuote) {
     style: `background-image:url("${card.bg}")`,
   });
   inner.append(clipped);
-  // Fixed font/style for every card — see .me-deco-quote in CSS — so no
-  // per-instance font styling here; only the editor's own selection varies.
+  // Each deco card gets one of the loaded font options (see buildDecoCards'
+  // round-robin assignment) instead of every card sharing one fixed style —
+  // applied the same way buildArcCard's render() applies entry.font.
   // Display text only truncates at DECO_QUOTE_CHAR_LIMIT (buildCardSet in
   // mini-editor.js already prefers quotes under this limit for these cards,
   // so this is a rarely-hit fallback) — `quote` itself stays untruncated
@@ -1342,6 +1366,12 @@ function buildDecoCard(a11y, entry, useQuote) {
   // silently shortened.
   const quoteP = createTag('div', { class: 'me-deco-quote' });
   quoteP.textContent = truncateQuote(quote, DECO_QUOTE_CHAR_LIMIT);
+  if (font) {
+    quoteP.style.fontFamily = font.font;
+    quoteP.style.fontStyle = font.italic ? 'italic' : '';
+    quoteP.style.fontWeight = font.weight || '';
+    quoteP.style.fontStretch = font.stretch || '';
+  }
   clipped.append(quoteP);
   if (author) {
     const authorP = createTag('div', { class: 'me-deco-author' });
@@ -1426,7 +1456,7 @@ const DECO_COLUMNS = [
   { cardIndexes: [5, 7], className: 'me-deco-col--near-right' },
 ];
 
-function buildDecoCards(a11y, cardSet, useQuote) {
+function buildDecoCards(a11y, cardSet, useQuote, fontOptions = []) {
   // Not aria-hidden: unlike a purely decorative background image, each card
   // here holds two real, focusable actions ("Use this quote" / "Copy quote")
   // — hiding the wrapper from assistive tech would leave those buttons in
@@ -1434,7 +1464,12 @@ function buildDecoCards(a11y, cardSet, useQuote) {
   const wrap = createTag('div', { class: 'mini-editor-decorations' });
   // cardSet[0] powers the main widget; decorative cards use the rest.
   const decoEntries = cardSet.slice(1, 1 + DECO_CARD_COUNT);
-  const decos = decoEntries.map((entry, i) => {
+  const decos = decoEntries.map((baseEntry, i) => {
+    // Round-robins fontOptions across the deco cards — there are always at
+    // least 5 (FALLBACK_FONT_OPTIONS) and up to DECO_CARD_COUNT (8) cards, so
+    // each card gets a different font from the loaded set until they wrap.
+    const font = fontOptions.length ? fontOptions[i % fontOptions.length] : undefined;
+    const entry = { ...baseEntry, font };
     const deco = buildDecoCard(a11y, entry, useQuote);
     deco.classList.add(`me-deco--${i + 1}`);
     deco.classList.add(`${entry.card.mode}-mode`);
@@ -2245,6 +2280,14 @@ export default async function createMiniEditorWidget(config = {}) {
     root,
     topActions = [],
     fontOptions,
+    // Resolves with the live Adobe Fonts kit's options once loaded (see
+    // mini-editor-fonts-loader.js's loadWebFontOptions) — the desktop deco
+    // cards wait on this (see decorationsEnabled below) rather than ever
+    // showing the bundled fallback fonts, unlike the centre card (fontOptions
+    // above), which is LCP-critical and can't wait. Defaults to fontOptions
+    // itself so a caller that doesn't pass this (e.g. a future host with no
+    // live-kit upgrade) still gets deco cards, just not upgraded later.
+    decoFontOptionsPromise = Promise.resolve(fontOptions),
     backgrounds,
     a11y,
     deps,
@@ -2301,15 +2344,20 @@ export default async function createMiniEditorWidget(config = {}) {
   let syncViewportMode = () => {};
   let removeResizeListener = () => {};
   let destroyArcCarousel = () => {};
+  let destroyed = false;
 
   if (decorationsEnabled) {
     // Use the full fetched card set for the tablet/mobile arc carousel,
     // independent of how many desktop deco cards are rendered.
     const arcCardSet = [...cardSet];
-    decorations = buildDecoCards(a11y, cardSet, useQuote);
-    // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
-    // no-op call when the CTA wasn't built (small viewport).
-    setDecoChainTarget(wireDecoTabChain(decorations, root));
+    // Empty now, populated once decoFontOptionsPromise resolves (below) —
+    // returned as-is to the caller so it can append this wrapper to the DOM
+    // immediately without waiting on the live fonts itself; the deco cards
+    // simply have nothing to show until then. This deliberately does NOT
+    // fall back to fontOptions (the centre card's fast-path fallback fonts)
+    // in the meantime — the desktop deco cards should only ever appear
+    // already showing a real, loaded font, never a flash of the fallback.
+    decorations = createTag('div', { class: 'mini-editor-decorations' });
     const {
       root: arcCarousel,
       updateCentre: updateArcCentre,
@@ -2331,41 +2379,69 @@ export default async function createMiniEditorWidget(config = {}) {
     // squeeze both side by side instead of the arc taking .me-card's place.
     widget.querySelector('.me-card').after(arcCarousel);
 
-    // The zig-zag columns (.me-deco-col--far-left etc., see
-    // mini-editor-widget.css) sit at fixed pixel offsets from centre, so
-    // between the >=1200px breakpoint and whatever width those offsets
-    // actually need (~1622px+ for the far columns), the outer cards run past
-    // the viewport edge — clipped by `main`'s overflow-x: clip, invisible but
-    // still in the tab order. Hide (not just visually clip) any card whose
-    // box no longer fits so it also drops out of the tab order, re-checked
-    // on first load and on every resize since it depends on viewport width,
-    // not just the >1200px/<=1200px carousel-mode switch below.
-    const decoCard1 = decorations.querySelector('.me-deco--1');
-    const decoCard3 = decorations.querySelector('.me-deco--3');
-    const decoCard5 = decorations.querySelector('.me-deco--5');
-    const decoCard7 = decorations.querySelector('.me-deco--7');
-    const syncDecoClipping = () => {
-      if (window.innerWidth < 1625) {
-        decoCard1.classList.add('hidden');
-        decoCard3.classList.add('hidden');
-        decoCard5.classList.add('hidden');
-        decoCard7.classList.add('hidden');
-      } else {
-        decoCard1.classList.remove('hidden');
-        decoCard3.classList.remove('hidden');
-        decoCard5.classList.remove('hidden');
-        decoCard7.classList.remove('hidden');
-      }
-    };
-
-    syncViewportMode = () => {
+    // Reassigned once the deco cards actually exist (see decoFontOptionsPromise
+    // below) to also run syncDecoClipping — indirected through this `let` +
+    // wrapper (rather than reassigning `syncViewportMode` itself) so both the
+    // resize listener below and the object this function returns always call
+    // through to whichever logic is current, instead of the return statement
+    // having already captured today's (pre-deco-cards) version by value.
+    let runViewportSync = () => {
       applyRuntimeArcTokens(root);
-      syncDecoClipping();
       root.classList.toggle('me-carousel-mode', isSmallViewport());
     };
+    syncViewportMode = () => runViewportSync();
     syncViewportMode();
     window.addEventListener('resize', syncViewportMode);
     removeResizeListener = () => window.removeEventListener('resize', syncViewportMode);
+
+    // Builds and reveals the desktop deco cards only once the live font kit
+    // has resolved (see decoFontOptionsPromise above), so they always appear
+    // already showing a real font — never the fallback, never unstyled.
+    // Runs in the background (not awaited by createMiniEditorWidget's own
+    // return) since the centre card/arc carousel above must not wait on it.
+    decoFontOptionsPromise.then((liveFontOptions) => {
+      if (destroyed) return;
+      const built = buildDecoCards(a11y, cardSet, useQuote, liveFontOptions);
+      decorations.append(...built.children);
+      // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
+      // no-op call when the CTA wasn't built (small viewport).
+      setDecoChainTarget(wireDecoTabChain(decorations, root));
+
+      // The zig-zag columns (.me-deco-col--far-left etc., see
+      // mini-editor-widget.css) sit at fixed pixel offsets from centre, so
+      // between the >=1200px breakpoint and whatever width those offsets
+      // actually need (~1622px+ for the far columns), the outer cards run
+      // past the viewport edge — clipped by `main`'s overflow-x: clip,
+      // invisible but still in the tab order. Hide (not just visually clip)
+      // any card whose box no longer fits so it also drops out of the tab
+      // order, re-checked on first load and on every resize since it depends
+      // on viewport width, not just the >1200px/<=1200px carousel-mode
+      // switch above.
+      const decoCard1 = decorations.querySelector('.me-deco--1');
+      const decoCard3 = decorations.querySelector('.me-deco--3');
+      const decoCard5 = decorations.querySelector('.me-deco--5');
+      const decoCard7 = decorations.querySelector('.me-deco--7');
+      const syncDecoClipping = () => {
+        if (window.innerWidth < 1625) {
+          decoCard1.classList.add('hidden');
+          decoCard3.classList.add('hidden');
+          decoCard5.classList.add('hidden');
+          decoCard7.classList.add('hidden');
+        } else {
+          decoCard1.classList.remove('hidden');
+          decoCard3.classList.remove('hidden');
+          decoCard5.classList.remove('hidden');
+          decoCard7.classList.remove('hidden');
+        }
+      };
+
+      const baseViewportSync = runViewportSync;
+      runViewportSync = () => {
+        baseViewportSync();
+        syncDecoClipping();
+      };
+      runViewportSync();
+    }).catch(() => {});
   }
 
   // Decouples this widget from the block(s) that offer their own "use this
@@ -2394,6 +2470,7 @@ export default async function createMiniEditorWidget(config = {}) {
     syncViewportMode,
     upgradeFontOptions,
     destroy: () => {
+      destroyed = true;
       destroyWidget();
       destroyArcCarousel();
       removeResizeListener();
