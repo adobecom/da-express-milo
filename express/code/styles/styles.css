@@ -426,6 +426,96 @@
   --section-padding-xl: var(--spacing-600);
   --section-padding-m: var(--spacing-400);
 
+  /* S2A responsive container and typography tokens — SM */
+  --s2a-containers-default-_static: 327px;
+  --s2a-containers-default-_grid-container-max-width: 719px;
+  --s2a-containers-default-_grid-container-min-width: 272px;
+  --s2a-containers-fixed-offset-_static: 327px;
+  --s2a-containers-fixed-offset-_grid-container-max-width: 719px;
+  --s2a-containers-fixed-offset-_grid-container-min-width: 272px;
+  --s2a-layout-guide-gap: 8px;
+  --s2a-layout-guide-_columns: 6;
+  --s2a-section-spacing-5xl: 80px;
+  --s2a-section-spacing-4xl: 64px;
+  --s2a-section-spacing-3xl: 40px;
+  --s2a-section-spacing-2xl: 24px;
+  --s2a-section-spacing-xl: 40px;
+  --s2a-section-spacing-lg: 32px;
+  --s2a-section-spacing-md: 24px;
+  --s2a-section-spacing-sm: 24px;
+  --s2a-section-spacing-xs: 24px;
+  --s2a-section-spacing-2xs: 8px;
+  --s2a-section-spacing-3xs: 16px;
+  --s2a-section-spacing-4xs: 12px;
+  --s2a-section-spacing-5xs: 8px;
+  --s2a-section-spacing-none: 0px;
+  --s2a-viewport-_static: 375px;
+  --s2a-viewport-_static_alt: 375px;
+  --s2a-viewport-_max-width: 767px;
+  --s2a-viewport-_min-width: 320px;
+  --s2a-viewport-side-margins-_margin-reflow-legacy: 24px;
+  --s2a-viewport-side-margins-_margin-reflow-default: 24px;
+  --s2a-viewport-side-margins-_margin-offset-reflow: 24px;
+  --s2a-viewport-side-margins-_margin-offset-reflow-legacy: 24px;
+  --s2a-viewport-_visibility-xl: 0;
+  --s2a-viewport-_visibility-xl-lg: 0;
+  --s2a-viewport-_visibility-xl-md: 0;
+  --s2a-viewport-_visibility-lg: 0;
+  --s2a-viewport-_visibility-lg-md: 0;
+  --s2a-viewport-_visibility-lg-sm: 1;
+  --s2a-viewport-_visibility-md: 0;
+  --s2a-viewport-_visibility-md-sm: 1;
+  --s2a-viewport-_visibility-sm: 1;
+  --s2a-typography-font-size-super: 56px;
+  --s2a-typography-font-size-heading-1: 40px;
+  --s2a-typography-font-size-heading-2: 32px;
+  --s2a-typography-font-size-heading-3: 24px;
+  --s2a-typography-font-size-heading-4: 20px;
+  --s2a-typography-font-size-heading-5: 18px;
+  --s2a-typography-font-size-heading-6: 16px;
+  --s2a-typography-font-size-body-lg: 16px;
+  --s2a-typography-font-size-body-md: 16px;
+  --s2a-typography-font-size-body-sm: 14px;
+  --s2a-typography-font-size-body-xs: 12px;
+  --s2a-typography-font-size-eyebrow: 16px;
+  --s2a-typography-font-size-label: 14px;
+  --s2a-typography-font-size-caption: 12px;
+  --s2a-typography-letter-spacing-super: -1.68px;
+  --s2a-typography-letter-spacing-heading-1: -1.68px;
+  --s2a-typography-letter-spacing-heading-2: -0.96px;
+  --s2a-typography-letter-spacing-heading-3: -0.48px;
+  --s2a-typography-letter-spacing-heading-4: -0.48px;
+  --s2a-typography-letter-spacing-heading-5: -0.2px;
+  --s2a-typography-letter-spacing-heading-6: -0.2px;
+  --s2a-typography-letter-spacing-body-lg: 0px;
+  --s2a-typography-letter-spacing-body-md: 0px;
+  --s2a-typography-letter-spacing-body-sm: 0px;
+  --s2a-typography-letter-spacing-body-xs: 0px;
+  --s2a-typography-letter-spacing-eyebrow: 0px;
+  --s2a-typography-letter-spacing-label: 0px;
+  --s2a-typography-letter-spacing-caption: 0px;
+  --s2a-typography-line-height-super: 56px;
+  --s2a-typography-line-height-heading-1: 40px;
+  --s2a-typography-line-height-heading-2: 32px;
+  --s2a-typography-line-height-heading-3: 24px;
+  --s2a-typography-line-height-heading-4: 20px;
+  --s2a-typography-line-height-heading-5: 20px;
+  --s2a-typography-line-height-heading-6: 18px;
+  --s2a-typography-line-height-body-lg: 20px;
+  --s2a-typography-line-height-body-md: 20px;
+  --s2a-typography-line-height-body-sm: 18px;
+  --s2a-typography-line-height-body-xs: 18px;
+  --s2a-typography-line-height-eyebrow: 20px;
+  --s2a-typography-line-height-label: 18px;
+  --s2a-typography-line-height-caption: 16px;
+  --s2a-viewport-vertical-padding-xl: 80px;
+  --s2a-viewport-vertical-padding-lg: 64px;
+  --s2a-viewport-vertical-padding-md: 40px;
+  --s2a-viewport-vertical-padding-sm: 32px;
+  --s2a-viewport-vertical-padding-xs: 24px;
+  --s2a-viewport-vertical-padding-2xs: 16px;
+  --s2a-viewport-vertical-padding-none: 0px;
+
 }
 
 @media (min-width: 600px) {
@@ -478,6 +568,141 @@
     --Grid-grid-gutter: var(--spacing-400);
     --section-padding-xl: var(--spacing-900);
     --section-padding-m: var(--spacing-700);
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    /* S2A responsive container and typography tokens — MD */
+    --s2a-containers-default-_static: 640px;
+    --s2a-containers-default-_grid-container-max-width: 1151px;
+    --s2a-containers-default-_grid-container-min-width: 640px;
+    --s2a-containers-fixed-offset-_static: 688px;
+    --s2a-containers-fixed-offset-_grid-container-max-width: 1151px;
+    --s2a-containers-fixed-offset-_grid-container-min-width: 640px;
+    --s2a-layout-guide-_columns: 12;
+    --s2a-section-spacing-5xl: 160px;
+    --s2a-section-spacing-4xl: 80px;
+    --s2a-section-spacing-3xl: 64px;
+    --s2a-section-spacing-2xl: 80px;
+    --s2a-section-spacing-xl: 80px;
+    --s2a-section-spacing-sm: 32px;
+    --s2a-section-spacing-2xs: 24px;
+    --s2a-viewport-_static: 768px;
+    --s2a-viewport-_static_alt: 768px;
+    --s2a-viewport-_max-width: 1279px;
+    --s2a-viewport-_min-width: 768px;
+    --s2a-viewport-side-margins-_margin-reflow-legacy: 64px;
+    --s2a-viewport-side-margins-_margin-reflow-default: 64px;
+    --s2a-viewport-side-margins-_margin-offset-reflow-legacy: 40px;
+    --s2a-viewport-_visibility-xl-md: 1;
+    --s2a-viewport-_visibility-lg-md: 1;
+    --s2a-viewport-_visibility-md: 1;
+    --s2a-viewport-_visibility-sm: 0;
+    --s2a-typography-font-size-super: 72px;
+    --s2a-typography-font-size-heading-1: 56px;
+    --s2a-typography-font-size-heading-2: 48px;
+    --s2a-typography-font-size-heading-3: 32px;
+    --s2a-typography-font-size-heading-4: 24px;
+    --s2a-typography-font-size-heading-5: 20px;
+    --s2a-typography-font-size-body-lg: 18px;
+    --s2a-typography-font-size-body-xs: 14px;
+    --s2a-typography-letter-spacing-super: -2.88px;
+    --s2a-typography-letter-spacing-heading-1: -3.2px;
+    --s2a-typography-letter-spacing-heading-2: -1.44px;
+    --s2a-typography-letter-spacing-heading-5: -0.48px;
+    --s2a-typography-line-height-super: 69px;
+    --s2a-typography-line-height-heading-1: 56px;
+    --s2a-typography-line-height-heading-2: 48px;
+    --s2a-typography-line-height-heading-3: 32px;
+    --s2a-typography-line-height-heading-4: 24px;
+    --s2a-typography-line-height-body-lg: 24px;
+    --s2a-viewport-vertical-padding-xl: 160px;
+    --s2a-viewport-vertical-padding-lg: 128px;
+    --s2a-viewport-vertical-padding-md: 80px;
+    --s2a-viewport-vertical-padding-sm: 64px;
+    --s2a-viewport-vertical-padding-xs: 40px;
+    --s2a-viewport-vertical-padding-2xs: 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    /* S2A responsive container and typography tokens — LG */
+    --s2a-containers-default-_static: 1068px;
+    --s2a-containers-default-_grid-container-max-width: 1200px;
+    --s2a-containers-default-_grid-container-min-width: 842px;
+    --s2a-containers-fixed-offset-_static: 1152px;
+    --s2a-containers-fixed-offset-_grid-container-max-width: 1602px;
+    --s2a-containers-fixed-offset-_grid-container-min-width: 1152px;
+    --s2a-section-spacing-5xl: 240px;
+    --s2a-section-spacing-4xl: 128px;
+    --s2a-section-spacing-3xl: 128px;
+    --s2a-section-spacing-2xl: 128px;
+    --s2a-section-spacing-xl: 128px;
+    --s2a-section-spacing-lg: 64px;
+    --s2a-section-spacing-md: 48px;
+    --s2a-section-spacing-sm: 40px;
+    --s2a-section-spacing-xs: 32px;
+    --s2a-viewport-_static: 1440px;
+    --s2a-viewport-_static_alt: 1280px;
+    --s2a-viewport-_max-width: 1440px;
+    --s2a-viewport-_min-width: 1280px;
+    --s2a-viewport-side-margins-_margin-reflow-legacy: 106px;
+    --s2a-viewport-side-margins-_margin-reflow-default: 106px;
+    --s2a-viewport-side-margins-_margin-offset-reflow-legacy: 64px;
+    --s2a-viewport-_visibility-xl-lg: 1;
+    --s2a-viewport-_visibility-lg: 1;
+    --s2a-viewport-_visibility-md: 0;
+    --s2a-viewport-_visibility-md-sm: 0;
+    --s2a-typography-font-size-super: 96px;
+    --s2a-typography-font-size-heading-1: 80px;
+    --s2a-typography-font-size-heading-2: 56px;
+    --s2a-typography-font-size-heading-3: 48px;
+    --s2a-typography-font-size-heading-4: 36px;
+    --s2a-typography-font-size-heading-5: 24px;
+    --s2a-typography-font-size-heading-6: 18px;
+    --s2a-typography-font-size-body-lg: 20px;
+    --s2a-typography-letter-spacing-super: -3.84px;
+    --s2a-typography-letter-spacing-heading-2: -1.68px;
+    --s2a-typography-letter-spacing-heading-3: -1.44px;
+    --s2a-typography-letter-spacing-heading-4: -1px;
+    --s2a-typography-letter-spacing-heading-5: -0.96px;
+    --s2a-typography-line-height-super: 92px;
+    --s2a-typography-line-height-heading-1: 76px;
+    --s2a-typography-line-height-heading-2: 56px;
+    --s2a-typography-line-height-heading-3: 48px;
+    --s2a-typography-line-height-heading-4: 32px;
+    --s2a-typography-line-height-heading-5: 24px;
+    --s2a-viewport-vertical-padding-xl: 240px;
+    --s2a-viewport-vertical-padding-lg: 160px;
+    --s2a-viewport-vertical-padding-md: 128px;
+    --s2a-viewport-vertical-padding-sm: 80px;
+    --s2a-viewport-vertical-padding-xs: 64px;
+  }
+}
+
+@media (min-width: 1440px) {
+  :root {
+    /* S2A responsive container and typography tokens — XL */
+    --s2a-containers-default-_static: 1920px;
+    --s2a-containers-default-_grid-container-max-width: 1920px;
+    --s2a-containers-default-_grid-container-min-width: 1200px;
+    --s2a-containers-fixed-offset-_static: 1920px;
+    --s2a-containers-fixed-offset-_grid-container-max-width: 1920px;
+    --s2a-containers-fixed-offset-_grid-container-min-width: 1200px;
+    --s2a-viewport-_static: 2560px;
+    --s2a-viewport-_static_alt: 1920px;
+    --s2a-viewport-_max-width: 2560px;
+    --s2a-viewport-_min-width: 1440px;
+    --s2a-viewport-side-margins-_margin-reflow-legacy: 120px;
+    --s2a-viewport-side-margins-_margin-reflow-default: 120px;
+    --s2a-viewport-side-margins-_margin-offset-reflow-legacy: 159.36px;
+    --s2a-viewport-_visibility-xl: 1;
+    --s2a-viewport-_visibility-lg: 0;
+    --s2a-viewport-_visibility-lg-md: 0;
+    --s2a-viewport-_visibility-lg-sm: 0;
+    --s2a-typography-letter-spacing-heading-5: -0.48px;
   }
 }
 

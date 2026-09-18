@@ -1,0 +1,741 @@
+/* Resume Hero owns a local copy of the verb-dropzone interaction styles.
+ * Its authored rows and cells remain in the DOM and receive layout hooks. */
+
+/* ============================================================
+   BASE — light is the default
+   ============================================================ */
+
+.resume-hero {
+  box-sizing: border-box;
+  margin-inline: auto;
+  max-width: 1600px;
+  min-width: 320px;
+  padding: var(--spacing-500) var(--spacing-300);
+  position: relative;
+}
+
+main .section .resume-hero p {
+  margin: 0;
+}
+
+.resume-hero .resume-hero-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 var(--spacing-500);
+}
+
+.resume-hero .resume-hero-benefit {
+  align-items: center;
+  color: var(--s2a-color-content-default);
+  display: flex;
+  font-family: var(--s2a-font-family-label);
+  font-size: var(--s2a-typography-font-size-label);
+  font-style: normal;
+  font-weight: 700;
+  gap: var(--spacing-100);
+  justify-content: center;
+  leading-trim: both;
+  letter-spacing: var(--s2a-typography-letter-spacing-label);
+  line-height: var(--s2a-typography-line-height-label);
+  padding: var(--spacing-200) var(--spacing-200) var(--spacing-200) var(--spacing-100);
+  text-edge: cap;
+  width: fit-content;
+}
+
+/* Authored headline/subcopy row. */
+.resume-hero .resume-hero-header {
+  display: flex;
+  justify-content: center;
+  margin-block-end: var(--spacing-300);
+  width: 100%;
+}
+
+.resume-hero .resume-hero-header-content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  max-width: 900px;
+  text-align: center;
+}
+
+.resume-hero .express-logo {
+  display: block;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  width: auto;
+}
+
+.resume-hero .heading {
+  color: var(--color-gray-900);
+  font-family: var(--s2a-font-family-heading);
+  font-size: var(--heading-font-size-l);
+  font-weight: var(--heading-font-weight-extra);
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin: 0;
+  text-align: center;
+}
+
+.resume-hero .subcopy {
+  color: var(--Alias-content-typography-Body);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  line-height: var(--body-line-height);
+  margin: 0;
+  text-align: center;
+}
+
+/* Authored action row: upload widget and create-now widget. */
+.resume-hero .resume-hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-500);
+  width: 100%;
+}
+
+.resume-hero .resume-hero-upload,
+.resume-hero .resume-hero-create {
+  box-sizing: border-box;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.resume-hero .resume-hero-upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+}
+
+.resume-hero .resume-hero-create {
+  align-items: center;
+  align-self: stretch;
+  background: var(--S2AC-Palette-gray-50, #F8F8F8); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  border: 1px solid rgb(0 0 0 / 3%);
+  border-radius: 24px;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column-reverse;
+  gap: var(--spacing-100);
+  justify-content: flex-end;
+  max-width: 100%;
+  padding: var(--spacing-600) var(--spacing-400);
+  text-align: start;
+}
+
+.resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area):not(.resume-hero-create-media) {
+  color: var(--s2a-color-content-default);
+  font-family: var(--s2a-font-family-heading);
+  font-size: var(--s2a-typography-font-size-heading-6);
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: var(--s2a-typography-letter-spacing-heading-6);
+  line-height: var(--s2a-typography-line-height-title-6, var(--spacing-325)); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  margin: 0;
+  text-align: center;
+  text-wrap-style: balance;
+}
+
+.resume-hero .resume-hero-create > .resume-hero-create-copy {
+  order: 2;
+}
+
+.resume-hero .resume-hero-create > .action-area {
+  order: 1;
+}
+
+.resume-hero .resume-hero-create > .resume-hero-create-media {
+  order: 0;
+}
+
+.resume-hero .resume-hero-create picture {
+  display: block;
+  margin-block-start: var(--spacing-400);
+  max-height: 216px;
+  max-width: 100%;
+}
+
+.resume-hero .resume-hero-create img {
+  display: block;
+  height: auto;
+  max-height: 216px;
+  max-width: 100%;
+  width: 100%;
+}
+
+.resume-hero .resume-hero-create .action-area {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  width: 100%;
+}
+
+.resume-hero .resume-hero-create a.con-button:any-link {
+  align-items: center;
+  box-sizing: border-box;
+  display: inline-flex;
+  height: var(--spacing-400);
+  justify-content: center;
+  margin: 0;
+  min-height: 0;
+  padding-block: 0;
+  padding: 4px 12px;
+}
+
+/* ============================================================
+   DROPZONE AREA
+   ============================================================ */
+
+.verb-dropzone-area {
+  --verb-dropzone-background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' rx='24' ry='24' fill='none' stroke='%23868686' stroke-width='2' stroke-dasharray='4%2C 4'/%3E%3C/svg%3E");
+
+  border: none;
+  border-radius: 24px;
+  background-image: var(--verb-dropzone-background-image);
+  padding: 21px var(--spacing-400);
+  background-color: var(--color-gray-100);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
+  color: var(--c1-text-text);
+  font-family: var(--body-font-family);
+}
+
+.verb-dropzone-area:hover,
+.verb-dropzone-area.dragging,
+.resume-hero.dragging-block .verb-dropzone-area {
+  background-color: var(--color-gray-150);
+}
+
+.verb-dropzone-area:focus-visible {
+  background-color: var(--color-gray-150);
+  outline: 2px solid var(--Alias-content-semantic-accent-key-focus);
+  outline-offset: 2px;
+}
+
+.resume-hero.dragging-block {
+  outline: none;
+}
+
+.resume-hero.dragging-block::before {
+  display: none;
+}
+
+/* ============================================================
+   INNER LAYOUT (icon + content)
+   ============================================================ */
+
+.verb-dropzone-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.verb-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  text-align: start;
+}
+
+/* ============================================================
+   HEADING
+   ============================================================ */
+
+.resume-hero .verb-dropzone-heading {
+  color: var(--C1-Text-text, #2C2C2C); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  font-family: var(--s2a-font-family-heading);
+  font-size: var(--s2a-typography-font-size-heading-5);
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: var(--s2a-font-letter-spacing-4xl);
+  line-height: var(--s2a-typography-line-height-heading-5);
+  margin: 0;
+  text-align: center;
+  text-wrap-style: balance;
+  word-break: break-word;
+}
+
+/* ============================================================
+   SUB LINE — file-type/size limit
+   ============================================================ */
+
+.resume-hero .verb-dropzone-sub {
+  color: #000; /* stylelint-disable-line color-no-hex */
+  font-family: var(--s2a-font-family-body);
+  font-size: var(--s2a-typography-font-size-body-md);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: var(--s2a-typography-letter-spacing-body-md);
+  line-height: var(--s2a-typography-line-height-body-md);
+  margin: 0;
+  text-align: center;
+  text-wrap-style: pretty;
+}
+
+/* Resume-specific dropzone composition: authored preview, heading, and copy. */
+.resume-hero .verb-dropzone-area {
+  background-image: none;
+  min-height: 0;
+  overflow: hidden;
+  padding: 51px 15px;
+  position: relative;
+}
+
+.resume-hero .verb-dropzone-inner {
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  z-index: 1;
+}
+
+.resume-hero .widget-icon {
+  align-items: center;
+  display: none;
+  height: 100%;
+  inset: 0;
+  justify-content: center;
+  max-height: none;
+  max-width: none;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+}
+
+.resume-hero .widget-icon > img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.resume-hero .resume-hero-dropzone-image {
+  display: block;
+  height: 100%;
+  max-height: none;
+  max-width: none;
+  overflow: hidden;
+  width: 100%;
+}
+
+.resume-hero .resume-hero-dropzone-image img {
+  display: block;
+  height: 100%;
+  max-height: none;
+  object-fit: fill;
+  width: 100%;
+}
+
+.resume-hero .verb-dropzone-content {
+  align-items: center;
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+
+/* ============================================================
+   FOOTER — legal + info icon
+   ============================================================ */
+
+.verb-dropzone-footer {
+  width: 100%;
+}
+
+.verb-dropzone-legal p {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--Palette-gray-700);
+  flex: 1;
+}
+
+.verb-dropzone-legal a,
+.verb-dropzone-legal .verb-dropzone-legal-url {
+  color: var(--link-color);
+  text-decoration: underline;
+  font-weight: 400;
+}
+
+.verb-dropzone-legal a:hover,
+.verb-dropzone-legal .verb-dropzone-legal-url:hover {
+  color: var(--link-hover-color);
+}
+
+/* ============================================================
+   INFO ICON + TOOLTIP
+   ============================================================ */
+
+.resume-hero .info-icon {
+  --tooltip-background-color: var(--color-content-neutral);
+  --tooltip-text-color: var(--color-white);
+
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  margin-inline-start: 4px;
+  margin-block-end: 2px;
+}
+
+.resume-hero .info-icon svg {
+  width: 10px;
+  height: 10px;
+  filter: none;
+  color: var(--tooltip-background-color);
+}
+
+.resume-hero .milo-tooltip {
+  position: relative;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.resume-hero .milo-tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 100%;
+  margin-left: 7px;
+  max-width: 160px;
+  padding: 3px 8px 5px 8px;
+  border-radius: 5px;
+  background: var(--tooltip-background-color);
+  color: var(--tooltip-text-color);
+  text-align: center;
+  display: none;
+  z-index: 8;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 130%;
+  width: max-content;
+  font-family: var(--body-font-family);
+  box-sizing: border-box;
+}
+
+.resume-hero .milo-tooltip::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  margin-left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 8px solid transparent;
+  border-right-color: var(--tooltip-background-color);
+  display: none;
+  z-index: 8;
+}
+
+.resume-hero .milo-tooltip.top::before {
+  left: 50%;
+  top: -13px;
+  transform: translateX(-50%) translateY(-100%);
+  margin-left: 0;
+  margin-bottom: 15px;
+}
+
+.resume-hero .milo-tooltip.top::after {
+  left: 50%;
+  top: -6px;
+  transform: translateX(-50%) translateY(-50%);
+  border-color: var(--tooltip-background-color) transparent transparent;
+  border-right-color: transparent;
+  margin-left: 0;
+}
+
+.resume-hero .milo-tooltip:hover::before,
+.resume-hero .milo-tooltip:focus::before,
+.resume-hero .milo-tooltip:hover::after,
+.resume-hero .milo-tooltip:focus::after {
+  display: block;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+
+.resume-hero .hide {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================================
+   DRAG OVERLAY — full-viewport, shown when files dragged over page
+   ============================================================ */
+
+.verb-dropzone-drag-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  align-items: center;
+  justify-content: center;
+  background: rgb(255 255 255 / 70%);
+  backdrop-filter: blur(47px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+}
+
+.verb-dropzone-drag-overlay.is-dragging {
+  opacity: 1;
+}
+
+.verb-dropzone-drag-icon {
+  width: 65px;
+  height: 65px;
+  color: var(--color-gray-950);
+}
+
+.verb-dropzone-drag-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.verb-dropzone-drag-text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-gray-950);
+}
+
+/* ============================================================
+   ERROR STATE
+   ============================================================ */
+
+.resume-hero .error.hide {
+  display: none;
+  position: absolute;
+  clip: unset;
+}
+
+.verb-dropzone-error {
+  cursor: default;
+  background: #D31510;
+  max-width: calc(100% - 32px);
+  color: var(--color-white);
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  z-index: 5;
+}
+
+.verb-dropzone-error-text {
+  border-right: 1px solid rgb(255 255 255 / 20%);
+  font-size: 12px;
+  padding: 0 12px 0 0;
+  margin: 0 6px 0 6px;
+  max-width: none;
+  min-width: auto;
+}
+
+.verb-dropzone-errorBtn {
+  align-self: flex-start;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: block;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.verb-dropzone-errorIcon {
+  align-self: flex-start;
+  width: 16px;
+  height: 16px;
+  margin: 5px 2px 0 6px;
+  flex-shrink: 0;
+}
+
+.verb-dropzone-errorIcon::after {
+  content: '';
+  background-image: url('/express/code/icons/alert.svg');
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================================
+   TABLET — ≥ 600px
+   ============================================================ */
+
+@media screen and (min-width: 600px) {
+  .verb-dropzone-error {
+    max-width: 435px;
+    padding: 8px;
+  }
+
+  .verb-dropzone-error-text {
+    font-size: 14px;
+    padding-right: 16px;
+    margin-right: 8px;
+    margin-left: 8px;
+    max-width: 324px;
+    min-width: 100px;
+  }
+
+  .verb-dropzone-errorIcon {
+    width: 18px;
+    height: 18px;
+    margin: 7px 4px 0 8px;
+  }
+
+  .verb-dropzone-errorIcon::after {
+    width: 18px;
+    height: 18px;
+  }
+
+  .verb-dropzone-errorBtn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* ============================================================
+   TWO-COLUMN ACTIONS — ≥ 900px
+   ============================================================ */
+
+@media screen and (min-width: 900px) {
+  .resume-hero {
+    padding: var(--spacing-900) var(--Grid-container-padding-side);
+  }
+  .resume-hero .resume-hero-header {
+    margin-block-end: var(--spacing-500);
+  }
+
+  .resume-hero .resume-hero-header-content {
+    gap: 0;
+  }
+
+  .resume-hero .express-logo {
+    margin-block-end: var(--spacing-100);
+  }
+
+  .resume-hero .resume-hero-actions {
+    align-items: stretch;
+    column-gap: var(--Grid-grid-gutter);
+    display: grid;
+    grid-template-columns: repeat(var(--s2a-layout-guide-_columns), minmax(0, 1fr));
+    margin: auto auto 22px;
+    max-width: 1130px;
+    /* max-height: 342px; */
+  }
+
+  .resume-hero .resume-hero-upload {
+    grid-column: auto / span 8;
+    width: auto;
+  }
+
+  .resume-hero .verb-dropzone-area {
+    aspect-ratio: auto;
+    background-image: var(--verb-dropzone-background-image);
+    height: 298px;
+    max-width: none;
+    min-height: 0;
+    padding: var(--spacing-400);
+    width: auto;
+  }
+
+  .resume-hero .widget-icon {
+    display: flex;
+  }
+
+  .resume-hero .resume-hero-create {
+    align-items: flex-start;
+    align-self: start;
+    border: 0;
+    flex-direction: column;
+    grid-column: auto / span 4;
+    height: 298px;
+    justify-content: flex-start;
+    max-width: 323px;
+
+    padding: var(--spacing-400);
+    width: auto;
+  }
+
+  .resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area):not(.resume-hero-create-media) {
+    text-align: start;
+  }
+
+  .resume-hero .resume-hero-create > :is(
+    .resume-hero-create-copy,
+    .action-area,
+    .resume-hero-create-media
+  ) {
+    order: initial;
+    flex-grow: 1;
+  }
+
+  .resume-hero .resume-hero-create .action-area {
+    justify-content: flex-start;
+  }
+
+  .resume-hero .resume-hero-create picture {
+    margin-block-start: 0;
+    max-height: none;
+  }
+
+  .resume-hero .resume-hero-create img {
+    max-height: none;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .resume-hero .heading {
+    font-size: var(--heading-font-size-xl);
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .resume-hero .resume-hero-actions {
+    max-width: 1130px;
+    margin: auto;
+    margin-bottom: 22px;
+  }
+}
