@@ -134,7 +134,7 @@
 
 .ax-color-modal-container:has(.modal-library-gradient) {
   max-height: 95vh;
-  max-height: 95dvh;
+  max-height: 95dvh; /* stylelint-disable-line declaration-block-no-duplicate-properties */
 }
 
 /* Tablet doesn't use the flat 95vh/95dvh cap above (unlike mobile/desktop) —

@@ -39,6 +39,7 @@
 .modal-color-mode-picker sp-picker.filter-picker {
   width: 144px;
   min-width: 144px;
+  --mod-picker-min-width: 144px;
 }
 
 .modal-codes-menu {
