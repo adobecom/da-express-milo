@@ -80,8 +80,8 @@
   --ax-toolbar-max-width-mobile: 599px;
   --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
   --ax-toolbar-max-width-tablet: 1135px;
-  --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
-  --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
+  --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width);
+  --ax-toolbar-inline-margin: var(--spacing-300);
   --ax-toolbar-max-width-desktop: calc(var(--ax-toolbar-presentation-max-width) - var(--ax-toolbar-inline-margin) * 2);
   --ax-toolbar-cta-min-width: 108px;
   --ax-toolbar-action-min-width: 300px;
@@ -263,6 +263,21 @@
 .ax-toolbar-main > sp-button {
   flex: 1 0 100%;
   min-inline-size: var(--ax-toolbar-cta-min-width);
+  /* sp-button's own #label is align-self:start, not centered — it relies on
+     --mod-button-top-to-text/-bottom-to-text padding summing exactly to the
+     button's content height to *look* centered. That sum falls short of this
+     button's actual height (a few px short at every breakpoint we use: l-size
+     mobile/tablet and desktop alike), and since the label isn't truly
+     flex-centered, 100% of that shortfall piles up below the text instead of
+     splitting evenly. Recompute both paddings from the button's own live
+     height/line-height so the label is exactly centered regardless of
+     breakpoint. --spectrum-button-line-height is unitless (e.g. "1.2"); "1em"
+     resolves it at the point var() is finally substituted into #label's own
+     padding-block-* (see button.js), i.e. against the label's real font-size,
+     not sp-button's own --spectrum-button-font-size token (which doesn't
+     match #label's rendered size and would throw the math off if used here). */
+  --mod-button-top-to-text: calc((var(--spectrum-button-height) - (var(--spectrum-button-line-height) * 1em)) / 2);
+  --mod-button-bottom-to-text: var(--mod-button-top-to-text);
 }
 
 /* ── Library variant (saved-themes modal toolbar) ──────────────── */
@@ -272,8 +287,6 @@
 
   max-inline-size: none;
   margin-inline: 0;
-  border-block-start: 1px solid var(--color-gray-150);
-  padding-block-start: var(--spacing-300);
   box-shadow: none;
 }
 
@@ -378,7 +391,7 @@
   --ax-toolbar-sticky-z: 80;
   --ax-toolbar-floating-bottom-offset: 0;
   --ax-toolbar-inline-margin: 0;
-  --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
+  --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width);
 
   position: fixed;
   inline-size: calc(100% - var(--ax-toolbar-inline-margin) * 2);
@@ -437,7 +450,7 @@
 
   .ax-toolbar-sticky-wrapper {
     --ax-toolbar-floating-bottom-offset: var(--spacing-200);
-    --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
+    --ax-toolbar-inline-margin: var(--spacing-300);
     inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   }
 

@@ -5,7 +5,7 @@
   --ax-lib-border: var(--color-gray-150);
   --ax-lib-heading-color: var(--Alias-content-typography-Heading);
   --ax-lib-detail-color: var(--Alias-content-typography-Detail);
-  --ax-lib-body-color: var(--Alias-content-typography-Body, #505050);
+  --ax-lib-body-color: var(--Alias-content-typography-Body);
   --ax-lib-accent: var(--S2-Buttons-Accent-Color-Default);
   --ax-lib-header-height: 76px;
   --ax-lib-strip-height: 56px;
@@ -23,7 +23,7 @@
    Mobile-first: base styles target S; min-width queries layer on M and L. */
 .ax-lib-header {
   position: sticky;
-  top: var(--ax-lib-header-sticky-top, var(--global-height-nav, 0px));
+  top: var(--ax-lib-header-sticky-top);
   z-index: 3;
   width: 100%;
   background: var(--ax-lib-bg);
@@ -144,7 +144,9 @@
    the Figma typography to this slot only. */
 .ax-lib-header__sort-picker sp-picker.filter-picker {
   flex-grow: 1;
+  width: 100%;
   min-width: 0;
+  --mod-picker-min-width: 144px;
   --mod-picker-font-size: var(--body-font-size-s);
   --mod-picker-line-height: 18px;
 
@@ -577,7 +579,11 @@
   flex-direction: column;
   width: max-content;
   min-width: 0;
-  padding: var(--spacing-100);
+  /* Horizontal is 0, not var(--spacing-100) — same split sp-picker's own
+     internal popover uses (see picker.css). sp-menu-item ships its own
+     :host margin (reserving room for its focus ring), so authoring
+     horizontal padding here on top of that margin double-spaced the edges. */
+  padding: var(--spacing-100) 0;
   background: var(--ax-lib-bg);
   border-radius: var(--Corner-radius-corner-radius-100);
   box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-elevated-key);
@@ -612,18 +618,33 @@
   --mod-menu-item-background-color-hover: var(--color-gray-150);
   --mod-menu-item-background-color-down: var(--color-gray-150);
 
-  display: block;
+  display: flex;
   inline-size: max-content;
   width: max-content;
   border: none;
   background: transparent;
   box-shadow: none;
   padding: 0;
+  gap: 2px;
 }
 
+/* Uses Spectrum's untouched default "M" size padding (no padding-block/
+   padding-inline-end override) — matches every other picker/menu in the app
+   (see picker.css's own base sp-menu-item rule), per design: the Codes/
+   Download menu's item text should read at the same size as its trigger.
+   Margin matches sp-picker's own sp-menu-item rule (8px, picker.css) —
+   overriding sp-menu-item's native :host margin (4px, sized for its focus
+   ring); this menu isn't a sp-picker so it doesn't inherit that rule and
+   needs its own copy. */
 .ax-lib-card__action-menu-list sp-menu-item {
   background: transparent;
   white-space: nowrap;
+  margin-inline: 8px;
+  /* This sp-menu-item list sits inside this sp-menu's own overflow:auto with
+     no reserved padding (see picker.css's identical fix on its own
+     sp-picker sp-menu-item rule) — an outward-drawn ring on the first/last
+     item gets clipped at that boundary. Draw it inward instead. */
+  --spectrum-menu-item-focus-indicator-offset: -4px;
 }
 
 .ax-lib-card__action-menu-list sp-menu-item:hover {

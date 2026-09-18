@@ -72,16 +72,25 @@
   border-width: 2px;
 }
 
-.gradient-editor--layout-responsive .gradient-editor-handle:first-child {
+/* [data-position] (the stop's own real offset, set in gradient-editor.js),
+   not :first-child/:last-child — DOM order only matches "at the left/right
+   edge" when every stop sits at a distinct position. Multiple stops can
+   legitimately share the same position (e.g. two coincident stops used to
+   create a hard color-stop edge), and this gradient's own data can have
+   several stops all at 0%: with :last-child, the last of those (still at
+   0%, not 100%) got the -9px "flush against the right edge" shift instead
+   of the +9px "flush against the left edge" one it actually needed, pushing
+   it further past the left edge instead of back into view. */
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="0"] {
   transform: translateX(9px);
 }
 
-.gradient-editor--layout-responsive .gradient-editor-handle:last-child {
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="100"] {
   transform: translateX(-9px);
 }
 
-.gradient-editor--layout-responsive .gradient-editor-handle:first-child::before,
-.gradient-editor--layout-responsive .gradient-editor-handle:last-child::before {
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="0"]::before,
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="100"]::before {
   content: '';
   position: absolute;
   inset: calc(-1 * var(--border-width-2) * 2);
@@ -91,17 +100,17 @@
   opacity: 0;
 }
 
-.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus::before,
-.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus-visible::before,
-.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus::before,
-.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus-visible::before {
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="0"]:focus::before,
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="0"]:focus-visible::before,
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="100"]:focus::before,
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="100"]:focus-visible::before {
   opacity: 1;
 }
 
-.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus,
-.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus-visible,
-.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus,
-.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus-visible {
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="0"]:focus,
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="0"]:focus-visible,
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="100"]:focus,
+.gradient-editor--layout-responsive .gradient-editor-handle[data-position="100"]:focus-visible {
   outline: none;
 }
 
@@ -137,23 +146,17 @@
   height: var(--Gradient-strip-tall-height-s);
 }
 
-@media (min-width: 600px) {
-  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
-    max-width: 100%;
-  }
-
-  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
-    height: var(--Gradient-strip-tall-height-m);
-  }
-}
-
+/* Modal gradient strip: 200px on mobile/tablet (matches the base rule above —
+   no tablet-specific override), 250px on desktop. This is a modal-specific
+   height, not the shared s/m/l strip scale (--Gradient-strip-tall-height-*),
+   which other gradient-strip components still use unchanged. */
 @media (min-width: 1200px) {
   .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
     max-width: 100%;
   }
 
   .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
-    height: var(--Gradient-strip-tall-height-l);
+    height: 250px;
   }
 }
 

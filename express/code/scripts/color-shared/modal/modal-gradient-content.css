@@ -4,10 +4,33 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-200);
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
+/* .modal-content-scroll wraps everything except the toolbar (see
+   createGradientModalContent.js) — same "toolbar lives outside the scroll
+   region" structure the Library modal already uses (modal-library-theme.css
+   / modal-library-gradient.css), so the sticky toolbar's own divider/gap
+   never gets scrolled behind it. That was a real bug when the toolbar was
+   just a sticky child inside the one scrolling flex column: the flex gap
+   right before it lived inside the scrolling area, so it scrolled out of
+   view the moment the toolbar stuck, leaving content flush against the
+   divider with no visible gap. This container no longer scrolls itself
+   (.modal-content-scroll does), and doesn't supply the gap before the
+   toolbar either — the toolbar's own border + padding-block-start supply
+   all of that, so they sit flush against each other here. */
+.ax-color-modal-content:has(.modal-content-scroll) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ax-color-modal-content .modal-content-scroll {
+  align-items: flex-start;
+  width: 100%;
+}
 
 .ax-color-modal-content .modal-palette-container {
   width: 100%;
@@ -33,9 +56,6 @@
   width: 100%;
   height: 200px;
   border-radius: 8px;
-  /* Inset so edge handles (0% / 100% with translate -50%) stay inside; handle ring = 22px → 11px half */
-  padding-left: 11px;
-  padding-right: 11px;
   box-sizing: border-box;
 }
 
@@ -49,9 +69,6 @@
 .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
   height: auto;
   min-height: 0;
-  /* Keep room for the gradient-editor focus outline (outline-offset 1px + 2px
-     width = 3px) so it isn't clipped at the scroll's top/bottom edges. */
-  padding: var(--spacing-75);
 }
 
 /* Inner stroke on the gradient preview (explore + library modals): an inset
@@ -59,7 +76,31 @@
    grid's .gradient-strip-visual. Drop the component's outer border so this is
    the only stroke. */
 .ax-color-modal-content .modal-gradient-preview .gradient-editor {
+  --Corner-radius-bar: var(--Corner-radius-corner-radius-200);
   border: none;
+}
+
+/* Stacked orientation (mobile/tablet)'s .swatch-column:first-child/:last-child
+   corner rounding is driven entirely by --figma-strip-radius, with no
+   fallback — modal-palette-content.css sets this for the palette modal's own
+   rail, but this file never mirrored it for the gradient modal's, so the
+   var() resolved to nothing and the corners silently went square. Desktop's
+   vertical orientation was unaffected since it uses a different, always-
+   defined token (--Corner-radius-corner-radius-200) instead. */
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail .modal-color-rail-wrap color-swatch-rail {
+  --figma-strip-radius: 8px;
+}
+
+/* This modal's rail always grows with its content instead of scrolling
+   internally (see the rail height rules below), so it never needs the
+   "more content below" fade hint — but that fade rule itself lives in
+   modal-palette-content.css, unscoped by breakpoint, and matches this
+   modal's identical class names whenever that file happens to already be
+   loaded (e.g. a palette was opened earlier in the same session). The extra
+   [daa-lh] attribute selector guarantees this wins regardless of which of
+   the two files' <link> tags lands in <head> last. */
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"])::after {
+  display: none;
 }
 
 .ax-color-modal-content .modal-gradient-preview .gradient-editor-bar {
@@ -117,8 +158,38 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
-  padding: 0 0 var(--spacing-200);
-  border-bottom: 1px solid var(--color-gray-150);
+}
+
+/* Creator avatar/name sit on the same row as the title, vertically centered
+   — unlike the palette modal, which stacks its thumb-tags row below the
+   title. Scoped via [daa-lh] (not just the shared class) since
+   modal-palette-content.css's own .modal-palette-name-tags rule (column,
+   loaded on every page regardless of which modal is currently open) targets
+   the exact same class name — attribute + class beats a lone class
+   regardless of stylesheet load order. flex-wrap lets it fall back to the
+   stacked look on narrow widths where title + creator can't both fit on one
+   line, rather than needing a separate breakpoint override.
+   justify-content: space-between (not margin-left: auto on the thumb-tags
+   child) — when there's room for both on one line, space-between pushes
+   them to opposite ends same as the margin would; but when they wrap onto
+   separate lines, a line with only one flex item has nothing to space
+   *between*, so that item sits at the line's start (left) instead of being
+   pushed to the right by its own now-orphaned auto margin. */
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-name-tags {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-thumb-tags {
+  width: auto;
+  flex-shrink: 0;
 }
 
 .ax-color-modal-content .modal-palette-name-likes {
@@ -202,33 +273,13 @@
   flex-shrink: 0;
 }
 
-.ax-color-modal-content .modal-tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-100);
-  align-items: flex-start;
-  justify-content: flex-start;
-  list-style: none;
+.ax-color-modal-content .modal-gradient-description {
   margin: 0;
-  padding: 0;
-}
-
-.ax-color-modal-content .modal-tag {
-  padding: 4px 12px;
-  background: var(--color-light-gray);
-  border-radius: 7px;
-  font-size: 12px;
-  line-height: 16px;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-gray-800-variant);
-  border: none;
-  box-sizing: border-box;
   font-family: var(--ax-body-font-family);
-  font-weight: 500;
-  white-space: nowrap;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 400;
+  color: var(--color-gray-800-variant);
 }
 
 .ax-color-modal-content .modal-thumbnail-container {
@@ -264,6 +315,24 @@
   pointer-events: none;
 }
 
+.ax-color-modal-content .modal-thumbnail .thumbnail-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #8F8F8F;
+  color: var(--color-white);
+  font-family: var(--body-font-family);
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 30px;
+  text-transform: uppercase;
+  border-radius: 50%;
+  user-select: none;
+}
+
 .ax-color-modal-content .modal-creator-name {
   font-family: 'Adobe Clean', sans-serif;
   font-size: 12px;
@@ -276,12 +345,21 @@
 }
 
 .ax-color-modal-content .modal-palette-toolbar {
-  width: 100%;
+  box-sizing: border-box;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-100);
+  border-block-start: 1px solid var(--color-gray-150);
+  position: sticky;
+  bottom: 0;
+  /* .swatch-column bumps to z-index:1 on :focus-within — without this the
+      toolbar (z-index:auto) loses the stack to a focused column scrolled
+      underneath it. */
+  z-index: 2;
+  background: var(--color-white);
+  padding-block: var(--spacing-300);
 }
 
 .ax-color-modal-content .modal-palette-toolbar .color-floating-toolbar-container {
@@ -546,14 +624,16 @@
     justify-content: space-between;
   }
 
+  /* margin-left: auto (not just order — see createGradientModalContent.js's
+     matching comment) pushes the thumbnail right on its own, since it's the
+     only flex child whenever there's no description (i.e. almost always —
+     real gradient descriptions are essentially always empty). order:1 alone
+     is a no-op with nothing to reorder against, unlike the palette modal's
+     tags container, which is always present (defaults to ['Color',
+     'Palette'] even when the palette has no tags of its own). */
   .ax-color-modal-content .modal-thumbnail-container {
     order: 1;
-  }
-
-  .ax-color-modal-content .modal-palette-container,
-  .ax-color-modal-content .modal-palette-name-tags,
-  .ax-color-modal-content .modal-palette-toolbar {
-    max-width: 550px;
+    margin-left: auto;
   }
 
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
@@ -604,6 +684,7 @@
   }
 }
 
+
 @media (min-width: 1200px) {
   .ax-color-modal-content .modal-content {
     overflow: visible;
@@ -616,19 +697,56 @@
     max-width: 100%;
   }
 
-  .ax-color-modal-content .modal-palette-name-tags {
-    margin: 0;
-    padding: 0 0 var(--spacing-200) 0;
+  /* Stop rail (swatch columns): fixed 160px on desktop, matching the Library
+     gradient modal's own rail (modal-library-gradient.css) — this one has no
+     dedicated wrapper class like .modal-library-gradient, so it's scoped via
+     the daa-lh set on this modal's <main> instead. Without this, it falls
+     through to modal-palette-content.css's shared aspect-ratio-based sizing,
+     which is meant for the palette modal's rail, not the gradient one.
+     160px (not 158px) because a 3-row RGB/HSB/Lab swatch-column's own
+     content (3 * 32px rows + 12px top/bottom padding) is exactly 160px —
+     min-height:auto's flexbox "automatic minimum size" won't let it shrink
+     below that, so 158px let the column overflow .swatch-rail's
+     overflow:hidden by 2px, clipping the bottom of its (inset) focus ring.
+     The [data-color-count-range] qualifier isn't for targeting — the rail
+     wrap always has this attribute once rendered — it's there so this
+     selector's specificity (5 class/attribute selectors) beats
+     modal-palette-content.css's same-breakpoint "large" rule (4 selectors)
+     outright, instead of the two depending on which stylesheet's <link>
+     happens to land in <head> last (they're fetched via Promise.all with no
+     guaranteed order). */
+  .ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] {
+    height: 160px;
+    min-height: 160px;
+    aspect-ratio: auto;
+    max-height: none;
+    /* Unlike modal-palette-content.css, this file never gives the wrap a flex
+       context of its own — it only ever gets one as an accidental side effect
+       of modal-palette-content.css happening to already be loaded (e.g. a
+       palette modal was opened earlier in the session). Without it, the
+       158px height above is real but inert: sp-theme/color-swatch-rail are
+       plain block children that just sit at their own content height inside
+       it. That's easy to miss testing HSB/RGB/Lab, whose multi-channel rows
+       are naturally tall enough to reach ~158px on content size alone, but
+       HEX mode's single hex-code row is only ~56px tall, leaving the rest of
+       the box visibly empty. */
+    display: flex;
+    flex-direction: column;
   }
 
-  .ax-color-modal-content .modal-palette-toolbar {
+  .ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] sp-theme {
+    flex: 1 1 0;
+    min-height: 0;
     width: 100%;
-    max-width: 100%;
-    margin-top: 0;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: nowrap;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] sp-theme color-swatch-rail {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
   }
 
   .ax-color-modal-content .modal-palette-toolbar .ax-toolbar-main {

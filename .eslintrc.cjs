@@ -59,5 +59,6 @@ module.exports = {
     'express/code/scripts/color-shared/spectrum/**',
     'express/code/scripts/color-shared/components/**',
     'express/code/scripts/widgets/**',
+    'test-html-results/**',
   ],
 };

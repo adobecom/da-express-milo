@@ -1,5 +1,12 @@
 import { hexToNormalizedRGB, paletteToThemeData } from '../../../../libs/services/providers/transforms.js';
 
+/** iOS Safari (and iPadOS, which reports as MacIntel with touch points) can't save .ase files. */
+export function isIOSDevice() {
+  if (typeof navigator === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 function channelToHex(value) {
   const int = Math.min(255, Math.max(0, Math.round(Number(value))));
   return Number.isNaN(int) ? '00' : int.toString(16).padStart(2, '0');

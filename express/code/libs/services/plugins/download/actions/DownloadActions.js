@@ -3,23 +3,23 @@ import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { ValidationError } from '../../../core/Errors.js';
 import { DownloadTopics } from '../topics.js';
 import {
-  ASSET_IMAGE_DOWNLOAD_SIZE,
   ASSET_SVG_SIZE,
   MIME_TYPES,
 } from '../constants.js';
 import {
+  buildGradientCSSValue,
   buildLinearGradientSVG,
   buildVariableSwatches,
   denormRGB,
   doesThemeHavePantoneColorCodes,
+  escapeXmlAttr,
+  formatSwatchInMode,
   getClassName,
   getDownloadedImageName,
-  getLinearGradientColorStops,
-  getLinearGradientCSS,
   performDownload,
+  renderGradientImage,
   renderPantoneJPEG,
   renderThemeJPEG,
-  rgbToHsl,
   safeClipboardWrite,
   validateSwatches,
   writeASE,
@@ -74,6 +74,14 @@ export class FileDownloadActions extends BaseActionGroup {
    * @throws {ValidationError}
    */
   async downloadAsJPEG(themeData) {
+    if (themeData.assetType === 'gradient') {
+      return this.#downloadJPEGVariant(
+        themeData,
+        DownloadTopics.FILE.JPEG,
+        (td) => renderGradientImage(td, MIME_TYPES.JPEG),
+        'AdobeColorGradient ',
+      );
+    }
     return this.#downloadJPEGVariant(
       themeData,
       DownloadTopics.FILE.JPEG,
@@ -105,22 +113,7 @@ export class FileDownloadActions extends BaseActionGroup {
   async downloadAsPNG(themeData) {
     validateSwatches(themeData, DownloadTopics.FILE.PNG);
 
-    const { width, height } = ASSET_IMAGE_DOWNLOAD_SIZE;
-    const colorStops = getLinearGradientColorStops(themeData.swatches);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = width;
-    canvas.height = height;
-
-    const linearGradient = ctx.createLinearGradient(0, 0, width, 0);
-    colorStops.forEach((stop) => {
-      linearGradient.addColorStop(stop.offset, `rgb(${stop.R}, ${stop.G}, ${stop.B})`);
-    });
-
-    ctx.fillStyle = linearGradient;
-    ctx.fillRect(0, 0, width, height);
-
-    const pngDataUrl = canvas.toDataURL(MIME_TYPES.PNG);
+    const pngDataUrl = renderGradientImage(themeData, MIME_TYPES.PNG);
     const fileName = `AdobeColorGradient ${themeData.name}.png`;
     performDownload(pngDataUrl, fileName, MIME_TYPES.PNG);
     return { fileName };
@@ -190,44 +183,24 @@ export class ExportActions extends BaseActionGroup {
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='HEX'] - the currently-selected
+   *   Color mode; only this mode's values are emitted (see formatSwatchInMode)
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsCSS(themeData) {
+  async exportAsCSS(themeData, mode = 'HEX') {
     validateSwatches(themeData, DownloadTopics.EXPORT.CSS);
 
     let output = '';
 
     if (themeData.assetType === 'gradient') {
-      const gradientCSS = getLinearGradientCSS(themeData.swatches);
-      output += '/* Gradient in Hex */\n';
-      output += `linear-gradient(to right, ${gradientCSS.linearGradientDataHEX});\n`;
-      output += '\n/* Gradient in RGBA */\n';
-      output += `linear-gradient(to right, ${gradientCSS.linearGradientDataRGBA});\n`;
+      output += `${buildGradientCSSValue(themeData.swatches, mode)};\n`;
     } else {
       const cls = getClassName(themeData.name);
-
-      output += '/* Color Theme Swatches in Hex */\n';
       themeData.swatches.forEach((swatch, i) => {
-        const { r, g, b } = denormRGB(swatch);
-        const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-        output += `.${cls}-${i + 1}-hex { color: #${hex}; }\n`;
-      });
-
-      output += '\n/* Color Theme Swatches in RGBA */\n';
-      themeData.swatches.forEach((swatch, i) => {
-        const { r, g, b } = denormRGB(swatch);
-        output += `.${cls}-${i + 1}-rgba { color: rgba(${r}, ${g}, ${b}, 1); }\n`;
-      });
-
-      output += '\n/* Color Theme Swatches in HSLA */\n';
-      themeData.swatches.forEach((swatch, i) => {
-        const hsl = rgbToHsl(swatch.rgb);
-        const h = Math.round(hsl.h * 360);
-        const s = Math.round(hsl.s * 100);
-        const l = Math.round(hsl.l * 100);
-        output += `.${cls}-${i + 1}-hsla { color: hsla(${h}, ${s}%, ${l}%, 1); }\n`;
+        const { suffix, value } = formatSwatchInMode(swatch, mode);
+        output += `.${cls}-${i + 1}-${suffix} { color: ${value}; }\n`;
       });
     }
 
@@ -237,37 +210,46 @@ export class ExportActions extends BaseActionGroup {
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='HEX']
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsSCSS(themeData) {
+  async exportAsSCSS(themeData, mode = 'HEX') {
     validateSwatches(themeData, DownloadTopics.EXPORT.SCSS);
-    const output = buildVariableSwatches(themeData.swatches, themeData.name, '$');
+    const output = themeData.assetType === 'gradient'
+      ? `$${getClassName(themeData.name)}: ${buildGradientCSSValue(themeData.swatches, mode)};\n`
+      : buildVariableSwatches(themeData.swatches, themeData.name, '$', mode);
     const clipboardSuccess = await safeClipboardWrite(output, 'SCSS');
     return { format: 'SCSS', output, clipboardSuccess };
   }
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='HEX']
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsLESS(themeData) {
+  async exportAsLESS(themeData, mode = 'HEX') {
     validateSwatches(themeData, DownloadTopics.EXPORT.LESS);
-    const output = buildVariableSwatches(themeData.swatches, themeData.name, '@');
+    const output = themeData.assetType === 'gradient'
+      ? `@${getClassName(themeData.name)}: ${buildGradientCSSValue(themeData.swatches, mode)};\n`
+      : buildVariableSwatches(themeData.swatches, themeData.name, '@', mode);
     const clipboardSuccess = await safeClipboardWrite(output, 'LESS');
     return { format: 'LESS', output, clipboardSuccess };
   }
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
+   * @param {'HEX'|'RGB'} [mode='HEX'] - only HEX/RGB are valid (no XML
+   *   representation exists for HSB/Lab, so those are excluded from the
+   *   Codes menu entirely — see createColorModesHeader.js)
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsXML(themeData) {
+  async exportAsXML(themeData, mode = 'HEX') {
     validateSwatches(themeData, DownloadTopics.EXPORT.XML);
 
     const cls = getClassName(themeData.name);
@@ -275,8 +257,13 @@ export class ExportActions extends BaseActionGroup {
 
     themeData.swatches.forEach((swatch, i) => {
       const { r, g, b } = denormRGB(swatch);
-      const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-      output += `<color name='${cls}-${i + 1}' rgb='${hex}' r='${r}' g='${g}' b='${b}' />\n`;
+      const name = escapeXmlAttr(`${cls}-${i + 1}`);
+      if (mode === 'HEX') {
+        const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+        output += `<color name='${name}' hex='${hex}' />\n`;
+      } else {
+        output += `<color name='${name}' r='${r}' g='${g}' b='${b}' />\n`;
+      }
     });
 
     output += '</palette>';
