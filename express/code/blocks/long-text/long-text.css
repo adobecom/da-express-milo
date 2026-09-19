@@ -9,7 +9,7 @@ main .section div.long-text-wrapper.plain {
 }
 
 main .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .long-text-wrapper:first-child:not(.plain) {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .long-text-wrapper:first-child {
     padding-top: 60px;
 }
 
@@ -27,7 +27,6 @@ main .long-text.plain {
     margin: unset;
     background-color: initial;
     border-radius: unset;
-    padding: var(--spacing-900) var(--Grid-container-padding-side);
 }
 
 main .long-text.no-background {
@@ -67,7 +66,7 @@ main .long-text.plain h1 {
 }
 
 main .long-text.plain h2 {
-    font-size: var(--heading-font-size-l);
+    font-size: var(--heading-font-size-m);
     margin-bottom: var(--spacing-400);
 }
 
