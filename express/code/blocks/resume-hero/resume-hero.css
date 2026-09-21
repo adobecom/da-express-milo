@@ -8,7 +8,8 @@
 .resume-hero {
   box-sizing: border-box;
   margin-inline: auto;
-  max-width: 1600px;
+  /* 1330px XL content area plus 40px desktop padding on each side. */
+  max-width: 1410px;
   min-width: 320px;
   padding: var(--spacing-500) var(--spacing-300);
   position: relative;
@@ -69,13 +70,18 @@ main .section .resume-hero p {
 }
 
 .resume-hero .heading {
+  /* Figma scopes this component to the XL responsive typography mode. */
+  --s2a-typography-font-size-heading-4: 36px;
+  --s2a-typography-letter-spacing-heading-4: -1px;
+  --s2a-typography-line-height-heading-4: 32px;
+
   color: var(--color-gray-900);
   font-family: var(--s2a-font-family-heading);
   font-size: var(--s2a-typography-font-size-heading-4);
   font-weight: var(--heading-font-weight-extra);
   letter-spacing: var(--s2a-typography-letter-spacing-heading-4);
   line-height: var(--s2a-typography-line-height-heading-4);
-  margin: 8px 0px;
+  /* margin: 8px 0px; */
   text-align: center;
 }
 
@@ -357,7 +363,7 @@ main .section .resume-hero p {
 .verb-dropzone-content {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--spacing-100);
   min-width: 0;
   text-align: start;
 }
@@ -367,12 +373,17 @@ main .section .resume-hero p {
    ============================================================ */
 
 .resume-hero .verb-dropzone-heading {
+  /* Figma scopes this component to the XL responsive typography mode. */
+  --s2a-typography-font-size-heading-5: 24px;
+  --s2a-typography-letter-spacing-heading-5: -0.48px;
+  --s2a-typography-line-height-heading-5: 24px;
+
   color: var(--c1-text-text);
   font-family: var(--s2a-font-family-heading);
   font-size: var(--s2a-typography-font-size-heading-5);
   font-style: normal;
   font-weight: 900;
-  letter-spacing: var(--s2a-font-letter-spacing-4xl);
+  letter-spacing: var(--s2a-typography-letter-spacing-heading-5);
   line-height: var(--s2a-typography-line-height-heading-5);
   margin: 0;
   text-align: center;
@@ -611,6 +622,7 @@ main .section .resume-hero p {
 .resume-hero .info-icon.milo-tooltip.top {
   bottom: -3px;
   height: fit-content;
+  position: absolute;
 }
 
 .resume-hero .info-icon svg {
@@ -663,21 +675,21 @@ main .section .resume-hero p {
 }
 
 .resume-hero .milo-tooltip.top::before {
-  left: 50%;
-  top: -10px;
-  transform: translateX(-50%) translateY(-100%);
-  margin-left: 0;
-  margin-bottom: 15px;
+ transform: translateX(-48%) translateY(-90%);
+    margin-left: 0;
+    margin-bottom: 15px;
+
+
 }
 
 .resume-hero .milo-tooltip.top::after {
-  border-width: 4px;
-  left: 50%;
-  top: -6px;
-  transform: translateX(-50%) translateY(-50%);
-  border-color: var(--tooltip-background-color) transparent transparent;
-  border-right-color: transparent;
-  margin-left: 0;
+    border-width: 4px;
+    /* left: 50%; */
+    top: -px;
+    transform: translateX(-10.75px) translateY(-1px);
+    border-color: var(--tooltip-background-color) transparent transparent;
+    border-right-color: transparent;
+    margin-left: 0;
 }
 
 /* Keep the first two trust items together on narrow screens, then stack. */

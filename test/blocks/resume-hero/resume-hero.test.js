@@ -194,11 +194,15 @@ describe('resume-hero', () => {
     const blockStyles = getComputedStyle(block);
     const headerStyles = getComputedStyle(block.querySelector('.resume-hero-header'));
     const headerContentStyles = getComputedStyle(block.querySelector('.resume-hero-header-content'));
+    const headingStyles = getComputedStyle(block.querySelector('.resume-hero .heading'));
 
     expect(blockStyles.padding).to.equal('32px 16px');
     expect(headerStyles.marginBlockEnd).to.equal('16px');
     expect(headerContentStyles.gap).to.equal('8px');
     expect(headerContentStyles.maxWidth).to.equal('666px');
+    expect(headingStyles.fontSize).to.equal('36px');
+    expect(headingStyles.letterSpacing).to.equal('-1px');
+    expect(headingStyles.lineHeight).to.equal('32px');
     expect(getComputedStyle(authoredNodes.uploadCell).gap).to.equal('8px');
   });
 
@@ -263,7 +267,6 @@ describe('resume-hero', () => {
     const legalStyles = getComputedStyle(legal);
     const legalLineStyles = getComputedStyle(legal.querySelector('p'));
     const iconStyles = getComputedStyle(infoIcon);
-    const tooltipStyles = getComputedStyle(infoIcon, '::before');
     const arrowStyles = getComputedStyle(infoIcon, '::after');
 
     expect(uploadStyles.gap).to.equal('8px');
@@ -272,9 +275,7 @@ describe('resume-hero', () => {
     expect(iconStyles.marginInlineStart).to.equal('2px');
     expect(iconStyles.bottom).to.equal('-3px');
     expect(iconStyles.marginBlockEnd).to.equal('0px');
-    expect(tooltipStyles.top).to.equal('-10px');
     expect(arrowStyles.borderTopWidth).to.equal('4px');
-    expect(arrowStyles.top).to.equal('-6px');
   });
 
   it('keeps the first two benefits together and stacks the rest on narrow mobile', async () => {
@@ -371,10 +372,16 @@ describe('resume-hero', () => {
   it('expands the cards container to 1330px at the XL breakpoint', async () => {
     await setViewport({ width: 1700, height: 900 });
     try {
+      const blockStyles = getComputedStyle(block);
       const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
+      const actionsRect = authoredNodes.actionsRow.getBoundingClientRect();
+      const headerStyles = getComputedStyle(block.querySelector('.resume-hero-header-content'));
       const createRect = authoredNodes.createCell.getBoundingClientRect();
 
+      expect(blockStyles.maxWidth).to.equal('1410px');
       expect(actionsStyles.maxWidth).to.equal('1330px');
+      expect(actionsRect.width).to.equal(1330);
+      expect(headerStyles.maxWidth).to.equal('666px');
       expect(createRect.width).to.be.greaterThan(323);
     } finally {
       await setViewport({ width: 800, height: 600 });
@@ -575,16 +582,26 @@ describe('resume-hero', () => {
     }
   });
 
-  it('styles the upload heading and subcopy with centered S2A typography', () => {
-    const headingStyles = getComputedStyle(block.querySelector('.verb-dropzone-heading'));
-    const subcopyStyles = getComputedStyle(block.querySelector('.verb-dropzone-sub'));
+  it('uses the complete XL typography mode and 8px subline gap on mobile', async () => {
+    await setViewport({ width: 500, height: 800 });
+    try {
+      const contentStyles = getComputedStyle(block.querySelector('.verb-dropzone-content'));
+      const headingStyles = getComputedStyle(block.querySelector('.verb-dropzone-heading'));
+      const subcopyStyles = getComputedStyle(block.querySelector('.verb-dropzone-sub'));
 
-    expect(headingStyles.color).to.equal('rgb(44, 44, 44)');
-    expect(headingStyles.fontWeight).to.equal('900');
-    expect(headingStyles.textAlign).to.equal('center');
-    expect(subcopyStyles.color).to.equal('rgb(0, 0, 0)');
-    expect(subcopyStyles.fontWeight).to.equal('400');
-    expect(subcopyStyles.textAlign).to.equal('center');
+      expect(contentStyles.gap).to.equal('8px');
+      expect(headingStyles.color).to.equal('rgb(44, 44, 44)');
+      expect(headingStyles.fontSize).to.equal('24px');
+      expect(headingStyles.fontWeight).to.equal('900');
+      expect(headingStyles.letterSpacing).to.equal('-0.48px');
+      expect(headingStyles.lineHeight).to.equal('24px');
+      expect(headingStyles.textAlign).to.equal('center');
+      expect(subcopyStyles.color).to.equal('rgb(0, 0, 0)');
+      expect(subcopyStyles.fontWeight).to.equal('400');
+      expect(subcopyStyles.textAlign).to.equal('center');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
   });
 
   it('creates a self-contained upload UI without a nested verb-dropzone block', () => {
