@@ -266,10 +266,12 @@ function createSwatchStrip(colors, type, t) {
   const swatches = safeColors.slice(0, 10).map((hex, i) => createTag('div', {
     class: 'ax-swatch',
     style: `background-color:${hex}`,
+    role: 'img',
     'aria-label': interpolate(t.swatchLabel, { index: i + 1, hex }),
   }));
   return createTag('div', {
     class: 'ax-swatch-strip',
+    role: 'group',
     'aria-label': interpolate(t.swatchStripLabel, { count, type }),
   }, swatches);
 }
@@ -281,6 +283,7 @@ function createGradientStrip(colors, angle, t) {
   return createTag('div', {
     class: 'ax-swatch-strip ax-gradient-strip',
     style: `background: ${css}`,
+    role: 'img',
     'aria-label': interpolate(t.gradientLabel, { stops: stops.join(' \u2192 ') }),
   });
 }
