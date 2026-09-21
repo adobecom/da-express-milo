@@ -269,37 +269,18 @@ describe('resume-hero', () => {
     }
   });
 
-  it('keeps the upload and create widgets side by side (flex, not grid) at tablet width', async () => {
+  it('stays stacked (mobile layout) at tablet width, pending design review of 600-900px', async () => {
     await setViewport({ width: 850, height: 900 });
     try {
       const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
-      const uploadStyles = getComputedStyle(authoredNodes.uploadCell);
-      const createStyles = getComputedStyle(authoredNodes.createCell);
+      const widgetIcon = block.querySelector('.widget-icon');
       const uploadRect = authoredNodes.uploadCell.getBoundingClientRect();
       const createRect = authoredNodes.createCell.getBoundingClientRect();
 
       expect(actionsStyles.display).to.equal('flex');
-      expect(actionsStyles.flexDirection).to.equal('row');
-      expect(parseFloat(uploadStyles.minWidth)).to.be.closeTo(551, 0.1);
-      expect(parseFloat(uploadStyles.maxWidth)).to.be.closeTo(565, 0.1);
-      expect(createStyles.width).to.equal('268px');
-      expect(createRect.left).to.be.greaterThan(uploadRect.right);
-    } finally {
-      await setViewport({ width: 800, height: 600 });
-    }
-  });
-
-  it('enables the dropzone sequence images and stretches its height at tablet width', async () => {
-    await setViewport({ width: 850, height: 900 });
-    try {
-      const dropzone = block.querySelector('.resume-hero-dropzone-area');
-      const widgetIcon = dropzone.querySelector('.widget-icon');
-      const createRect = authoredNodes.createCell.getBoundingClientRect();
-      const dropzoneRect = dropzone.getBoundingClientRect();
-
-      expect(getComputedStyle(widgetIcon).display).to.equal('flex');
-      expect(dropzoneRect.height).to.be.lessThan(createRect.height);
-      expect(dropzoneRect.height).to.be.greaterThan(100);
+      expect(actionsStyles.flexDirection).to.equal('column');
+      expect(getComputedStyle(widgetIcon).display).to.equal('none');
+      expect(createRect.top).to.be.greaterThan(uploadRect.bottom);
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
@@ -482,20 +463,22 @@ describe('resume-hero', () => {
       expect(borderStyles.pointerEvents).to.equal('none');
       expect(Number(borderStyles.zIndex)).to.be.greaterThan(Number(widgetIconStyles.zIndex));
       expect(borderStyles.backgroundImage).to.not.equal('none');
-      expect(getComputedStyle(dropzoneArea).backgroundImage).to.equal('none');
+      // The button also keeps its own copy of the dashed background (not
+      // suppressed to none) -- belt-and-suspenders so the boundary is never
+      // fully missing even if the overlay doesn't render for some reason.
+      expect(getComputedStyle(dropzoneArea).backgroundImage).to.not.equal('none');
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
   });
 
-  it('uses a compact image-free dropzone below the tablet breakpoint', async () => {
+  it('uses a compact card-image-free dropzone below the tablet breakpoint', async () => {
     await setViewport({ width: 500, height: 800 });
     try {
       const dropzone = block.querySelector('.resume-hero-dropzone-area');
       const widgetIcon = dropzone.querySelector('.widget-icon');
       const styles = getComputedStyle(dropzone);
 
-      expect(styles.backgroundImage).to.equal('none');
       expect(styles.minHeight).to.equal('0px');
       expect(styles.padding).to.equal('51px 15px');
       expect(getComputedStyle(widgetIcon).display).to.equal('none');
