@@ -1,6 +1,8 @@
 /* eslint-env mocha */
 
-import { readFile, setViewport } from '@web/test-runner-commands';
+import {
+  readFile, setViewport, sendMouse, resetMouse,
+} from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
@@ -251,7 +253,9 @@ describe('resume-hero', () => {
       expect(dropzoneStyles.maxWidth).to.equal('none');
       expect(createStyles.alignSelf).to.equal('start');
       expect(createStyles.justifyContent).to.equal('flex-start');
-      expect(createStyles.maxWidth).to.equal('323px');
+      // width:323px is clamped by the base rule's unconditional max-width:100%
+      // once the grid track is narrower than 323px at this viewport.
+      expect(parseFloat(createStyles.width)).to.be.at.most(323);
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
@@ -292,6 +296,7 @@ describe('resume-hero', () => {
       expect(first.position).to.equal('absolute');
       expect(first.bottom).to.equal('-30px');
       expect(first.right).to.equal('-50px');
+      expect(first.top).to.equal('138px');
       expect(parseFloat(first.width)).to.be.closeTo(144, 0.1);
       expect(parseFloat(first.height)).to.be.closeTo(190, 0.1);
       expect(first.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('-8.28deg');
@@ -301,6 +306,7 @@ describe('resume-hero', () => {
       expect(second.position).to.equal('absolute');
       expect(second.bottom).to.equal('-50px');
       expect(second.left).to.equal('-10px');
+      expect(second.top).to.equal('158px');
       expect(parseFloat(second.width)).to.be.closeTo(144, 0.1);
       expect(parseFloat(second.height)).to.be.closeTo(190, 0.1);
       expect(second.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('6.91deg');
@@ -309,6 +315,28 @@ describe('resume-hero', () => {
         expect(getComputedStyle(picture.querySelector('img')).objectFit).to.equal('contain');
       });
     } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('slides the upload sequence images up and unrotates them on dropzone hover', async () => {
+    await setViewport({ width: 1000, height: 800 });
+    try {
+      const dropzone = block.querySelector('.resume-hero-dropzone-area');
+      const rect = dropzone.getBoundingClientRect();
+      await sendMouse({
+        type: 'move',
+        position: [Math.round(rect.left + rect.width / 2), Math.round(rect.top + rect.height / 2)],
+      });
+      await new Promise((resolve) => { setTimeout(resolve, 500); });
+
+      authoredNodes.uploadPictures.forEach((picture) => {
+        const styles = getComputedStyle(picture);
+        expect(styles.top).to.equal('70px');
+        expect(styles.transform).to.equal('matrix(1, 0, 0, 1, 0, 0)');
+      });
+    } finally {
+      await resetMouse();
       await setViewport({ width: 800, height: 600 });
     }
   });
@@ -360,6 +388,41 @@ describe('resume-hero', () => {
     const media3 = block.querySelector('.resume-hero-create-media-3');
     expect(getComputedStyle(media1).transform).to.equal(expectedMedia1);
     expect(getComputedStyle(media3).transform).to.equal(expectedMedia3);
+  });
+
+  it('fans out media-1/media-3 and shades the card on create-card hover', async () => {
+    const card = block.querySelector('.resume-hero-create');
+    const rect = card.getBoundingClientRect();
+    try {
+      await sendMouse({
+        type: 'move',
+        position: [Math.round(rect.left + rect.width / 2), Math.round(rect.top + rect.height / 2)],
+      });
+      await new Promise((resolve) => { setTimeout(resolve, 500); });
+
+      const media1 = block.querySelector('.resume-hero-create-media-1');
+      const media2 = block.querySelector('.resume-hero-create-media-2');
+      const media3 = block.querySelector('.resume-hero-create-media-3');
+
+      expect(getComputedStyle(media1).transform).to.equal('matrix(1, 0, 0, 1, -116, 7)');
+      expect(getComputedStyle(media2).transform).to.equal('matrix(1, 0, 0, 1, 0, 7)');
+      expect(getComputedStyle(media3).transform).to.equal('matrix(1, 0, 0, 1, 116, 7)');
+      [media1, media2, media3].forEach((media) => {
+        const styles = getComputedStyle(media);
+        expect(styles.borderRadius).to.equal('6px');
+        expect(styles.boxShadow).to.include('36px 112px 33px 0px');
+        expect(styles.boxShadow).to.include('1px 4px 10px 0px');
+      });
+
+      const probe = document.createElement('div');
+      probe.style.backgroundColor = 'var(--color-gray-150)';
+      document.body.append(probe);
+      const expectedHoverColor = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      expect(getComputedStyle(card).backgroundColor).to.equal(expectedHoverColor);
+    } finally {
+      await resetMouse();
+    }
   });
 
   it('paints the dropzone boundary above the sequence images and lets clicks pass through', async () => {

@@ -125,6 +125,11 @@ main .section .resume-hero p {
   max-width: 100%;
   padding: var(--spacing-600) var(--spacing-400);
   text-align: start;
+  transition: background-color 0.2s ease;
+}
+
+.resume-hero .resume-hero-create:hover {
+  background-color: var(--color-gray-150);
 }
 
 .resume-hero .resume-hero-create.resume-hero-media-sequence {
@@ -173,8 +178,9 @@ main .section .resume-hero p {
   max-height: 100%;
   max-width: none;
   opacity: 0;
-  position: absolute; 
+  position: absolute;
   transform-origin: center;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .resume-hero .resume-hero-create-media-stage > .resume-hero-create-media-1 {
@@ -205,6 +211,28 @@ main .section .resume-hero p {
   opacity: 1;
   transform: translate(10px, -10px) rotate(2.66deg);
   width: 96.634px;
+}
+
+.resume-hero .resume-hero-create:hover .resume-hero-create-media-stage > .resume-hero-create-media-1 {
+  transform: translate(-116px, 7px);
+}
+
+.resume-hero .resume-hero-create:hover .resume-hero-create-media-stage > .resume-hero-create-media-2 {
+  transform: translate(0, 7px);
+}
+
+.resume-hero .resume-hero-create:hover .resume-hero-create-media-stage > .resume-hero-create-media-3 {
+  transform: translate(116px, 7px);
+}
+
+.resume-hero .resume-hero-create:hover .resume-hero-create-media-stage > .resume-hero-create-media {
+  border-radius: 6px;
+  box-shadow:
+    36px 112px 33px 0 rgb(0 0 0 / 0%),
+    23px 72px 30px 0 rgb(0 0 0 / 1%),
+    13px 40px 25px 0 rgb(0 0 0 / 5%),
+    6px 18px 19px 0 rgb(0 0 0 / 9%),
+    1px 4px 10px 0 rgb(0 0 0 / 10%);
 }
 
 .resume-hero .resume-hero-create .resume-hero-create-media-stage picture {
@@ -432,6 +460,7 @@ main .section .resume-hero p {
   opacity: 1;
   position: absolute;
   transform: rotate(var(--resume-hero-media-rotation));
+  transition: top 0.4s ease, transform 0.4s ease;
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
@@ -445,6 +474,7 @@ main .section .resume-hero p {
   gap: 3.501px;
   height: 190px;
   left: -10px;
+  top: 158px;
   transform-origin: bottom left;
   width: 144px;
 }
@@ -456,8 +486,23 @@ main .section .resume-hero p {
   bottom: -30px;
   height: 190px;
   right: -50px;
+  top: 138px;
   transform-origin: bottom right;
   width: 144px;
+}
+
+.resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-1,
+.resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-2 {
+  top: 70px;
+  transform: rotate(0deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image,
+  .resume-hero .resume-hero-create,
+  .resume-hero .resume-hero-create-media-stage > .resume-hero-create-media {
+    transition: none;
+  }
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image img {
@@ -844,10 +889,10 @@ main .section .resume-hero p {
     grid-column: auto / span 4;
     height: 298px;
     justify-content: flex-start;
-    max-width: 323px;
+    width: 323px;
 
     padding: var(--spacing-400);
-    width: auto;
+ 
   }
 
   .resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area):not(.resume-hero-create-media) {
