@@ -1,14 +1,20 @@
 /**
  * Mini Editor fonts loader
  *
- * Single entry point (`getFontOptions`) that returns the font-choice list the
- * mini-editor's font control renders. It owns the decision of WHERE those
- * options come from, so callers never branch on it:
+ * Two entry points that split font loading into a fast path and a live path,
+ * so the Adobe Fonts (Typekit) kit's network round trip never blocks the
+ * card's first render (it's the mini-editor's LCP element — see
+ * mini-editor.js):
  *
- *   - Load the Adobe Fonts (Typekit) kit, then read whatever families it
- *     actually exposes and turn them into options (the live source).
- *   - If the kit fails to load or exposes nothing, fall back to the bundled
- *     FALLBACK_FONT_OPTIONS so the UI always has choices to show.
+ *   - `getFontOptions` (default export) resolves immediately with the
+ *     bundled FALLBACK_FONT_OPTIONS — or, if the kit has already loaded by
+ *     the time it's called (e.g. a second mini-editor block decorating after
+ *     the first one's kit load finished), the real options straight away.
+ *   - `loadWebFontOptions` loads the kit, then reads whatever families it
+ *     actually exposes and turns them into options (the live source). Not
+ *     awaited before the card renders — mini-editor.js calls it after the
+ *     widget has mounted and upgrades the already-visible font control once
+ *     it resolves.
  *
  * Every option has the same shape the widget consumes:
  * `{ label, font, italic?, weight?, stretch? }`.
@@ -167,17 +173,40 @@ function buildFontOptions() {
   return options.length ? options : FALLBACK_FONT_OPTIONS;
 }
 
+// Set once loadWebFontOptions() resolves, so a getFontOptions() call made
+// afterwards (e.g. a second mini-editor block decorating later) returns the
+// live list immediately instead of the fallback.
+let resolvedFontOptions = null;
+let webFontOptionsPromise = null;
+
 /**
- * Returns the mini-editor's font-choice list as `[{ label, font, italic?,
- * weight?, stretch? }, ...]`. Loads the Adobe Fonts kit first so the options
- * reflect whatever families it actually registered, then builds them — the
- * caller does not need to load the kit or know which source (live/fallback)
- * was used.
+ * Loads the Adobe Fonts kit and returns the live font-choice list once it
+ * resolves. Memoized so every caller on the page (an upgrade after the
+ * inline widget mounts, the "Create a design" modal) shares one kit load
+ * instead of each triggering their own.
+ *
+ * @returns {Promise<Array<{ label: string, font: string, italic?: boolean,
+ *   weight?: string, stretch?: string }>>}
+ */
+export function loadWebFontOptions() {
+  webFontOptionsPromise ??= loadWebFonts().then(() => {
+    resolvedFontOptions = buildFontOptions();
+    return resolvedFontOptions;
+  });
+  return webFontOptionsPromise;
+}
+
+/**
+ * Returns the mini-editor's initial font-choice list, with no network wait —
+ * the bundled fallback, or the live Adobe Fonts list if loadWebFontOptions()
+ * already resolved it. Callers that need the live list to load, rather than
+ * just use it if already available, should call loadWebFontOptions()
+ * directly (see mini-editor.js, which does so only after the card has
+ * already rendered with these fallback options).
  *
  * @returns {Promise<Array<{ label: string, font: string, italic?: boolean,
  *   weight?: string, stretch?: string }>>}
  */
 export default async function getFontOptions() {
-  await loadWebFonts();
-  return buildFontOptions();
+  return resolvedFontOptions || FALLBACK_FONT_OPTIONS;
 }
