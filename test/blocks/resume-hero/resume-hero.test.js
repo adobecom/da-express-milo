@@ -17,14 +17,18 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales });
 });
 
-const resumeHeroStyles = document.createElement('link');
-resumeHeroStyles.rel = 'stylesheet';
-resumeHeroStyles.href = '/express/code/blocks/resume-hero/resume-hero.css';
-document.head.append(resumeHeroStyles);
-await new Promise((resolve, reject) => {
-  resumeHeroStyles.addEventListener('load', resolve, { once: true });
-  resumeHeroStyles.addEventListener('error', reject, { once: true });
-});
+const styleSheets = [
+  '/express/code/styles/styles.css',
+  '/express/code/blocks/resume-hero/resume-hero.css',
+];
+await Promise.all(styleSheets.map((href) => new Promise((resolve, reject) => {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  link.addEventListener('load', resolve, { once: true });
+  link.addEventListener('error', reject, { once: true });
+  document.head.append(link);
+})));
 
 const {
   default: decorate,
@@ -194,102 +198,184 @@ describe('resume-hero', () => {
     expect(blockStyles.padding).to.equal('32px 16px');
     expect(headerStyles.marginBlockEnd).to.equal('16px');
     expect(headerContentStyles.gap).to.equal('8px');
+    expect(headerContentStyles.maxWidth).to.equal('666px');
+    expect(getComputedStyle(authoredNodes.uploadCell).gap).to.equal('8px');
   });
 
-  it('lays out the mobile create widget and decorates its link as a button', () => {
-    const styles = getComputedStyle(authoredNodes.createCell);
-    const buttonStyles = getComputedStyle(authoredNodes.createLink);
-    const copyStyles = getComputedStyle(authoredNodes.createCopy);
-    const actionStyles = getComputedStyle(authoredNodes.createLink.closest('.action-area'));
-    const mediaStage = block.querySelector('.resume-hero-create-media-stage');
-    const pictureStyles = getComputedStyle(authoredNodes.createPictures[0]);
-    const imageStyles = getComputedStyle(authoredNodes.createPictures[0].querySelector('img'));
+  it('lays out the mobile create widget and decorates its link as a button', async () => {
+    await setViewport({ width: 500, height: 1000 });
+    try {
+      const styles = getComputedStyle(authoredNodes.createCell);
+      const copyStyles = getComputedStyle(authoredNodes.createCopy);
+      const actionStyles = getComputedStyle(authoredNodes.createLink.closest('.action-area'));
+      const mediaStage = block.querySelector('.resume-hero-create-media-stage');
+      const pictureStyles = getComputedStyle(authoredNodes.createPictures[0]);
+      const imageStyles = getComputedStyle(authoredNodes.createPictures[0].querySelector('img'));
 
-    expect(styles.display).to.equal('flex');
-    expect(styles.padding).to.equal('40px 24px');
-    expect(styles.flexDirection).to.equal('column-reverse');
-    expect(styles.justifyContent).to.equal('flex-end');
-    expect(styles.alignItems).to.equal('center');
-    expect(styles.gap).to.equal('8px');
-    expect(styles.borderRadius).to.equal('24px');
-    expect(styles.backgroundColor).to.equal('rgb(248, 248, 248)');
-    expect(buttonStyles.height).to.equal('24px');
-    expect(copyStyles.order).to.equal('1');
-    expect(actionStyles.order).to.equal('0');
-    expect(getComputedStyle(mediaStage).order).to.equal('2');
-    expect(authoredNodes.createCopy.classList.contains('resume-hero-create-copy')).to.be.true;
-    authoredNodes.createMedia.forEach((media) => {
-      expect(media.classList.contains('resume-hero-create-media')).to.be.true;
-    });
-    expect(mediaStage.getBoundingClientRect().top)
-      .to.be.lessThan(authoredNodes.createCopy.getBoundingClientRect().top);
-    expect(authoredNodes.createCopy.getBoundingClientRect().top)
-      .to.be.lessThan(authoredNodes.createLink.closest('.action-area').getBoundingClientRect().top);
-    expect(getComputedStyle(mediaStage).height).to.equal('184px');
-    expect(pictureStyles.marginBlockStart).to.equal('0px');
-    expect(pictureStyles.maxHeight).to.equal('100%');
-    expect(imageStyles.maxHeight).to.equal('100%');
-    expect(authoredNodes.createLink.classList.contains('con-button')).to.be.true;
-    expect(authoredNodes.createLink.classList.contains('blue')).to.be.false;
-    expect(authoredNodes.createLink.classList.contains('button-xl')).to.be.true;
+      expect(styles.display).to.equal('flex');
+      expect(styles.padding).to.equal('40px 24px');
+      expect(styles.flexDirection).to.equal('column-reverse');
+      expect(styles.justifyContent).to.equal('flex-end');
+      expect(styles.alignItems).to.equal('center');
+      expect(styles.gap).to.equal('8px');
+      expect(styles.borderRadius).to.equal('24px');
+      expect(copyStyles.order).to.equal('1');
+      expect(actionStyles.order).to.equal('0');
+      expect(getComputedStyle(mediaStage).order).to.equal('2');
+      expect(authoredNodes.createCopy.classList.contains('resume-hero-create-copy')).to.be.true;
+      authoredNodes.createMedia.forEach((media) => {
+        expect(media.classList.contains('resume-hero-create-media')).to.be.true;
+      });
+      expect(mediaStage.getBoundingClientRect().top)
+        .to.be.lessThan(authoredNodes.createCopy.getBoundingClientRect().top);
+      expect(authoredNodes.createCopy.getBoundingClientRect().top)
+        .to.be.lessThan(authoredNodes.createLink.closest('.action-area').getBoundingClientRect().top);
+      expect(getComputedStyle(mediaStage).height).to.equal('184px');
+      expect(pictureStyles.marginBlockStart).to.equal('0px');
+      expect(pictureStyles.maxHeight).to.equal('100%');
+      expect(imageStyles.maxHeight).to.equal('100%');
+      expect(authoredNodes.createLink.classList.contains('con-button')).to.be.true;
+      expect(authoredNodes.createLink.classList.contains('blue')).to.be.false;
+      expect(authoredNodes.createLink.classList.contains('small')).to.be.true;
+      expect(authoredNodes.createLink.classList.contains('button-xl')).to.be.false;
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
   });
 
-  it('uses an eight/four-column grid for the upload and create areas at 900px and above', async () => {
+  it('extends the authored Create link over the entire card', () => {
+    const cardRect = authoredNodes.createCell.getBoundingClientRect();
+    const hitTarget = document.elementFromPoint(
+      Math.round(cardRect.left + 8),
+      Math.round(cardRect.top + 8),
+    );
+    const overlayStyles = getComputedStyle(authoredNodes.createLink, '::after');
+
+    expect(overlayStyles.position).to.equal('absolute');
+    expect(overlayStyles.inset).to.equal('0px');
+    expect(hitTarget).to.equal(authoredNodes.createLink);
+  });
+
+  it('uses the requested disclaimer and tooltip spacing', () => {
+    const legal = block.querySelector('.verb-dropzone-legal');
+    const infoIcon = block.querySelector('.info-icon');
+    const uploadStyles = getComputedStyle(authoredNodes.uploadCell);
+    const legalStyles = getComputedStyle(legal);
+    const legalLineStyles = getComputedStyle(legal.querySelector('p'));
+    const iconStyles = getComputedStyle(infoIcon);
+    const tooltipStyles = getComputedStyle(infoIcon, '::before');
+    const arrowStyles = getComputedStyle(infoIcon, '::after');
+
+    expect(uploadStyles.gap).to.equal('8px');
+    expect(legalStyles.gap).to.equal('0px');
+    expect(legalLineStyles.position).to.equal('relative');
+    expect(iconStyles.marginInlineStart).to.equal('2px');
+    expect(iconStyles.bottom).to.equal('-3px');
+    expect(iconStyles.marginBlockEnd).to.equal('0px');
+    expect(tooltipStyles.top).to.equal('-10px');
+    expect(arrowStyles.borderTopWidth).to.equal('4px');
+    expect(arrowStyles.top).to.equal('-6px');
+  });
+
+  it('keeps the first two benefits together and stacks the rest on narrow mobile', async () => {
+    await setViewport({ width: 360, height: 800 });
+    try {
+      const benefits = [...block.querySelectorAll('.resume-hero-benefit')];
+      const rects = benefits.map((benefit) => benefit.getBoundingClientRect());
+
+      expect(getComputedStyle(block.querySelector('.resume-hero-benefits')).display).to.equal('grid');
+      expect(rects[0].top).to.equal(rects[1].top);
+      expect(rects[2].top).to.be.at.least(rects[0].bottom);
+      expect(rects[3].top).to.be.at.least(rects[2].bottom);
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('uses the bounded tablet card widths when both cards fit side by side', async () => {
     await setViewport({ width: 1000, height: 800 });
     try {
       const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
-      const uploadStyles = getComputedStyle(authoredNodes.uploadCell);
       const createStyles = getComputedStyle(authoredNodes.createCell);
       const dropzoneStyles = getComputedStyle(block.querySelector('.resume-hero-dropzone-area'));
       const uploadRect = authoredNodes.uploadCell.getBoundingClientRect();
       const createRect = authoredNodes.createCell.getBoundingClientRect();
 
-      expect(actionsStyles.display).to.equal('grid');
-      expect(uploadStyles.gridColumnEnd).to.equal('span 8');
-      expect(createStyles.gridColumnEnd).to.equal('span 4');
+      expect(actionsStyles.display).to.equal('flex');
+      expect(actionsStyles.flexWrap).to.equal('wrap');
       expect(createRect.left).to.be.greaterThan(uploadRect.right);
+      expect(uploadRect.width).to.be.within(551, 565);
+      expect(createRect.width).to.be.within(268, 565);
       expect(dropzoneStyles.height).to.equal('298px');
-      expect(dropzoneStyles.maxWidth).to.equal('none');
-      expect(createStyles.alignSelf).to.equal('start');
-      expect(createStyles.justifyContent).to.equal('flex-start');
-      // create stays at the tablet width (268px) until the 1199px upgrade breakpoint
-      expect(createStyles.width).to.equal('268px');
+      expect(createStyles.height).to.equal(dropzoneStyles.height);
+      expect(createStyles.padding).to.equal('24px');
+      expect(createStyles.alignItems).to.equal('center');
+      expect(createStyles.justifyContent).to.equal('flex-end');
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
   });
 
-  it('widens the create card to 323px at the 1199px breakpoint', async () => {
+  it('allows both tablet cards to grow to 565px at the wide end of the range', async () => {
     await setViewport({ width: 1199, height: 800 });
     try {
+      const uploadStyles = getComputedStyle(authoredNodes.uploadCell);
       const createStyles = getComputedStyle(authoredNodes.createCell);
-      expect(createStyles.width).to.equal('323px');
+      expect(uploadStyles.width).to.equal('565px');
+      expect(createStyles.width).to.equal('565px');
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
   });
 
-  it('stays stacked (mobile layout) at tablet width, pending design review of 600-900px', async () => {
+  it('stacks bounded tablet cards and displays dropzone artwork when both cards do not fit', async () => {
     await setViewport({ width: 850, height: 900 });
     try {
       const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
       const widgetIcon = block.querySelector('.widget-icon');
+      const dropzoneRect = block.querySelector('.resume-hero-dropzone-area').getBoundingClientRect();
       const uploadRect = authoredNodes.uploadCell.getBoundingClientRect();
       const createRect = authoredNodes.createCell.getBoundingClientRect();
 
       expect(actionsStyles.display).to.equal('flex');
-      expect(actionsStyles.flexDirection).to.equal('column');
-      expect(getComputedStyle(widgetIcon).display).to.equal('none');
+      expect(actionsStyles.flexWrap).to.equal('wrap');
+      expect(uploadRect.width).to.equal(565);
+      expect(createRect.width).to.equal(565);
+      expect(createRect.height).to.equal(dropzoneRect.height);
+      expect(getComputedStyle(widgetIcon).display).to.equal('flex');
       expect(createRect.top).to.be.greaterThan(uploadRect.bottom);
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
   });
 
-  it('caps the actions grid at 1130px on desktop', async () => {
+  it('uses the desktop grid, 40px top spacing, and a 1130px container', async () => {
     await setViewport({ width: 1440, height: 900 });
     try {
-      expect(getComputedStyle(authoredNodes.actionsRow).maxWidth).to.equal('1130px');
+      const blockStyles = getComputedStyle(block);
+      const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
+      const headerStyles = getComputedStyle(block.querySelector('.resume-hero-header'));
+      const createStyles = getComputedStyle(authoredNodes.createCell);
+
+      expect(blockStyles.paddingTop).to.equal('40px');
+      expect(headerStyles.marginBlockEnd).to.equal('16px');
+      expect(actionsStyles.display).to.equal('grid');
+      expect(actionsStyles.maxWidth).to.equal('1130px');
+      expect(createStyles.width).to.equal('323px');
+      expect(createStyles.borderTopWidth).to.equal('1px');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('expands the cards container to 1330px at the XL breakpoint', async () => {
+    await setViewport({ width: 1700, height: 900 });
+    try {
+      const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
+      const createRect = authoredNodes.createCell.getBoundingClientRect();
+
+      expect(actionsStyles.maxWidth).to.equal('1330px');
+      expect(createRect.width).to.be.greaterThan(323);
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
@@ -416,6 +502,7 @@ describe('resume-hero', () => {
   });
 
   it('fans out media-1/media-3 and shades the card on create-card hover', async () => {
+    await setViewport({ width: 800, height: 1000 });
     const card = block.querySelector('.resume-hero-create');
     const rect = card.getBoundingClientRect();
     try {
@@ -447,6 +534,7 @@ describe('resume-hero', () => {
       expect(getComputedStyle(card).backgroundColor).to.equal(expectedHoverColor);
     } finally {
       await resetMouse();
+      await setViewport({ width: 800, height: 600 });
     }
   });
 
@@ -635,6 +723,7 @@ describe('resume-hero placeholder precedence', () => {
   it('falls back to the legacy verb-* keys when no resume-hero-* key is authored', async () => {
     delete window.mph['resume-hero-resume-builder-upload-cta'];
     delete window.mph['resume-hero-legal'];
+    window.mph['verb-dropzone-resume-builder-upload-cta'] = 'Upload Your Resume';
     const block = document.querySelector('.resume-hero');
     await decorate(block);
 

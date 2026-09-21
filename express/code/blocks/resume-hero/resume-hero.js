@@ -95,9 +95,10 @@ function createSvgElement(iconName) {
 
 const getCTA = (verb) => {
   const verbConfig = LIMITS[verb];
-  return window.mph?.[`resume-hero-${verb}-upload-cta`]
+  const value = window.mph?.[`resume-hero-${verb}-upload-cta`]
     || window.mph?.[`verb-dropzone-${verb}-upload-cta`]
     || window.mph?.[`verb-widget-cta-${verbConfig?.uploadType}`];
+  return value === 'Upload Your Resume' ? 'Upload your resume' : value;
 };
 
 function isMobileDevice() {
@@ -358,8 +359,8 @@ function decorateAuthoredLayout(element) {
 
 function decorateCreateLinks(createCell) {
   createCell?.querySelectorAll('a').forEach((link) => {
-    link.classList.add('con-button', 'button-xl');
-    link.classList.remove('blue');
+    link.classList.add('con-button', 'small');
+    link.classList.remove('blue', 'button-xl', 'xl-button', 'large');
     link.closest('p')?.classList.add('action-area');
   });
 
