@@ -400,6 +400,7 @@
 
   /* S2AC transparent palette tokens */
   --S2AC-Palette-transparent-black-50: rgb(0 0 0 / 3%);
+  --S2AC-Palette-gray-50: var(--color-gray-100);
   --S2AC-Palette-gray-75: var(--color-gray-150);
   --S2AC-Palette-gray-300: var(--color-gray-300-variant);
   --Palette-transparent-white-700: rgb(255 255 255 / 66%);
@@ -508,6 +509,14 @@
   --s2a-typography-line-height-eyebrow: 20px;
   --s2a-typography-line-height-label: 18px;
   --s2a-typography-line-height-caption: 16px;
+  --s2a-typography-line-height-title-6: 18px;
+
+  /* S2A foundational color/font tokens (non-responsive) */
+  --s2a-color-content-default: var(--color-black);
+  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --s2a-font-family-body: var(--body-font-family);
+  --s2a-font-family-label: var(--body-font-family);
+  --s2a-font-letter-spacing-4xl: -0.48px;
   --s2a-viewport-vertical-padding-xl: 80px;
   --s2a-viewport-vertical-padding-lg: 64px;
   --s2a-viewport-vertical-padding-md: 40px;

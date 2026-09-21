@@ -640,7 +640,6 @@ export default async function decorate(element) {
 
   function handleUploadingEvent(data, attempts, cookieExp, canSendDataToSplunk) {
     isUploading = true;
-    console.log('uploading')
     exitFlag = false;
     prefetchTarget();
     const metadata = mergeData({ ...data, userAttempts: attempts });

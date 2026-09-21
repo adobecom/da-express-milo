@@ -71,19 +71,20 @@ main .section .resume-hero p {
 .resume-hero .heading {
   color: var(--color-gray-900);
   font-family: var(--s2a-font-family-heading);
-  font-size: var(--heading-font-size-l);
+  font-size: var(--s2a-typography-font-size-heading-4);
   font-weight: var(--heading-font-weight-extra);
-  letter-spacing: -1px;
-  line-height: 1.1;
-  margin: 0;
+  letter-spacing: var(--s2a-typography-letter-spacing-heading-4);
+  line-height: var(--s2a-typography-line-height-heading-4);
+  margin: 8px 0px;
   text-align: center;
 }
 
 .resume-hero .subcopy {
   color: var(--Alias-content-typography-Body);
-  font-family: var(--body-font-family);
-  font-size: var(--body-font-size-m);
-  line-height: var(--body-line-height);
+  font-family: var(--s2a-font-family-body);
+  font-size: var(--s2a-typography-font-size-body-md);
+  letter-spacing: var(--s2a-typography-letter-spacing-body-md);
+  line-height: var(--s2a-typography-line-height-body-md);
   margin: 0;
   text-align: center;
 }
@@ -113,8 +114,8 @@ main .section .resume-hero p {
 .resume-hero .resume-hero-create {
   align-items: center;
   align-self: stretch;
-  background: var(--S2AC-Palette-gray-50, #F8F8F8); /* stylelint-disable-line declaration-property-value-disallowed-list */
-  border: 1px solid rgb(0 0 0 / 3%);
+  background: var(--S2AC-Palette-gray-50);
+  border: 1px solid var(--S2AC-Palette-transparent-black-50);
   border-radius: 24px;
   display: flex;
   flex: 0 0 auto;
@@ -133,7 +134,7 @@ main .section .resume-hero p {
   font-style: normal;
   font-weight: 900;
   letter-spacing: var(--s2a-typography-letter-spacing-heading-6);
-  line-height: var(--s2a-typography-line-height-title-6, var(--spacing-325)); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  line-height: var(--s2a-typography-line-height-title-6);
   margin: 0;
   text-align: center;
   text-wrap-style: balance;
@@ -257,7 +258,7 @@ main .section .resume-hero p {
    ============================================================ */
 
 .resume-hero .verb-dropzone-heading {
-  color: var(--C1-Text-text, #2C2C2C); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  color: var(--c1-text-text);
   font-family: var(--s2a-font-family-heading);
   font-size: var(--s2a-typography-font-size-heading-5);
   font-style: normal;
@@ -275,7 +276,7 @@ main .section .resume-hero p {
    ============================================================ */
 
 .resume-hero .verb-dropzone-sub {
-  color: #000; /* stylelint-disable-line color-no-hex */
+  color: var(--s2a-color-content-default);
   font-family: var(--s2a-font-family-body);
   font-size: var(--s2a-typography-font-size-body-md);
   font-style: normal;
@@ -663,7 +664,6 @@ main .section .resume-hero p {
     grid-template-columns: repeat(var(--s2a-layout-guide-_columns), minmax(0, 1fr));
     margin: auto auto 22px;
     max-width: 1130px;
-    /* max-height: 342px; */
   }
 
   .resume-hero .resume-hero-upload {
@@ -723,12 +723,6 @@ main .section .resume-hero p {
 
   .resume-hero .resume-hero-create img {
     max-height: none;
-  }
-}
-
-@media screen and (min-width: 1200px) {
-  .resume-hero .heading {
-    font-size: var(--heading-font-size-xl);
   }
 }
 
