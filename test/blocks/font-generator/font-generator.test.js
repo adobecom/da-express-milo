@@ -80,4 +80,45 @@ describe('font-generator', () => {
   it('mounts the mobile/tablet filter panel overlay', () => {
     expect(block.querySelector('.fg-overlay .fg-panel')).to.exist;
   });
+
+  describe('partial unicode support disclaimer (MWPW-206090)', () => {
+    let textarea;
+    let disclaimer;
+
+    before(() => {
+      textarea = block.querySelector('.fg-sidebar textarea.label');
+      disclaimer = block.querySelector('.fg-sidebar .disclaimer');
+    });
+
+    afterEach(() => {
+      textarea.value = '';
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    it('is hidden for pure-ASCII input', () => {
+      textarea.value = 'hello';
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      expect(disclaimer.classList.contains('is-visible')).to.equal(false);
+    });
+
+    // One test string per affected locale from the ticket's acceptance criteria.
+    ['über', 'café', 'øre', 'sång'].forEach((text) => {
+      it(`shows for "${text}"`, () => {
+        textarea.value = text;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        expect(disclaimer.classList.contains('is-visible')).to.equal(true);
+        expect(disclaimer.querySelector('.disclaimer-text').textContent).to.not.equal('');
+      });
+    });
+
+    it('hides again once the trigger character is removed', () => {
+      textarea.value = 'café';
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      expect(disclaimer.classList.contains('is-visible')).to.equal(true);
+
+      textarea.value = 'cafe';
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      expect(disclaimer.classList.contains('is-visible')).to.equal(false);
+    });
+  });
 });
