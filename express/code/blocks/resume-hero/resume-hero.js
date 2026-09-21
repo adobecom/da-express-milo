@@ -352,7 +352,7 @@ function decorateAuthoredLayout(element) {
   return {
     uploadCell,
     createCell,
-    picture: uploadCell.querySelector('picture'),
+    pictures: [...uploadCell.querySelectorAll('picture')],
   };
 }
 
@@ -363,15 +363,27 @@ function decorateCreateLinks(createCell) {
     link.closest('p')?.classList.add('action-area');
   });
 
+  const mediaItems = [];
   [...(createCell?.children || [])].forEach((child) => {
     if (child.matches('picture') || child.querySelector(':scope > picture')) {
       child.classList.add('resume-hero-create-media');
+      mediaItems.push(child);
     } else if (child.matches('a') || child.querySelector('a')) {
       child.classList.add('action-area');
     } else {
       child.classList.add('resume-hero-create-copy');
     }
   });
+
+  if (mediaItems.length > 1) {
+    const mediaStage = createTag('div', { class: 'resume-hero-create-media-stage' });
+    mediaItems.forEach((item, index) => {
+      item.classList.add(`resume-hero-create-media-${index + 1}`);
+      mediaStage.append(item);
+    });
+    createCell.classList.add('resume-hero-media-sequence');
+    createCell.append(mediaStage);
+  }
 }
 
 function decorateBenefitItems(element) {
@@ -469,7 +481,7 @@ export default async function decorate(element) {
   });
   decorateBenefitItems(element);
   const authoredLinks = [...element.querySelectorAll('a')];
-  const { uploadCell, createCell, picture } = decorateAuthoredLayout(element);
+  const { uploadCell, createCell, pictures } = decorateAuthoredLayout(element);
   decorateCreateLinks(createCell);
 
   // Dropzone
@@ -482,9 +494,23 @@ export default async function decorate(element) {
   });
   const dzInner = createTag('div', { class: 'verb-dropzone-inner' });
   const iconWrapper = createTag('div', { class: 'widget-icon' });
-  if (picture) {
-    picture.classList.add('resume-hero-dropzone-image');
-    iconWrapper.append(picture);
+  if (pictures.length) {
+    if (pictures.length > 1) iconWrapper.classList.add('resume-hero-media-sequence');
+    // Authored order runs opposite to the Figma sequence slots, so the slot
+    // number is assigned in reverse of the authored picture order.
+    pictures.forEach((picture, index) => {
+      const { parentElement } = picture;
+      picture.classList.add(
+        'resume-hero-dropzone-image',
+        `resume-hero-dropzone-image-${pictures.length - index}`,
+      );
+      iconWrapper.append(picture);
+      // Authoring wraps each picture in its own <p>; moving the picture out
+      // leaves that wrapper behind as an empty flex child, adding extra gap.
+      if (parentElement !== uploadCell && !parentElement.children.length) {
+        parentElement.remove();
+      }
+    });
   } else {
     const uploadDocImg = createTag('img', {
       src: new URL('../../icons/upload-document.png', import.meta.url).href,
@@ -503,7 +529,10 @@ export default async function decorate(element) {
   const subLine = createTag('p', { class: 'verb-dropzone-sub', id: 'file-upload-description' }, window.mph?.[`resume-hero-${VERB}-file-limit`] || window.mph?.[`verb-widget-${VERB}-file-limit`]);
   dzContent.append(headingEl, subLine);
   dzInner.append(iconWrapper, dzContent);
-  dropzone.append(dzInner);
+  // Painted above the sequence images (z-index) so the dashed boundary is
+  // never covered by artwork positioned past the dropzone's edge.
+  const dropzoneBorder = createTag('div', { class: 'resume-hero-dropzone-border', 'aria-hidden': 'true' });
+  dropzone.append(dzInner, dropzoneBorder);
 
   let soloClicked = false;
   let fileInput = null;

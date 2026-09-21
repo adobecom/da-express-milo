@@ -85,10 +85,10 @@ describe('resume-hero', () => {
       headerRow: block.querySelector('#authored-header-row'),
       actionsRow: block.querySelector('#authored-actions-row'),
       uploadCell: block.querySelector('#authored-upload-cell'),
-      uploadPicture: block.querySelector('#authored-upload-picture'),
+      uploadPictures: [...block.querySelectorAll('[id^="authored-upload-picture-"]')],
       createCell: block.querySelector('#authored-create-cell'),
-      createMedia: block.querySelector('#authored-create-media'),
-      createPicture: block.querySelector('#authored-create-picture'),
+      createMedia: [...block.querySelectorAll('[id^="authored-create-media-"]')],
+      createPictures: [...block.querySelectorAll('[id^="authored-create-picture-"]')],
       createCopy: block.querySelector('#authored-create-copy'),
       createLink: block.querySelector('#authored-create-link'),
       extraRow: block.querySelector('#authored-extra-row'),
@@ -176,8 +176,9 @@ describe('resume-hero', () => {
     expect(rootIcon.querySelector('svg[data-source="root-status"]')).to.exist;
   });
 
-  it('preserves the create-now picture, copy, and link', () => {
-    expect(block.querySelector('#authored-create-picture')).to.equal(authoredNodes.createPicture);
+  it('preserves every create-now picture, copy, and link', () => {
+    expect([...block.querySelectorAll('[id^="authored-create-picture-"]')])
+      .to.deep.equal(authoredNodes.createPictures);
     expect(block.querySelector('#authored-create-copy')).to.equal(authoredNodes.createCopy);
     expect(block.querySelector('#authored-create-link')).to.equal(authoredNodes.createLink);
     expect(authoredNodes.createLink.getAttribute('href')).to.equal('https://www.adobe.com/express/templates/resume');
@@ -198,8 +199,9 @@ describe('resume-hero', () => {
     const buttonStyles = getComputedStyle(authoredNodes.createLink);
     const copyStyles = getComputedStyle(authoredNodes.createCopy);
     const actionStyles = getComputedStyle(authoredNodes.createLink.closest('.action-area'));
-    const pictureStyles = getComputedStyle(authoredNodes.createPicture);
-    const imageStyles = getComputedStyle(authoredNodes.createPicture.querySelector('img'));
+    const mediaStage = block.querySelector('.resume-hero-create-media-stage');
+    const pictureStyles = getComputedStyle(authoredNodes.createPictures[0]);
+    const imageStyles = getComputedStyle(authoredNodes.createPictures[0].querySelector('img'));
 
     expect(styles.display).to.equal('flex');
     expect(styles.padding).to.equal('40px 24px');
@@ -210,18 +212,21 @@ describe('resume-hero', () => {
     expect(styles.borderRadius).to.equal('24px');
     expect(styles.backgroundColor).to.equal('rgb(248, 248, 248)');
     expect(buttonStyles.height).to.equal('24px');
-    expect(copyStyles.order).to.equal('2');
-    expect(actionStyles.order).to.equal('1');
-    expect(getComputedStyle(authoredNodes.createMedia).order).to.equal('0');
+    expect(copyStyles.order).to.equal('1');
+    expect(actionStyles.order).to.equal('0');
+    expect(getComputedStyle(mediaStage).order).to.equal('2');
     expect(authoredNodes.createCopy.classList.contains('resume-hero-create-copy')).to.be.true;
-    expect(authoredNodes.createMedia.classList.contains('resume-hero-create-media')).to.be.true;
+    authoredNodes.createMedia.forEach((media) => {
+      expect(media.classList.contains('resume-hero-create-media')).to.be.true;
+    });
+    expect(mediaStage.getBoundingClientRect().top)
+      .to.be.lessThan(authoredNodes.createCopy.getBoundingClientRect().top);
     expect(authoredNodes.createCopy.getBoundingClientRect().top)
       .to.be.lessThan(authoredNodes.createLink.closest('.action-area').getBoundingClientRect().top);
-    expect(authoredNodes.createLink.closest('.action-area').getBoundingClientRect().top)
-      .to.be.lessThan(authoredNodes.createPicture.getBoundingClientRect().top);
-    expect(pictureStyles.marginBlockStart).to.equal('24px');
-    expect(pictureStyles.maxHeight).to.equal('216px');
-    expect(imageStyles.maxHeight).to.equal('216px');
+    expect(getComputedStyle(mediaStage).height).to.equal('184px');
+    expect(pictureStyles.marginBlockStart).to.equal('0px');
+    expect(pictureStyles.maxHeight).to.equal('100%');
+    expect(imageStyles.maxHeight).to.equal('100%');
     expect(authoredNodes.createLink.classList.contains('con-button')).to.be.true;
     expect(authoredNodes.createLink.classList.contains('blue')).to.be.false;
     expect(authoredNodes.createLink.classList.contains('button-xl')).to.be.true;
@@ -261,24 +266,116 @@ describe('resume-hero', () => {
     }
   });
 
-  it('moves only the authored upload picture into the dropzone icon', () => {
-    const picture = block.querySelector('.widget-icon #authored-upload-picture');
-    expect(picture).to.equal(authoredNodes.uploadPicture);
-    expect(picture.classList.contains('resume-hero-dropzone-image')).to.be.true;
+  it('moves all authored upload pictures into the dropzone in source order', () => {
+    const iconWrapper = block.querySelector('.widget-icon');
+    const pictures = [...iconWrapper.querySelectorAll('.resume-hero-dropzone-image')];
+
+    expect(pictures).to.deep.equal(authoredNodes.uploadPictures);
+    expect(iconWrapper.classList.contains('resume-hero-media-sequence')).to.be.true;
+    expect(pictures[0].classList.contains('resume-hero-dropzone-image-2')).to.be.true;
+    expect(pictures[1].classList.contains('resume-hero-dropzone-image-1')).to.be.true;
   });
 
-  it('resizes the dropzone image horizontally while retaining its fixed height', async () => {
-    const image = authoredNodes.uploadPicture.querySelector('img');
+  it('leaves no empty paragraph wrappers behind in the upload cell', () => {
+    const strayParagraphs = [...authoredNodes.uploadCell.children]
+      .filter((child) => child.tagName === 'P');
+    expect(strayParagraphs).to.have.lengthOf(0);
+  });
+
+  it('anchors the upload sequence at the bottom corners with the authored dimensions', async () => {
     await setViewport({ width: 1000, height: 800 });
     try {
-      const narrowRect = image.getBoundingClientRect();
-      expect(getComputedStyle(image).objectFit).to.equal('fill');
-      expect(narrowRect.height).to.equal(298);
+      const [first, second] = authoredNodes.uploadPictures.map((picture) => (
+        getComputedStyle(picture)
+      ));
 
-      await setViewport({ width: 1200, height: 800 });
-      const wideRect = image.getBoundingClientRect();
-      expect(wideRect.width).to.be.greaterThan(narrowRect.width);
-      expect(wideRect.height).to.equal(narrowRect.height);
+      expect(first.position).to.equal('absolute');
+      expect(first.bottom).to.equal('-30px');
+      expect(first.right).to.equal('-50px');
+      expect(parseFloat(first.width)).to.be.closeTo(144, 0.1);
+      expect(parseFloat(first.height)).to.be.closeTo(190, 0.1);
+      expect(first.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('-8.28deg');
+      expect(first.animationName).to.equal('none');
+      expect(first.animationDelay).to.equal('4.6s');
+
+      expect(second.position).to.equal('absolute');
+      expect(second.bottom).to.equal('-50px');
+      expect(second.left).to.equal('-10px');
+      expect(parseFloat(second.width)).to.be.closeTo(144, 0.1);
+      expect(parseFloat(second.height)).to.be.closeTo(190, 0.1);
+      expect(second.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('6.91deg');
+      expect(second.animationDelay).to.equal('-0.4s');
+      authoredNodes.uploadPictures.forEach((picture) => {
+        expect(getComputedStyle(picture.querySelector('img')).objectFit).to.equal('contain');
+      });
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('sequences all three create images with their authored sizes and rotations', () => {
+    const stage = block.querySelector('.resume-hero-create-media-stage');
+    const media = [...stage.querySelectorAll('.resume-hero-create-media')];
+    const specs = [
+      { width: 100.322, height: 125.065, rotation: '2.66deg', delay: '-0.4s' },
+      { width: 100.322, height: 125.065, rotation: '0.433deg', delay: '3.6s' },
+      { width: 96.634, height: 125.07, rotation: '-3.298deg', delay: '7.6s' },
+    ];
+
+    expect(authoredNodes.createCell.classList.contains('resume-hero-media-sequence')).to.be.true;
+    expect(media).to.deep.equal(authoredNodes.createMedia);
+    media.forEach((item, index) => {
+      const styles = getComputedStyle(item);
+      expect(styles.position).to.equal('absolute');
+      expect(parseFloat(styles.width)).to.be.closeTo(specs[index].width, 0.1);
+      expect(parseFloat(styles.height)).to.be.closeTo(specs[index].height, 0.1);
+      expect(styles.getPropertyValue('--resume-hero-media-rotation').trim())
+        .to.equal(specs[index].rotation);
+      expect(styles.animationName).to.equal('none');
+      expect(styles.animationDelay).to.equal(specs[index].delay);
+    });
+    expect(getComputedStyle(media[2]).aspectRatio).to.equal('17 / 22');
+  });
+
+  it('keeps all three create images visible so they appear stacked', () => {
+    const stage = block.querySelector('.resume-hero-create-media-stage');
+    const media = [...stage.querySelectorAll('.resume-hero-create-media')];
+
+    media.forEach((item) => {
+      expect(getComputedStyle(item).opacity).to.equal('1');
+    });
+  });
+
+  it('applies the authored offset/rotation transforms to media-1 and media-3', () => {
+    const probe = document.createElement('div');
+    document.body.append(probe);
+
+    probe.style.transform = 'translate(-10px, 10px) rotate(-2.66deg)';
+    const expectedMedia1 = getComputedStyle(probe).transform;
+    probe.style.transform = 'translate(10px, -10px) rotate(2.66deg)';
+    const expectedMedia3 = getComputedStyle(probe).transform;
+    probe.remove();
+
+    const media1 = block.querySelector('.resume-hero-create-media-1');
+    const media3 = block.querySelector('.resume-hero-create-media-3');
+    expect(getComputedStyle(media1).transform).to.equal(expectedMedia1);
+    expect(getComputedStyle(media3).transform).to.equal(expectedMedia3);
+  });
+
+  it('paints the dropzone boundary above the sequence images and lets clicks pass through', async () => {
+    await setViewport({ width: 1000, height: 800 });
+    try {
+      const dropzoneArea = block.querySelector('.resume-hero-dropzone-area');
+      const border = block.querySelector('.resume-hero-dropzone-border');
+      const borderStyles = getComputedStyle(border);
+      const widgetIconStyles = getComputedStyle(block.querySelector('.widget-icon'));
+
+      expect(border).to.exist;
+      expect(borderStyles.position).to.equal('absolute');
+      expect(borderStyles.pointerEvents).to.equal('none');
+      expect(Number(borderStyles.zIndex)).to.be.greaterThan(Number(widgetIconStyles.zIndex));
+      expect(borderStyles.backgroundImage).to.not.equal('none');
+      expect(getComputedStyle(dropzoneArea).backgroundImage).to.equal('none');
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
@@ -329,6 +426,9 @@ describe('resume-hero', () => {
     await decorate(block);
     expect(block.querySelectorAll('#unity-upload')).to.have.length(1);
     expect(block.querySelectorAll('#file-upload')).to.have.length(1);
+    expect(block.querySelectorAll('.resume-hero-create-media-stage')).to.have.length(1);
+    expect(block.querySelectorAll('.resume-hero-dropzone-image')).to.have.length(2);
+    expect(block.querySelectorAll('.resume-hero-create-media')).to.have.length(3);
   });
 });
 
