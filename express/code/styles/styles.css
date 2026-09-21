@@ -425,7 +425,7 @@
   --Grid-container-padding-side: var(--spacing-300);
   --Grid-grid-gutter: var(--spacing-100);
   --section-padding-xl: var(--spacing-600);
-  --section-padding-m: var(--spacing-700);
+  --section-padding-m: var(--spacing-400);
 
   /* S2A responsive container and typography tokens — SM */
   --s2a-containers-default-_static: 327px;
@@ -536,6 +536,7 @@
     --Grid-container-padding-side: var(--spacing-500);
     --Grid-grid-gutter: var(--spacing-300);
     --section-padding-xl: var(--spacing-600);
+    --section-padding-m: var(--spacing-400);
   }
 }
 
@@ -575,6 +576,7 @@
     --Grid-container-padding-side: var(--spacing-600);
     --Grid-grid-gutter: var(--spacing-400);
     --section-padding-xl: var(--spacing-900);
+    --section-padding-m: var(--spacing-700);
   }
 }
 
