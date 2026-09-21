@@ -3,6 +3,8 @@
   --susi-tabs-width: 400px;
   --susi-min-height: 462px;
   --susi-standard-padding: 24px;
+  --susi-image-modal-width: 1120px;
+  --susi-image-modal-height: 600px;
 }
 
 .susi-light {
@@ -164,6 +166,74 @@
 .susi-light.student input[type='checkbox'] {
   width: 1rem;
   height: 1rem;
+}
+
+@media (max-width: 1199px) {
+  .susi-light.color .title {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding-inline: var(--spacing-300);
+  }
+}
+
+.susi-light.color.has-image .susi-image {
+  display: none;
+}
+
+.susi-light.color.has-image .susi-form-pane {
+  width: 100%;
+}
+
+@media (min-width: 1200px) {
+  .susi-light.color.has-image {
+    height: 100%;
+  }
+
+  .susi-light.color.has-image .susi-layout {
+    flex-direction: row;
+    align-items: stretch;
+    text-align: initial;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .susi-light.color.has-image .susi-image {
+    display: block;
+    width: 50%;
+    height: 100%;
+    flex: 1 1 50%;
+    object-fit: cover;
+  }
+
+  .susi-light.color.has-image .susi-form-pane {
+    display: flex;
+    flex: 1 1 50%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    gap: var(--spacing-400);
+    padding: var(--spacing-500) var(--spacing-500) var(--spacing-600);
+    overflow-y: auto;
+  }
+
+  .susi-light.color.has-image .express-logo {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .dialog-modal:has(.susi-light.color.has-image) {
+    width: var(--susi-image-modal-width);
+    height: var(--susi-image-modal-height);
+    overflow: hidden;
+  }
+
+  .dialog-modal:has(.susi-light.color.has-image) > .fragment,
+  .dialog-modal:has(.susi-light.color.has-image) > .fragment > .section,
+  .dialog-modal:has(.susi-light.color.has-image) > .fragment > .section > .content {
+    height: 100%;
+  }
 }
 
 .susi-light .subheading {
