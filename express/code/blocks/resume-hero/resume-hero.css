@@ -388,7 +388,6 @@ main .section .resume-hero p {
 
 /* Resume-specific dropzone composition: authored preview, heading, and copy. */
 .resume-hero .verb-dropzone-area {
-  background-image: none;
   min-height: 0;
   overflow: hidden;
   padding: 51px 15px;
