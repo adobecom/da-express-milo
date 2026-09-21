@@ -831,6 +831,51 @@ main .section .resume-hero p {
 }
 
 /* ============================================================
+   TWO-COLUMN ACTIONS — ≥ 600px (tablet keeps upload/create side by side)
+   ============================================================ */
+
+@media screen and (min-width: 600px) {
+  .resume-hero .resume-hero-actions {
+    align-items: stretch;
+    display: flex;
+    flex-direction: row;
+    gap: var(--Grid-grid-gutter);
+    margin: auto auto 22px;
+    max-width: 1130px;
+  }
+
+  .resume-hero .resume-hero-upload {
+    align-items: flex-start;
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    gap: var(--spacing-100);
+    justify-content: flex-end;
+    max-width: 565px;
+    min-width: 551px;
+  }
+
+  .resume-hero .verb-dropzone-area {
+    aspect-ratio: auto;
+    flex: 1;
+  }
+
+  .resume-hero .widget-icon {
+    display: flex;
+  }
+
+  .resume-hero .resume-hero-dropzone-border {
+    background-image: var(--verb-dropzone-background-image);
+  }
+
+  .resume-hero .resume-hero-create {
+    flex: 0 0 auto;
+    min-width: 268px;
+    width: 268px;
+  }
+}
+
+/* ============================================================
    TWO-COLUMN ACTIONS — ≥ 900px
    ============================================================ */
 
@@ -851,34 +896,27 @@ main .section .resume-hero p {
   }
 
   .resume-hero .resume-hero-actions {
-    align-items: stretch;
-    column-gap: var(--Grid-grid-gutter);
     display: grid;
     grid-template-columns: repeat(var(--s2a-layout-guide-_columns), minmax(0, 1fr));
-    margin: auto auto 22px;
-    max-width: 1130px;
   }
 
   .resume-hero .resume-hero-upload {
+    align-items: normal;
+    gap: var(--spacing-300);
     grid-column: auto / span 8;
+    justify-content: normal;
+    max-width: none;
+    min-width: 0;
     width: auto;
   }
 
   .resume-hero .verb-dropzone-area {
-    aspect-ratio: auto;
+    flex: 0 0 auto;
     height: 298px;
     max-width: none;
     min-height: 0;
     padding: var(--spacing-400);
     width: auto;
-  }
-
-  .resume-hero .widget-icon {
-    display: flex;
-  }
-
-  .resume-hero .resume-hero-dropzone-border {
-    background-image: var(--verb-dropzone-background-image);
   }
 
   .resume-hero .resume-hero-create {
@@ -889,10 +927,7 @@ main .section .resume-hero p {
     grid-column: auto / span 4;
     height: 298px;
     justify-content: flex-start;
-    width: 323px;
-
     padding: var(--spacing-400);
- 
   }
 
   .resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area):not(.resume-hero-create-media) {
@@ -923,6 +958,13 @@ main .section .resume-hero p {
 
   .resume-hero .resume-hero-create img {
     max-height: none;
+  }
+}
+
+@media screen and (min-width: 1199px) {
+  .resume-hero .resume-hero-create {
+    min-width: 323px;
+    width: 323px;
   }
 }
 

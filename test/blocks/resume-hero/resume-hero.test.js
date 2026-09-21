@@ -247,15 +247,59 @@ describe('resume-hero', () => {
       expect(actionsStyles.display).to.equal('grid');
       expect(uploadStyles.gridColumnEnd).to.equal('span 8');
       expect(createStyles.gridColumnEnd).to.equal('span 4');
-      expect(uploadRect.width / createRect.width).to.be.closeTo(2, 0.1);
       expect(createRect.left).to.be.greaterThan(uploadRect.right);
       expect(dropzoneStyles.height).to.equal('298px');
       expect(dropzoneStyles.maxWidth).to.equal('none');
       expect(createStyles.alignSelf).to.equal('start');
       expect(createStyles.justifyContent).to.equal('flex-start');
-      // width:323px is clamped by the base rule's unconditional max-width:100%
-      // once the grid track is narrower than 323px at this viewport.
-      expect(parseFloat(createStyles.width)).to.be.at.most(323);
+      // create stays at the tablet width (268px) until the 1199px upgrade breakpoint
+      expect(createStyles.width).to.equal('268px');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('widens the create card to 323px at the 1199px breakpoint', async () => {
+    await setViewport({ width: 1199, height: 800 });
+    try {
+      const createStyles = getComputedStyle(authoredNodes.createCell);
+      expect(createStyles.width).to.equal('323px');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('keeps the upload and create widgets side by side (flex, not grid) at tablet width', async () => {
+    await setViewport({ width: 850, height: 900 });
+    try {
+      const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
+      const uploadStyles = getComputedStyle(authoredNodes.uploadCell);
+      const createStyles = getComputedStyle(authoredNodes.createCell);
+      const uploadRect = authoredNodes.uploadCell.getBoundingClientRect();
+      const createRect = authoredNodes.createCell.getBoundingClientRect();
+
+      expect(actionsStyles.display).to.equal('flex');
+      expect(actionsStyles.flexDirection).to.equal('row');
+      expect(parseFloat(uploadStyles.minWidth)).to.be.closeTo(551, 0.1);
+      expect(parseFloat(uploadStyles.maxWidth)).to.be.closeTo(565, 0.1);
+      expect(createStyles.width).to.equal('268px');
+      expect(createRect.left).to.be.greaterThan(uploadRect.right);
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('enables the dropzone sequence images and stretches its height at tablet width', async () => {
+    await setViewport({ width: 850, height: 900 });
+    try {
+      const dropzone = block.querySelector('.resume-hero-dropzone-area');
+      const widgetIcon = dropzone.querySelector('.widget-icon');
+      const createRect = authoredNodes.createCell.getBoundingClientRect();
+      const dropzoneRect = dropzone.getBoundingClientRect();
+
+      expect(getComputedStyle(widgetIcon).display).to.equal('flex');
+      expect(dropzoneRect.height).to.be.lessThan(createRect.height);
+      expect(dropzoneRect.height).to.be.greaterThan(100);
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
@@ -444,15 +488,20 @@ describe('resume-hero', () => {
     }
   });
 
-  it('uses a compact image-free dropzone on mobile', () => {
-    const dropzone = block.querySelector('.resume-hero-dropzone-area');
-    const widgetIcon = dropzone.querySelector('.widget-icon');
-    const styles = getComputedStyle(dropzone);
+  it('uses a compact image-free dropzone below the tablet breakpoint', async () => {
+    await setViewport({ width: 500, height: 800 });
+    try {
+      const dropzone = block.querySelector('.resume-hero-dropzone-area');
+      const widgetIcon = dropzone.querySelector('.widget-icon');
+      const styles = getComputedStyle(dropzone);
 
-    expect(styles.backgroundImage).to.equal('none');
-    expect(styles.minHeight).to.equal('0px');
-    expect(styles.padding).to.equal('51px 15px');
-    expect(getComputedStyle(widgetIcon).display).to.equal('none');
+      expect(styles.backgroundImage).to.equal('none');
+      expect(styles.minHeight).to.equal('0px');
+      expect(styles.padding).to.equal('51px 15px');
+      expect(getComputedStyle(widgetIcon).display).to.equal('none');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
   });
 
   it('styles the upload heading and subcopy with centered S2A typography', () => {
