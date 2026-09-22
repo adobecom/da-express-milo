@@ -90,7 +90,7 @@ const CONFIG = {
   decorateArea,
   faasCloseModalAfterSubmit: 'on',
   locales: {
-    '': { ietf: 'en-US', tk: 'jdq5hay.css' },
+    '': { ietf: 'en-US', tk: 'iwo3rvz.css' },
     ara: { ietf: 'ar', tk: 'cbp4pzm.css', dir: 'rtl' },
     br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
     // eslint-disable-next-line max-len
@@ -118,7 +118,7 @@ const CONFIG = {
     // Sub-locales declared in languageMap above must also be registered here
     // so Milo's locale resolver recognizes their URL prefixes (AEEE-34989).
     // Values match da-cc's canonical locales config.
-    ae_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    ae_ar: { ietf: 'ar', tk: 'rnf4ipd.css', dir: 'rtl' },
     ae_en: { ietf: 'en', tk: 'pps7abe.css' },
     africa: { ietf: 'en', tk: 'pps7abe.css' },
     ar: { ietf: 'es-AR', tk: 'oln4yqj.css' },
@@ -142,7 +142,7 @@ const CONFIG = {
     cz: { ietf: 'cs-CZ', tk: 'aaz7dvd.css' },
     ec: { ietf: 'es-419', tk: 'oln4yqj.css' },
     ee: { ietf: 'et-EE', tk: 'aaz7dvd.css' },
-    eg_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    eg_ar: { ietf: 'ar', tk: 'rnf4ipd.css', dir: 'rtl' },
     eg_en: { ietf: 'en-GB', tk: 'pps7abe.css' },
     gr_el: { ietf: 'el', tk: 'fnx0rsr.css' },
     gr_en: { ietf: 'en-GR', tk: 'pps7abe.css' },
@@ -153,9 +153,9 @@ const CONFIG = {
     id_en: { ietf: 'en', tk: 'pps7abe.css' },
     ie: { ietf: 'en-GB', tk: 'pps7abe.css' },
     il_en: { ietf: 'en-IL', tk: 'pps7abe.css' },
-    il_he: { ietf: 'he', tk: 'nwq1mna.css', dir: 'rtl' },
+    il_he: { ietf: 'he', tk: 'rnf4ipd.css', dir: 'rtl' },
     in_hi: { ietf: 'hi', tk: 'aaa8deh.css' },
-    kw_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    kw_ar: { ietf: 'ar', tk: 'rnf4ipd.css', dir: 'rtl' },
     kw_en: { ietf: 'en-GB', tk: 'pps7abe.css' },
     la: { ietf: 'es-LA', tk: 'oln4yqj.css' },
     lt: { ietf: 'lt-LT', tk: 'aaz7dvd.css' },
@@ -176,11 +176,11 @@ const CONFIG = {
     pl: { ietf: 'pl-PL', tk: 'aaz7dvd.css' },
     pr: { ietf: 'es-419', tk: 'oln4yqj.css' },
     pt: { ietf: 'pt-PT', tk: 'inq1xob.css' },
-    qa_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    qa_ar: { ietf: 'ar', tk: 'rnf4ipd.css', dir: 'rtl' },
     qa_en: { ietf: 'en-GB', tk: 'pps7abe.css' },
     ro: { ietf: 'ro-RO', tk: 'aaz7dvd.css' },
     ru: { ietf: 'ru-RU', tk: 'aaz7dvd.css' },
-    sa_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    sa_ar: { ietf: 'ar', tk: 'rnf4ipd.css', dir: 'rtl' },
     sa_en: { ietf: 'en', tk: 'pps7abe.css' },
     // sea has no da-cc precedent; defaulting to umbrella English.
     sea: { ietf: 'en', tk: 'pps7abe.css' },

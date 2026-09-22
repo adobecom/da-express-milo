@@ -4,7 +4,7 @@ import { chromium } from '@playwright/test';
 // only resolve to the intended face once this kit's @font-face rules are
 // active, so measurement has to run against the same font data production
 // renders with, not a system-font fallback.
-const ADOBE_FONTS_KIT_ID = 'iqd6egj';
+const ADOBE_FONTS_KIT_ID = 'zlz1zki';
 
 // Large reference size so actualBoundingBox* rounding error is negligible;
 // the result is stored as an em-relative multiplier, not an absolute size.
