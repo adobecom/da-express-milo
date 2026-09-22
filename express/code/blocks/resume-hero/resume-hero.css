@@ -930,9 +930,9 @@ main .section .resume-hero p {
     margin-block-end: var(--spacing-300);
   }
 
-  .resume-hero .resume-hero-header-content {
+  /* .resume-hero .resume-hero-header-content {
     gap: 0;
-  }
+  } */
 
   .resume-hero .express-logo {
     margin-block-end: var(--spacing-100);
