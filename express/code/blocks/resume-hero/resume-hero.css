@@ -677,7 +677,7 @@ main .section .resume-hero p {
  transform: translateX(-48%) translateY(-90%);
     margin-left: 0;
     margin-bottom: 15px;
-
+   top: -4px;
 
 }
 
