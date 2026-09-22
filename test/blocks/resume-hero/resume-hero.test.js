@@ -9,7 +9,7 @@ import sinon from 'sinon';
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
 window.isTestEnv = true;
 
-const [{ getLibs, decorateMiloIcons }] = await Promise.all([
+const [{ getLibs }] = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
   import('../../../express/code/scripts/scripts.js'),
 ]);
@@ -32,6 +32,7 @@ await Promise.all(styleSheets.map((href) => new Promise((resolve, reject) => {
 
 const {
   default: decorate,
+  decorateMiloIcons,
   LIMITS,
 } = await import('../../../express/code/blocks/resume-hero/resume-hero.js');
 const basicHtml = await readFile({ path: './mocks/basic.html' });
