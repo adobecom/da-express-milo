@@ -481,14 +481,14 @@ describe('resume-hero', () => {
       ));
 
       expect(first.position).to.equal('absolute');
-      expect(first.right).to.equal('-100px');
+      expect(first.right).to.equal('-70px');
       expect(parseFloat(first.top)).to.be.closeTo(130.125, 0.1);
       expect(parseFloat(first.width)).to.be.closeTo(185.03, 0.1);
       expect(parseFloat(first.height)).to.be.closeTo(248.75, 0.1);
       expect(first.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('-8.28deg');
 
       expect(second.position).to.equal('absolute');
-      expect(second.left).to.equal('-60px');
+      expect(second.left).to.equal('-30px');
       expect(parseFloat(second.top)).to.be.closeTo(130.125, 0.1);
       expect(parseFloat(second.width)).to.be.closeTo(185.03, 0.1);
       expect(parseFloat(second.height)).to.be.closeTo(248.75, 0.1);
@@ -508,41 +508,35 @@ describe('resume-hero', () => {
     }
   });
 
-  it('slides the upload sequence images up and unrotates them on dropzone hover', async () => {
+  it('keeps the upload sequence static on tablet hover', async () => {
     await setViewport({ width: 1000, height: 800 });
     const pictures = authoredNodes.uploadPictures;
     try {
       const dropzone = block.querySelector('.resume-hero-dropzone-area');
       const rect = dropzone.getBoundingClientRect();
-      pictures.forEach((picture) => {
-        picture.style.transition = 'none';
+      const restingStyles = pictures.map((picture) => {
+        const styles = getComputedStyle(picture);
+        return {
+          left: styles.left,
+          right: styles.right,
+          top: styles.top,
+          transform: styles.transform,
+        };
       });
       await sendMouse({
         type: 'move',
         position: [Math.round(rect.left + rect.width / 2), Math.round(rect.top + rect.height / 2)],
       });
 
-      const [rightPicture, leftPicture] = pictures.map((picture) => getComputedStyle(picture));
-      expect(parseFloat(rightPicture.top)).to.be.closeTo(33.675, 0.1);
-      expect(rightPicture.right).to.equal('-100px');
-      expect(parseFloat(leftPicture.top)).to.be.closeTo(33.675, 0.1);
-      expect(leftPicture.left).to.equal('-30px');
-      [rightPicture, leftPicture].forEach((styles) => {
-        expect(styles.transform).to.equal('matrix(1, 0, 0, 1, 0, 0)');
-        const imageHeight = parseFloat(styles.height);
-        const templateHeight = imageHeight * 0.8;
-        const sourceTopPadding = imageHeight * 0.1;
-        const visibleTopGap = parseFloat(styles.top) + sourceTopPadding;
-        const visibleBottomGap = 298 - visibleTopGap - templateHeight;
-
-        expect(visibleTopGap).to.be.closeTo(58.55, 0.1);
-        expect(visibleBottomGap).to.be.closeTo(40.45, 0.1);
-        expect(66.8 - visibleTopGap).to.be.closeTo(48.7 - visibleBottomGap, 0.1);
+      pictures.forEach((picture, index) => {
+        const styles = getComputedStyle(picture);
+        expect(styles.left).to.equal(restingStyles[index].left);
+        expect(styles.right).to.equal(restingStyles[index].right);
+        expect(styles.top).to.equal(restingStyles[index].top);
+        expect(styles.transform).to.equal(restingStyles[index].transform);
+        expect(styles.transitionDuration).to.equal('0s');
       });
     } finally {
-      pictures.forEach((picture) => {
-        picture.style.removeProperty('transition');
-      });
       await resetMouse();
       await setViewport({ width: 800, height: 600 });
     }

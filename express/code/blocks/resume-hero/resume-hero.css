@@ -920,6 +920,24 @@ main .section .resume-hero p {
     right: -70px;
   }
 
+  .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image {
+    transition: none;
+  }
+
+  .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1,
+  .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
+    top: 130.125px;
+    transform: rotate(var(--resume-hero-media-rotation));
+  }
+
+  .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
+    left: -30px;
+  }
+
+  .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
+    right: -70px;
+  }
+
   .resume-hero .resume-hero-dropzone-border {
     background-image: none;
   }
