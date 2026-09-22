@@ -576,8 +576,9 @@ describe('resume-hero', () => {
       const styles = getComputedStyle(item);
       expect(styles.opacity).to.equal('1');
       expect(styles.borderRadius).to.equal('6px');
-      expect(styles.boxShadow).to.include('1px 4px 10px 0px');
-      expect(styles.overflow).to.equal('hidden');
+      expect(styles.boxShadow).to.equal('none');
+      expect(styles.filter).to.include('drop-shadow');
+      expect(styles.overflow).to.equal('visible');
     });
   });
 
@@ -632,8 +633,13 @@ describe('resume-hero', () => {
       [media1, media2, media3].forEach((media) => {
         const styles = getComputedStyle(media);
         expect(styles.borderRadius).to.equal('6px');
-        expect(styles.boxShadow).to.include('36px 112px 33px 0px');
-        expect(styles.boxShadow).to.include('1px 4px 10px 0px');
+        expect(styles.boxShadow).to.equal('none');
+        expect(styles.filter).to.include('drop-shadow');
+        expect(styles.overflow).to.equal('visible');
+        const pictureStyles = getComputedStyle(media.querySelector('picture'));
+        const imageStyles = getComputedStyle(media.querySelector('img'));
+        expect(pictureStyles.overflow).to.equal('hidden');
+        expect(imageStyles.scale).to.equal('1.01');
       });
 
       const probe = document.createElement('div');
