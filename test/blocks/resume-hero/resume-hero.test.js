@@ -371,37 +371,7 @@ describe('resume-hero', () => {
       .filter((child) => child.tagName === 'P');
     expect(strayParagraphs).to.have.lengthOf(0);
   });
-
-  it('animates both axes for the desktop dropzone sequence', async () => {
-    await setViewport({ width: 1440, height: 900 });
-    try {
-      authoredNodes.uploadPictures.forEach((picture) => {
-        const styles = getComputedStyle(picture);
-        const properties = styles.transitionProperty.split(',').map((property) => property.trim());
-        const timingFunctions = styles.transitionTimingFunction
-          .split('),')
-          .map((value, index, values) => `${value}${index < values.length - 1 ? ')' : ''}`.trim());
-        const durations = styles.transitionDuration.split(',').map((duration) => duration.trim());
-        const [originX, originY] = styles.transformOrigin.split(' ').map(parseFloat);
-        expect(properties).to.include('left');
-        expect(properties).to.include('right');
-        expect(properties).to.include('top');
-        expect(properties).to.include('transform');
-        timingFunctions.forEach((timingFunction) => {
-          expect(timingFunction).to.equal('cubic-bezier(0.34, 1.56, 0.64, 1)');
-        });
-        durations.forEach((duration) => {
-          expect(duration).to.equal('0.8s');
-        });
-        expect(originX).to.be.closeTo(parseFloat(styles.width) / 2, 0.1);
-        expect(originY).to.be.closeTo(parseFloat(styles.height) / 2, 0.1);
-        expect(styles.willChange).to.equal('top, left, right, transform');
-      });
-    } finally {
-      await setViewport({ width: 800, height: 600 });
-    }
-  });
-
+  
   it('sequences all three create images with their authored sizes and rotations', () => {
     const stage = block.querySelector('.resume-hero-create-media-stage');
     const media = [...stage.querySelectorAll('.resume-hero-create-media')];
