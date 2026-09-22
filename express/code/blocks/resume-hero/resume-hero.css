@@ -636,20 +636,21 @@ main .section .resume-hero p {
 }
 
 .resume-hero .milo-tooltip.top::before {
-  left: 50%;
-  margin-left: 0;
-  top: -10px;
-  transform: translateX(-50%) translateY(-100%);
+ transform: translateX(-48%) translateY(-90%);
+    margin-left: 0;
+    margin-bottom: 15px;
+
+
 }
 
 .resume-hero .milo-tooltip.top::after {
-  border-color: var(--tooltip-background-color) transparent transparent;
-  border-right-color: transparent;
-  border-width: 4px;
-  left: 50%;
-  margin-left: 0;
-  top: -6px;
-  transform: translateX(-50%) translateY(-50%);
+    border-width: 4px;
+    /* left: 50%; */
+    top: -px;
+    transform: translateX(-10.75px) translateY(-1px);
+    border-color: var(--tooltip-background-color) transparent transparent;
+    border-right-color: transparent;
+    margin-left: 0;
 }
 
 /* Keep the first two trust items together on narrow screens, then stack. */

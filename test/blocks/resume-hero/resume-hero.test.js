@@ -276,9 +276,12 @@ describe('resume-hero', () => {
     expect(iconStyles.marginInlineStart).to.equal('2px');
     expect(iconStyles.bottom).to.equal('-3px');
     expect(iconStyles.marginBlockEnd).to.equal('0px');
-    expect(tooltipStyles.top).to.equal('-10px');
+    expect(tooltipStyles.left).to.equal('100%');
+    expect(tooltipStyles.marginBlockEnd).to.equal('15px');
+    expect(tooltipStyles.top).to.equal('50%');
+    expect(arrowStyles.left).to.equal('100%');
     expect(arrowStyles.borderTopWidth).to.equal('4px');
-    expect(arrowStyles.top).to.equal('-6px');
+    expect(arrowStyles.top).to.equal('50%');
   });
 
   it('keeps the first two benefits together and stacks the rest on narrow mobile', async () => {
