@@ -21,22 +21,35 @@ if (params.workflow) {
 if (params.dropzone2) {
   appTags.push('dropzone2');
 }
-function ensureSatelliteReady(callback) {
-  // eslint-disable-next-line no-underscore-dangle
-  if (window._satellite?.track instanceof Function) {
-    callback();
-  } else {
-    setTimeout(() => ensureSatelliteReady(callback), 50);
+function ensureSatelliteReady(callback, maxWaitMs = 10000) {
+  const start = Date.now();
+  function poll() {
+    // eslint-disable-next-line no-underscore-dangle
+    if (window._satellite?.track instanceof Function) {
+      callback();
+    } else if (Date.now() - start < maxWaitMs) {
+      setTimeout(poll, 50);
+    } else {
+      window.lana?.log(
+        'ensureSatelliteReady: _satellite not available after timeout',
+        { sampleRate: 0.1, tags: 'express,analytics', severity: 'warn' },
+      );
+    }
   }
+  poll();
 }
 
 function getSessionID() {
-  const aToken = window.adobeIMS.getAccessToken();
-  const arrayToken = aToken?.token.split('.');
-  if (!arrayToken) return;
-  const tokenPayload = JSON.parse(atob(arrayToken[1]));
-  // eslint-disable-next-line consistent-return
-  return tokenPayload.sub || tokenPayload.user_id;
+  try {
+    const token = window.adobeIMS?.getAccessToken?.()?.token;
+    const payload = token?.split('.')[1];
+    if (!payload) return undefined;
+
+    const tokenPayload = JSON.parse(atob(payload));
+    return tokenPayload.sub || tokenPayload.user_id;
+  } catch {
+    return undefined;
+  }
 }
 
 function eventData(metaData, { appReferrer: referrer, trackingId: tracking }) {
