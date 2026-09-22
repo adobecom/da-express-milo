@@ -482,14 +482,14 @@ describe('resume-hero', () => {
 
       expect(first.position).to.equal('absolute');
       expect(first.right).to.equal('-70px');
-      expect(parseFloat(first.top)).to.be.closeTo(130.125, 0.1);
+      expect(parseFloat(first.top)).to.be.closeTo(156.125, 0.1);
       expect(parseFloat(first.width)).to.be.closeTo(185.03, 0.1);
       expect(parseFloat(first.height)).to.be.closeTo(248.75, 0.1);
       expect(first.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('-8.28deg');
 
       expect(second.position).to.equal('absolute');
       expect(second.left).to.equal('-30px');
-      expect(parseFloat(second.top)).to.be.closeTo(130.125, 0.1);
+      expect(parseFloat(second.top)).to.be.closeTo(156.125, 0.1);
       expect(parseFloat(second.width)).to.be.closeTo(185.03, 0.1);
       expect(parseFloat(second.height)).to.be.closeTo(248.75, 0.1);
       expect(second.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('6.91deg');
@@ -501,8 +501,38 @@ describe('resume-hero', () => {
       });
 
       const sourceTopPadding = parseFloat(first.height) * 0.1;
-      expect(parseFloat(first.top) + sourceTopPadding).to.be.closeTo(155, 0.1);
-      expect(parseFloat(second.top) + sourceTopPadding).to.be.closeTo(155, 0.1);
+      expect(parseFloat(first.top) + sourceTopPadding).to.be.closeTo(181, 0.1);
+      expect(parseFloat(second.top) + sourceTopPadding).to.be.closeTo(181, 0.1);
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
+  it('animates both axes for the desktop dropzone sequence', async () => {
+    await setViewport({ width: 1440, height: 900 });
+    try {
+      authoredNodes.uploadPictures.forEach((picture) => {
+        const styles = getComputedStyle(picture);
+        const properties = styles.transitionProperty.split(',').map((property) => property.trim());
+        const timingFunctions = styles.transitionTimingFunction
+          .split('),')
+          .map((value, index, values) => `${value}${index < values.length - 1 ? ')' : ''}`.trim());
+        const durations = styles.transitionDuration.split(',').map((duration) => duration.trim());
+        const [originX, originY] = styles.transformOrigin.split(' ').map(parseFloat);
+        expect(properties).to.include('left');
+        expect(properties).to.include('right');
+        expect(properties).to.include('top');
+        expect(properties).to.include('transform');
+        timingFunctions.forEach((timingFunction) => {
+          expect(timingFunction).to.equal('cubic-bezier(0.34, 1.56, 0.64, 1)');
+        });
+        durations.forEach((duration) => {
+          expect(duration).to.equal('0.8s');
+        });
+        expect(originX).to.be.closeTo(parseFloat(styles.width) / 2, 0.1);
+        expect(originY).to.be.closeTo(parseFloat(styles.height) / 2, 0.1);
+        expect(styles.willChange).to.equal('top, left, right, transform');
+      });
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
@@ -674,6 +704,10 @@ describe('resume-hero', () => {
       expect(borderSvgStyles.overflow).to.equal('visible');
       expect(borderRect.getAttribute('stroke-width')).to.equal('1');
       expect(borderRect.getAttribute('stroke-dasharray')).to.equal('4 4');
+      expect(borderRect.getAttribute('stroke')).to.equal('#8f8f8f');
+      expect(borderRect.getAttribute('stroke-linecap')).to.equal('butt');
+      expect(borderRect.getAttribute('stroke-linejoin')).to.equal('round');
+      expect(borderRect.getAttribute('shape-rendering')).to.equal('geometricPrecision');
       expect(borderRect.getAttribute('vector-effect')).to.equal('non-scaling-stroke');
       expect(getComputedStyle(dropzoneArea).backgroundImage).to.equal('none');
       pictures.forEach((picture) => {
@@ -815,6 +849,7 @@ describe('resume-hero placeholder precedence', () => {
     Object.assign(window.mph, {
       'resume-hero-resume-builder-upload-cta': 'RH upload cta',
       'resume-hero-resume-builder-file-limit': 'RH file limit',
+      'resume-hero-resume-builder-file-limit-desktop': 'RH desktop file limit',
       'resume-hero-legal': 'RH legal line',
       'resume-hero-tool-tip': 'RH tooltip',
       'resume-hero-close-dialog': 'RH close',
@@ -829,7 +864,8 @@ describe('resume-hero placeholder precedence', () => {
     await decorate(block);
 
     expect(block.querySelector('.verb-dropzone-heading').textContent).to.equal('RH upload cta');
-    expect(block.querySelector('.verb-dropzone-sub').textContent).to.equal('RH file limit');
+    expect(block.querySelector('.resume-hero-file-limit-default').textContent).to.equal('RH file limit');
+    expect(block.querySelector('.resume-hero-file-limit-desktop').textContent).to.equal('RH desktop file limit');
     expect(block.querySelector('.verb-dropzone-legal p').firstChild.textContent).to.equal('RH legal line');
     expect(block.querySelector('.info-icon').getAttribute('aria-label')).to.equal('RH tooltip');
     const errorCloseButton = block.querySelector('.verb-dropzone-errorBtn');
@@ -838,10 +874,30 @@ describe('resume-hero placeholder precedence', () => {
     expect(errorCloseButton.getAttribute('aria-label')).to.equal('RH close');
   });
 
+  it('switches to the desktop-specific file-limit placeholder at 1200px', async () => {
+    const block = document.querySelector('.resume-hero');
+    await decorate(block);
+    const defaultFileLimit = block.querySelector('.resume-hero-file-limit-default');
+    const desktopFileLimit = block.querySelector('.resume-hero-file-limit-desktop');
+
+    try {
+      await setViewport({ width: 1000, height: 800 });
+      expect(getComputedStyle(defaultFileLimit).display).to.equal('inline');
+      expect(getComputedStyle(desktopFileLimit).display).to.equal('none');
+
+      await setViewport({ width: 1440, height: 900 });
+      expect(getComputedStyle(defaultFileLimit).display).to.equal('none');
+      expect(getComputedStyle(desktopFileLimit).display).to.equal('inline');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
+  });
+
   it('lets resume-hero-* page metadata override the fetched sheet values', async () => {
     const metas = [
       ['resume-hero-resume-builder-upload-cta', 'Meta upload cta'],
       ['resume-hero-resume-builder-file-limit', 'Meta file limit'],
+      ['resume-hero-resume-builder-file-limit-desktop', 'Meta desktop file limit'],
     ].map(([name, content]) => {
       const meta = document.createElement('meta');
       meta.name = name;
@@ -854,19 +910,26 @@ describe('resume-hero placeholder precedence', () => {
     await decorate(block);
 
     expect(block.querySelector('.verb-dropzone-heading').textContent).to.equal('Meta upload cta');
-    expect(block.querySelector('.verb-dropzone-sub').textContent).to.equal('Meta file limit');
+    expect(block.querySelector('.resume-hero-file-limit-default').textContent).to.equal('Meta file limit');
+    expect(block.querySelector('.resume-hero-file-limit-desktop').textContent).to.equal('Meta desktop file limit');
 
     metas.forEach((meta) => meta.remove());
   });
 
   it('falls back to the legacy verb-* keys when no resume-hero-* key is authored', async () => {
     delete window.mph['resume-hero-resume-builder-upload-cta'];
+    delete window.mph['resume-hero-resume-builder-file-limit'];
+    delete window.mph['resume-hero-resume-builder-file-limit-desktop'];
     delete window.mph['resume-hero-legal'];
     window.mph['verb-dropzone-resume-builder-upload-cta'] = 'Upload Your Resume';
     const block = document.querySelector('.resume-hero');
     await decorate(block);
 
     expect(block.querySelector('.verb-dropzone-heading').textContent).to.equal('Upload your resume');
+    expect(block.querySelector('.resume-hero-file-limit-default').textContent)
+      .to.equal('PDF, DOCX, or DOC up to 20 MB.');
+    expect(block.querySelector('.resume-hero-file-limit-desktop').textContent)
+      .to.equal('PDF, DOCX, or DOC up to 20 MB.');
     expect(block.querySelector('.verb-dropzone-legal p').firstChild.textContent).to.equal('Your file will be securely handled.');
   });
 });

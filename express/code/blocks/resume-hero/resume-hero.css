@@ -407,6 +407,10 @@ main .section .resume-hero p {
   text-wrap-style: pretty;
 }
 
+.resume-hero .resume-hero-file-limit-desktop {
+  display: none;
+}
+
 /* Resume-specific dropzone composition: authored preview, heading, and copy. */
 .resume-hero .verb-dropzone-area {
   background-image: none;
@@ -491,7 +495,13 @@ main .section .resume-hero p {
   opacity: 1;
   position: absolute;
   transform: rotate(var(--resume-hero-media-rotation));
-  transition: top 0.4s ease, transform 0.4s ease;
+  transform-origin: center center;
+  transition:
+    top 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+    left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+    right 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: top, left, right, transform;
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
@@ -504,7 +514,6 @@ main .section .resume-hero p {
   height: 248.75px;
   left: -35px;
   top: 130.125px;
-  transform-origin: bottom left;
   width: 185.03px;
 }
 
@@ -514,7 +523,6 @@ main .section .resume-hero p {
   height: 248.75px;
   right: -75px;
   top: 130.125px;
-  transform-origin: bottom right;
   width: 185.03px;
 }
 
@@ -930,12 +938,13 @@ main .section .resume-hero p {
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image {
+    top: 156.125px;
     transition: none;
   }
 
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1,
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-    top: 130.125px;
+    top: 156.125px;
     transform: rotate(var(--resume-hero-media-rotation));
   }
 
@@ -971,6 +980,14 @@ main .section .resume-hero p {
 
   .resume-hero .resume-hero-header {
     margin-block-end: var(--spacing-300);
+  }
+
+  .resume-hero .resume-hero-file-limit-default {
+    display: none;
+  }
+
+  .resume-hero .resume-hero-file-limit-desktop {
+    display: inline;
   }
 
   .resume-hero .resume-hero-actions {

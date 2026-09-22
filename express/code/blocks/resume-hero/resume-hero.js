@@ -500,7 +500,15 @@ export default async function decorate(element) {
   // "mini dropzone" component (no separate desktop/mobile drag copy, no
   // extra CTA pill).
   const headingEl = createTag('p', { class: 'verb-dropzone-heading', id: 'verb-dropzone-heading' }, getCTA(VERB));
-  const subLine = createTag('p', { class: 'verb-dropzone-sub', id: 'file-upload-description' }, window.mph?.[`resume-hero-${VERB}-file-limit`] || window.mph?.[`verb-widget-${VERB}-file-limit`]);
+  const fileLimit = window.mph?.[`resume-hero-${VERB}-file-limit`]
+    || window.mph?.[`verb-widget-${VERB}-file-limit`];
+  const desktopFileLimit = window.mph?.[`resume-hero-${VERB}-file-limit-desktop`]
+    || window.mph?.[`verb-widget-${VERB}-file-limit-desktop`]
+    || fileLimit;
+  const subLine = createTag('p', { class: 'verb-dropzone-sub', id: 'file-upload-description' });
+  const defaultFileLimit = createTag('span', { class: 'resume-hero-file-limit-default' }, fileLimit);
+  const desktopFileLimitEl = createTag('span', { class: 'resume-hero-file-limit-desktop' }, desktopFileLimit);
+  subLine.append(defaultFileLimit, desktopFileLimitEl);
   dzContent.append(headingEl, subLine);
   dzInner.append(iconWrapper, dzContent);
   // Painted above the sequence images (z-index) so the dashed boundary is
@@ -517,9 +525,12 @@ export default async function decorate(element) {
   borderRect.setAttribute('rx', '23.5');
   borderRect.setAttribute('ry', '23.5');
   borderRect.setAttribute('fill', 'none');
-  borderRect.setAttribute('stroke', '#868686');
+  borderRect.setAttribute('stroke', '#8f8f8f');
   borderRect.setAttribute('stroke-width', '1');
   borderRect.setAttribute('stroke-dasharray', '4 4');
+  borderRect.setAttribute('stroke-linecap', 'butt');
+  borderRect.setAttribute('stroke-linejoin', 'round');
+  borderRect.setAttribute('shape-rendering', 'geometricPrecision');
   borderRect.setAttribute('vector-effect', 'non-scaling-stroke');
   borderSvg.append(borderRect);
   dropzoneBorder.append(borderSvg);
