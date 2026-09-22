@@ -930,10 +930,6 @@ main .section .resume-hero p {
     margin-block-end: var(--spacing-300);
   }
 
-  .resume-hero .express-logo {
-    margin-block-end: var(--spacing-100);
-  }
-
   .resume-hero .resume-hero-actions {
     align-items: stretch;
     display: grid;
