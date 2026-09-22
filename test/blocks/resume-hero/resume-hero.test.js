@@ -371,7 +371,7 @@ describe('resume-hero', () => {
       .filter((child) => child.tagName === 'P');
     expect(strayParagraphs).to.have.lengthOf(0);
   });
-  
+
   it('sequences all three create images with their authored sizes and rotations', () => {
     const stage = block.querySelector('.resume-hero-create-media-stage');
     const media = [...stage.querySelectorAll('.resume-hero-create-media')];
