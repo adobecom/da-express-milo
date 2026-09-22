@@ -770,6 +770,7 @@ describe('resume-hero', () => {
   it('creates a self-contained upload UI without a nested verb-dropzone block', () => {
     expect(block.querySelector('#unity-upload.verb-dropzone-area')).to.exist;
     expect(block.querySelector('#file-upload')).to.exist;
+    expect(block.querySelector('#file-upload').tabIndex).to.equal(-1);
     expect(block.querySelector('.verb-dropzone-footer')).to.exist;
     expect(block.querySelector('.verb-dropzone')).to.not.exist;
   });

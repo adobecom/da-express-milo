@@ -650,6 +650,7 @@ export default async function decorate(element) {
     accept: limits.acceptedFiles,
     id: 'file-upload',
     class: 'hide',
+    tabindex: '-1',
     'aria-hidden': 'true',
     'aria-describedby': 'file-upload-description',
   });
