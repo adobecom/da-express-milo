@@ -267,6 +267,7 @@ describe('resume-hero', () => {
     const legalStyles = getComputedStyle(legal);
     const legalLineStyles = getComputedStyle(legal.querySelector('p'));
     const iconStyles = getComputedStyle(infoIcon);
+    const tooltipStyles = getComputedStyle(infoIcon, '::before');
     const arrowStyles = getComputedStyle(infoIcon, '::after');
 
     expect(uploadStyles.gap).to.equal('8px');
@@ -275,7 +276,9 @@ describe('resume-hero', () => {
     expect(iconStyles.marginInlineStart).to.equal('2px');
     expect(iconStyles.bottom).to.equal('-3px');
     expect(iconStyles.marginBlockEnd).to.equal('0px');
+    expect(tooltipStyles.top).to.equal('-10px');
     expect(arrowStyles.borderTopWidth).to.equal('4px');
+    expect(arrowStyles.top).to.equal('-6px');
   });
 
   it('keeps the first two benefits together and stacks the rest on narrow mobile', async () => {
@@ -418,8 +421,6 @@ describe('resume-hero', () => {
       expect(parseFloat(first.width)).to.be.closeTo(144, 0.1);
       expect(parseFloat(first.height)).to.be.closeTo(190, 0.1);
       expect(first.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('-8.28deg');
-      expect(first.animationName).to.equal('none');
-      expect(first.animationDelay).to.equal('4.6s');
 
       expect(second.position).to.equal('absolute');
       expect(second.bottom).to.equal('-50px');
@@ -428,7 +429,6 @@ describe('resume-hero', () => {
       expect(parseFloat(second.width)).to.be.closeTo(144, 0.1);
       expect(parseFloat(second.height)).to.be.closeTo(190, 0.1);
       expect(second.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('6.91deg');
-      expect(second.animationDelay).to.equal('-0.4s');
       authoredNodes.uploadPictures.forEach((picture) => {
         expect(getComputedStyle(picture.querySelector('img')).objectFit).to.equal('contain');
       });
@@ -439,21 +439,27 @@ describe('resume-hero', () => {
 
   it('slides the upload sequence images up and unrotates them on dropzone hover', async () => {
     await setViewport({ width: 1000, height: 800 });
+    const pictures = authoredNodes.uploadPictures;
     try {
       const dropzone = block.querySelector('.resume-hero-dropzone-area');
       const rect = dropzone.getBoundingClientRect();
+      pictures.forEach((picture) => {
+        picture.style.transition = 'none';
+      });
       await sendMouse({
         type: 'move',
         position: [Math.round(rect.left + rect.width / 2), Math.round(rect.top + rect.height / 2)],
       });
-      await new Promise((resolve) => { setTimeout(resolve, 500); });
 
-      authoredNodes.uploadPictures.forEach((picture) => {
+      pictures.forEach((picture) => {
         const styles = getComputedStyle(picture);
         expect(styles.top).to.equal('70px');
         expect(styles.transform).to.equal('matrix(1, 0, 0, 1, 0, 0)');
       });
     } finally {
+      pictures.forEach((picture) => {
+        picture.style.removeProperty('transition');
+      });
       await resetMouse();
       await setViewport({ width: 800, height: 600 });
     }
@@ -463,9 +469,9 @@ describe('resume-hero', () => {
     const stage = block.querySelector('.resume-hero-create-media-stage');
     const media = [...stage.querySelectorAll('.resume-hero-create-media')];
     const specs = [
-      { width: 100.322, height: 125.065, rotation: '2.66deg', delay: '-0.4s' },
-      { width: 100.322, height: 125.065, rotation: '0.433deg', delay: '3.6s' },
-      { width: 96.634, height: 125.07, rotation: '-3.298deg', delay: '7.6s' },
+      { width: 100.322, height: 125.065 },
+      { width: 100.322, height: 125.065 },
+      { width: 96.634, height: 125.07 },
     ];
 
     expect(authoredNodes.createCell.classList.contains('resume-hero-media-sequence')).to.be.true;
@@ -475,10 +481,6 @@ describe('resume-hero', () => {
       expect(styles.position).to.equal('absolute');
       expect(parseFloat(styles.width)).to.be.closeTo(specs[index].width, 0.1);
       expect(parseFloat(styles.height)).to.be.closeTo(specs[index].height, 0.1);
-      expect(styles.getPropertyValue('--resume-hero-media-rotation').trim())
-        .to.equal(specs[index].rotation);
-      expect(styles.animationName).to.equal('none');
-      expect(styles.animationDelay).to.equal(specs[index].delay);
     });
     expect(getComputedStyle(media[2]).aspectRatio).to.equal('17 / 22');
   });
@@ -512,12 +514,16 @@ describe('resume-hero', () => {
     await setViewport({ width: 800, height: 1000 });
     const card = block.querySelector('.resume-hero-create');
     const rect = card.getBoundingClientRect();
+    const mediaItems = [...card.querySelectorAll('.resume-hero-create-media')];
     try {
+      card.style.transition = 'none';
+      mediaItems.forEach((item) => {
+        item.style.transition = 'none';
+      });
       await sendMouse({
         type: 'move',
         position: [Math.round(rect.left + rect.width / 2), Math.round(rect.top + rect.height / 2)],
       });
-      await new Promise((resolve) => { setTimeout(resolve, 500); });
 
       const media1 = block.querySelector('.resume-hero-create-media-1');
       const media2 = block.querySelector('.resume-hero-create-media-2');
@@ -540,6 +546,10 @@ describe('resume-hero', () => {
       probe.remove();
       expect(getComputedStyle(card).backgroundColor).to.equal(expectedHoverColor);
     } finally {
+      card.style.removeProperty('transition');
+      mediaItems.forEach((item) => {
+        item.style.removeProperty('transition');
+      });
       await resetMouse();
       await setViewport({ width: 800, height: 600 });
     }
@@ -661,12 +671,12 @@ describe('resume-hero legacy authoring', () => {
         <div>
           <div><h2>Resume headline</h2><p>Resume subcopy</p></div>
           <div id="legacy-create-cell">
-            <picture id="legacy-create-picture"><img src="/express/code/blocks/resume-hero/resume-preview.svg" alt="Create"></picture>
+            <picture id="legacy-create-picture"><img src="/express/code/icons/resume.svg" alt="Create"></picture>
             <p><a id="legacy-create-link" href="https://www.adobe.com/create">Create now</a></p>
           </div>
         </div>
         <div>
-          <div><picture id="legacy-upload-picture"><img src="/express/code/blocks/resume-hero/resume-preview.svg" alt="Upload"></picture></div>
+          <div><picture id="legacy-upload-picture"><img src="/express/code/icons/document.svg" alt="Upload"></picture></div>
         </div>
       </div>`;
   });
@@ -713,7 +723,10 @@ describe('resume-hero placeholder precedence', () => {
     expect(block.querySelector('.verb-dropzone-sub').textContent).to.equal('RH file limit');
     expect(block.querySelector('.verb-dropzone-legal p').firstChild.textContent).to.equal('RH legal line');
     expect(block.querySelector('.info-icon').getAttribute('aria-label')).to.equal('RH tooltip');
-    expect(block.querySelector('.verb-dropzone-errorBtn').getAttribute('aria-label')).to.equal('RH close');
+    const errorCloseButton = block.querySelector('.verb-dropzone-errorBtn');
+    expect(errorCloseButton.tagName).to.equal('BUTTON');
+    expect(errorCloseButton.type).to.equal('button');
+    expect(errorCloseButton.getAttribute('aria-label')).to.equal('RH close');
   });
 
   it('lets resume-hero-* page metadata override the fetched sheet values', async () => {

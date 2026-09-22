@@ -8,10 +8,11 @@ import trackBranchParameters from '../../scripts/branchlinks.js';
 
 function isOldBrowser() {
   const { name, version } = window?.browser || {};
+  const majorVersion = Number.parseInt(version, 10);
   return (
     name === 'Internet Explorer'
-    || (name === 'Microsoft Edge' && (!version || version.split('.')[0] < 86))
-    || (name === 'Safari' && version.split('.')[0] < 14)
+    || (name === 'Microsoft Edge' && (!version || majorVersion < 86))
+    || (name === 'Safari' && (!version || majorVersion < 14))
   );
 }
 
@@ -53,10 +54,7 @@ const MB20 = 20971520;
 const DOC_ONLY = ['.pdf', '.doc', '.docx'];
 const LOGO_INJECT_VALUES = ['on', 'yes', 'true'];
 
-// This block only ships the resume-builder verb; kept as a LIMITS map (rather
-// than a flat constant) to match verb-dropzone's shape so the rest of this
-// file's upload/analytics engine (copied from verb-dropzone.js) needs no
-// further changes.
+// Keep the resume-builder settings in the shape expected by the Unity loader.
 export const LIMITS = {
   'resume-builder': { maxFileSize: MB20, acceptedFiles: DOC_ONLY, maxNumFiles: 1, genAI: true },
 };
@@ -94,26 +92,10 @@ function createSvgElement(iconName) {
 }
 
 const getCTA = (verb) => {
-  const verbConfig = LIMITS[verb];
   const value = window.mph?.[`resume-hero-${verb}-upload-cta`]
-    || window.mph?.[`verb-dropzone-${verb}-upload-cta`]
-    || window.mph?.[`verb-widget-cta-${verbConfig?.uploadType}`];
+    || window.mph?.[`verb-dropzone-${verb}-upload-cta`];
   return value === 'Upload Your Resume' ? 'Upload your resume' : value;
 };
-
-function isMobileDevice() {
-  const ua = navigator.userAgent.toLowerCase();
-  return /android|iphone|ipod|blackberry|windows phone/i.test(ua);
-}
-
-function isTabletDevice() {
-  const ua = navigator.userAgent.toLowerCase();
-  const isIPadOS = navigator.userAgent.includes('Mac')
-    && 'ontouchend' in document
-    && !/iphone|ipod/i.test(ua);
-  const isTabletUA = /ipad|android(?!.*mobile)/i.test(ua);
-  return isIPadOS || isTabletUA;
-}
 
 function getEnv() {
   const { hostname } = window.location;
@@ -444,15 +426,6 @@ export default async function decorate(element) {
     || 'resume-builder';
   const VERB = rawVerb === 'ai-summary-generator' ? 'summarize-pdf' : rawVerb;
   const limits = LIMITS[VERB];
-  const isMobile = isMobileDevice();
-  const isTablet = isTabletDevice();
-  const mobileOrTabletTouch = isMobile || isTablet;
-
-  let useFileUpload = true;
-  if (mobileOrTabletTouch) {
-    if (limits?.level === 0) useFileUpload = false;
-    else if (limits?.mobileApp) useFileUpload = false;
-  }
 
   // Initialize analytics - track attempts for analytics data (no UI changes based on attempts)
   const userAttempts = getVerbKey(`${VERB}_attempts`);
@@ -535,19 +508,14 @@ export default async function decorate(element) {
   const dropzoneBorder = createTag('div', { class: 'resume-hero-dropzone-border', 'aria-hidden': 'true' });
   dropzone.append(dzInner, dropzoneBorder);
 
-  let soloClicked = false;
-  let fileInput = null;
-  if (useFileUpload) {
-    fileInput = createTag('input', {
-      type: 'file',
-      accept: limits?.acceptedFiles,
-      id: 'file-upload',
-      class: 'hide',
-      'aria-hidden': 'true',
-      'aria-describedby': 'file-upload-description',
-      ...(limits?.multipleFiles && { multiple: '' }),
-    });
-  }
+  const fileInput = createTag('input', {
+    type: 'file',
+    accept: limits.acceptedFiles,
+    id: 'file-upload',
+    class: 'hide',
+    'aria-hidden': 'true',
+    'aria-describedby': 'file-upload-description',
+  });
   const errorState = createTag('div', {
     class: 'error hide',
     role: 'alert',
@@ -562,7 +530,11 @@ export default async function decorate(element) {
     class: 'verb-dropzone-errorIcon',
     'aria-hidden': 'true',
   });
-  const errorCloseBtn = createTag('div', { class: 'verb-dropzone-errorBtn', role: 'button', tabindex: '0', 'aria-label': window.mph?.['resume-hero-close-dialog'] || window.mph?.['close-dialog'] });
+  const errorCloseBtn = createTag('button', {
+    class: 'verb-dropzone-errorBtn',
+    type: 'button',
+    'aria-label': window.mph?.['resume-hero-close-dialog'] || window.mph?.['close-dialog'],
+  });
   const srAlert = { announceTimer: null, cleanupTimer: null };
   const clearSrAlert = () => {
     clearTimeout(srAlert.announceTimer);
@@ -641,7 +613,7 @@ export default async function decorate(element) {
   footer.append(legalText);
 
   uploadCell.append(dropzone, footer);
-  if (fileInput) uploadCell.append(fileInput);
+  uploadCell.append(fileInput);
   element.append(errorState);
   element.dataset.resumeHeroDecorated = 'true';
 
@@ -733,94 +705,82 @@ export default async function decorate(element) {
       );
     }
   };
-  if (useFileUpload && fileInput) {
-    const dragOverlay = buildDragOverlay(window.mph?.['resume-hero-drag-overlay'] || window.mph?.['verb-dropzone-drag-overlay'] || '');
-    document.body.append(dragOverlay);
-    const hideDragOverlay = () => dragOverlay.classList.remove('is-dragging');
-    let dragLeaveTimer = null;
-    let isBlockVisible = false;
-    const visibilityObserver = new IntersectionObserver(([entry]) => {
-      isBlockVisible = entry.isIntersecting;
-    }, { threshold: 0 });
-    visibilityObserver.observe(element);
+  const dragOverlay = buildDragOverlay(window.mph?.['resume-hero-drag-overlay'] || window.mph?.['verb-dropzone-drag-overlay'] || '');
+  document.body.append(dragOverlay);
+  const hideDragOverlay = () => dragOverlay.classList.remove('is-dragging');
+  let dragLeaveTimer = null;
+  let isBlockVisible = false;
+  const visibilityObserver = new IntersectionObserver(([entry]) => {
+    isBlockVisible = entry.isIntersecting;
+  }, { threshold: 0 });
+  visibilityObserver.observe(element);
 
-    dropzone.addEventListener('click', () => {
-      fileInput.click();
-    });
-    document.addEventListener('dragenter', (e) => {
-      if (!e.dataTransfer?.types?.includes('Files')) return;
-      if (!isBlockVisible) return;
-      clearTimeout(dragLeaveTimer);
-      dragOverlay.classList.add('is-dragging');
-    });
-    document.addEventListener('dragleave', (e) => {
-      if (e.relatedTarget) return;
-      dragLeaveTimer = setTimeout(hideDragOverlay, 200);
-    });
-    document.addEventListener('dragend', hideDragOverlay);
-    document.addEventListener('drop', () => setTimeout(hideDragOverlay, 200), true);
-    window.addEventListener('blur', hideDragOverlay);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') hideDragOverlay();
-    });
-    element.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setDraggingClass(true);
-      element.classList.add('dragging-block');
-    });
-    element.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!element.contains(e.relatedTarget)) {
-        setDraggingClass(false);
-        element.classList.remove('dragging-block');
-      }
-    });
-    element.addEventListener('drop', (e) => {
-      e.preventDefault();
-      setTimeout(hideDragOverlay, 200);
+  dropzone.addEventListener('click', () => {
+    fileInput.click();
+  });
+  document.addEventListener('dragenter', (e) => {
+    if (!e.dataTransfer?.types?.includes('Files')) return;
+    if (!isBlockVisible) return;
+    clearTimeout(dragLeaveTimer);
+    dragOverlay.classList.add('is-dragging');
+  });
+  document.addEventListener('dragleave', (e) => {
+    if (e.relatedTarget) return;
+    dragLeaveTimer = setTimeout(hideDragOverlay, 200);
+  });
+  document.addEventListener('dragend', hideDragOverlay);
+  document.addEventListener('drop', () => setTimeout(hideDragOverlay, 200), true);
+  window.addEventListener('blur', hideDragOverlay);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') hideDragOverlay();
+  });
+  element.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingClass(true);
+    element.classList.add('dragging-block');
+  });
+  element.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!element.contains(e.relatedTarget)) {
       setDraggingClass(false);
       element.classList.remove('dragging-block');
-      const { dataTransfer: { files } } = e;
-      if (files.length > 0) {
-        noOfFiles = files.length;
-      }
+    }
+  });
+  element.addEventListener('drop', (e) => {
+    e.preventDefault();
+    setTimeout(hideDragOverlay, 200);
+    setDraggingClass(false);
+    element.classList.remove('dragging-block');
+    const { dataTransfer: { files } } = e;
+    if (files.length > 0) {
+      noOfFiles = files.length;
+    }
+  });
+  fileInput.addEventListener('click', () => {
+    [
+      'filepicker:shown',
+      'dropzone:choose-file-clicked',
+      'files-selected',
+      'entry:clicked',
+      'discover:clicked',
+    ].forEach((analyticsEvent) => {
+      window.analytics.verbAnalytics(analyticsEvent, VERB, { userAttempts });
     });
-    fileInput.addEventListener('click', () => {
-      if (soloClicked) {
-        soloClicked = false;
-        return;
-      }
-      [
-        'filepicker:shown',
-        'dropzone:choose-file-clicked',
-        'files-selected',
-        'entry:clicked',
-        'discover:clicked',
-      ].forEach((analyticsEvent) => {
-        window.analytics.verbAnalytics(analyticsEvent, VERB, { userAttempts });
-      });
-    });
-    fileInput.addEventListener('change', (data) => {
-      const { target: { files } } = data;
-      if (files.length > 0) {
-        noOfFiles = files.length;
-      }
-    });
-    fileInput.addEventListener('cancel', () => {
-      window.analytics.verbAnalytics('choose-file:close', VERB, { userAttempts });
-    });
-  }
+  });
+  fileInput.addEventListener('change', (data) => {
+    const { target: { files } } = data;
+    if (files.length > 0) {
+      noOfFiles = files.length;
+    }
+  });
+  fileInput.addEventListener('cancel', () => {
+    window.analytics.verbAnalytics('choose-file:close', VERB, { userAttempts });
+  });
   errorCloseBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     closeError();
-  });
-  errorCloseBtn.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      closeError();
-    }
   });
   element.addEventListener('unity:track-analytics', (e) => {
     const cookieExp = new Date(Date.now() + 30 * 60 * 1000).toUTCString();

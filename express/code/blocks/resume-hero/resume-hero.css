@@ -6,6 +6,14 @@
    ============================================================ */
 
 .resume-hero {
+  /* Figma scopes this component to the XL responsive typography mode. */
+  --s2a-typography-font-size-heading-4: 36px;
+  --s2a-typography-font-size-heading-5: 24px;
+  --s2a-typography-letter-spacing-heading-4: -1px;
+  --s2a-typography-letter-spacing-heading-5: -0.48px;
+  --s2a-typography-line-height-heading-4: 32px;
+  --s2a-typography-line-height-heading-5: 24px;
+
   box-sizing: border-box;
   margin-inline: auto;
   /* 1330px XL content area plus 40px desktop padding on each side. */
@@ -70,18 +78,13 @@ main .section .resume-hero p {
 }
 
 .resume-hero .heading {
-  /* Figma scopes this component to the XL responsive typography mode. */
-  --s2a-typography-font-size-heading-4: 36px;
-  --s2a-typography-letter-spacing-heading-4: -1px;
-  --s2a-typography-line-height-heading-4: 32px;
-
   color: var(--color-gray-900);
   font-family: var(--s2a-font-family-heading);
   font-size: var(--s2a-typography-font-size-heading-4);
   font-weight: var(--heading-font-weight-extra);
   letter-spacing: var(--s2a-typography-letter-spacing-heading-4);
   line-height: var(--s2a-typography-line-height-heading-4);
-  /* margin: 8px 0px; */
+  margin: 0;
   text-align: center;
 }
 
@@ -180,7 +183,6 @@ main .section .resume-hero p {
 }
 
 .resume-hero .resume-hero-create-media-stage > .resume-hero-create-media {
-  animation: none;
   margin: 0;
   max-height: 100%;
   max-width: none;
@@ -191,9 +193,6 @@ main .section .resume-hero p {
 }
 
 .resume-hero .resume-hero-create-media-stage > .resume-hero-create-media-1 {
-  --resume-hero-media-rotation: 2.66deg;
-
-  animation-delay: -0.4s;
   height: 125.065px;
   opacity: 1;
   transform: translate(-10px, 10px) rotate(-2.66deg);
@@ -201,18 +200,12 @@ main .section .resume-hero p {
 }
 
 .resume-hero .resume-hero-create-media-stage > .resume-hero-create-media-2 {
-  --resume-hero-media-rotation: 0.433deg;
-
-  animation-delay: 3.6s;
   height: 125.065px;
   opacity: 1;
   width: 100.322px;
 }
 
 .resume-hero .resume-hero-create-media-stage > .resume-hero-create-media-3 {
-  --resume-hero-media-rotation: -3.298deg;
-
-  animation-delay: 7.6s;
   aspect-ratio: 17 / 22;
   height: 125.07px;
   opacity: 1;
@@ -373,11 +366,6 @@ main .section .resume-hero p {
    ============================================================ */
 
 .resume-hero .verb-dropzone-heading {
-  /* Figma scopes this component to the XL responsive typography mode. */
-  --s2a-typography-font-size-heading-5: 24px;
-  --s2a-typography-letter-spacing-heading-5: -0.48px;
-  --s2a-typography-line-height-heading-5: 24px;
-
   color: var(--c1-text-text);
   font-family: var(--s2a-font-family-heading);
   font-size: var(--s2a-typography-font-size-heading-5);
@@ -474,7 +462,6 @@ main .section .resume-hero p {
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image {
-  animation: none;
   bottom: 0;
   margin: 0;
   max-width: none;
@@ -488,7 +475,6 @@ main .section .resume-hero p {
   --resume-hero-media-rotation: 6.91deg;
 
   align-items: flex-start;
-  animation-delay: -0.4s;
   bottom: -50px;
   display: flex;
   flex-direction: column;
@@ -503,7 +489,6 @@ main .section .resume-hero p {
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
   --resume-hero-media-rotation: -8.28deg;
 
-  animation-delay: 4.6s;
   bottom: -30px;
   height: 190px;
   right: -50px;
@@ -538,30 +523,6 @@ main .section .resume-hero p {
   position: relative;
   text-align: center;
   z-index: 1;
-}
-
-@keyframes resume-hero-dropzone-media-cycle {
-  0%, 50%, 100% {
-    opacity: 0;
-    transform: translateY(var(--spacing-200)) scale(0.96) rotate(var(--resume-hero-media-rotation));
-  }
-
-  8%, 42% {
-    opacity: 1;
-    transform: translateY(0) scale(1) rotate(var(--resume-hero-media-rotation));
-  }
-}
-
-@keyframes resume-hero-create-media-cycle {
-  0%, 33%, 100% {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% + var(--spacing-200))) scale(0.94) rotate(var(--resume-hero-media-rotation));
-  }
-
-  6%, 27% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1) rotate(var(--resume-hero-media-rotation));
-  }
 }
 
 /* ============================================================
@@ -675,21 +636,20 @@ main .section .resume-hero p {
 }
 
 .resume-hero .milo-tooltip.top::before {
- transform: translateX(-48%) translateY(-90%);
-    margin-left: 0;
-    margin-bottom: 15px;
-
-
+  left: 50%;
+  margin-left: 0;
+  top: -10px;
+  transform: translateX(-50%) translateY(-100%);
 }
 
 .resume-hero .milo-tooltip.top::after {
-    border-width: 4px;
-    /* left: 50%; */
-    top: -px;
-    transform: translateX(-10.75px) translateY(-1px);
-    border-color: var(--tooltip-background-color) transparent transparent;
-    border-right-color: transparent;
-    margin-left: 0;
+  border-color: var(--tooltip-background-color) transparent transparent;
+  border-right-color: transparent;
+  border-width: 4px;
+  left: 50%;
+  margin-left: 0;
+  top: -6px;
+  transform: translateX(-50%) translateY(-50%);
 }
 
 /* Keep the first two trust items together on narrow screens, then stack. */
@@ -929,10 +889,6 @@ main .section .resume-hero p {
   .resume-hero .resume-hero-header {
     margin-block-end: var(--spacing-300);
   }
-
-  /* .resume-hero .resume-hero-header-content {
-    gap: 0;
-  } */
 
   .resume-hero .express-logo {
     margin-block-end: var(--spacing-100);
