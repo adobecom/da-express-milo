@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./font-bento.spec.cjs');
 const FontBentoBlock = require('./font-bento.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
