@@ -465,16 +465,6 @@ main .section .resume-hero p {
   width: 100%;
 }
 
-.resume-hero .resume-hero-dropzone-image-1,
-.resume-hero .resume-hero-dropzone-image-2 {
-  /* box-shadow:
-    36px 112px 33px 0 rgb(0 0 0 / 0%),
-    23px 72px 30px 0 rgb(0 0 0 / 1%),
-    13px 40px 25px 0 rgb(0 0 0 / 5%),
-    6px 18px 19px 0 rgb(0 0 0 / 9%),
-    1px 4px 10px 0 rgb(0 0 0 / 10%); */
-}
-
 .resume-hero .resume-hero-dropzone-image img {
   display: block;
   height: 100%;
@@ -501,28 +491,35 @@ main .section .resume-hero p {
   display: flex;
   flex-direction: column;
   gap: 3.501px;
-  height: 190px;
-  left: -10px;
-  top: 158px;
+  height: 240px;
+  left: -35px;
+  top: 108px;
   transform-origin: bottom left;
-  width: 144px;
+  width: 194px;
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
   --resume-hero-media-rotation: -8.28deg;
 
   bottom: -50px;
-  height: 190px;
-  right: -50px;
-  top: 158px;
+  height: 240px;
+  right: -75px;
+  top: 108px;
   transform-origin: bottom right;
-  width: 144px;
+  width: 194px;
 }
 
 .resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-1,
 .resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-2 {
-  top: 70px;
   transform: rotate(0deg);
+}
+
+.resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-1 {
+  top: 70px;
+}
+
+.resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-2 {
+  top: 82px;
 }
 
 @media (prefers-reduced-motion: reduce) {

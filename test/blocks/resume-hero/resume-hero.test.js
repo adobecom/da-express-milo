@@ -482,18 +482,18 @@ describe('resume-hero', () => {
 
       expect(first.position).to.equal('absolute');
       expect(first.bottom).to.equal('-50px');
-      expect(first.right).to.equal('-50px');
-      expect(first.top).to.equal('158px');
-      expect(parseFloat(first.width)).to.be.closeTo(144, 0.1);
-      expect(parseFloat(first.height)).to.be.closeTo(190, 0.1);
+      expect(first.right).to.equal('-75px');
+      expect(first.top).to.equal('108px');
+      expect(parseFloat(first.width)).to.be.closeTo(194, 0.1);
+      expect(parseFloat(first.height)).to.be.closeTo(240, 0.1);
       expect(first.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('-8.28deg');
 
       expect(second.position).to.equal('absolute');
       expect(second.bottom).to.equal('-50px');
-      expect(second.left).to.equal('-10px');
-      expect(second.top).to.equal('158px');
-      expect(parseFloat(second.width)).to.be.closeTo(144, 0.1);
-      expect(parseFloat(second.height)).to.be.closeTo(190, 0.1);
+      expect(second.left).to.equal('-35px');
+      expect(second.top).to.equal('108px');
+      expect(parseFloat(second.width)).to.be.closeTo(194, 0.1);
+      expect(parseFloat(second.height)).to.be.closeTo(240, 0.1);
       expect(second.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('6.91deg');
       authoredNodes.uploadPictures.forEach((picture) => {
         expect(getComputedStyle(picture.querySelector('img')).objectFit).to.equal('contain');
@@ -517,9 +517,10 @@ describe('resume-hero', () => {
         position: [Math.round(rect.left + rect.width / 2), Math.round(rect.top + rect.height / 2)],
       });
 
-      pictures.forEach((picture) => {
-        const styles = getComputedStyle(picture);
-        expect(styles.top).to.equal('70px');
+      const [rightPicture, leftPicture] = pictures.map((picture) => getComputedStyle(picture));
+      expect(rightPicture.top).to.equal('82px');
+      expect(leftPicture.top).to.equal('70px');
+      [rightPicture, leftPicture].forEach((styles) => {
         expect(styles.transform).to.equal('matrix(1, 0, 0, 1, 0, 0)');
       });
     } finally {
@@ -655,8 +656,7 @@ describe('resume-hero', () => {
       expect(getComputedStyle(dropzoneArea).backgroundImage).to.equal('none');
       pictures.forEach((picture) => {
         const styles = getComputedStyle(picture);
-        expect(styles.boxShadow).to.include('36px 112px 33px 0px');
-        expect(styles.boxShadow).to.include('1px 4px 10px 0px');
+        expect(styles.boxShadow).to.equal('none');
         expect(styles.overflow).to.equal('visible');
       });
     } finally {
