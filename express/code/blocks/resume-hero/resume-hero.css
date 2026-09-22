@@ -949,11 +949,11 @@ main .section .resume-hero p {
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
-    left: -30px;
+    left: -40px;
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-    right: -70px;
+    right: -80px;
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image {
@@ -968,11 +968,11 @@ main .section .resume-hero p {
   }
 
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
-    left: -30px;
+    left: -40px;
   }
 
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-    right: -70px;
+    right: -80px;
   }
 
   .resume-hero .resume-hero-dropzone-border {

@@ -79,7 +79,7 @@ main .section .verb-express-hero p {
 
 .verb-express-hero .copy :is(h1, h2, h3, h4, h5, h6) {
   color: var(--color-gray-900);
-  font-family: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  font-family: var(--s2a-font-family-heading);
   font-size: var(--heading-font-size-l);
   font-weight: var(--heading-font-weight-extra);
   /* Figma spec: 32px on a 36px heading (tight display leading) — no
