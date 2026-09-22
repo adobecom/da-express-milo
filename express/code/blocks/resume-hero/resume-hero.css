@@ -6,6 +6,7 @@
    ============================================================ */
 
 .resume-hero {
+  --Background-Primary-Focus: #4B75FF;
   --s2a-color-content-default: var(--color-black);
   --s2a-font-family-body: var(--body-font-family);
   --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
@@ -309,9 +310,8 @@ main .section .resume-hero p {
   z-index: 3;
 }
 
-.resume-hero .resume-hero-create:focus-within {
-  outline: 2px solid var(--Alias-content-semantic-accent-key-focus);
-  outline-offset: 2px;
+.resume-hero .resume-hero-create.resume-hero-media-sequence:focus-within {
+  border: 2px solid var(--Background-Primary-Focus);
 }
 
 .resume-hero .resume-hero-create a.con-button:focus-visible {

@@ -616,9 +616,9 @@ describe('resume-hero', () => {
     authoredNodes.createLink.focus();
     const styles = getComputedStyle(authoredNodes.createCell);
 
-    expect(styles.outlineStyle).to.equal('solid');
-    expect(styles.outlineWidth).to.equal('2px');
-    expect(styles.outlineOffset).to.equal('2px');
+    expect(styles.borderStyle).to.equal('solid');
+    expect(styles.borderWidth).to.equal('2px');
+    expect(styles.borderColor).to.equal('rgb(75, 117, 255)');
     authoredNodes.createLink.blur();
   });
 
