@@ -6,13 +6,25 @@
    ============================================================ */
 
 .resume-hero {
-  /* Figma scopes this component to the XL responsive typography mode. */
+  --s2a-color-content-default: var(--color-black);
+  --s2a-font-family-body: var(--body-font-family);
+  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --s2a-font-family-label: var(--body-font-family);
+  --s2a-typography-font-size-body-md: 16px;
   --s2a-typography-font-size-heading-4: 36px;
   --s2a-typography-font-size-heading-5: 24px;
+  --s2a-typography-font-size-heading-6: 16px;
+  --s2a-typography-font-size-label: 14px;
+  --s2a-typography-letter-spacing-body-md: 0px;
   --s2a-typography-letter-spacing-heading-4: -1px;
   --s2a-typography-letter-spacing-heading-5: -0.48px;
+  --s2a-typography-letter-spacing-heading-6: -0.2px;
+  --s2a-typography-letter-spacing-label: 0px;
+  --s2a-typography-line-height-body-md: 20px;
   --s2a-typography-line-height-heading-4: 32px;
   --s2a-typography-line-height-heading-5: 24px;
+  --s2a-typography-line-height-label: 18px;
+  --s2a-typography-line-height-title-6: 18px;
 
   box-sizing: border-box;
   margin-inline: auto;
@@ -520,7 +532,7 @@ main .section .resume-hero p {
   gap: 3.501px;
   height: 248.75px;
   left: -35px;
-  top: 130.125px;
+  top: 140.125px;
   width: 185.03px;
 }
 
@@ -529,7 +541,7 @@ main .section .resume-hero p {
 
   height: 248.75px;
   right: -75px;
-  top: 130.125px;
+  top: 140.125px;
   width: 185.03px;
 }
 
@@ -540,12 +552,12 @@ main .section .resume-hero p {
 
 .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
   left: -30px;
-  top: 43.675px;
+  top: 53.675px;
 }
 
 .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
   right: -70px;
-  top: 53.675px;
+  top: 63.675px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -945,13 +957,13 @@ main .section .resume-hero p {
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image {
-    top: 176.125px;
+    top: 186.125px;
     transition: none;
   }
 
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1,
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-    top: 176.125px;
+    top: 186.125px;
     transform: rotate(var(--resume-hero-media-rotation));
   }
 
@@ -1071,6 +1083,12 @@ main .section .resume-hero p {
 
   .resume-hero .resume-hero-create img {
     max-height: none;
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  .resume-hero {
+    --s2a-typography-font-size-heading-6: 18px;
   }
 }
 
