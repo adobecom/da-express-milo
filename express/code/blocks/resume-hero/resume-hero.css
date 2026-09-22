@@ -513,12 +513,12 @@ main .section .resume-hero p {
 
 .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
   left: -30px;
-  top: 33.675px;
+  top: 43.675px;
 }
 
 .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-  right: -80px;
-  top: 33.675px;
+  right: -70px;
+  top: 53.675px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -910,11 +910,11 @@ main .section .resume-hero p {
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
-    left: -60px;
+    left: -30px;
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-    right: -100px;
+    right: -70px;
   }
 
   .resume-hero .resume-hero-dropzone-border {
