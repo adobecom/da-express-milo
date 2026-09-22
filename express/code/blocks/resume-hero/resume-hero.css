@@ -1038,19 +1038,19 @@ main .section .resume-hero p {
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
-    left: -45px;
+    left: -15px;
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-    right: -85px;
+    right: -65px;
   }
 
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
-    left: -40px;
+    left: -10px;
   }
 
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-    right: -80px;
+    right: -70px;
   }
 
   .resume-hero .resume-hero-dropzone-border {
