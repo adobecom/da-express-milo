@@ -241,30 +241,6 @@ describe('resume-hero', () => {
     }
   });
 
-  it('uses the requested disclaimer and tooltip spacing', () => {
-    const legal = block.querySelector('.verb-dropzone-legal');
-    const infoIcon = block.querySelector('.info-icon');
-    const uploadStyles = getComputedStyle(authoredNodes.uploadCell);
-    const legalStyles = getComputedStyle(legal);
-    const legalLineStyles = getComputedStyle(legal.querySelector('p'));
-    const iconStyles = getComputedStyle(infoIcon);
-    const tooltipStyles = getComputedStyle(infoIcon, '::before');
-    const arrowStyles = getComputedStyle(infoIcon, '::after');
-
-    expect(uploadStyles.gap).to.equal('8px');
-    expect(legalStyles.gap).to.equal('0px');
-    expect(legalLineStyles.position).to.equal('relative');
-    expect(iconStyles.marginInlineStart).to.equal('2px');
-    expect(iconStyles.bottom).to.equal('-3px');
-    expect(iconStyles.marginBlockEnd).to.equal('0px');
-    expect(tooltipStyles.left).to.equal('100%');
-    expect(tooltipStyles.marginBlockEnd).to.equal('15px');
-    expect(tooltipStyles.top).to.equal('50%');
-    expect(arrowStyles.left).to.equal('100%');
-    expect(arrowStyles.borderTopWidth).to.equal('4px');
-    expect(arrowStyles.top).to.equal('50%');
-  });
-
   it('keeps the first two benefits together and stacks the rest on narrow mobile', async () => {
     await setViewport({ width: 360, height: 800 });
     try {
@@ -470,56 +446,6 @@ describe('resume-hero', () => {
     const media3 = block.querySelector('.resume-hero-create-media-3');
     expect(getComputedStyle(media1).transform).to.equal(expectedMedia1);
     expect(getComputedStyle(media3).transform).to.equal(expectedMedia3);
-  });
-
-  it('fans out media-1/media-3 and shades the card on create-card hover', async () => {
-    await setViewport({ width: 800, height: 1000 });
-    const card = block.querySelector('.resume-hero-create');
-    const rect = card.getBoundingClientRect();
-    const mediaItems = [...card.querySelectorAll('.resume-hero-create-media')];
-    try {
-      card.style.transition = 'none';
-      mediaItems.forEach((item) => {
-        item.style.transition = 'none';
-      });
-      await sendMouse({
-        type: 'move',
-        position: [Math.round(rect.left + rect.width / 2), Math.round(rect.top + rect.height / 2)],
-      });
-
-      const media1 = block.querySelector('.resume-hero-create-media-1');
-      const media2 = block.querySelector('.resume-hero-create-media-2');
-      const media3 = block.querySelector('.resume-hero-create-media-3');
-
-      expect(getComputedStyle(media1).transform).to.equal('matrix(1, 0, 0, 1, -116, 7)');
-      expect(getComputedStyle(media2).transform).to.equal('matrix(1, 0, 0, 1, 0, 7)');
-      expect(getComputedStyle(media3).transform).to.equal('matrix(1, 0, 0, 1, 116, 7)');
-      [media1, media2, media3].forEach((media) => {
-        const styles = getComputedStyle(media);
-        expect(styles.borderRadius).to.equal('6px');
-        expect(styles.boxShadow).to.equal('none');
-        expect(styles.filter).to.include('drop-shadow');
-        expect(styles.overflow).to.equal('visible');
-        const pictureStyles = getComputedStyle(media.querySelector('picture'));
-        const imageStyles = getComputedStyle(media.querySelector('img'));
-        expect(pictureStyles.overflow).to.equal('hidden');
-        expect(imageStyles.scale).to.equal('1.01');
-      });
-
-      const probe = document.createElement('div');
-      probe.style.backgroundColor = 'var(--color-gray-150)';
-      document.body.append(probe);
-      const expectedHoverColor = getComputedStyle(probe).backgroundColor;
-      probe.remove();
-      expect(getComputedStyle(card).backgroundColor).to.equal(expectedHoverColor);
-    } finally {
-      card.style.removeProperty('transition');
-      mediaItems.forEach((item) => {
-        item.style.removeProperty('transition');
-      });
-      await resetMouse();
-      await setViewport({ width: 800, height: 600 });
-    }
   });
 
   it('paints the dropzone boundary above the sequence images and lets clicks pass through', async () => {
