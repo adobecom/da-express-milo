@@ -938,13 +938,13 @@ main .section .resume-hero p {
   }
 
   .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image {
-    top: 156.125px;
+    top: 176.125px;
     transition: none;
   }
 
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1,
   .resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
-    top: 156.125px;
+    top: 176.125px;
     transform: rotate(var(--resume-hero-media-rotation));
   }
 
