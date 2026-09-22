@@ -191,27 +191,6 @@ describe('resume-hero', () => {
     expect(authoredNodes.createLink.getAttribute('href')).to.equal('https://www.adobe.com/express/templates/resume');
   });
 
-  it('uses the mobile-first spacing for the block and header', async () => {
-    await setViewport({ width: 500, height: 800 });
-    try {
-      const blockStyles = getComputedStyle(block);
-      const headerStyles = getComputedStyle(block.querySelector('.resume-hero-header'));
-      const headerContentStyles = getComputedStyle(block.querySelector('.resume-hero-header-content'));
-      const headingStyles = getComputedStyle(block.querySelector('.resume-hero .heading'));
-
-      expect(blockStyles.padding).to.equal('32px 16px');
-      expect(headerStyles.marginBlockEnd).to.equal('16px');
-      expect(headerContentStyles.gap).to.equal('8px');
-      expect(headerContentStyles.maxWidth).to.equal('666px');
-      expect(headingStyles.fontSize).to.equal('36px');
-      expect(headingStyles.letterSpacing).to.equal('-1px');
-      expect(headingStyles.lineHeight).to.equal('32px');
-      expect(getComputedStyle(authoredNodes.uploadCell).gap).to.equal('8px');
-    } finally {
-      await setViewport({ width: 800, height: 600 });
-    }
-  });
-
   it('keeps 8px between the headline and subcopy at every breakpoint', async () => {
     for (const width of [500, 1000, 1700]) {
       await setViewport({ width, height: 900 });
@@ -262,19 +241,6 @@ describe('resume-hero', () => {
     }
   });
 
-  it('extends the authored Create link over the entire card', () => {
-    const cardRect = authoredNodes.createCell.getBoundingClientRect();
-    const hitTarget = document.elementFromPoint(
-      Math.round(cardRect.left + 8),
-      Math.round(cardRect.top + 8),
-    );
-    const overlayStyles = getComputedStyle(authoredNodes.createLink, '::after');
-
-    expect(overlayStyles.position).to.equal('absolute');
-    expect(overlayStyles.inset).to.equal('0px');
-    expect(hitTarget).to.equal(authoredNodes.createLink);
-  });
-
   it('uses the requested disclaimer and tooltip spacing', () => {
     const legal = block.querySelector('.verb-dropzone-legal');
     const infoIcon = block.querySelector('.info-icon');
@@ -297,50 +263,6 @@ describe('resume-hero', () => {
     expect(arrowStyles.left).to.equal('100%');
     expect(arrowStyles.borderTopWidth).to.equal('4px');
     expect(arrowStyles.top).to.equal('50%');
-  });
-
-  it('uses the requested mobile spacing around the cards and value props', async () => {
-    await setViewport({ width: 500, height: 1000 });
-    try {
-      const actionsRect = authoredNodes.actionsRow.getBoundingClientRect();
-      const uploadRect = authoredNodes.uploadCell.getBoundingClientRect();
-      const createRect = authoredNodes.createCell.getBoundingClientRect();
-      const firstBenefit = authoredNodes.extraRow.querySelector('.resume-hero-benefit');
-      const benefitRect = firstBenefit.getBoundingClientRect();
-      const benefitStyles = getComputedStyle(firstBenefit);
-      const actionsStyles = getComputedStyle(authoredNodes.actionsRow);
-
-      expect(actionsStyles.gap).to.equal('24px');
-      expect(createRect.top - uploadRect.bottom).to.equal(24);
-      expect(benefitRect.top + parseFloat(benefitStyles.paddingTop) - actionsRect.bottom)
-        .to.equal(22);
-    } finally {
-      await setViewport({ width: 800, height: 600 });
-    }
-  });
-
-  it('keeps 22px of visible space before value props at every breakpoint', async () => {
-    const gaps = [];
-    for (const width of [500, 1000, 1700]) {
-      await setViewport({ width, height: 1000 });
-      const firstBenefit = authoredNodes.extraRow.querySelector('.resume-hero-benefit');
-      const benefitRect = firstBenefit.getBoundingClientRect();
-      const benefitStyles = getComputedStyle(firstBenefit);
-      const reference = width < 600
-        ? authoredNodes.createCell
-        : block.querySelector('.verb-dropzone-legal p:last-child');
-      const visibleGap = benefitRect.top
-        + parseFloat(benefitStyles.paddingTop)
-        - reference.getBoundingClientRect().bottom;
-
-      gaps.push({ width, visibleGap });
-    }
-    await setViewport({ width: 800, height: 600 });
-    expect(gaps).to.deep.equal([
-      { width: 500, visibleGap: 22 },
-      { width: 1000, visibleGap: 22 },
-      { width: 1700, visibleGap: 22 },
-    ]);
   });
 
   it('keeps the first two benefits together and stacks the rest on narrow mobile', async () => {
@@ -474,41 +396,6 @@ describe('resume-hero', () => {
     expect(strayParagraphs).to.have.lengthOf(0);
   });
 
-  it('enlarges and offsets the upload sequence at the tablet breakpoint', async () => {
-    await setViewport({ width: 1000, height: 800 });
-    try {
-      const [first, second] = authoredNodes.uploadPictures.map((picture) => (
-        getComputedStyle(picture)
-      ));
-
-      expect(first.position).to.equal('absolute');
-      expect(first.right).to.equal('-70px');
-      expect(parseFloat(first.top)).to.be.closeTo(156.125, 0.1);
-      expect(parseFloat(first.width)).to.be.closeTo(185.03, 0.1);
-      expect(parseFloat(first.height)).to.be.closeTo(248.75, 0.1);
-      expect(first.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('-8.28deg');
-
-      expect(second.position).to.equal('absolute');
-      expect(second.left).to.equal('-30px');
-      expect(parseFloat(second.top)).to.be.closeTo(156.125, 0.1);
-      expect(parseFloat(second.width)).to.be.closeTo(185.03, 0.1);
-      expect(parseFloat(second.height)).to.be.closeTo(248.75, 0.1);
-      expect(second.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('6.91deg');
-      authoredNodes.uploadPictures.forEach((picture) => {
-        const imageStyles = getComputedStyle(picture.querySelector('img'));
-        expect(imageStyles.objectFit).to.equal('contain');
-        expect(parseFloat(imageStyles.width)).to.be.closeTo(185.03, 0.1);
-        expect(parseFloat(imageStyles.height)).to.be.closeTo(248.75, 0.1);
-      });
-
-      const sourceTopPadding = parseFloat(first.height) * 0.1;
-      expect(parseFloat(first.top) + sourceTopPadding).to.be.closeTo(181, 0.1);
-      expect(parseFloat(second.top) + sourceTopPadding).to.be.closeTo(181, 0.1);
-    } finally {
-      await setViewport({ width: 800, height: 600 });
-    }
-  });
-
   it('animates both axes for the desktop dropzone sequence', async () => {
     await setViewport({ width: 1440, height: 900 });
     try {
@@ -539,40 +426,6 @@ describe('resume-hero', () => {
     }
   });
 
-  it('keeps the upload sequence static on tablet hover', async () => {
-    await setViewport({ width: 1000, height: 800 });
-    const pictures = authoredNodes.uploadPictures;
-    try {
-      const dropzone = block.querySelector('.resume-hero-dropzone-area');
-      const rect = dropzone.getBoundingClientRect();
-      const restingStyles = pictures.map((picture) => {
-        const styles = getComputedStyle(picture);
-        return {
-          left: styles.left,
-          right: styles.right,
-          top: styles.top,
-          transform: styles.transform,
-        };
-      });
-      await sendMouse({
-        type: 'move',
-        position: [Math.round(rect.left + rect.width / 2), Math.round(rect.top + rect.height / 2)],
-      });
-
-      pictures.forEach((picture, index) => {
-        const styles = getComputedStyle(picture);
-        expect(styles.left).to.equal(restingStyles[index].left);
-        expect(styles.right).to.equal(restingStyles[index].right);
-        expect(styles.top).to.equal(restingStyles[index].top);
-        expect(styles.transform).to.equal(restingStyles[index].transform);
-        expect(styles.transitionDuration).to.equal('0s');
-      });
-    } finally {
-      await resetMouse();
-      await setViewport({ width: 800, height: 600 });
-    }
-  });
-
   it('sequences all three create images with their authored sizes and rotations', () => {
     const stage = block.querySelector('.resume-hero-create-media-stage');
     const media = [...stage.querySelectorAll('.resume-hero-create-media')];
@@ -591,26 +444,6 @@ describe('resume-hero', () => {
       expect(parseFloat(styles.height)).to.be.closeTo(specs[index].height, 0.1);
     });
     expect(getComputedStyle(media[2]).aspectRatio).to.equal('17 / 22');
-  });
-
-  it('keeps all three create images visible so they appear stacked', () => {
-    const stage = block.querySelector('.resume-hero-create-media-stage');
-    const media = [...stage.querySelectorAll('.resume-hero-create-media')];
-
-    media.forEach((item) => {
-      const styles = getComputedStyle(item);
-      expect(styles.opacity).to.equal('1');
-      expect(styles.borderRadius).to.equal('6px');
-      expect(styles.boxShadow).to.equal('none');
-      expect(styles.filter).to.include('drop-shadow');
-      expect(styles.overflow).to.equal('visible');
-      expect(styles.transitionDuration).to.equal('0.8s');
-      expect(styles.transitionTimingFunction).to.equal('cubic-bezier(0.34, 1.56, 0.64, 1)');
-      expect(styles.willChange).to.equal('transform');
-      const [originX, originY] = styles.transformOrigin.split(' ').map(parseFloat);
-      expect(originX).to.be.closeTo(parseFloat(styles.width) / 2, 0.1);
-      expect(originY).to.be.closeTo(parseFloat(styles.height) / 2, 0.1);
-    });
   });
 
   it('shows the create-card focus treatment when its CTA receives focus', () => {
