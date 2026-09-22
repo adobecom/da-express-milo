@@ -483,6 +483,12 @@ main .section .resume-hero p {
 }
 
 .resume-hero .resume-hero-dropzone-image img {
+  box-shadow:
+    36px 112px 33px 0 rgb(0 0 0 / 0%),
+    23px 72px 30px 0 rgb(0 0 0 / 1%),
+    13px 40px 25px 0 rgb(0 0 0 / 5%),
+    6px 18px 19px 0 rgb(0 0 0 / 9%),
+    1px 4px 10px 0 rgb(0 0 0 / 10%);
   display: block;
   height: 100%;
   max-height: none;
@@ -551,7 +557,7 @@ main .section .resume-hero p {
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image img {
-  height: 200px;
+  height: auto;
   max-width: none;
   object-fit: contain;
   width: 144px;
