@@ -202,7 +202,8 @@ main .section .resume-hero p {
   overflow: visible;
   position: absolute;
   transform-origin: center;
-  transition: transform 0.4s ease;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
 }
 
 .resume-hero .resume-hero-create-media-stage > .resume-hero-create-media-1 {

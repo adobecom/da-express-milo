@@ -603,6 +603,12 @@ describe('resume-hero', () => {
       expect(styles.boxShadow).to.equal('none');
       expect(styles.filter).to.include('drop-shadow');
       expect(styles.overflow).to.equal('visible');
+      expect(styles.transitionDuration).to.equal('0.8s');
+      expect(styles.transitionTimingFunction).to.equal('cubic-bezier(0.34, 1.56, 0.64, 1)');
+      expect(styles.willChange).to.equal('transform');
+      const [originX, originY] = styles.transformOrigin.split(' ').map(parseFloat);
+      expect(originX).to.be.closeTo(parseFloat(styles.width) / 2, 0.1);
+      expect(originY).to.be.closeTo(parseFloat(styles.height) / 2, 0.1);
     });
   });
 
