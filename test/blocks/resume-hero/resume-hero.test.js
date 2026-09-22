@@ -655,7 +655,8 @@ describe('resume-hero', () => {
       expect(getComputedStyle(dropzoneArea).backgroundImage).to.equal('none');
       pictures.forEach((picture) => {
         const styles = getComputedStyle(picture);
-        expect(styles.boxShadow).to.not.equal('none');
+        expect(styles.boxShadow).to.include('36px 112px 33px 0px');
+        expect(styles.boxShadow).to.include('1px 4px 10px 0px');
         expect(styles.overflow).to.equal('visible');
       });
     } finally {
