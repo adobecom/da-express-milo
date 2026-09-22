@@ -122,6 +122,11 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.color:first-child {
+  padding-top: 0;
+}
+
+.section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.has-ribbon-banner:first-child {
   padding-top: 0;
 }
@@ -853,14 +858,21 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   width: 46%;
 }
 
-.ax-columns.color>div {
-  padding: var(--spacing-900) 0 0 0;
+.ax-columns.color .color-svg-img.color-bistro {
+  height: 100%;
+  width: 100%;
+}
+
+.section .ax-columns.color>div {
+  padding: var(--section-padding-m) 0;
   gap: 15px;
+  justify-content: space-between;
 }
 
 .ax-columns.color .column.text {
   padding: 0;
-  max-width: 345px;
+  max-width: none;
+  flex: 1;
 }
 
 .ax-columns.color.shadow .img-wrapper {
@@ -870,11 +882,41 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 .ax-columns.color h2,
 .ax-columns.color p {
   hyphens: manual;
-  text-align: center;
+  text-align: start;
 }
 
 .ax-columns.color h2 {
   font-size: var(--heading-font-size-l);
+}
+
+.section .ax-columns.color {
+  box-sizing: border-box;
+  max-width: var(--block-lg-max-width);
+  padding-inline: var(--Grid-container-padding-side);
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .section .ax-columns.color > div {
+    padding: var(--spacing-900) 0;
+    gap: var(--spacing-700);
+  }
+}
+
+@media (min-width: 1200px) {
+  .section .ax-columns.color > div {
+    padding: var(--section-padding-xl) 0;
+    gap: var(--spacing-800);
+  }
+}
+
+@media (max-width: 599px) {
+  .ax-columns.color .img-wrapper {
+    width: 100%;
+  }
+}
+
+.ax-columns.color p {
+  font-size: var(--body-font-size-l);
 }
 
 .collapsible-card-wrapper+.columns-wrapper .ax-columns>div {
@@ -1187,11 +1229,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     width: 418px;
   }
 
-  .ax-columns.color h2,
-  .ax-columns.color p {
-    text-align: left;
-  }
-
   .section:first-of-type .ax-columns:first-of-type .brand.icon {
     position: unset;
     top: unset;
@@ -1212,12 +1249,10 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     align-items: flex-start;
   }
 
-  /* stylelint-disable-next-line no-duplicate-selectors */
   .section .ax-columns,
   .ax-columns.top.center,
   .ax-columns.fullsize.center,
-  .ax-columns.light,
-  .ax-columns.fullsize.center {
+  .ax-columns.light {
     max-width: 836px;
     padding-left: var(--spacing-500);
     padding-right: var(--spacing-500);
@@ -1581,10 +1616,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .ax-columns.color .img-wrapper {
     height: 500px;
     width: 500px;
-  }
-
-  .ax-columns.color>div {
-    gap: 25px;
   }
 
   .ax-columns.fullsize.top>div {
