@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 import {
-  readFile, setViewport, sendMouse, resetMouse,
+  readFile, setViewport,
 } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
