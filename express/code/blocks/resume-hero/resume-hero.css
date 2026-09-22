@@ -551,10 +551,10 @@ main .section .resume-hero p {
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image img {
-  height: 248.75px;
+  height: 200px;
   max-width: none;
   object-fit: contain;
-  width: 185.03px;
+  width: 144px;
 }
 
 .resume-hero .verb-dropzone-content {
