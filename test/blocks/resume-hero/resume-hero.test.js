@@ -665,10 +665,10 @@ describe('resume-hero', () => {
       expect(borderStyles.position).to.equal('absolute');
       expect(borderStyles.pointerEvents).to.equal('none');
       expect(Number(borderStyles.zIndex)).to.be.greaterThan(Number(widgetIconStyles.zIndex));
-      expect(borderStyles.borderBottomStyle).to.equal('dashed');
-      expect(borderStyles.borderRightStyle).to.equal('dashed');
-      expect(borderStyles.borderBottomWidth).to.equal('2px');
-      expect(borderStyles.borderRightWidth).to.equal('2px');
+      expect(borderStyles.borderBottomWidth).to.equal('0px');
+      expect(borderStyles.borderRightWidth).to.equal('0px');
+      expect(borderStyles.backgroundImage).to.include("stroke-width='1'");
+      expect(borderStyles.backgroundImage).to.include("stroke-dasharray='4 4'");
       expect(getComputedStyle(dropzoneArea).backgroundImage).to.equal('none');
       pictures.forEach((picture) => {
         const styles = getComputedStyle(picture);
