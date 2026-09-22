@@ -659,7 +659,13 @@ let ccEverywhereInitPromise;
 // ever exist per page; each caller still keeps its own local reference to the resolved value.
 export async function ensureCCEverywhere(getConfig) {
   if (!ccEverywhereInitPromise) {
-    ccEverywhereInitPromise = loadAndInitializeCCEverywhere(getConfig);
+    // Clear the cached promise on failure so a later real attempt (e.g. the user's file
+    // drop, after a background preload's loadScript failed due to an ad-blocker or network
+    // blip) can retry instead of replaying the same rejection for the rest of the page view.
+    ccEverywhereInitPromise = loadAndInitializeCCEverywhere(getConfig).catch((error) => {
+      ccEverywhereInitPromise = undefined;
+      throw error;
+    });
   }
   return ccEverywhereInitPromise;
 }
