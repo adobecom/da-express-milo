@@ -154,7 +154,7 @@ main .section .link-list-wrapper:has(.link-list.link-text),
 }
 
 .section .link-list-wrapper .link-list.noarrows > div:first-of-type > div > p:first-of-type {
-  font-weight: 800;
+  font-weight: 900;
   font-size: var(--body-font-size-m);
   margin: 0 var(--spacing-200) 4px var(--spacing-200);
 }
