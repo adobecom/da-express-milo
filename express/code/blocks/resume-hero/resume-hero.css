@@ -474,7 +474,6 @@ main .section .resume-hero p {
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image {
-  bottom: 0;
   margin: 0;
   max-width: none;
   opacity: 1;
@@ -487,39 +486,39 @@ main .section .resume-hero p {
   --resume-hero-media-rotation: 6.91deg;
 
   align-items: flex-start;
-  bottom: -50px;
   display: flex;
   flex-direction: column;
   gap: 3.501px;
-  height: 240px;
+  height: 248.75px;
   left: -35px;
-  top: 108px;
+  top: 130.125px;
   transform-origin: bottom left;
-  width: 194px;
+  width: 185.03px;
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
   --resume-hero-media-rotation: -8.28deg;
 
-  bottom: -50px;
-  height: 240px;
+  height: 248.75px;
   right: -75px;
-  top: 108px;
+  top: 130.125px;
   transform-origin: bottom right;
-  width: 194px;
+  width: 185.03px;
 }
 
-.resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-1,
-.resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-2 {
+.resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1,
+.resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
   transform: rotate(0deg);
 }
 
-.resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-1 {
-  top: 70px;
+.resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
+  left: -30px;
+  top: 33.675px;
 }
 
-.resume-hero .resume-hero-dropzone-area:hover .resume-hero-dropzone-image-2 {
-  top: 82px;
+.resume-hero .resume-hero-dropzone-area:hover .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
+  right: -80px;
+  top: 33.675px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -531,10 +530,10 @@ main .section .resume-hero p {
 }
 
 .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image img {
-  height: 100%;
-  max-width: 100%;
+  height: 248.75px;
+  max-width: none;
   object-fit: contain;
-  width: auto;
+  width: 185.03px;
 }
 
 .resume-hero .verb-dropzone-content {
@@ -908,6 +907,14 @@ main .section .resume-hero p {
 
   .resume-hero .widget-icon {
     display: flex;
+  }
+
+  .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-1 {
+    left: -60px;
+  }
+
+  .resume-hero .widget-icon.resume-hero-media-sequence .resume-hero-dropzone-image-2 {
+    right: -100px;
   }
 
   .resume-hero .resume-hero-dropzone-border {

@@ -473,7 +473,7 @@ describe('resume-hero', () => {
     expect(strayParagraphs).to.have.lengthOf(0);
   });
 
-  it('anchors the upload sequence at the bottom corners with the authored dimensions', async () => {
+  it('enlarges and offsets the upload sequence at the tablet breakpoint', async () => {
     await setViewport({ width: 1000, height: 800 });
     try {
       const [first, second] = authoredNodes.uploadPictures.map((picture) => (
@@ -481,23 +481,28 @@ describe('resume-hero', () => {
       ));
 
       expect(first.position).to.equal('absolute');
-      expect(first.bottom).to.equal('-50px');
-      expect(first.right).to.equal('-75px');
-      expect(first.top).to.equal('108px');
-      expect(parseFloat(first.width)).to.be.closeTo(194, 0.1);
-      expect(parseFloat(first.height)).to.be.closeTo(240, 0.1);
+      expect(first.right).to.equal('-100px');
+      expect(parseFloat(first.top)).to.be.closeTo(130.125, 0.1);
+      expect(parseFloat(first.width)).to.be.closeTo(185.03, 0.1);
+      expect(parseFloat(first.height)).to.be.closeTo(248.75, 0.1);
       expect(first.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('-8.28deg');
 
       expect(second.position).to.equal('absolute');
-      expect(second.bottom).to.equal('-50px');
-      expect(second.left).to.equal('-35px');
-      expect(second.top).to.equal('108px');
-      expect(parseFloat(second.width)).to.be.closeTo(194, 0.1);
-      expect(parseFloat(second.height)).to.be.closeTo(240, 0.1);
+      expect(second.left).to.equal('-60px');
+      expect(parseFloat(second.top)).to.be.closeTo(130.125, 0.1);
+      expect(parseFloat(second.width)).to.be.closeTo(185.03, 0.1);
+      expect(parseFloat(second.height)).to.be.closeTo(248.75, 0.1);
       expect(second.getPropertyValue('--resume-hero-media-rotation').trim()).to.equal('6.91deg');
       authoredNodes.uploadPictures.forEach((picture) => {
-        expect(getComputedStyle(picture.querySelector('img')).objectFit).to.equal('contain');
+        const imageStyles = getComputedStyle(picture.querySelector('img'));
+        expect(imageStyles.objectFit).to.equal('contain');
+        expect(parseFloat(imageStyles.width)).to.be.closeTo(185.03, 0.1);
+        expect(parseFloat(imageStyles.height)).to.be.closeTo(248.75, 0.1);
       });
+
+      const sourceTopPadding = parseFloat(first.height) * 0.1;
+      expect(parseFloat(first.top) + sourceTopPadding).to.be.closeTo(155, 0.1);
+      expect(parseFloat(second.top) + sourceTopPadding).to.be.closeTo(155, 0.1);
     } finally {
       await setViewport({ width: 800, height: 600 });
     }
@@ -518,10 +523,21 @@ describe('resume-hero', () => {
       });
 
       const [rightPicture, leftPicture] = pictures.map((picture) => getComputedStyle(picture));
-      expect(rightPicture.top).to.equal('82px');
-      expect(leftPicture.top).to.equal('70px');
+      expect(parseFloat(rightPicture.top)).to.be.closeTo(33.675, 0.1);
+      expect(rightPicture.right).to.equal('-100px');
+      expect(parseFloat(leftPicture.top)).to.be.closeTo(33.675, 0.1);
+      expect(leftPicture.left).to.equal('-30px');
       [rightPicture, leftPicture].forEach((styles) => {
         expect(styles.transform).to.equal('matrix(1, 0, 0, 1, 0, 0)');
+        const imageHeight = parseFloat(styles.height);
+        const templateHeight = imageHeight * 0.8;
+        const sourceTopPadding = imageHeight * 0.1;
+        const visibleTopGap = parseFloat(styles.top) + sourceTopPadding;
+        const visibleBottomGap = 298 - visibleTopGap - templateHeight;
+
+        expect(visibleTopGap).to.be.closeTo(58.55, 0.1);
+        expect(visibleBottomGap).to.be.closeTo(40.45, 0.1);
+        expect(66.8 - visibleTopGap).to.be.closeTo(48.7 - visibleBottomGap, 0.1);
       });
     } finally {
       pictures.forEach((picture) => {
