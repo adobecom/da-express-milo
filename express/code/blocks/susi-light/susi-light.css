@@ -158,23 +158,36 @@
   margin-top: auto;
 }
 
-/* CLS: height set by applyModalWrapperReserve */
+/* CLS: height set by applyModalWrapperReserve (inline --susi-modal-wrapper-height
+   overrides the fallback below, since it's set on this same element). */
+.susi-light:not(.tabs):has(.susi-layout) {
+  --susi-modal-wrapper-height: var(--susi-wrapper-standard);
+}
+
 .susi-light:not(.tabs):has(.susi-layout) .susi-wrapper {
-  min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
+  min-height: var(--susi-modal-wrapper-height);
 }
 
 .susi-light.student .susi-wrapper {
   width: var(--susi-modal-width);
 }
 
+.susi-light.simplified {
+  --susi-modal-wrapper-height: var(--susi-wrapper-simplified);
+}
+
 .susi-light.simplified .susi-wrapper {
-  min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-simplified));
+  min-height: var(--susi-modal-wrapper-height);
+}
+
+.susi-light:not(:has(.susi-layout)) {
+  --susi-modal-wrapper-height: var(--susi-wrapper-edu-express);
 }
 
 .susi-light:not(:has(.susi-layout)) > susi-sentry-light {
   display: block;
   width: 100%;
-  min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-edu-express));
+  min-height: var(--susi-modal-wrapper-height);
 }
 
 .susi-light.color .susi-wrapper {
@@ -222,7 +235,7 @@
 
 .dialog-modal:has(.susi-light:not(.tabs) .susi-layout) .susi-wrapper {
   flex: 0 0 auto;
-  min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
+  min-height: var(--susi-modal-wrapper-height);
 }
 
 .dialog-modal .susi-light .express-logo {
