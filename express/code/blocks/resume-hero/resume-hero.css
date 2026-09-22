@@ -449,10 +449,7 @@ main .section .resume-hero p {
    obscured by artwork that bleeds past the dropzone's edge; clicks pass
    through to the dropzone button underneath. */
 .resume-hero .resume-hero-dropzone-border {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect x='.5' y='.5' width='calc(100%25 - 1px)' height='calc(100%25 - 1px)' rx='23.5' ry='23.5' fill='none' stroke='%23868686' stroke-width='1' stroke-dasharray='4 4'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  border: 0;
+  border: 2px dashed #868686;
   border-radius: 24px;
   box-sizing: border-box;
   inset: 0;
@@ -941,6 +938,10 @@ main .section .resume-hero p {
     right: -70px;
   }
 
+  .resume-hero .resume-hero-dropzone-border {
+    background-image: none;
+  }
+
   .resume-hero .resume-hero-create {
     flex: 1 1 268px;
     height: 298px;
@@ -990,6 +991,10 @@ main .section .resume-hero p {
 
   .resume-hero .widget-icon {
     display: flex;
+  }
+
+  .resume-hero .resume-hero-dropzone-border {
+    background-image: none;
   }
 
   .resume-hero .resume-hero-create {
