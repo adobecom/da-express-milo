@@ -658,6 +658,9 @@ describe('resume-hero', () => {
       const dropzoneArea = block.querySelector('.resume-hero-dropzone-area');
       const border = block.querySelector('.resume-hero-dropzone-border');
       const borderStyles = getComputedStyle(border);
+      const borderSvg = border.querySelector('.resume-hero-dropzone-border-svg');
+      const borderRect = borderSvg.querySelector('rect');
+      const borderSvgStyles = getComputedStyle(borderSvg);
       const widgetIconStyles = getComputedStyle(block.querySelector('.widget-icon'));
       const pictures = [...block.querySelectorAll('.resume-hero-dropzone-image')];
 
@@ -665,10 +668,13 @@ describe('resume-hero', () => {
       expect(borderStyles.position).to.equal('absolute');
       expect(borderStyles.pointerEvents).to.equal('none');
       expect(Number(borderStyles.zIndex)).to.be.greaterThan(Number(widgetIconStyles.zIndex));
-      expect(borderStyles.borderBottomStyle).to.equal('dashed');
-      expect(borderStyles.borderRightStyle).to.equal('dashed');
-      expect(borderStyles.borderBottomWidth).to.equal('2px');
-      expect(borderStyles.borderRightWidth).to.equal('2px');
+      expect(borderStyles.borderBottomWidth).to.equal('0px');
+      expect(borderStyles.borderRightWidth).to.equal('0px');
+      expect(borderSvgStyles.inset).to.equal('0.5px');
+      expect(borderSvgStyles.overflow).to.equal('visible');
+      expect(borderRect.getAttribute('stroke-width')).to.equal('1');
+      expect(borderRect.getAttribute('stroke-dasharray')).to.equal('4 4');
+      expect(borderRect.getAttribute('vector-effect')).to.equal('non-scaling-stroke');
       expect(getComputedStyle(dropzoneArea).backgroundImage).to.equal('none');
       pictures.forEach((picture) => {
         const styles = getComputedStyle(picture);

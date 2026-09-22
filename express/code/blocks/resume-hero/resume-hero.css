@@ -449,13 +449,22 @@ main .section .resume-hero p {
    obscured by artwork that bleeds past the dropzone's edge; clicks pass
    through to the dropzone button underneath. */
 .resume-hero .resume-hero-dropzone-border {
-  border: 2px dashed #868686;
+  border: 0;
   border-radius: 24px;
   box-sizing: border-box;
   inset: 0;
   pointer-events: none;
   position: absolute;
   z-index: 2;
+}
+
+.resume-hero .resume-hero-dropzone-border-svg {
+  display: block;
+  height: calc(100% - 1px);
+  inset: 0.5px;
+  overflow: visible;
+  position: absolute;
+  width: calc(100% - 1px);
 }
 
 .resume-hero .resume-hero-dropzone-image {

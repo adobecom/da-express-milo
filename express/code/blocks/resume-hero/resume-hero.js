@@ -506,6 +506,23 @@ export default async function decorate(element) {
   // Painted above the sequence images (z-index) so the dashed boundary is
   // never covered by artwork positioned past the dropzone's edge.
   const dropzoneBorder = createTag('div', { class: 'resume-hero-dropzone-border', 'aria-hidden': 'true' });
+  const borderSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const borderRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  borderSvg.classList.add('resume-hero-dropzone-border-svg');
+  borderSvg.setAttribute('focusable', 'false');
+  borderRect.setAttribute('x', '0');
+  borderRect.setAttribute('y', '0');
+  borderRect.setAttribute('width', '100%');
+  borderRect.setAttribute('height', '100%');
+  borderRect.setAttribute('rx', '23.5');
+  borderRect.setAttribute('ry', '23.5');
+  borderRect.setAttribute('fill', 'none');
+  borderRect.setAttribute('stroke', '#868686');
+  borderRect.setAttribute('stroke-width', '1');
+  borderRect.setAttribute('stroke-dasharray', '4 4');
+  borderRect.setAttribute('vector-effect', 'non-scaling-stroke');
+  borderSvg.append(borderRect);
+  dropzoneBorder.append(borderSvg);
   dropzone.append(dzInner, dropzoneBorder);
 
   const fileInput = createTag('input', {
