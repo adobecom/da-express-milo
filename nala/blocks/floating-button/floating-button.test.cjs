@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../utils/test.cjs';
 import { features } from './floating-button.spec.cjs';
 import FloatingButton from './floating-button.page.cjs';
 import { runAccessibilityTest } from '../../libs/accessibility.cjs';

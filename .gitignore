@@ -24,3 +24,7 @@ actionlint
 .playwright-mcp/
 !.eslintrc-code-compatibility.js
 !.browserslistrc
+
+.hlx/.da-token.json
+
+content
