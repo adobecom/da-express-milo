@@ -1,0 +1,41 @@
+{
+  "block": "color-carousel",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-carousel-authored",
+      "selector": "div.color-carousel",
+      "path": "/drafts/nala/blocks/color-carousel",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@color-carousel",
+        "@authored",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@color-carousel-ckg",
+      "selector": "div.color-carousel.ckg",
+      "path": "/drafts/nala/blocks/color-carousel-ckg",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@color-carousel",
+        "@ckg",
+        "@express"
+      ]
+    }
+  ]
+}
