@@ -15,6 +15,39 @@ export const showScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   if (lottieScrollButton) lottieScrollButton.removeAttribute('tabIndex');
 };
 
+export function delayFloatingCtaUntilMiniEditorPassed(
+  floatButtonWrapper,
+  floatingButton,
+  miniEditor,
+  restoreButtonPosition,
+) {
+  if (!miniEditor) return;
+
+  // Keep the CTA hidden before IntersectionObserver reports its initial state.
+  // This also covers a mini editor that starts below the viewport: the CTA must
+  // not appear until the user has scrolled past the entire editor.
+  floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
+
+  const miniEditorObserver = new IntersectionObserver(([entry]) => {
+    const miniEditorHasPassed = entry.boundingClientRect.bottom <= 0;
+    floatButtonWrapper.classList.toggle(
+      'floating-button--mini-editor-suppressed',
+      !miniEditorHasPassed,
+    );
+
+    if (miniEditorHasPassed) {
+      restoreButtonPosition();
+    } else {
+      floatingButton.style.bottom = '0px';
+    }
+  }, {
+    root: null,
+    threshold: 0,
+  });
+
+  miniEditorObserver.observe(miniEditor);
+}
+
 export function openToolBox(wrapper, lottie, data) {
   const toolbox = wrapper.querySelector('.toolbox');
   const button = wrapper.querySelector('.floating-button');
@@ -228,6 +261,24 @@ export async function createFloatingButton(block, audience, data) {
       floatButton.style.removeProperty('bottom');
     }
   });
+
+  if (floatButtonWrapper.dataset.audience === 'mobile') {
+    const miniEditor = document.querySelector('.mini-editor');
+    delayFloatingCtaUntilMiniEditorPassed(
+      floatButtonWrapper,
+      floatButton,
+      miniEditor,
+      () => {
+        if (promoBar && promoBar.block) {
+          floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
+        } else if (currentBottom) {
+          floatButton.style.bottom = currentBottom;
+        } else {
+          floatButton.style.removeProperty('bottom');
+        }
+      },
+    );
+  }
 
   // Intersection observer - hide button when scrolled to footer
   const footer = document.querySelector('footer');

@@ -35,7 +35,8 @@ body.branch-banner-is-active .floating-button-wrapper {
 }
 
 /* Suppressed: keep wrapper present but visually hide button area like hidden state */
-.floating-button-wrapper.floating-button--suppressed {
+.floating-button-wrapper.floating-button--suppressed,
+.floating-button-wrapper.floating-button--mini-editor-suppressed {
     height: 150px;
     bottom: -151px;
     opacity: 0.9;
@@ -228,7 +229,8 @@ body[data-suppressfloatingcta="true"] main .floating-button-wrapper[data-audienc
         opacity: 0.9;
     }
 
-    .floating-button-wrapper.floating-button--suppressed {
+    .floating-button-wrapper.floating-button--suppressed,
+    .floating-button-wrapper.floating-button--mini-editor-suppressed {
         bottom: -151px;
         opacity: 0.9;
     }
