@@ -734,6 +734,9 @@ export default async function decorate(block) {
 
   // variant for the colors pages
   if (block.classList.contains('color')) {
+    const isColorChildPage = getMetadata('pagetype')?.toLowerCase() === 'color';
+    if (isColorChildPage) block.classList.add('color-column');
+
     const [primaryColor, accentColor] = rows[1]
       .querySelector(':scope > div')
       .textContent.trim()
@@ -747,7 +750,8 @@ export default async function decorate(block) {
     svgCol.remove();
     rows[1].remove();
     textCol.classList.add('text');
-    svg.innerHTML = `<svg class='color-svg-img ${svgId}'> <use href='/express/code/icons/color-sprite.svg#${svgId}'></use></svg>`;
+    const svgClass = isColorChildPage ? `color-svg-img ${svgId}` : 'color-svg-img';
+    svg.innerHTML = `<svg class='${svgClass}'> <use href='/express/code/icons/color-sprite.svg#${svgId}'></use></svg>`;
     svg.style.backgroundColor = primaryColor;
     svg.style.fill = accentColor;
     rows[0].append(svg);
