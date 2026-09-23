@@ -25,4 +25,6 @@ actionlint
 !.eslintrc-code-compatibility.js
 !.browserslistrc
 
+.hlx/.da-token.json
+
 content
