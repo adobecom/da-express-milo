@@ -1,5 +1,5 @@
 import path from 'path';
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../utils/test.cjs';
 import WebUtil from '../../libs/webutil.cjs';
 import { features } from './frictionless-qa-video.spec.cjs';
 import FrictionlessQA from './frictionless-qa-video.page.cjs';
