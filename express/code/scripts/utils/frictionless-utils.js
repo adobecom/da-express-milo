@@ -625,6 +625,21 @@ export function createSDKConfig(getConfig, urlParams) {
   };
 }
 
+// The CC Everywhere embedded editor iframe posts this message when its own
+// content overflows and it needs the host page to scroll on its behalf.
+// TODO: origin/type validation temporarily disabled for initial testing; re-enable before launch.
+function handleScrollDeltaMessage(event) {
+  // if (!event.origin.endsWith('.adobe.com') || event.data?.type !== 'SCROLL_DELTA') return;
+  const { deltaX = 0, deltaY = 0 } = event.data;
+  window.scrollBy(deltaX, deltaY);
+}
+
+function listenForScrollDelta() {
+  if (window.frictionlessScrollDeltaListenerAdded) return;
+  window.addEventListener('message', handleScrollDeltaMessage);
+  window.frictionlessScrollDeltaListenerAdded = true;
+}
+
 export async function loadAndInitializeCCEverywhere(getConfig) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlOverride = urlParams.get('sdk-override');
@@ -648,6 +663,7 @@ export async function loadAndInitializeCCEverywhere(getConfig) {
   }
 
   const ccEverywhereConfig = createSDKConfig(getConfig, urlParams);
+  listenForScrollDelta();
   return window.CCEverywhere.initialize(...Object.values(ccEverywhereConfig));
 }
 
