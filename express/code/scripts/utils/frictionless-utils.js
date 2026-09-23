@@ -630,7 +630,7 @@ export function createSDKConfig(getConfig, urlParams) {
 // TODO: origin/type validation temporarily disabled for initial testing; re-enable before launch.
 function handleScrollDeltaMessage(event) {
   // if (!event.origin.endsWith('.adobe.com') || event.data?.type !== 'SCROLL_DELTA') return;
-  const { deltaX = 0, deltaY = 0 } = event.data;
+  const { deltaX = 0, deltaY = 0 } = event.data?.message?.data ?? {};
   window.scrollBy(deltaX, deltaY);
 }
 
