@@ -625,11 +625,10 @@ export function createSDKConfig(getConfig, urlParams) {
   };
 }
 
-// The CC Everywhere embedded editor iframe posts this message when its own
-// content overflows and it needs the host page to scroll on its behalf.
-// TODO: origin/type validation temporarily disabled for initial testing; re-enable before launch.
+// The frictionless widget iframe posts this message on scroll events
+// it needs the host page to scroll on its behalf.
 function handleScrollDeltaMessage(event) {
-  // if (!event.origin.endsWith('.adobe.com') || event.data?.type !== 'SCROLL_DELTA') return;
+  if (!event.origin.endsWith('.adobe.com') || event.data?.message?.type !== 'SCROLL_DELTA') return;
   const { deltaX = 0, deltaY = 0 } = event.data?.message?.data ?? {};
   // Force instant scrolling so rapid successive deltas don't get queued/slowed
   // down by an inherited `scroll-behavior: smooth` on the document.
