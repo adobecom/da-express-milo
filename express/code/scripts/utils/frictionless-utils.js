@@ -631,7 +631,9 @@ export function createSDKConfig(getConfig, urlParams) {
 function handleScrollDeltaMessage(event) {
   // if (!event.origin.endsWith('.adobe.com') || event.data?.type !== 'SCROLL_DELTA') return;
   const { deltaX = 0, deltaY = 0 } = event.data?.message?.data ?? {};
-  window.scrollBy(deltaX, deltaY);
+  // Force instant scrolling so rapid successive deltas don't get queued/slowed
+  // down by an inherited `scroll-behavior: smooth` on the document.
+  window.scrollBy({ left: deltaX, top: deltaY, behavior: 'instant' });
 }
 
 function listenForScrollDelta() {
