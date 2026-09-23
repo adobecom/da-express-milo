@@ -43,7 +43,7 @@
 }
 
 .template-list-horizontal-fullwidth-mini-apipowered-spreadsheet-powered-container p {
-  font-weight: 800;
+  font-weight: 900;
   font-size: var(--body-font-size-m);
   margin: 16px 12px 12px 12px;
   text-align: left;
@@ -1704,7 +1704,7 @@
 
 .template-list-horizontal-fullwidth-mini-container .template-list .template-title p:last-of-type {
   margin-top: 16px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .template-list-horizontal-fullwidth-mini-container .template-list .template-title p:first-of-type {
@@ -1713,7 +1713,7 @@
 
 .template-list-horizontal-fullwidth-mini-container .template-list .template-title p:last-of-type { /* stylelint-disable-line no-duplicate-selectors */
   margin-top: 16px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .template-list-horizontal-fullwidth-mini-container .template-title .icon {
