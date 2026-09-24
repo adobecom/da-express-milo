@@ -354,7 +354,9 @@ export async function applyCreateNowLink(anchor, colorName) {
   if (!anchor || !colorName) return;
   const { default: trackBranchParameters } = await import('../../branchlinks.js');
   anchor.href = CREATE_NOW_BASE_URL;
-  await trackBranchParameters([anchor]);
+  const links = [anchor];
+  links.isSearchOverride = true;
+  await trackBranchParameters(links);
   const url = new URL(anchor.href);
   url.searchParams.set('q', colorName.toLowerCase());
   url.searchParams.set('searchCategory', 'templates');
