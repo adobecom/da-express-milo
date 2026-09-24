@@ -23,7 +23,7 @@
       "tcid": "1",
       "name": "@color-carousel-ckg",
       "selector": "div.color-carousel.ckg",
-      "path": "/drafts/nala/blocks/color-carousel-ckg",
+      "path": "/drafts/nala/blocks/color-carousel-ckg?ckg-env=prod",
       "data": {
         "semantic": {
           "texts": [],
