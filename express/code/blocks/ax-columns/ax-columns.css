@@ -1014,7 +1014,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   gap: var(--spacing-300);
 }
 
-.ax-columns.fullsize .button-container.two-ctas .button {
+.ax-columns.fullsize .button-container.two-ctas .con-button {
   margin: 0;
 }
 
@@ -1365,12 +1365,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     display: none;
   }
 
-  .ax-columns.marquee .button-container.free-plan-container a.button {
+  .ax-columns.marquee .button-container.free-plan-container a.con-button {
     width: 137px;
     height: 48px;
     font-size: var(--body-font-size-l);
-    padding-bottom: 10px;
-    border-radius: 24px;
+    border-radius: 999px;
     display: inline-block;
   }
 
@@ -1742,7 +1741,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   text-align: center;
 }
 
-.ax-columns.slim-button a.button {
+.ax-columns.slim-button a.con-button {
   padding: 5px 19.5px;
 }
 
@@ -1974,7 +1973,6 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
 
 /* Temporary styles for the Font Generator SEO page's ax-columns instance.
    Not a long-term variant — remove once a permanent layout solution lands. */
-.section .ax-columns.temporary-font-generator-styles p.button-container a.button,
 .section .ax-columns.temporary-font-generator-styles a.con-button {
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
@@ -1982,8 +1980,6 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   color: var(--color-white);
 }
 
-.section .ax-columns.temporary-font-generator-styles p.button-container a.button:hover,
-.section .ax-columns.temporary-font-generator-styles p.button-container a.button:active,
 .section .ax-columns.temporary-font-generator-styles a.con-button:hover,
 .section .ax-columns.temporary-font-generator-styles a.con-button:active {
   background-color: var(--Background-Primary-Hover);
@@ -2022,15 +2018,36 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   }
 }
 
-main .ax-columns a.button.fill {
+main .ax-columns a.con-button.fill {
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
   border-radius: 999px;
   color: var(--color-white);
 }
 
-main .ax-columns a.button.fill:any-link:hover,
-main .ax-columns a.button.fill:any-link:active {
+main .ax-columns a.con-button.fill:any-link:hover,
+main .ax-columns a.con-button.fill:any-link:active {
      background-color: var(--color-info-accent-hover);
     border-color: var(--color-info-accent-hover);
+}
+
+/* The .highlight card is a white surface even when the block also carries
+   .dark — authors add .dark to correct the surrounding section's header text.
+   The s2 ladder in styles.css then styles outline CTAs for a DARK surface
+   (white text + translucent white stroke, `.s2.dark ...outline`), so they
+   vanish on the white card. Re-assert the block's filled-primary treatment
+   (matches .con-button.fill / the pre-s2 look) so the CTA stays legible.
+   Selector mirrors the s2 rule's shape (:is/.button, :not(.fill), :any-link)
+   plus .ax-columns.highlight to outrank main .s2.dark ...outline (0,6,2). */
+main .ax-columns.s2.dark.highlight a:is(.con-button, .button).outline:not(.fill):any-link {
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+  border-radius: 999px;
+  color: var(--color-white);
+}
+
+main .ax-columns.s2.dark.highlight a:is(.con-button, .button).outline:not(.fill):any-link:hover,
+main .ax-columns.s2.dark.highlight a:is(.con-button, .button).outline:not(.fill):any-link:active {
+  background-color: var(--color-info-accent-hover);
+  border-color: var(--color-info-accent-hover);
 }

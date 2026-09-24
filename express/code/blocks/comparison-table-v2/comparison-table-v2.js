@@ -751,6 +751,10 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  */
 export default async function decorate(comparisonBlock) {
+  // Verified against the Spectrum-2 button system (see styles.css) — see
+  // that comment block for the other blocks in this rollout.
+  comparisonBlock.classList.add('s2');
+
   try {
     const parentSection = comparisonBlock.closest('section');
     if (parentSection && parentSection.classList.contains('content-toggle-hidden')) {
