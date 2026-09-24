@@ -19,6 +19,7 @@ test-a11y-results/
 # Development and testing files
 dev/
 actionlint
+.claude/settings.local.json
 .claude/worktrees/
 .claude/**.local.*
 .playwright-mcp/
