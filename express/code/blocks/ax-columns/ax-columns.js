@@ -223,25 +223,29 @@ function injectLogo(block) {
 
 const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   if (rowNum + cellNum !== 0) return;
-  const italicAnchor = cell.querySelector('p > em > a');
-  if (!italicAnchor) return;
-  const boldAnchor = italicAnchor.parentElement?.previousElementSibling?.querySelector('a');
   const block = cell.closest('.ax-columns');
 
-  if (boldAnchor && block?.className.includes('fullsize')) {
-    boldAnchor.classList.add('button', 'accent', 'xlarge', 'primaryCTA');
-    BlockMediator.set('primaryCtaUrl', boldAnchor.href);
-    italicAnchor.classList.add('button', 'primary', 'reverse', 'xlarge');
-    boldAnchor.parentElement?.replaceWith(boldAnchor);
-    italicAnchor.parentElement?.replaceWith(italicAnchor);
-    boldAnchor.closest('p')?.classList.add('button-container', 'two-ctas');
+  // Post milo-decoration the primary CTA (authored bold/strong) is `a.con-button.blue`
+  // and the secondary (authored italic/em) is `a.con-button.outline`; milo has
+  // already unwrapped the <em>/<strong> and moved each anchor into its <p>.
+  const primaryAnchor = cell.querySelector('a.con-button.blue');
+  const secondaryAnchor = cell.querySelector('a.con-button.outline');
+  // Legacy fallback: plain anchors that milo didn't decorate still land as `.button`.
+  const italicAnchor = secondaryAnchor || cell.querySelector('p > em > a');
+  if (!italicAnchor && !primaryAnchor) return;
+
+  if (block?.className.includes('fullsize') && primaryAnchor) {
+    primaryAnchor.classList.add('xlarge', 'primaryCTA');
+    BlockMediator.set('primaryCtaUrl', primaryAnchor.href);
+    secondaryAnchor?.classList.add('reverse', 'xlarge');
+    primaryAnchor.closest('p')?.classList.add('button-container', 'two-ctas');
     return;
   }
 
-  const links = italicAnchor.parentElement?.querySelectorAll('a');
-  if (links.length < 2) return;
-  italicAnchor.parentElement?.classList.add('phone-number-cta-row');
-  links[0].classList.add('button', 'xlarge', 'trial-cta');
+  const links = italicAnchor?.closest('p')?.querySelectorAll('a');
+  if (!links || links.length < 2) return;
+  italicAnchor.closest('p')?.classList.add('phone-number-cta-row');
+  links[0].classList.add('con-button', 'xlarge', 'trial-cta');
   links[1].classList.add('phone');
   italicAnchor.closest('p')?.prepend(links[0]);
 };
@@ -356,8 +360,25 @@ export default async function decorate(block) {
   if (document.body.dataset.device === 'mobile') replaceHyphensInText(block);
   const colorProperties = extractProperties(block);
   splitAndAddVariantsWithDash(block);
+  // Verified against the Spectrum-2 button system (see styles.css) — see
+  // that comment block for the other blocks in this rollout. Added after
+  // splitAndAddVariantsWithDash so it doesn't shift the positional index the
+  // numbered-list total-count parsing below relies on (block.classList[3]).
+  block.classList.add('s2');
   decorateSocialIcons(block);
   await decorateButtonsDeprecated(block, 'button-xxl');
+
+  // ax-columns is no longer in decorateButtonsDeprecated's exclusion list, so
+  // its CTAs are now decorated by milo's decorateButtons: strong->`.con-button.blue`,
+  // em->`.con-button.outline`, size `button-xxl`, and the parent <p>/<div> gets
+  // `.action-area`. This block's CSS is written against `.button-container` (39
+  // rules) and its JS/CSS expect `.xlarge`, so bridge milo's output back onto the
+  // existing contract instead of rewriting every rule. Idempotent and scoped to
+  // this block's already-decorated con-buttons.
+  block.querySelectorAll('a.con-button').forEach((btn) => {
+    btn.classList.add('xlarge');
+    btn.closest('p, div')?.classList.add('button-container');
+  });
 
   const rows = Array.from(block.children);
 
