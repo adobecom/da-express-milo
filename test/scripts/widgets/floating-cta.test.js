@@ -1,5 +1,8 @@
 import { expect } from '@esm-bundle/chai';
-import { delayFloatingCtaUntilMiniEditorPassed } from '../../../express/code/scripts/widgets/floating-cta.js';
+import {
+  delayFloatingCtaUntilMiniEditorPassed,
+  syncFloatingCtaAccessibility,
+} from '../../../express/code/scripts/widgets/floating-cta.js';
 
 describe('Floating CTA mini editor delay', () => {
   let originalIntersectionObserver;
@@ -46,15 +49,49 @@ describe('Floating CTA mini editor delay', () => {
 
     expect(observedTarget).to.equal(miniEditor);
     expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.true;
+    expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
+    expect(wrapper.hasAttribute('inert')).to.be.true;
 
     observerCallback([{ boundingClientRect: { bottom: 500 } }]);
     expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.true;
+    expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
+    expect(wrapper.hasAttribute('inert')).to.be.true;
     expect(button.style.bottom).to.equal('0px');
     expect(restored).to.be.false;
 
     observerCallback([{ boundingClientRect: { bottom: 0 } }]);
     expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.false;
+    expect(wrapper.hasAttribute('aria-hidden')).to.be.false;
+    expect(wrapper.hasAttribute('inert')).to.be.false;
     expect(restored).to.be.true;
+  });
+
+  it('stays inaccessible while another suppression state remains active', () => {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('floating-button--mini-editor-suppressed', 'floating-button--hidden');
+    syncFloatingCtaAccessibility(wrapper);
+
+    wrapper.classList.remove('floating-button--mini-editor-suppressed');
+    syncFloatingCtaAccessibility(wrapper);
+
+    expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
+    expect(wrapper.hasAttribute('inert')).to.be.true;
+
+    wrapper.classList.remove('floating-button--hidden');
+    syncFloatingCtaAccessibility(wrapper);
+
+    expect(wrapper.hasAttribute('aria-hidden')).to.be.false;
+    expect(wrapper.hasAttribute('inert')).to.be.false;
+  });
+
+  it('makes the existing suppression state inaccessible', () => {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('floating-button--suppressed');
+
+    syncFloatingCtaAccessibility(wrapper);
+
+    expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
+    expect(wrapper.hasAttribute('inert')).to.be.true;
   });
 
   it('does nothing when a mini editor is not authored', () => {

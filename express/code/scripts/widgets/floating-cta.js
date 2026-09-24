@@ -2,6 +2,26 @@ import { getLibs, getLottie, lazyLoadLottiePlayer, createTag, getMobileOperating
 import { setDaaLL } from '../utils/analytics.js';
 import BlockMediator from '../block-mediator.min.js';
 
+const ACCESSIBILITY_HIDDEN_CLASSES = [
+  'floating-button--hidden',
+  'floating-button--suppressed',
+  'floating-button--mini-editor-suppressed',
+];
+
+export function syncFloatingCtaAccessibility(floatButtonWrapper) {
+  const isHidden = ACCESSIBILITY_HIDDEN_CLASSES
+    .some((className) => floatButtonWrapper.classList.contains(className));
+
+  if (isHidden) {
+    if (floatButtonWrapper.contains(document.activeElement)) document.activeElement.blur();
+    floatButtonWrapper.setAttribute('aria-hidden', 'true');
+    floatButtonWrapper.setAttribute('inert', '');
+  } else {
+    floatButtonWrapper.removeAttribute('aria-hidden');
+    floatButtonWrapper.removeAttribute('inert');
+  }
+}
+
 export const hideScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   floatButtonWrapper.classList.add('floating-button--scrolled');
   if (lottieScrollButton) {
@@ -27,6 +47,7 @@ export function delayFloatingCtaUntilMiniEditorPassed(
   // This also covers a mini editor that starts below the viewport: the CTA must
   // not appear until the user has scrolled past the entire editor.
   floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
+  syncFloatingCtaAccessibility(floatButtonWrapper);
 
   const miniEditorObserver = new IntersectionObserver(([entry]) => {
     const miniEditorHasPassed = entry.boundingClientRect.bottom <= 0;
@@ -34,6 +55,7 @@ export function delayFloatingCtaUntilMiniEditorPassed(
       'floating-button--mini-editor-suppressed',
       !miniEditorHasPassed,
     );
+    syncFloatingCtaAccessibility(floatButtonWrapper);
 
     if (miniEditorHasPassed) {
       restoreButtonPosition();
@@ -219,6 +241,7 @@ export async function createFloatingButton(block, audience, data) {
     const hasSuppressTargets = !!document.querySelector('.suppress-until-not-visible');
     if (hasSuppressTargets) {
       floatButtonWrapper.classList.add('floating-button--suppressed');
+      syncFloatingCtaAccessibility(floatButtonWrapper);
     }
   }
 
@@ -288,15 +311,12 @@ export async function createFloatingButton(block, audience, data) {
       if (entry.intersectionRatio > 0 || entry.isIntersecting) {
         // Visually and accessibly hide the floating CTA when the footer is in view
         floatButtonWrapper.classList.add('floating-button--hidden');
-        floatButtonWrapper.setAttribute('aria-hidden', 'true');
-        // Prevent focus and remove from the accessibility tree in supporting browsers
-        floatButtonWrapper.setAttribute('inert', '');
+        syncFloatingCtaAccessibility(floatButtonWrapper);
         floatButton.style.bottom = '0px';
       } else {
         // Restore visibility and accessibility when the footer is not in view
         floatButtonWrapper.classList.remove('floating-button--hidden');
-        floatButtonWrapper.removeAttribute('aria-hidden');
-        floatButtonWrapper.removeAttribute('inert');
+        syncFloatingCtaAccessibility(floatButtonWrapper);
         if (promoBar && promoBar.block) {
           floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
         } else if (currentBottom) {
@@ -365,10 +385,12 @@ export async function createFloatingButton(block, audience, data) {
       const updateSuppressedState = (anyVisible) => {
         if (anyVisible) {
           floatButtonWrapper.classList.add('floating-button--suppressed');
+          syncFloatingCtaAccessibility(floatButtonWrapper);
           // Keep CTA pinned to bottom visually when suppressed
           floatButton.style.bottom = '0px';
         } else {
           floatButtonWrapper.classList.remove('floating-button--suppressed');
+          syncFloatingCtaAccessibility(floatButtonWrapper);
           if (promoBar && promoBar.block) {
             floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
           } else if (currentBottom) {
