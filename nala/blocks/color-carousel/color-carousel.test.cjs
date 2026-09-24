@@ -7,6 +7,17 @@ const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
 const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
 
+// Chips only exist once decorate() has rendered — for the ckg variant that means
+// after the CKG network fetch resolves, which can lag well past the default wait
+// in CI. Wait on the rendered chips directly rather than data-block-status
+// (which the network-bound ckg variant flips to "loaded" only after that fetch),
+// matching how the ckg-link-list nala test waits on its pills.
+async function waitForChips(block, timeout = 45000) {
+  await block.block.scrollIntoViewIfNeeded();
+  await expect(block.block).toBeVisible();
+  await expect(block.chip.first()).toBeVisible({ timeout });
+}
+
 // Shared with both variants: assert every rendered chip has a name, a hex-format
 // label, a non-transparent swatch tinted to that hex, and (when it links) an href.
 async function verifyChips(block) {
@@ -68,9 +79,7 @@ test.describe('ColorCarouselBlock Test Suite', () => {
     });
 
     await test.step('step-2: Verify authored chips render', async () => {
-      await block.waitReady();
-      await block.block.scrollIntoViewIfNeeded();
-      await expect(block.block).toBeVisible();
+      await waitForChips(block);
       // The authored variant must not trip the dynamic ckg failsafe.
       await expect(block.block).not.toHaveClass(/\bckg\b/);
       await verifyChips(block);
@@ -100,9 +109,7 @@ test.describe('ColorCarouselBlock Test Suite', () => {
     });
 
     await test.step('step-2: Verify dynamically-pulled ckg chips render', async () => {
-      await block.waitReady();
-      await block.block.scrollIntoViewIfNeeded();
-      await expect(block.block).toBeVisible();
+      await waitForChips(block);
       await verifyChips(block);
       await verifySemantic(block, data.semantic);
     });
