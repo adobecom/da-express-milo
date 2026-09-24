@@ -59,9 +59,8 @@ test.describe('ColorWheelBlock Test Suite', () => {
       }
     });
 
-    // TODO: Remove skip flag when toolbar is fixed MWPW-191732
     await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: true });
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
     await test.step('step-4: SEO validation', async () => {
