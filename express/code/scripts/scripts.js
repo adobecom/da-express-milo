@@ -90,7 +90,7 @@ const CONFIG = {
   decorateArea,
   faasCloseModalAfterSubmit: 'on',
   locales: {
-    '': { ietf: 'en-US', tk: 'hah7vzn.css' },
+    '': { ietf: 'en-US', tk: 'uwk3rbm.css' },
     ara: { ietf: 'ar', tk: 'cbp4pzm.css', dir: 'rtl' },
     br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
     // eslint-disable-next-line max-len

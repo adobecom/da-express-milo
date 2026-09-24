@@ -9,7 +9,7 @@
   --Background-Primary-Focus: #4B75FF;
   --s2a-color-content-default: var(--color-black);
   --s2a-font-family-body: var(--body-font-family);
-  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  /* --s2a-font-family-heading now provided globally (styles.css) */
   --s2a-font-family-label: var(--body-font-family);
   --s2a-typography-font-size-body-md: 16px;
   --s2a-typography-font-size-heading-4: 36px;

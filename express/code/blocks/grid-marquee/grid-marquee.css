@@ -574,6 +574,7 @@ main .section .grid-marquee.pricing-page h1 {
 }
 
 main .section .grid-marquee.resume-builder h1 {
+  font-family: var(--heading-font-family);
   font-size: var(--typography-headings-xl);
   line-height: 104%;
   font-weight: 900;
