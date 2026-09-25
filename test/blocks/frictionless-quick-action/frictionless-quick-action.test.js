@@ -12,6 +12,7 @@ const {
   setupFrictionlessTargetBaseUrl,
   getFrictionlessTargetBaseUrl,
   buildSearchParamsForEditorUrl,
+  logVideoUploadEvent,
 } = imports[2];
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
@@ -336,5 +337,102 @@ describe('remove-background-focused-challenger — URL setup and editor params',
     expect(params['edit-action']).to.be.undefined;
     expect(params['l2-panel']).to.be.undefined;
     expect(params['open-download']).to.be.undefined;
+  });
+});
+
+describe('logVideoUploadEvent', () => {
+  let originalLana;
+  const videoFile = () => new File([new ArrayBuffer(1024)], 'my clip.mp4', { type: 'video/mp4' });
+
+  beforeEach(() => {
+    originalLana = window.lana;
+    window.lana = { log: sinon.stub() };
+  });
+
+  afterEach(() => {
+    window.lana = originalLana;
+    sinon.restore();
+  });
+
+  it('logs a started video upload without duration/asset/error fields', () => {
+    logVideoUploadEvent('started', {
+      file: videoFile(),
+      quickAction: 'video-crop',
+    });
+
+    expect(window.lana.log.calledOnce).to.be.true;
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Video upload started');
+    expect(message).to.include('userId:');
+    expect(message).to.include('size:1024');
+    expect(message).to.include('type:video/mp4');
+    expect(message).to.include('quickAction:video-crop');
+    expect(message).to.not.include('uploadDuration:'); // omitted until the upload settles
+    expect(message).to.not.include('id:');
+    expect(message).to.not.include('errorCode:');
+    expect(options.tags).to.include('frictionless-video-upload-started');
+    expect(options.severity).to.equal('info');
+  });
+
+  it('logs a successful video upload with debugging context', () => {
+    logVideoUploadEvent('success', {
+      file: videoFile(),
+      quickAction: 'video-crop',
+      uploadDuration: 1200,
+      assetId: 'asset-123',
+    });
+
+    expect(window.lana.log.calledOnce).to.be.true;
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Video upload successful');
+    expect(message).to.include('id:asset-123');
+    expect(message).to.include('userId:'); // user id context is always present
+    expect(message).to.include('size:1024');
+    expect(message).to.include('type:video/mp4');
+    expect(message).to.include('quickAction:video-crop');
+    expect(message).to.include('uploadDuration:1200');
+    expect(message).to.not.include('name:'); // filename intentionally excluded (PII)
+    expect(options.clientId).to.equal('express');
+    expect(options.tags).to.include('frictionless-video-upload-success');
+    expect(options.severity).to.equal('info');
+  });
+
+  it('logs a failed video upload with error details and sanitizes whitespace', () => {
+    logVideoUploadEvent('failed', {
+      file: videoFile(),
+      quickAction: 'video-crop',
+      uploadDuration: 800,
+      error: { code: 'UPLOAD_FAILED', message: 'network went down' },
+    });
+
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Video upload failed');
+    expect(message).to.include('errorCode:UPLOAD_FAILED');
+    // whitespace collapsed so the space-delimited key:value fields stay parseable
+    expect(message).to.include('errorMessage:network_went_down');
+    expect(message).to.not.include('id:');
+    expect(options.severity).to.equal('error');
+    expect(options.tags).to.include('frictionless-video-upload-failed');
+  });
+
+  it('logs a cancelled video upload without asset or error fields', () => {
+    logVideoUploadEvent('cancelled', {
+      file: videoFile(),
+      quickAction: 'video-crop',
+      uploadDuration: 400,
+    });
+
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Video upload cancelled');
+    expect(message).to.not.include('id:');
+    expect(message).to.not.include('errorCode:');
+    expect(options.tags).to.include('frictionless-video-upload-cancelled');
+    expect(options.severity).to.equal('info');
+  });
+
+  it('ignores unknown statuses and missing files', () => {
+    logVideoUploadEvent('bogus', { file: videoFile() });
+    logVideoUploadEvent('success', { quickAction: 'video-crop' });
+    expect(window.lana.log.called).to.be.false;
   });
 });
