@@ -651,6 +651,142 @@ export async function loadAndInitializeCCEverywhere(getConfig) {
   return window.CCEverywhere.initialize(...Object.values(ccEverywhereConfig));
 }
 
+let ccEverywhereInitPromise;
+
+// Ensures the CC Everywhere SDK is loaded and initialized only once for the page, even if
+// desktop and mobile frictionless blocks (or a background preload and a user-triggered
+// startSDK) race each other. Shared across both blocks since only one SDK instance should
+// ever exist per page; each caller still keeps its own local reference to the resolved value.
+export async function ensureCCEverywhere(getConfig) {
+  if (!ccEverywhereInitPromise) {
+    // Clear the cached promise on failure so a later real attempt (e.g. the user's file
+    // drop, after a background preload's loadScript failed due to an ad-blocker or network
+    // blip) can retry instead of replaying the same rejection for the rest of the page view.
+    ccEverywhereInitPromise = loadAndInitializeCCEverywhere(getConfig).catch((error) => {
+      ccEverywhereInitPromise = undefined;
+      throw error;
+    });
+  }
+  return ccEverywhereInitPromise;
+}
+
+// Per-platform switch maps for quick actions with a preload-capable standalone route.
+// Warming up a quick action whose flag is false here would just open an editor the user
+// never asked for, so keep these in sync with which quick actions have the corresponding
+// `embed-preload-enabled` feature flag turned on in hz (see each quick action's
+// config-interface.ts under apps/quick-actions/modules/src/actions/<id>/). Desktop and
+// mobile are tracked separately since the two blocks can be enabled independently.
+export const PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP = {
+  'convert-to-jpg': true,
+  'convert-to-png': true,
+  'convert-to-svg': false,
+  'crop-image': true,
+  'resize-image': true,
+  'remove-background': false,
+  'compress-image': true,
+  'generate-qr-code': false,
+  'convert-to-gif': true,
+  'convert-to-mp4': true,
+  'crop-video': true,
+  'video-convert': true,
+  'video-compress': true,
+  'trim-video': true,
+  'resize-video': true,
+  'merge-videos': true,
+  'caption-video': false,
+  'heic-to-jpg': true,
+  'heic-to-png': true,
+  'audio-converter': true,
+  'video-to-audio': true,
+};
+
+export const PRELOAD_ENABLED_QUICK_ACTIONS_MOBILE = {
+  'convert-to-jpg': true,
+  'convert-to-png': true,
+  'convert-to-svg': false,
+  'crop-image': true,
+  'resize-image': true,
+  'remove-background': false,
+  'compress-image': true,
+  'generate-qr-code': false,
+  'convert-to-gif': true,
+  'convert-to-mp4': true,
+  'crop-video': true,
+  'video-convert': true,
+  'video-compress': true,
+  'trim-video': true,
+  'resize-video': true,
+  'merge-videos': false,
+  'caption-video': false,
+  'heic-to-jpg': true,
+  'heic-to-png': true,
+  'audio-converter': true,
+  'video-to-audio': true,
+};
+
+function getQuickActionId(quickAction) {
+  if (quickAction === 'video-convert' || quickAction === 'video-compress') {
+    return 'video-encode';
+  }
+
+  if (quickAction === 'heic-to-jpg') {
+    return 'convert-to-jpg';
+  }
+
+  if (quickAction === 'heic-to-png') {
+    return 'convert-to-png';
+  }
+
+  if (quickAction === 'video-to-audio') {
+    return 'audio-converter';
+  }
+
+  return quickAction;
+}
+
+/**
+ * Eagerly loads the CC Everywhere SDK and warms up the quick action's iframe in the
+ * background, so it's already loaded by the time the user picks a file. The warmed-up
+ * container is created under the same #<quickAction>-container element the real quick
+ * action later reuses, in its final on-page position - the SDK can't move a live iframe's
+ * DOM parent afterwards without reloading it, so it has to be right from this first, hidden
+ * open() call. Created with the `hidden` class (visibility: hidden, out of flow) so its
+ * normal min-height doesn't push down the upload page's layout before the user picks a
+ * file; the real quick action un-hides it on reveal.
+ * @param quickAction the quick action id (e.g. 'resize-image')
+ * @param block the frictionless block element the container should be appended to
+ * @param options.getConfig milo's getConfig accessor
+ * @param options.createTag milo's createTag helper
+ * @param options.preloadEnabledMap PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP or _MOBILE,
+ * whichever matches the calling block
+ * @returns the initialized CCEverywhere SDK instance, or undefined if init failed
+ */
+export async function preloadQuickAction(quickAction, block, options) {
+  const { getConfig, createTag, preloadEnabledMap } = options;
+  if (!preloadEnabledMap[quickAction]) return undefined;
+  try {
+    const sdk = await ensureCCEverywhere(getConfig);
+    const id = `${quickAction}-container`;
+    const quickActionContainer = block.querySelector(`#${id}`)
+      ?? createTag('div', { id, class: 'quick-action-container hidden' });
+    if (!quickActionContainer.isConnected) block.append(quickActionContainer);
+    sdk?.quickAction.warmup(getQuickActionId(quickAction), 'preload', createContainerConfig(quickAction));
+    return sdk;
+  } catch (error) {
+    window.lana?.log(`[FrictionlessQA] Failed to preload quick action: ${error?.message || error}`, { tags: 'frictionless-utils', severity: 'warning' });
+    return undefined;
+  }
+}
+
+export function schedulePreloadQuickAction(quickAction, block, options) {
+  const preload = () => preloadQuickAction(quickAction, block, options);
+  if (document.readyState === 'complete') {
+    preload();
+  } else {
+    window.addEventListener('load', preload, { once: true });
+  }
+}
+
 export async function initProgressBar(replaceKey, getConfig) {
   const { default: ProgressBar } = await import('./createProgressBar.js');
   const progressBar = new ProgressBar();
