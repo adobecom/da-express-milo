@@ -22,7 +22,12 @@ export default async function getData() {
   const { getConfig, getMetadata } = await import(`${getLibs()}/utils/utils.js`);
   const { locale } = getConfig();
 
-  let textQuery = window.location.pathname
+  // An explicit `ckg-search-override` metadata value lets a page declare its CKG
+  // search term directly instead of inferring it from the URL path — needed for
+  // pages whose path doesn't encode a color (e.g. drafts/test pages). Opt-in:
+  // pages that don't set it keep the path-derived behavior unchanged.
+  const overrideQuery = getMetadata('ckg-search-override')?.trim();
+  let textQuery = overrideQuery || window.location.pathname
     .split('/')
     .filter(Boolean)
     .map((s) => s.trim())
