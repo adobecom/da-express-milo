@@ -1,5 +1,8 @@
 import { announceToScreenReader } from '../spectrum/index.js';
-import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
+import {
+  isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi,
+  decorateAnalyticsAttributes, trackColorExport,
+} from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { createIconButton, createSpectrumIcon } from '../utils/icons.js';
@@ -64,6 +67,7 @@ async function handleShare({ name, colors }, t) {
 
   try {
     await navigator.share({ title: name, url: shareUrl });
+    trackColorExport('share');
     announceToScreenReader(t.sharedSuccessfully);
     showExpressToast({ message: t.sharedSuccessfully, variant: 'positive' });
     return;
@@ -73,6 +77,7 @@ async function handleShare({ name, colors }, t) {
 
   try {
     await navigator.clipboard.writeText(shareUrl);
+    trackColorExport('share');
     announceToScreenReader(t.urlCopiedToClipboard);
     showExpressToast({ message: t.urlCopiedToClipboard, variant: 'positive' });
   } catch (err) {
@@ -153,6 +158,7 @@ async function handleDownload(palette, t) {
     const themeData = paletteToThemeData(palette);
     const downloadProvider = await serviceManager.getProvider('download');
     await downloadProvider.downloadJPEG(themeData);
+    trackColorExport('download');
     announceToScreenReader(t.downloadStarted);
   } catch (err) {
     window.lana?.log(`Download failed: ${err.message}`, {
@@ -194,6 +200,7 @@ async function handleGradientDownload(palette, t) {
     a.download = `${name}.jpg`;
     a.click();
     URL.revokeObjectURL(url);
+    trackColorExport('download');
     announceToScreenReader(t.downloadStarted);
   } catch (err) {
     window.lana?.log(`Gradient download failed: ${err.message}`, {
@@ -227,7 +234,10 @@ async function handleSave(
       paletteData: palette,
       type,
       anchorElement: container,
-      onSave: () => { activeDrawer = null; },
+      onSave: () => {
+        trackColorExport('save-to-library');
+        activeDrawer = null;
+      },
       onClose: () => { activeDrawer = null; },
       ccLibraryProvider,
       onLibraryCreated: (newLib) => {

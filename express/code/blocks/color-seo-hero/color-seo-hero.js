@@ -1,5 +1,5 @@
 import { getLibs, getIconElementDeprecated, createTag } from '../../scripts/utils.js';
-import { buildColorToolUrl, applyCreateNowLink } from '../../scripts/color-shared/utils/utilities.js';
+import { buildColorToolUrl, applyCreateNowLink, trackColorExport } from '../../scripts/color-shared/utils/utilities.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -131,6 +131,7 @@ async function shareColor(context) {
   if (navigator.share) {
     try {
       await navigator.share({ title: colorName, url: shareUrl });
+      trackColorExport('share');
       return;
     } catch (err) {
       if (err?.name === 'AbortError') return;
@@ -139,6 +140,7 @@ async function shareColor(context) {
 
   try {
     await navigator.clipboard.writeText(shareUrl);
+    trackColorExport('share');
     showExpressToast({ message: strings.linkCopied, variant: 'positive', timeout: 2000 });
     announceToScreenReader(strings.linkCopied);
   } catch (err) {
@@ -158,6 +160,7 @@ function buildCopyCodeMenu(context) {
     getName: () => context.colorName,
     formatLabels: strings.codeFormatLabels,
     onCopied: () => {
+      trackColorExport('copy-clipboard');
       showExpressToast({ message: strings.codeCopied, variant: 'positive', timeout: 2000 });
       announceToScreenReader(strings.codeCopied);
     },
@@ -175,6 +178,7 @@ function buildDownloadMenu(context) {
     getName: () => context.colorName,
     formatLabels: strings.downloadFormatLabels,
     onDownloaded: () => {
+      trackColorExport('download');
       announceToScreenReader(strings.downloadStarted);
     },
     onError: (err) => {
