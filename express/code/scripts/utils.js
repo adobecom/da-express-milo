@@ -314,7 +314,8 @@ export async function decorateButtonsDeprecated(el, size) {
   el.querySelectorAll(':scope a:not(.con-button, .social-link)').forEach(($a) => {
     // Mirrors decorateButtons' own #_button-<name> handling (milo's utils/decorate.js)
     // since this deprecated path never calls it for these blocks.
-    [...$a.href.matchAll(/#_button-([a-zA-Z-]+)/g)].forEach((match) => {
+    const customButtonClasses = [...$a.href.matchAll(/#_button-([a-zA-Z-]+)/g)];
+    customButtonClasses.forEach((match) => {
       $a.href = $a.href.replace(match[0], '');
       $a.classList.add(match[1]);
     });
@@ -363,6 +364,13 @@ export async function decorateButtonsDeprecated(el, size) {
               && $twoup.children.length === 1 && $twoup.tagName === 'P') {
             $a.classList.add('button', 'accent', 'light');
             $twoup.classList.add('button-container');
+          }
+          // Explicit black/outline variants replace the fallback's default blue
+          // class. Links without an authored variant keep their existing styling.
+          const hasExplicitVariant = customButtonClasses
+            .some(([, className]) => className === 'fill' || className === 'outline');
+          if ($a.classList.contains('button') && hasExplicitVariant) {
+            $a.classList.remove('accent');
           }
         }
         if (linkText.startsWith('{{icon-') && linkText.endsWith('}}')) {
