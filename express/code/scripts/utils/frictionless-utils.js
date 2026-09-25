@@ -625,6 +625,22 @@ export function createSDKConfig(getConfig, urlParams) {
   };
 }
 
+// The frictionless widget iframe posts this message on scroll events
+// it needs the host page to scroll on its behalf.
+function handleScrollDeltaMessage(event) {
+  if (!event.origin.endsWith('.adobe.com') || event.data?.message?.type !== 'SCROLL_DELTA') return;
+  const { deltaX = 0, deltaY = 0 } = event.data?.message?.data ?? {};
+  // Force instant scrolling so rapid successive deltas don't get queued/slowed
+  // down by an inherited `scroll-behavior: smooth` on the document.
+  window.scrollBy({ left: deltaX, top: deltaY, behavior: 'instant' });
+}
+
+function listenForScrollDelta() {
+  if (window.frictionlessScrollDeltaListenerAdded) return;
+  window.addEventListener('message', handleScrollDeltaMessage);
+  window.frictionlessScrollDeltaListenerAdded = true;
+}
+
 export async function loadAndInitializeCCEverywhere(getConfig) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlOverride = urlParams.get('sdk-override');
@@ -648,6 +664,7 @@ export async function loadAndInitializeCCEverywhere(getConfig) {
   }
 
   const ccEverywhereConfig = createSDKConfig(getConfig, urlParams);
+  listenForScrollDelta();
   return window.CCEverywhere.initialize(...Object.values(ccEverywhereConfig));
 }
 
