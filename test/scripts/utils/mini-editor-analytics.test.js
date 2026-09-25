@@ -73,6 +73,7 @@ describe('mini-editor analytics', () => {
     fetchStub.restore();
     delete window.adobeIMS;
     delete window.ecid;
+    delete window.alloy_all;
     setNavigatorValue('userAgent', originalUserAgent);
     setNavigatorValue('platform', originalPlatform);
     Object.defineProperty(navigator, 'userAgentData', {
@@ -93,7 +94,8 @@ describe('mini-editor analytics', () => {
     expect(eventName).to.equal('event');
 
     const corpnew = getCorpnewPayload(payload);
-    const { sdm, custom } = corpnew;
+    const { sdm, event } = corpnew;
+    const { custom } = event;
     expect(sdm.event).to.deep.include({
       pagename: 'export-project-complete-unauth',
       event_date: '2026-09-01',
@@ -208,5 +210,29 @@ describe('mini-editor analytics', () => {
   it('does not track when no export method is provided', async () => {
     await trackMiniEditorExport();
     expect(trackStub.called).to.be.false;
+  });
+
+  it('appends to an existing _adobe_corpnew.event.custom array instead of replacing it', async () => {
+    const preExistingEntry = { propertyName: 'some.other.rule', propertyValue: 'x', propertyType: 'string' };
+    window.alloy_all = {
+      data: {
+        _adobe_corpnew: {
+          event: {
+            custom: [preExistingEntry],
+          },
+        },
+      },
+    };
+
+    await trackMiniEditorExport({ exportMethod: 'copy-clipboard' });
+
+    const [, payload] = trackStub.firstCall.args;
+    const { event } = getCorpnewPayload(payload);
+    expect(event.custom[0]).to.deep.equal(preExistingEntry);
+    expect(findProperty(event.custom, 'custom.export_method')).to.deep.equal({
+      propertyName: 'custom.export_method',
+      propertyValue: 'copy-clipboard',
+      propertyType: 'string',
+    });
   });
 });
