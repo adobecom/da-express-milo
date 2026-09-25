@@ -4,7 +4,7 @@ import loadMiloStyle from '../../utils/loadMiloStyle.js';
 import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
 import { showExpressToast } from '../../spectrum/components/express-toast.js';
 import { createGradientEditorPlaceholders } from '../../i18n/loadGradientEditorPlaceholders.js';
-import { interpolate } from '../../utils/utilities.js';
+import { interpolate, trackColorExport } from '../../utils/utilities.js';
 
 const DEFAULT_HEX = '#808080';
 const DEFAULT_STOPS = [
@@ -735,6 +735,7 @@ export function createGradientEditor(initialGradient, options = {}) {
           const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
           copyTextToClipboard(copyHex).then((ok) => {
             if (ok) {
+              trackColorExport('copy-clipboard');
               announceToScreenReader(strings.copySuccessSr, 'polite');
               showCopiedTooltipFeedback(handle);
             } else {
@@ -857,6 +858,7 @@ export function createGradientEditor(initialGradient, options = {}) {
               const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
               copyTextToClipboard(copyHex).then((ok) => {
                 if (ok) {
+                  trackColorExport('copy-clipboard');
                   announceToScreenReader('Color copied', 'polite');
                   showCopiedTooltipFeedback(handle);
                 } else {
