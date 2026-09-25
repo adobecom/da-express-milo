@@ -302,6 +302,16 @@ describe('decorateButtonsDeprecated #_button-<name> handling', () => {
     const link = block.querySelector('a');
     expect(link.href).to.equal('https://www.adobe.com/');
     expect(link.classList.contains('fill')).to.be.true;
+    expect(link.classList.contains('accent')).to.be.false;
+  });
+
+  it('keeps the existing accent class when no explicit variant is authored', async () => {
+    document.body.innerHTML = '<div class="ax-columns"><p><strong><a href="https://www.adobe.com/">CTA</a></strong></p></div>';
+    const block = document.querySelector('.ax-columns');
+    await decorateButtonsDeprecated(block);
+    const link = block.querySelector('a');
+    expect(link.classList.contains('button')).to.be.true;
+    expect(link.classList.contains('accent')).to.be.true;
   });
 
   it('leaves a href without a #_button-<name> suffix unchanged', async () => {
