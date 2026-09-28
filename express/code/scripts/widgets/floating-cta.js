@@ -5,7 +5,7 @@ import BlockMediator from '../block-mediator.min.js';
 const ACCESSIBILITY_HIDDEN_CLASSES = [
   'floating-button--hidden',
   'floating-button--suppressed',
-  'floating-button--hero-suppressed',
+  'floating-button--mini-editor-suppressed',
 ];
 
 export function syncFloatingCtaAccessibility(floatButtonWrapper) {
@@ -35,29 +35,29 @@ export const showScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   if (lottieScrollButton) lottieScrollButton.removeAttribute('tabIndex');
 };
 
-export function delayFloatingCtaUntilElementPassed(
+export function delayFloatingCtaUntilMiniEditorPassed(
   floatButtonWrapper,
   floatingButton,
-  target,
+  miniEditor,
   restoreButtonPosition,
 ) {
-  if (!target) return;
+  if (!miniEditor) return;
 
   // Keep the CTA hidden before IntersectionObserver reports its initial state.
-  // This also covers a target that starts below the viewport: the CTA must not
-  // appear until the user has scrolled past the entire element.
-  floatButtonWrapper.classList.add('floating-button--hero-suppressed');
+  // This also covers a mini editor that starts below the viewport: the CTA must
+  // not appear until the user has scrolled past the entire editor.
+  floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
   syncFloatingCtaAccessibility(floatButtonWrapper);
 
-  const targetObserver = new IntersectionObserver(([entry]) => {
-    const targetHasPassed = entry.boundingClientRect.bottom <= 0;
+  const miniEditorObserver = new IntersectionObserver(([entry]) => {
+    const miniEditorHasPassed = entry.boundingClientRect.bottom <= 0;
     floatButtonWrapper.classList.toggle(
-      'floating-button--hero-suppressed',
-      !targetHasPassed,
+      'floating-button--mini-editor-suppressed',
+      !miniEditorHasPassed,
     );
     syncFloatingCtaAccessibility(floatButtonWrapper);
 
-    if (targetHasPassed) {
+    if (miniEditorHasPassed) {
       restoreButtonPosition();
     } else {
       floatingButton.style.bottom = '0px';
@@ -67,7 +67,7 @@ export function delayFloatingCtaUntilElementPassed(
     threshold: 0,
   });
 
-  targetObserver.observe(target);
+  miniEditorObserver.observe(miniEditor);
 }
 
 export function openToolBox(wrapper, lottie, data) {
@@ -285,11 +285,12 @@ export async function createFloatingButton(block, audience, data) {
     }
   });
 
-  if (floatButtonWrapper.dataset.audience === 'mobile' && data.delayUntilElementPassed) {
-    delayFloatingCtaUntilElementPassed(
+  if (floatButtonWrapper.dataset.audience === 'mobile') {
+    const miniEditor = document.querySelector('.mini-editor');
+    delayFloatingCtaUntilMiniEditorPassed(
       floatButtonWrapper,
       floatButton,
-      data.delayUntilElementPassed,
+      miniEditor,
       () => {
         if (promoBar && promoBar.block) {
           floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;

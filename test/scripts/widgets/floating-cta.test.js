@@ -1,10 +1,10 @@
 import { expect } from '@esm-bundle/chai';
 import {
-  delayFloatingCtaUntilElementPassed,
+  delayFloatingCtaUntilMiniEditorPassed,
   syncFloatingCtaAccessibility,
 } from '../../../express/code/scripts/widgets/floating-cta.js';
 
-describe('Floating CTA hero delay', () => {
+describe('Floating CTA mini editor delay', () => {
   let originalIntersectionObserver;
   let observerCallback;
   let observedTarget;
@@ -29,38 +29,38 @@ describe('Floating CTA hero delay', () => {
     document.body.innerHTML = '';
   });
 
-  it('stays hidden until the entire hero has scrolled above the viewport', () => {
+  it('stays hidden until the entire mini editor has scrolled above the viewport', () => {
     document.body.innerHTML = `
-      <div class="resume-hero"></div>
+      <div class="mini-editor"></div>
       <div class="floating-button-wrapper">
         <div class="floating-button"></div>
       </div>`;
-    const hero = document.querySelector('.resume-hero');
+    const miniEditor = document.querySelector('.mini-editor');
     const wrapper = document.querySelector('.floating-button-wrapper');
     const button = document.querySelector('.floating-button');
     let restored = false;
 
-    delayFloatingCtaUntilElementPassed(
+    delayFloatingCtaUntilMiniEditorPassed(
       wrapper,
       button,
-      hero,
+      miniEditor,
       () => { restored = true; },
     );
 
-    expect(observedTarget).to.equal(hero);
-    expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
+    expect(observedTarget).to.equal(miniEditor);
+    expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.true;
     expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
     expect(wrapper.hasAttribute('inert')).to.be.true;
 
     observerCallback([{ boundingClientRect: { bottom: 500 } }]);
-    expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
+    expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.true;
     expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
     expect(wrapper.hasAttribute('inert')).to.be.true;
     expect(button.style.bottom).to.equal('0px');
     expect(restored).to.be.false;
 
     observerCallback([{ boundingClientRect: { bottom: 0 } }]);
-    expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.false;
+    expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.false;
     expect(wrapper.hasAttribute('aria-hidden')).to.be.false;
     expect(wrapper.hasAttribute('inert')).to.be.false;
     expect(restored).to.be.true;
@@ -68,10 +68,10 @@ describe('Floating CTA hero delay', () => {
 
   it('stays inaccessible while another suppression state remains active', () => {
     const wrapper = document.createElement('div');
-    wrapper.classList.add('floating-button--hero-suppressed', 'floating-button--hidden');
+    wrapper.classList.add('floating-button--mini-editor-suppressed', 'floating-button--hidden');
     syncFloatingCtaAccessibility(wrapper);
 
-    wrapper.classList.remove('floating-button--hero-suppressed');
+    wrapper.classList.remove('floating-button--mini-editor-suppressed');
     syncFloatingCtaAccessibility(wrapper);
 
     expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
@@ -94,13 +94,13 @@ describe('Floating CTA hero delay', () => {
     expect(wrapper.hasAttribute('inert')).to.be.true;
   });
 
-  it('does nothing when a hero is not authored', () => {
+  it('does nothing when a mini editor is not authored', () => {
     const wrapper = document.createElement('div');
     const button = document.createElement('div');
 
-    delayFloatingCtaUntilElementPassed(wrapper, button, null, () => {});
+    delayFloatingCtaUntilMiniEditorPassed(wrapper, button, null, () => {});
 
     expect(observedTarget).to.be.undefined;
-    expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.false;
+    expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.false;
   });
 });
