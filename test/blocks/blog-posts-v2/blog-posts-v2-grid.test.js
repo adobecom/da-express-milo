@@ -14,7 +14,7 @@ const { resetBlogCache } = imports[2];
 const { GRID_PAGE_SIZE, loadGridStyles, createGridLoadMore } = imports[3];
 
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
-  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
+  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'iwo3rvz.css' } } });
 });
 
 function generateMockPosts(count) {
