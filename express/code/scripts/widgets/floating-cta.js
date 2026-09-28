@@ -35,7 +35,7 @@ export const showScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   if (lottieScrollButton) lottieScrollButton.removeAttribute('tabIndex');
 };
 
-export function delayFloatingCtaUntilViewportPassed(
+export function delayFloatingCtaUntilElementPassed(
   floatButtonWrapper,
   floatingButton,
   target,
@@ -43,40 +43,31 @@ export function delayFloatingCtaUntilViewportPassed(
 ) {
   if (!target) return;
 
-  // Keep the CTA out of the initial marquee view, then reveal it after the
-  // user has moved one viewport beyond the marquee's starting position.
+  // Keep the CTA hidden before IntersectionObserver reports its initial state.
+  // This also covers a target that starts below the viewport: the CTA must not
+  // appear until the user has scrolled past the entire element.
   floatButtonWrapper.classList.add('floating-button--hero-suppressed');
   syncFloatingCtaAccessibility(floatButtonWrapper);
 
-  const updateSuppression = () => {
-    const initialViewportHasPassed = target.getBoundingClientRect().top <= -window.innerHeight;
+  const targetObserver = new IntersectionObserver(([entry]) => {
+    const targetHasPassed = entry.boundingClientRect.bottom <= 0;
     floatButtonWrapper.classList.toggle(
       'floating-button--hero-suppressed',
-      !initialViewportHasPassed,
+      !targetHasPassed,
     );
     syncFloatingCtaAccessibility(floatButtonWrapper);
 
-    if (initialViewportHasPassed) {
+    if (targetHasPassed) {
       restoreButtonPosition();
     } else {
       floatingButton.style.bottom = '0px';
     }
-  };
+  }, {
+    root: null,
+    threshold: 0,
+  });
 
-  let updatePending = false;
-  const updateOnAnimationFrame = () => {
-    updatePending = false;
-    updateSuppression();
-  };
-  const scheduleUpdate = () => {
-    if (updatePending) return;
-    updatePending = true;
-    requestAnimationFrame(updateOnAnimationFrame);
-  };
-
-  window.addEventListener('scroll', scheduleUpdate, { passive: true });
-  window.addEventListener('resize', scheduleUpdate);
-  updateSuppression();
+  targetObserver.observe(target);
 }
 
 export function openToolBox(wrapper, lottie, data) {
@@ -294,11 +285,11 @@ export async function createFloatingButton(block, audience, data) {
     }
   });
 
-  if (floatButtonWrapper.dataset.audience === 'mobile' && data.delayUntilViewportPassed) {
-    delayFloatingCtaUntilViewportPassed(
+  if (floatButtonWrapper.dataset.audience === 'mobile' && data.delayUntilElementPassed) {
+    delayFloatingCtaUntilElementPassed(
       floatButtonWrapper,
       floatButton,
-      data.delayUntilViewportPassed,
+      data.delayUntilElementPassed,
       () => {
         if (promoBar && promoBar.block) {
           floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
