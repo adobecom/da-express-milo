@@ -36,5 +36,5 @@ main .section .embed lite-youtube {
 }
 
 main .section .embed-soundcloud>iframe {
-    height: 200px ! important;
+    height: 200px ! important; /* stylelint-disable-line declaration-no-important */
 }

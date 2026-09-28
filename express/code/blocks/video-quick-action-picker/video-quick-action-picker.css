@@ -103,7 +103,7 @@
   width: 100%;
   height: 100%;
   color: var(--color-default-font);
-  font-size: var(--ax-body-xs-size, 14px);
+  font-size: var(--ax-body-xs-size, 14px); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 /* --- Scrollable Body & Content Container --- */
@@ -162,8 +162,8 @@
   gap: var(--spacing-200);
   padding-block: var(--spacing-75);
   font-family: var(--body-font-family);
-  font-size: var(--ax-heading-xs-size, 16px);
-  line-height: var(--ax-heading-xs-lh, 20px);
+  font-size: var(--ax-heading-xs-size, 16px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  line-height: var(--ax-heading-xs-lh, 20px); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 .vqap-action-title span {
@@ -174,8 +174,8 @@
 }
 
 .vqap-action-title strong {
-  font-weight: var(--ax-heading-weight, 700);
-  color: var(--heading-color, var(--color-default-font));
+  font-weight: var(--ax-heading-weight, 700); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  color: var(--heading-color, var(--color-default-font)); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 .vqap-card-icon {

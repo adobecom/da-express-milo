@@ -5,13 +5,16 @@ on:
     paths:
       - '**.js'
       - '**.cjs'
+      - '**.css'
 
 jobs:
   run-lint:
-    name: Running eslint
+    name: Running eslint and stylelint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
         with:
@@ -32,3 +35,17 @@ jobs:
         uses: tj-actions/eslint-changed-files@74f98653675512158746d3136cd2d9326fbfb6e1
         with:
           config_path: ".eslintrc.cjs"
+
+      - name: Check for changed CSS files
+        id: changed-css
+        run: |
+          git diff --name-only --diff-filter=ACMR "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" -- '*.css' > changed-css-files.txt
+          if [ -s changed-css-files.txt ]; then
+            echo "has_css_files=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_css_files=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run stylelint on changed files
+        if: steps.changed-css.outputs.has_css_files == 'true'
+        run: cat changed-css-files.txt | xargs npx stylelint --

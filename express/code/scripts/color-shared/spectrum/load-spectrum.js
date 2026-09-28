@@ -163,6 +163,11 @@ export function loadCoreDeps() {
 
 // ── public loaders ───────────────────────────────────────────────────
 
+export async function importOverlay() {
+  const mod = await import(`${DIST}/overlay.js`);
+  return mod.Overlay;
+}
+
 /**
  * Load picker components (sp-picker, sp-menu, sp-menu-item, sp-popover, sp-overlay).
  */

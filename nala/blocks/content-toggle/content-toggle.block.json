@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@content-toggle-default",
       "selector": "div.content-toggle",
-      "path": "/drafts/nala/test-gen/content-toggle/content-toggle",
+      "path": "/drafts/nala/blocks/content-toggle/content-toggle",
       "data": {
         "semantic": {
           "texts": [],

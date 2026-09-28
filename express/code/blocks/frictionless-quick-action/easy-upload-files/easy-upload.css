@@ -22,7 +22,8 @@
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .dropzone-container {
   border-radius: 32px;
   border: 2px solid var(--color-white);
-  background: var(--transparent-white-700, rgba(255, 255, 255, 0.66));
+  background: var(--transparent-white-700, rgba(255, 255, 255, 0.66)); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
   box-shadow: 0 0 1px 0 var(--Alias-drop-shadow-emphasized-key-color, rgba(0, 0, 0, 0.08)),
     0 1px 4px 0 var(--Alias-drop-shadow-transition-color, rgba(0, 0, 0, 0.04)),
     0 2px 8px 0 var(--Alias-drop-shadow-ambient-color, rgba(0, 0, 0, 0.08));
@@ -406,6 +407,7 @@ main  .easy-upload-confirm a.button:any-link {
   justify-content: center;
   border-radius: 16px;
   background: var(--color-white);
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
   box-shadow: 0 0 1px 0 var(--Alias-drop-shadow-emphasized-key-color, rgba(0, 0, 0, 0.08)),
     0 1px 4px 0 var(--Alias-drop-shadow-transition-color, rgba(0, 0, 0, 0.04)),
     0 2px 8px 0 var(--Alias-drop-shadow-ambient-color, rgba(0, 0, 0, 0.08));
@@ -520,7 +522,7 @@ main  .easy-upload-confirm a.button:any-link {
 main .section p.qr-error-message {
   position: relative;
   z-index: 1;
-  color: var(--Content-negative-default, #D31510);
+  color: var(--Content-negative-default, #D31510); /* stylelint-disable-line declaration-property-value-disallowed-list */
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-xs);
   font-style: normal;

@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@sticky-promo-bar-shown",
       "selector": "div.sticky-promo-bar.shown",
-      "path": "/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar",
+      "path": "/drafts/nala/blocks/sticky-promo-bar/sticky-promo-bar",
       "data": {
         "semantic": {
           "texts": [],
@@ -23,7 +23,7 @@
       "tcid": "1",
       "name": "@sticky-promo-bar-rounded-shown",
       "selector": "div.sticky-promo-bar.rounded.shown",
-      "path": "/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar-rounded",
+      "path": "/drafts/nala/blocks/sticky-promo-bar/sticky-promo-bar-rounded",
       "data": {
         "semantic": {
           "texts": [],
@@ -53,7 +53,7 @@
       "tcid": "2",
       "name": "@sticky-promo-bar-loadinbody-rounded-inbody",
       "selector": "div.sticky-promo-bar.loadinbody.rounded.inbody",
-      "path": "/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar-rounded-loadinbody",
+      "path": "/drafts/nala/blocks/sticky-promo-bar/sticky-promo-bar-rounded-loadinbody",
       "data": {
         "semantic": {
           "texts": [],
@@ -83,7 +83,7 @@
       "tcid": "3",
       "name": "@sticky-promo-bar-loadinbody-rounded-clone",
       "selector": "div.sticky-promo-bar.loadinbody.rounded.clone",
-      "path": "/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar-rounded-loadinbody",
+      "path": "/drafts/nala/blocks/sticky-promo-bar/sticky-promo-bar-rounded-loadinbody",
       "data": {
         "semantic": {
           "texts": [],

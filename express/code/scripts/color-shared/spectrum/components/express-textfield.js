@@ -15,6 +15,7 @@
  */
 
 import { loadTextfield } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
@@ -79,7 +80,7 @@ export async function createExpressTextfield(config) {
 
   await loadTextfield();
   await loadOverrideStyles('textfield', STYLES_PATH);
-  await customElements.whenDefined('sp-textfield');
+  await waitForComponents(['sp-textfield']);
 
   const theme = createThemeWrapper();
   const wrapper = document.createElement('div');

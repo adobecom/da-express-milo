@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@cta-cards-default",
       "selector": "div.cta-cards",
-      "path": "/drafts/nala/test-gen/cta-cards/cta-cards",
+      "path": "/drafts/nala/blocks/cta-cards/cta-cards",
       "data": {
         "semantic": {
           "texts": [

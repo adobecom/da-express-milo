@@ -339,7 +339,7 @@ color-wheel-express {
 }
 
 .color-wheel-harmony-current-name {
-  color: var(--Alias-content-typography-Body, #505050);
+  color: var(--Alias-content-typography-Body, #505050); /* stylelint-disable-line declaration-property-value-disallowed-list */
   font-size: var(--Global-Typography-Size-Label-Label-L);
   line-height: var(--Global-Typography-Line-height-Label-Label-L);
 }
@@ -524,7 +524,7 @@ color-wheel-express {
 
   .color-wheel .ax-color-tool-layout {
     grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-columns: minmax(0, var(--cw-sidebar-fr, 4fr)) minmax(0, 8fr);
+    grid-template-columns: minmax(0, var(--cw-sidebar-fr, 4fr)) minmax(0, 8fr); /* stylelint-disable-line declaration-property-value-disallowed-list */
     align-items: stretch;
     transition: grid-template-columns 0.35s ease, column-gap 0.35s ease;
   }

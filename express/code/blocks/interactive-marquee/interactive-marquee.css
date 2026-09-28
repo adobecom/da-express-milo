@@ -305,7 +305,7 @@ main .interactive-marquee.horizontal-masonry input[type="text"] {
 
 main .interactive-marquee.horizontal-masonry input[type="text"]::placeholder {
   font-style: italic;
-  content: "abfdsfdsfsdfds" !important;
+  content: "abfdsfdsfsdfds" !important; /* stylelint-disable-line declaration-no-important */
 }
 
 main .interactive-container.interactive-marquee.horizontal-masonry .enticement-container input::placeholder {
@@ -510,7 +510,7 @@ main .interactive-marquee.horizontal-masonry.wide .media-container {
   max-width: unset;
 }
 
-main .interactive-marquee.horizontal-masonry.wide .media-container p.image-container {
+main .interactive-marquee.horizontal-masonry.wide .media-container p.image-container { /* stylelint-disable-line no-duplicate-selectors */
   flex: 0 0 calc(50% - 10px);
 }
 

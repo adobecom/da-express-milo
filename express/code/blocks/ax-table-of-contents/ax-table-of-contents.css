@@ -17,7 +17,7 @@
   }
 }
 
-.ax-table-of-contents-wrapper {
+.ax-table-of-contents-wrapper { /* stylelint-disable-line no-duplicate-selectors */
   max-width: var(--block-sm-max-width);
   margin: auto;
   padding: 0;

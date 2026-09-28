@@ -60,7 +60,7 @@ main .list p {
     padding: var(--spacing-350);
   }
 
-  main .list .item {
+  main .list .item { /* stylelint-disable-line no-duplicate-selectors */
     width: 220px;
   }
 }
@@ -73,7 +73,7 @@ main .list > div > div > :last-child {
   margin-bottom: 0;
 }
 
-main .list {
+main .list { /* stylelint-disable-line no-duplicate-selectors */
     list-style: none;
     text-align: start;
     box-sizing: border-box;

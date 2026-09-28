@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@collapsible-rows-default",
       "selector": "div.collapsible-rows",
-      "path": "/drafts/nala/test-gen/collapsible-rows/collapsible-rows",
+      "path": "/drafts/nala/blocks/collapsible-rows/collapsible-rows",
       "data": {
         "semantic": {
           "texts": [

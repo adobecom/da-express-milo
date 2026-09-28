@@ -1,5 +1,6 @@
 import { serviceManager } from '../../../../libs/services/index.js';
 import { announceToScreenReader } from '../../spectrum/index.js';
+import { trackColorExport } from '../../utils/utilities.js';
 import { createLibraryCardActionMenu } from './createLibraryCardActionMenu.js';
 import { libraryItemToDownloadData } from './libraryDownloadUtils.js';
 
@@ -77,8 +78,11 @@ export function createLibraryDownloadMenu({
     async onSelect(format, { closePopover }) {
       try {
         const started = await runDownload(item, format);
-        if (started && strings.librariesDownloadStarted) {
-          announceToScreenReader(strings.librariesDownloadStarted);
+        if (started) {
+          trackColorExport('download');
+          if (strings.librariesDownloadStarted) {
+            announceToScreenReader(strings.librariesDownloadStarted);
+          }
         }
       } catch (err) {
         window.lana?.log(`Library download failed: ${err?.message}`, {

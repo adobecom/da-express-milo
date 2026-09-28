@@ -18,6 +18,7 @@
  */
 
 import { loadAlertDialog } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import {
   trapFocus,
@@ -54,7 +55,7 @@ export async function showExpressAlertDialog(config) {
 
   await loadAlertDialog();
   await loadOverrideStyles('alert-dialog', STYLES_PATH);
-  await customElements.whenDefined('sp-alert-dialog');
+  await waitForComponents(['sp-alert-dialog']);
 
   const dialogId = `express-alert-dialog-${dialogIdCounter += 1}`;
   const headingId = `${dialogId}-heading`;

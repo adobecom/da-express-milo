@@ -220,6 +220,20 @@ function toCard(drawer) {
 
 // Headline functions moved to grid-marquee-hero block
 
+// Localized store badges are keyed by language (e.g. apple-store-fr.svg). Every
+// supported locale maps to a badge language via its ietf code; the English default
+// is used for English locales and as the fallback when a localized asset is missing.
+// No authoring required — dropping a `<store>-store-<lang>.svg` into icons/ is enough.
+function storeBadgeLang(ietf) {
+  const [lang, sub] = (ietf || 'en-US').toLowerCase().split('-');
+  if (lang === 'en') return null;
+  if (lang === 'zh') return ['tw', 'hk', 'mo'].includes(sub) ? 'zh-hant' : 'zh-hans';
+  if (lang === 'pt') return sub === 'pt' ? 'pt-pt' : 'pt-br';
+  if (lang === 'es') return sub === 'es' ? 'es' : 'es-419';
+  if (lang === 'fr') return sub === 'ca' ? 'fr-ca' : 'fr';
+  return lang;
+}
+
 async function makeRating(
   store,
   ratingPlaceholder,
@@ -237,11 +251,14 @@ async function makeRating(
   const storeTypeIndex = [APPLE, GOOGLE].indexOf(store);
   const [score, cnt] = ratings[storeTypeIndex].split(',').map((str) => str.trim());
   const ariaLabel = store === APPLE ? appleStoreLabelPlaceholder : playStoreLabelPlaceholder;
-  const { locale: { region } } = config;
-  // ToDo: Add support for all regions and remove Hardcoded Arabic region
-  const storeLink = createTag('a', {
-    href: link,
-  }, getIconElementDeprecated(`${store}-store${region === 'ara' ? `-${region}` : ''}`));
+  const badgeLang = storeBadgeLang(config.locale.ietf);
+  const storeIcon = getIconElementDeprecated(`${store}-store${badgeLang ? `-${badgeLang}` : ''}`);
+  if (badgeLang) {
+    storeIcon.addEventListener('error', () => {
+      storeIcon.src = `/express/code/icons/${store}-store.svg`;
+    }, { once: true });
+  }
+  const storeLink = createTag('a', { href: link }, storeIcon);
   storeLink.setAttribute('aria-label', ariaLabel);
   const { default: trackBranchParameters } = await import('../../scripts/branchlinks.js');
   await trackBranchParameters([storeLink]);

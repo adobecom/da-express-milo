@@ -29,7 +29,7 @@ main .section:has(.card) .content {
   padding: 0;
 }
 
-main .section:has(.cards.highlight) {
+main .section:has(.cards.highlight) { /* stylelint-disable-line no-duplicate-selectors */
   background: var(--gradient-highlight-vertical);
 }
 

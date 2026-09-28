@@ -126,14 +126,14 @@
    The CTA paragraph (p:has(a.button)) needs its own margin-top back on top
    of that reset, for the spacing-300 gap above it. */
 .mini-editor-header p {
-  margin: 0 !important;
+  margin: 0 !important; /* stylelint-disable-line declaration-no-important */
   max-width: 437px;
   font-size: var(--body-font-size-m);
   color: var(--Alias-content-typography-Body);
 }
 
 .mini-editor-header p:has(a.button) {
-  margin-top: 6px !important;
+  margin-top: 6px !important; /* stylelint-disable-line declaration-no-important */
 }
 
 /* Matches the "Design with your quote" CTA on the discover page hero

@@ -637,15 +637,17 @@ export function createGradientsRenderer(options) {
       }
     }
 
-    if (existingCount !== newCount) {
-      existingCards.slice(0, Math.min(existingCount, newCount)).forEach((card, index) => {
-        const gradient = cardsToShow[index];
-        if (gradient && card.getAttribute('data-gradient-id') !== gradient.id) {
-          const newCard = createGradientCard(gradient, index + 1);
-          card.replaceWith(newCard);
-        }
-      });
-    }
+    // Reconcile the overlapping range on every update, not just when the count
+    // changes. Sort filters (e.g. Most popular -> Random -> Most used) reorder
+    // the same set, so existingCount === newCount while the id at each position
+    // changes; without this the grid would keep rendering the previous order.
+    existingCards.slice(0, Math.min(existingCount, newCount)).forEach((card, index) => {
+      const gradient = cardsToShow[index];
+      if (gradient && card.getAttribute('data-gradient-id') !== gradient.id) {
+        const newCard = createGradientCard(gradient, index + 1);
+        card.replaceWith(newCard);
+      }
+    });
 
     updateCardTabIndexes();
     updateCardAriaAttributes();

@@ -90,7 +90,7 @@ const CONFIG = {
   decorateArea,
   faasCloseModalAfterSubmit: 'on',
   locales: {
-    '': { ietf: 'en-US', tk: 'iwo3rvz.css' },
+    '': { ietf: 'en-US', tk: 'hah7vzn.css' },
     ara: { ietf: 'ar', tk: 'cbp4pzm.css', dir: 'rtl' },
     br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
     // eslint-disable-next-line max-len
@@ -297,6 +297,19 @@ const CONFIG = {
     'wcs-api-key': 'AdobeExpressWeb',
   },
 };
+
+// Handle dynamic import failures gracefully. Bots are hitting the templates page
+// and causing unhandled rejections that are logged with extreme frequency.
+window.addEventListener('unhandledrejection', (event) => {
+  const { reason } = event;
+  if (reason instanceof TypeError && reason.message.includes('dynamically imported module')) {
+    event.preventDefault();
+    // preventDefault() only suppresses the browser's default console reporting;
+    // lana's own unhandledrejection listener still fires unless propagation is stopped.
+    event.stopImmediatePropagation();
+    window.lana?.log(`Import failed: ${reason.message}`, { tags: 'dynamic-import', severity: 'error' });
+  }
+});
 
 /*
  * ------------------------------------------------------------

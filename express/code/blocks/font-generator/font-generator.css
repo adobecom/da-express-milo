@@ -496,7 +496,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 .font-generator .fg-sk-filter-btn {
   min-height: 48px;
-  border-radius: var(--corner-radius-80, 8px);
+  border-radius: var(--corner-radius-80, 8px); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 .font-generator .fg-sk-promo {

@@ -136,6 +136,7 @@ describe('mini-editor-widget', () => {
     const serifBtn = Array.from(root.querySelectorAll('.me-row--fonts .me-font'))
       .find((b) => b.textContent === 'Serif');
     serifBtn.click();
+    await clock.tickAsync(120);
     expect(root.style.getPropertyValue('--me-quote-font')).to.equal(fontOptions[1].font);
     expect(root.style.getPropertyValue('--me-quote-font-style')).to.equal('italic');
     expect(serifBtn.classList.contains('is-selected')).to.be.true;
@@ -178,6 +179,7 @@ describe('mini-editor-widget', () => {
     const serifBtn = Array.from(root.querySelectorAll('.me-row--fonts .me-font'))
       .find((b) => b.textContent === 'Serif');
     serifBtn.click();
+    await clock.tickAsync(120);
     expect(editor.getContentModel().font).to.deep.equal({
       family: fontOptions[1].family,
       style: 'italic',
@@ -216,6 +218,7 @@ describe('mini-editor-widget', () => {
   it('useQuote swaps the quote/author shown in the main widget card', async () => {
     const { root, editor } = await mount();
     editor.useQuote({ quote: 'Swapped in', author: 'Someone Else' });
+    await clock.tickAsync(120);
     expect(root.querySelector('.me-quote').textContent).to.equal('Swapped in');
     expect(root.querySelector('.me-author').textContent).to.equal('Someone Else');
     expect(root.querySelector('.me-author').style.display).to.equal('');
@@ -262,6 +265,7 @@ describe('mini-editor-widget', () => {
     document.dispatchEvent(new CustomEvent('mini-editor:use-quote', {
       detail: { quote: 'From collapsible-rows', author: 'Some Author' },
     }));
+    await clock.tickAsync(120);
     expect(root.querySelector('.me-quote').textContent).to.equal('From collapsible-rows');
   });
 
@@ -316,6 +320,7 @@ describe('mini-editor-widget', () => {
       const serifBtn = Array.from(root.querySelectorAll('.me-row--fonts .me-font'))
         .find((b) => b.textContent === 'Serif');
       serifBtn.click();
+      await clock.tickAsync(120);
       const centerQuote = root.querySelector('.me-arc-card--center .me-arc-quote');
       expect(centerQuote.style.fontStyle).to.equal('italic');
     });

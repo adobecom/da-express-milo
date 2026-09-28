@@ -17,12 +17,12 @@
 
 .app-ratings .ratings {
   display: flex;
-  min-width: var(--Global-Device-Widths-device-min-width, 360px);
-  max-width: var(--Global-Device-Widths-device-max-width, 767px);
+  min-width: var(--Global-Device-Widths-device-min-width, 360px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  max-width: var(--Global-Device-Widths-device-max-width, 767px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: var(--Marquee-grid-Card-Element-Padding, var(--spacing-300));
+  gap: var(--Marquee-grid-Card-Element-Padding, var(--spacing-300)); /* stylelint-disable-line declaration-property-value-disallowed-list */
   align-self: stretch;
   padding: var(--spacing-300);
 }

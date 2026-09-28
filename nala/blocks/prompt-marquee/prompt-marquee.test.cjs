@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../utils/test.cjs';
 import WebUtil from '../../libs/webutil.cjs';
 import { features } from './prompt-marquee.spec.cjs';
 import PromptMarquee from './prompt-marquee.page.cjs';

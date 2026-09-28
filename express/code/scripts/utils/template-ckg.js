@@ -282,7 +282,10 @@ async function lazyLoadSearchMarqueeLinklist() {
             pathname: row.value,
           });
         });
-      } else {
+      } else if (!window.location.pathname.toLowerCase().endsWith('/express/templates/search')) {
+        // The root page of the search page does not have a CKG data and bot traffic doesn't have
+        // generate a short-title metadata via query parameters, so we don't log to Lana for that
+        // case.
         window.lana?.log('template-ckg: Missing ckgData or short-title metadata - pills will not be populated', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info' });
       }
 

@@ -80,8 +80,10 @@
   --ax-toolbar-max-width-mobile: 599px;
   --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
   --ax-toolbar-max-width-tablet: 1135px;
+  /* stylelint-disable declaration-property-value-disallowed-list */
   --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
   --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
+  /* stylelint-enable declaration-property-value-disallowed-list */
   --ax-toolbar-max-width-desktop: calc(var(--ax-toolbar-presentation-max-width) - var(--ax-toolbar-inline-margin) * 2);
   --ax-toolbar-cta-min-width: 108px;
   --ax-toolbar-action-min-width: 300px;
@@ -162,6 +164,20 @@
   align-items: center;
   flex: 1;
   min-inline-size: 0;
+}
+
+/* ── Edit button — opt-in persistent label (showEditLabel) ────── */
+
+.ax-edit-btn--labeled {
+  inline-size: auto;
+}
+
+.ax-edit-btn-label {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  font-weight: 700;
+  color: var(--color-default-font);
+  white-space: nowrap;
 }
 
 /* ── Toolbar actions ─────────────────────────────────────────── */
@@ -378,6 +394,7 @@
   --ax-toolbar-sticky-z: 80;
   --ax-toolbar-floating-bottom-offset: 0;
   --ax-toolbar-inline-margin: 0;
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list */
   --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
 
   position: fixed;
@@ -437,6 +454,7 @@
 
   .ax-toolbar-sticky-wrapper {
     --ax-toolbar-floating-bottom-offset: var(--spacing-200);
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list */
     --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
     inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   }

@@ -34,7 +34,7 @@
   margin-bottom: 0;
 }
 
-.how-to-steps-carousel-container > div > h2 {
+.how-to-steps-carousel-container > div > h2 { /* stylelint-disable-line no-duplicate-selectors */
   font-size: var(--heading-font-size-xl);
 }
 
@@ -92,8 +92,8 @@
 
 .how-to-steps-carousel .tip-numbers {
   display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
+  display: -ms-flexbox; /* stylelint-disable-line declaration-block-no-duplicate-properties */
+  display: flex; /* stylelint-disable-line declaration-block-no-duplicate-properties */
   text-align: left;
   margin-top: 18px;
 }
@@ -155,7 +155,7 @@ main .how-to-steps-carousel .tip-text h3 {
   height: 56px;
 }
 
-.how-to-steps-carousel-container > picture > img {
+.how-to-steps-carousel-container > picture > img { /* stylelint-disable-line no-duplicate-selectors */
   margin-bottom: 80px;
   width: calc(100% - 40px);
 }
@@ -240,7 +240,7 @@ div:has(> .video-how-to-steps-carousel) {
     width: calc((100% - 72px) * 0.55 - 176px);
   }
 
-  .video-how-to-steps-carousel {
+  .video-how-to-steps-carousel { /* stylelint-disable-line no-duplicate-selectors */
     margin-left: 80px;
   }
 }

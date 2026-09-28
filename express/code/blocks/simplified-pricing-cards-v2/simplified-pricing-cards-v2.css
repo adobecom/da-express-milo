@@ -127,7 +127,7 @@ main .section>.simplified-pricing-cards-v2-wrapper {
   border-radius: var(--border-radius-large);
 }
 
-.simplified-pricing-cards-v2 .card-inner-content.hide {
+.simplified-pricing-cards-v2 .card-inner-content.hide { /* stylelint-disable-line no-duplicate-selectors */
   /* max-height: 0; */
   padding: var(--spacing-300);
   gap: 0;
@@ -200,6 +200,7 @@ main .section>.simplified-pricing-cards-v2-wrapper {
   text-align: left;
 }
 
+/* stylelint-disable-next-line no-duplicate-selectors */
 .simplified-pricing-cards-v2 .card-header h2,
 .simplified-pricing-cards-v2 .card-header h3,
 .simplified-pricing-cards-v2 .card-header h4,
@@ -290,7 +291,7 @@ main .section>.simplified-pricing-cards-v2-wrapper {
   color: var(--color-text-secondary);
   font-family: var(--body-font-family);
   font-weight: var(--body-font-weight);
-  line-height: var(--line-height);
+  line-height: var(--line-height); /* stylelint-disable-line declaration-block-no-duplicate-properties */
 }
 
 .simplified-pricing-cards-v2 .pricing-area .pricing-row {
