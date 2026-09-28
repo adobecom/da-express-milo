@@ -9,6 +9,46 @@ const ACCESSIBILITY_HIDDEN_CLASSES = [
   'floating-button--mini-editor-suppressed',
 ];
 
+const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]';
+const legacyTabIndexes = new WeakMap();
+
+function disableLegacyFocusableElements(wrapper) {
+  if ('inert' in HTMLElement.prototype) return;
+  wrapper.querySelectorAll(FOCUSABLE_SELECTOR).forEach((element) => {
+    if (!legacyTabIndexes.has(element)) {
+      legacyTabIndexes.set(element, element.getAttribute('tabindex'));
+    }
+    element.setAttribute('tabindex', '-1');
+  });
+}
+
+function restoreLegacyFocusableElements(wrapper) {
+  wrapper.querySelectorAll(FOCUSABLE_SELECTOR).forEach((element) => {
+    if (!legacyTabIndexes.has(element)) return;
+    const tabIndex = legacyTabIndexes.get(element);
+    if (tabIndex === null) element.removeAttribute('tabindex');
+    else element.setAttribute('tabindex', tabIndex);
+    legacyTabIndexes.delete(element);
+  });
+}
+
+function trackViewportChanges(update) {
+  let updatePending = false;
+  const updateOnAnimationFrame = () => {
+    updatePending = false;
+    update();
+  };
+  const scheduleUpdate = () => {
+    if (updatePending) return;
+    updatePending = true;
+    requestAnimationFrame(updateOnAnimationFrame);
+  };
+
+  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  window.addEventListener('resize', scheduleUpdate);
+  update();
+}
+
 export function syncFloatingCtaAccessibility(floatButtonWrapper) {
   const isHidden = ACCESSIBILITY_HIDDEN_CLASSES
     .some((className) => floatButtonWrapper.classList.contains(className));
@@ -17,9 +57,11 @@ export function syncFloatingCtaAccessibility(floatButtonWrapper) {
     if (floatButtonWrapper.contains(document.activeElement)) document.activeElement.blur();
     floatButtonWrapper.setAttribute('aria-hidden', 'true');
     floatButtonWrapper.setAttribute('inert', '');
+    disableLegacyFocusableElements(floatButtonWrapper);
   } else {
     floatButtonWrapper.removeAttribute('aria-hidden');
     floatButtonWrapper.removeAttribute('inert');
+    restoreLegacyFocusableElements(floatButtonWrapper);
   }
 }
 
@@ -48,8 +90,8 @@ export function delayFloatingCtaUntilMiniEditorPassed(
   floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
   syncFloatingCtaAccessibility(floatButtonWrapper);
 
-  const miniEditorObserver = new IntersectionObserver(([entry]) => {
-    const miniEditorHasPassed = entry.boundingClientRect.bottom <= 0;
+  const updateSuppression = (miniEditorBottom) => {
+    const miniEditorHasPassed = miniEditorBottom <= 0;
     floatButtonWrapper.classList.toggle(
       'floating-button--mini-editor-suppressed',
       !miniEditorHasPassed,
@@ -61,6 +103,15 @@ export function delayFloatingCtaUntilMiniEditorPassed(
     } else {
       floatingButton.style.bottom = '0px';
     }
+  };
+
+  if (typeof window.IntersectionObserver !== 'function') {
+    trackViewportChanges(() => updateSuppression(miniEditor.getBoundingClientRect().bottom));
+    return;
+  }
+
+  const miniEditorObserver = new IntersectionObserver(([entry]) => {
+    updateSuppression(entry.boundingClientRect.bottom);
   }, {
     root: null,
     threshold: 0,
@@ -97,20 +148,7 @@ export function delayFloatingCtaUntilViewportPassed(
     }
   };
 
-  let updatePending = false;
-  const updateOnAnimationFrame = () => {
-    updatePending = false;
-    updateSuppression();
-  };
-  const scheduleUpdate = () => {
-    if (updatePending) return;
-    updatePending = true;
-    requestAnimationFrame(updateOnAnimationFrame);
-  };
-
-  window.addEventListener('scroll', scheduleUpdate, { passive: true });
-  window.addEventListener('resize', scheduleUpdate);
-  updateSuppression();
+  trackViewportChanges(updateSuppression);
 }
 
 export function openToolBox(wrapper, lottie, data) {
@@ -353,7 +391,6 @@ export async function createFloatingButton(block, audience, data) {
       restoreButtonPosition,
     );
   }
-
 
   // Intersection observer - hide button when scrolled to footer
   const footer = document.querySelector('footer');
