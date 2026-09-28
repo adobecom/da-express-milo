@@ -1,35 +1,15 @@
 import { expect } from '@esm-bundle/chai';
 import {
-  delayFloatingCtaUntilElementPassed,
+  delayFloatingCtaUntilViewportPassed,
   syncFloatingCtaAccessibility,
 } from '../../../express/code/scripts/widgets/floating-cta.js';
 
 describe('Floating CTA hero delay', () => {
-  let originalIntersectionObserver;
-  let observerCallback;
-  let observedTarget;
-
-  beforeEach(() => {
-    originalIntersectionObserver = window.IntersectionObserver;
-    observerCallback = undefined;
-    observedTarget = undefined;
-    window.IntersectionObserver = class MockIntersectionObserver {
-      constructor(callback, options) {
-        observerCallback = callback;
-        this.options = options;
-        this.observe = (target) => {
-          observedTarget = target;
-        };
-      }
-    };
-  });
-
   afterEach(() => {
-    window.IntersectionObserver = originalIntersectionObserver;
-    document.body.innerHTML = '';
+    document.body.replaceChildren();
   });
 
-  it('stays hidden until the entire hero has scrolled above the viewport', () => {
+  it('reveals after scrolling one viewport past the hero start', async () => {
     document.body.innerHTML = `
       <div class="resume-hero"></div>
       <div class="floating-button-wrapper">
@@ -38,28 +18,31 @@ describe('Floating CTA hero delay', () => {
     const hero = document.querySelector('.resume-hero');
     const wrapper = document.querySelector('.floating-button-wrapper');
     const button = document.querySelector('.floating-button');
+    let heroTop = 0;
     let restored = false;
+    hero.getBoundingClientRect = () => ({ top: heroTop });
 
-    delayFloatingCtaUntilElementPassed(
+    delayFloatingCtaUntilViewportPassed(
       wrapper,
       button,
       hero,
       () => { restored = true; },
     );
 
-    expect(observedTarget).to.equal(hero);
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
     expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
     expect(wrapper.hasAttribute('inert')).to.be.true;
 
-    observerCallback([{ boundingClientRect: { bottom: 500 } }]);
+    heroTop = -(window.innerHeight - 1);
+    window.dispatchEvent(new Event('scroll'));
+    await new Promise(requestAnimationFrame);
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
-    expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
-    expect(wrapper.hasAttribute('inert')).to.be.true;
     expect(button.style.bottom).to.equal('0px');
     expect(restored).to.be.false;
 
-    observerCallback([{ boundingClientRect: { bottom: 0 } }]);
+    heroTop = -window.innerHeight;
+    window.dispatchEvent(new Event('scroll'));
+    await new Promise(requestAnimationFrame);
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.false;
     expect(wrapper.hasAttribute('aria-hidden')).to.be.false;
     expect(wrapper.hasAttribute('inert')).to.be.false;
@@ -98,9 +81,8 @@ describe('Floating CTA hero delay', () => {
     const wrapper = document.createElement('div');
     const button = document.createElement('div');
 
-    delayFloatingCtaUntilElementPassed(wrapper, button, null, () => {});
+    delayFloatingCtaUntilViewportPassed(wrapper, button, null, () => {});
 
-    expect(observedTarget).to.be.undefined;
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.false;
   });
 });

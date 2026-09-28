@@ -56,7 +56,7 @@ export default async function decorate(block) {
     : collectFloatingButtonData(createTag, getIconElementDeprecated, false, {}, 'unity-upload');
 
   if (audience === 'mobile') {
-    data.delayUntilElementPassed = document.querySelector('.resume-hero, .verb-express-hero');
+    data.delayUntilViewportPassed = document.querySelector('.resume-hero, .verb-express-hero');
   }
 
   const blockWrapper = await createUnityMultiFunctionButton(block, data, audience);
