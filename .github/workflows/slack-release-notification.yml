@@ -160,7 +160,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "channel": "${{ env.SLACK_CHANNEL_ID }}",
-              "text": "@ax-devs 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST_MODE)' || '' }}",
+              "text": "<!subteam^S07RK2JSX8X|@ax-devs> <!subteam^S07QX6W03UN|@acom-express-pdms> 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST_MODE)' || '' }}",
               "attachments": [
                 {
                   "color": "#0066cc",
@@ -221,7 +221,7 @@ jobs:
           
           curl -X POST -H 'Content-type: application/json' \
             --data '{
-              "text": "<!here> 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST MODE)' || '' }}",
+              "text": "<!subteam^S07RK2JSX8X|@ax-devs> <!subteam^S07QX6W03UN|@acom-express-pdms> 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST MODE)' || '' }}",
               "attachments": [
                 {
                   "color": "#0066cc",

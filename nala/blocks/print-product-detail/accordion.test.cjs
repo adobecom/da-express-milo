@@ -1,4 +1,4 @@
-const { expect, test } = require('@playwright/test');
+const { expect, test } = require('../../utils/test.cjs');
 const { features } = require('./accordion.spec.cjs');
 
 const miloLibs = process.env.MILO_LIBS || '';

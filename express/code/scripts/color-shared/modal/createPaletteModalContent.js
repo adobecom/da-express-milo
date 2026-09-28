@@ -3,7 +3,7 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
-import { decorateAnalyticsAttributes } from '../utils/utilities.js';
+import { decorateAnalyticsAttributes, trackColorExport } from '../utils/utilities.js';
 
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
 
@@ -138,6 +138,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
     decorateAnalyticsAttributes(copyBtn, { linkLabel: 'Copy color' });
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(hex).then(() => {
+        trackColorExport('copy-clipboard');
         copyBtn.textContent = 'Copied';
         setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
       });

@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../utils/test.cjs';
 import { features } from './grid-marquee-hero.spec.cjs';
 import GridMarqueeHero from './grid-marquee-hero.page.cjs';
 

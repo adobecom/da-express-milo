@@ -72,7 +72,7 @@ main .how-to-steps .tip-number {
   color: var(--color-black);
   font-size: 1.25rem;
   line-height: 1.25rem;
-  font-weight: 800;
+  font-weight: 900;
   -ms-flex-item-align: start;
   align-self: flex-start;
 }
