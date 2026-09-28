@@ -6,6 +6,7 @@ const ACCESSIBILITY_HIDDEN_CLASSES = [
   'floating-button--hidden',
   'floating-button--suppressed',
   'floating-button--hero-suppressed',
+  'floating-button--mini-editor-suppressed',
 ];
 
 export function syncFloatingCtaAccessibility(floatButtonWrapper) {
@@ -34,6 +35,39 @@ export const showScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   floatButtonWrapper.classList.remove('floating-button--scrolled');
   if (lottieScrollButton) lottieScrollButton.removeAttribute('tabIndex');
 };
+
+export function delayFloatingCtaUntilMiniEditorPassed(
+  floatButtonWrapper,
+  floatingButton,
+  miniEditor,
+  restoreButtonPosition,
+) {
+  if (!miniEditor) return;
+
+  // Keep the CTA hidden before IntersectionObserver reports its initial state.
+  floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
+  syncFloatingCtaAccessibility(floatButtonWrapper);
+
+  const miniEditorObserver = new IntersectionObserver(([entry]) => {
+    const miniEditorHasPassed = entry.boundingClientRect.bottom <= 0;
+    floatButtonWrapper.classList.toggle(
+      'floating-button--mini-editor-suppressed',
+      !miniEditorHasPassed,
+    );
+    syncFloatingCtaAccessibility(floatButtonWrapper);
+
+    if (miniEditorHasPassed) {
+      restoreButtonPosition();
+    } else {
+      floatingButton.style.bottom = '0px';
+    }
+  }, {
+    root: null,
+    threshold: 0,
+  });
+
+  miniEditorObserver.observe(miniEditor);
+}
 
 export function delayFloatingCtaUntilViewportPassed(
   floatButtonWrapper,
@@ -294,22 +328,32 @@ export async function createFloatingButton(block, audience, data) {
     }
   });
 
-  if (floatButtonWrapper.dataset.audience === 'mobile' && data.delayUntilViewportPassed) {
+  const restoreButtonPosition = () => {
+    if (promoBar && promoBar.block) {
+      floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
+    } else if (currentBottom) {
+      floatButton.style.bottom = currentBottom;
+    } else {
+      floatButton.style.removeProperty('bottom');
+    }
+  };
+
+  if (floatButtonWrapper.dataset.audience === 'mobile') {
+    delayFloatingCtaUntilMiniEditorPassed(
+      floatButtonWrapper,
+      floatButton,
+      document.querySelector('.mini-editor'),
+      restoreButtonPosition,
+    );
+
     delayFloatingCtaUntilViewportPassed(
       floatButtonWrapper,
       floatButton,
       data.delayUntilViewportPassed,
-      () => {
-        if (promoBar && promoBar.block) {
-          floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
-        } else if (currentBottom) {
-          floatButton.style.bottom = currentBottom;
-        } else {
-          floatButton.style.removeProperty('bottom');
-        }
-      },
+      restoreButtonPosition,
     );
   }
+
 
   // Intersection observer - hide button when scrolled to footer
   const footer = document.querySelector('footer');

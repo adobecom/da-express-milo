@@ -6,7 +6,7 @@ main .mobile-fork-button-unity {
   padding: 0;
 }
 
-main .floating-button-wrapper.mobile-fork-button-unity:is(.floating-button--hidden, .floating-button--hero-suppressed) {
+main .floating-button-wrapper.mobile-fork-button-unity:is(.floating-button--hidden, .floating-button--hero-suppressed, .floating-button--mini-editor-suppressed) {
   bottom: -300px;
 }
 
@@ -64,6 +64,6 @@ main .mobile-fork-button-unity .floating-button a.button:any-link.outline {
   color: var(--Palette-gray-800);
 }
 
-main .mobile-fork-button-unity:is(.floating-button--hidden, .floating-button--hero-suppressed) .floating-button.block {
+main .mobile-fork-button-unity:is(.floating-button--hidden, .floating-button--hero-suppressed, .floating-button--mini-editor-suppressed) .floating-button.block {
   margin-bottom: -10px;
 }
