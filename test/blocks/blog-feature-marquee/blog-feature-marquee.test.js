@@ -18,7 +18,7 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
       ietf: 'en-US',
     },
     locales: {
-      '': { ietf: 'en-US', tk: 'jdq5hay.css' },
+      '': { ietf: 'en-US', tk: 'iwo3rvz.css' },
     },
   });
 });
