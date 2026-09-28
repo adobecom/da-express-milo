@@ -2,26 +2,6 @@ import { getLibs, getLottie, lazyLoadLottiePlayer, createTag, getMobileOperating
 import { setDaaLL } from '../utils/analytics.js';
 import BlockMediator from '../block-mediator.min.js';
 
-const ACCESSIBILITY_HIDDEN_CLASSES = [
-  'floating-button--hidden',
-  'floating-button--suppressed',
-  'floating-button--hero-suppressed',
-];
-
-export function syncFloatingCtaAccessibility(floatButtonWrapper) {
-  const isHidden = ACCESSIBILITY_HIDDEN_CLASSES
-    .some((className) => floatButtonWrapper.classList.contains(className));
-
-  if (isHidden) {
-    if (floatButtonWrapper.contains(document.activeElement)) document.activeElement.blur();
-    floatButtonWrapper.setAttribute('aria-hidden', 'true');
-    floatButtonWrapper.setAttribute('inert', '');
-  } else {
-    floatButtonWrapper.removeAttribute('aria-hidden');
-    floatButtonWrapper.removeAttribute('inert');
-  }
-}
-
 export const hideScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   floatButtonWrapper.classList.add('floating-button--scrolled');
   if (lottieScrollButton) {
@@ -34,50 +14,6 @@ export const showScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   floatButtonWrapper.classList.remove('floating-button--scrolled');
   if (lottieScrollButton) lottieScrollButton.removeAttribute('tabIndex');
 };
-
-export function delayFloatingCtaUntilViewportPassed(
-  floatButtonWrapper,
-  floatingButton,
-  target,
-  restoreButtonPosition,
-) {
-  if (!target) return;
-
-  // Keep the CTA out of the initial marquee view, then reveal it after the
-  // user has moved one viewport beyond the marquee's starting position.
-  floatButtonWrapper.classList.add('floating-button--hero-suppressed');
-  syncFloatingCtaAccessibility(floatButtonWrapper);
-
-  const updateSuppression = () => {
-    const initialViewportHasPassed = target.getBoundingClientRect().top <= -window.innerHeight;
-    floatButtonWrapper.classList.toggle(
-      'floating-button--hero-suppressed',
-      !initialViewportHasPassed,
-    );
-    syncFloatingCtaAccessibility(floatButtonWrapper);
-
-    if (initialViewportHasPassed) {
-      restoreButtonPosition();
-    } else {
-      floatingButton.style.bottom = '0px';
-    }
-  };
-
-  let updatePending = false;
-  const updateOnAnimationFrame = () => {
-    updatePending = false;
-    updateSuppression();
-  };
-  const scheduleUpdate = () => {
-    if (updatePending) return;
-    updatePending = true;
-    requestAnimationFrame(updateOnAnimationFrame);
-  };
-
-  window.addEventListener('scroll', scheduleUpdate, { passive: true });
-  window.addEventListener('resize', scheduleUpdate);
-  updateSuppression();
-}
 
 export function openToolBox(wrapper, lottie, data) {
   const toolbox = wrapper.querySelector('.toolbox');
@@ -250,7 +186,6 @@ export async function createFloatingButton(block, audience, data) {
     const hasSuppressTargets = !!document.querySelector('.suppress-until-not-visible');
     if (hasSuppressTargets) {
       floatButtonWrapper.classList.add('floating-button--suppressed');
-      syncFloatingCtaAccessibility(floatButtonWrapper);
     }
   }
 
@@ -294,23 +229,6 @@ export async function createFloatingButton(block, audience, data) {
     }
   });
 
-  if (floatButtonWrapper.dataset.audience === 'mobile' && data.delayUntilViewportPassed) {
-    delayFloatingCtaUntilViewportPassed(
-      floatButtonWrapper,
-      floatButton,
-      data.delayUntilViewportPassed,
-      () => {
-        if (promoBar && promoBar.block) {
-          floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
-        } else if (currentBottom) {
-          floatButton.style.bottom = currentBottom;
-        } else {
-          floatButton.style.removeProperty('bottom');
-        }
-      },
-    );
-  }
-
   // Intersection observer - hide button when scrolled to footer
   const footer = document.querySelector('footer');
   if (footer) {
@@ -319,12 +237,15 @@ export async function createFloatingButton(block, audience, data) {
       if (entry.intersectionRatio > 0 || entry.isIntersecting) {
         // Visually and accessibly hide the floating CTA when the footer is in view
         floatButtonWrapper.classList.add('floating-button--hidden');
-        syncFloatingCtaAccessibility(floatButtonWrapper);
+        floatButtonWrapper.setAttribute('aria-hidden', 'true');
+        // Prevent focus and remove from the accessibility tree in supporting browsers
+        floatButtonWrapper.setAttribute('inert', '');
         floatButton.style.bottom = '0px';
       } else {
         // Restore visibility and accessibility when the footer is not in view
         floatButtonWrapper.classList.remove('floating-button--hidden');
-        syncFloatingCtaAccessibility(floatButtonWrapper);
+        floatButtonWrapper.removeAttribute('aria-hidden');
+        floatButtonWrapper.removeAttribute('inert');
         if (promoBar && promoBar.block) {
           floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
         } else if (currentBottom) {
@@ -393,12 +314,10 @@ export async function createFloatingButton(block, audience, data) {
       const updateSuppressedState = (anyVisible) => {
         if (anyVisible) {
           floatButtonWrapper.classList.add('floating-button--suppressed');
-          syncFloatingCtaAccessibility(floatButtonWrapper);
           // Keep CTA pinned to bottom visually when suppressed
           floatButton.style.bottom = '0px';
         } else {
           floatButtonWrapper.classList.remove('floating-button--suppressed');
-          syncFloatingCtaAccessibility(floatButtonWrapper);
           if (promoBar && promoBar.block) {
             floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
           } else if (currentBottom) {
