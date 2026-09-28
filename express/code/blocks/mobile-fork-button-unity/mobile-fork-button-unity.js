@@ -55,6 +55,10 @@ export default async function decorate(block) {
     ? collectOsSplitFloatingButtonData(createTag, getIconElementDeprecated, platform, {}, 'unity-upload')
     : collectFloatingButtonData(createTag, getIconElementDeprecated, false, {}, 'unity-upload');
 
+  if (audience === 'mobile') {
+    data.delayUntilViewportPassed = document.querySelector('.resume-hero, .verb-express-hero');
+  }
+
   const blockWrapper = await createUnityMultiFunctionButton(block, data, audience);
   const blockLinks = blockWrapper.querySelectorAll('a');
   if (blockLinks && blockLinks.length > 0) {
