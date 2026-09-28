@@ -113,14 +113,46 @@ export default async function init(el) {
   }
 
   const element = el.querySelector('span');
-  const verbDropzone = el.closest('.section')?.querySelector('.verb-dropzone');
-  if (!element && !verbDropzone) return;
+  const verbUploadBlock = el.closest('.section')?.querySelector(
+    '.resume-hero, .verb-express-hero, .verb-dropzone',
+  );
+  if (!element && !verbUploadBlock) return;
   const unitylibs = getUnityLibs();
-  if (verbDropzone) {
-    const { LIMITS: VERB_DROPZONE_LIMITS } = await import('../verb-dropzone/verb-dropzone.js');
-    Object.assign(LIMITS, VERB_DROPZONE_LIMITS);
+  if (verbUploadBlock) {
+    const uploadBlockType = [
+      'resume-hero',
+      'verb-express-hero',
+      'verb-dropzone',
+    ].find((className) => verbUploadBlock.classList.contains(className));
+    let limitsModule;
+
+    switch (uploadBlockType) {
+      case 'resume-hero':
+        limitsModule = '../resume-hero/resume-hero.js';
+        break;
+      case 'verb-express-hero':
+        limitsModule = '../verb-express-hero/verb-express-hero.js';
+        break;
+      case 'verb-dropzone':
+        limitsModule = '../verb-dropzone/verb-dropzone.js';
+        break;
+      default:
+        limitsModule = null;
+    }
+
+    if (limitsModule) {
+      const { LIMITS: verbUploadLimits } = await import(limitsModule);
+      Object.assign(LIMITS, verbUploadLimits);
+    }
   }
-  const verb = (verbDropzone && [...verbDropzone.classList].find((cn) => LIMITS[cn])) || element.classList[1].replace('icon-', '');
+  const configuredBlockVerb = verbUploadBlock
+    ? [...verbUploadBlock.classList].find((className) => LIMITS[className])
+    : null;
+  const blockVerb = configuredBlockVerb
+    || (verbUploadBlock?.classList.contains('resume-hero') ? 'resume-builder' : null);
+  const iconVerb = element?.classList?.[1]?.replace('icon-', '');
+  const verb = blockVerb || iconVerb;
+  if (!verb) return;
   if (mobileApp && LIMITS[verb]?.mobileApp) return;
   const langFromPath = window.location.pathname.split('/')[1];
   const languageCode = localeMap[langFromPath] ? localeMap[langFromPath].split('-')[0] : 'en';

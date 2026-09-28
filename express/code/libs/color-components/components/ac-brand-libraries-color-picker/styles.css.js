@@ -97,7 +97,7 @@ export const style = css`
     .brand-header-text {
         margin: unset;
         font-size: 14px;
-        font-weight: 800;
+        font-weight: 900;
         color: #212121;
         overflow: hidden;
         text-overflow: ellipsis;

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./search-marquee.spec.cjs');
 const SearchMarquee = require('./search-marquee.page.cjs');
 
