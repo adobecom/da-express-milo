@@ -509,8 +509,8 @@ const listenAlloy = () => {
 
 async function loadMobileGoogleLogin(loadIms, loadScript, getConfig) {
   if (!isMobileForkButtonViewport()) return false;
-  const queryValue = new URLSearchParams(window.location.search).get('google-login');
-  const googleLogin = (queryValue || getMetadata('google-login'))?.trim().toLowerCase();
+  if (!/(^|\/)express(?:\/|$)/.test(window.location.pathname)) return false;
+  const googleLogin = getMetadata('google-login')?.trim().toLowerCase();
   if (!['mobile', 'on'].includes(googleLogin)) return false;
 
   try {
@@ -544,9 +544,12 @@ async function loadPage() {
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
 
-  if (!isMobileForkButtonViewport()) {
-    document.head.append(createTag('meta', { name: 'google-login', content: 'desktop' }));
-  }
+  const mobileOrTablet = isMobileForkButtonViewport();
+  const googleLoginMeta = createTag('meta', {
+    name: 'google-login',
+    content: mobileOrTablet ? 'mobile' : 'desktop',
+  });
+  document.head.append(googleLoginMeta);
 
   const config = setConfig({ ...CONFIG, miloLibs });
 
@@ -572,6 +575,9 @@ async function loadPage() {
   // Start One Tap before block decoration so its state can suppress generated floating CTAs.
   decorateArea();
   const mobileGoogleLogin = loadMobileGoogleLogin(loadIms, loadScript, () => config);
+  // Milo owns desktop One Tap. Hide the mobile flag from Milo while it decorates to avoid
+  // initializing Google Identity Services twice; restore it once loadArea completes.
+  if (mobileOrTablet) googleLoginMeta.remove();
 
   loadLana({ clientId: 'express' });
 
@@ -610,6 +616,7 @@ async function loadPage() {
   });
 
   await Promise.all([loadArea(), mobileGoogleLogin]);
+  if (mobileOrTablet) document.head.append(googleLoginMeta);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
