@@ -53,6 +53,12 @@ export function isIPad() {
     || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
+export function isMobileForkButtonViewport() {
+  return document.body.dataset.device === 'mobile'
+    || isIPad()
+    || window.matchMedia('(max-width: 1199px)').matches;
+}
+
 export function getMobileOperatingSystem() {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
@@ -642,7 +648,8 @@ export function buildAutoBlocks() {
     const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable', 'mobile-fork-button-os-split', 'mobile-fork-button-unity'];
     const configuredDevice = document.body.dataset?.device;
     const mobileBlockName = getMetadata('mobile-floating-cta');
-    const device = isIPad() && mobileBlockName === 'mobile-fork-button-unity'
+    const device = mobileBlockName === 'mobile-fork-button-unity'
+      && isMobileForkButtonViewport()
       ? 'mobile'
       : configuredDevice;
     const blockName = device === 'mobile'

@@ -112,7 +112,7 @@ describe('Floating CTA hero delay', () => {
     document.body.replaceChildren();
   });
 
-  it('reveals after scrolling one viewport past the hero start', async () => {
+  it('reveals after the hero fully exits the viewport', async () => {
     document.body.innerHTML = `
       <div class="resume-hero"></div>
       <div class="floating-button-wrapper">
@@ -121,9 +121,9 @@ describe('Floating CTA hero delay', () => {
     const hero = document.querySelector('.resume-hero');
     const wrapper = document.querySelector('.floating-button-wrapper');
     const button = document.querySelector('.floating-button');
-    let heroTop = 0;
+    let heroBottom = 500;
     let restored = false;
-    hero.getBoundingClientRect = () => ({ top: heroTop });
+    hero.getBoundingClientRect = () => ({ bottom: heroBottom });
 
     delayFloatingCtaUntilViewportPassed(
       wrapper,
@@ -136,14 +136,14 @@ describe('Floating CTA hero delay', () => {
     expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
     expect(wrapper.hasAttribute('inert')).to.be.true;
 
-    heroTop = -(window.innerHeight - 1);
+    heroBottom = 1;
     window.dispatchEvent(new Event('scroll'));
     await new Promise(requestAnimationFrame);
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
     expect(button.style.bottom).to.equal('0px');
     expect(restored).to.be.false;
 
-    heroTop = -window.innerHeight;
+    heroBottom = 0;
     window.dispatchEvent(new Event('scroll'));
     await new Promise(requestAnimationFrame);
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.false;

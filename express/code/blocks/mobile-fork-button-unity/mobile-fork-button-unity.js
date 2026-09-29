@@ -1,4 +1,11 @@
-import { getLibs, getMobileOperatingSystem, getIconElementDeprecated, addTempWrapperDeprecated, isIPad } from '../../scripts/utils.js';
+import {
+  addTempWrapperDeprecated,
+  getIconElementDeprecated,
+  getLibs,
+  getMobileOperatingSystem,
+  isIPad,
+  isMobileForkButtonViewport,
+} from '../../scripts/utils.js';
 import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
 import { collectFloatingButtonData, collectOsSplitFloatingButtonData, SUPPORTED_MWEB_OS } from '../../scripts/utils/mobile-fork-button-utils.js';
 
@@ -35,8 +42,9 @@ async function createUnityMultiFunctionButton(block, data, audience, isTablet) {
 
 export default async function decorate(block) {
   ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
-  const isTablet = isIPad();
-  const os = isTablet ? 'iOS' : getMobileOperatingSystem();
+  const useDeviceOverride = document.body.dataset.device !== 'mobile'
+    && isMobileForkButtonViewport();
+  const os = isIPad() || useDeviceOverride ? 'iOS' : getMobileOperatingSystem();
   const eligibilityOn = getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() === 'on';
   if (eligibilityOn && !SUPPORTED_MWEB_OS.includes(os)) {
     const { default: decorateNormal } = await import('../floating-button/floating-button.js');
@@ -61,7 +69,12 @@ export default async function decorate(block) {
     data.delayUntilViewportPassed = document.querySelector('.resume-hero, .verb-express-hero');
   }
 
-  const blockWrapper = await createUnityMultiFunctionButton(block, data, audience, isTablet);
+  const blockWrapper = await createUnityMultiFunctionButton(
+    block,
+    data,
+    audience,
+    useDeviceOverride,
+  );
   const blockLinks = blockWrapper.querySelectorAll('a');
   if (blockLinks && blockLinks.length > 0) {
     const linksPopulated = new CustomEvent('linkspopulated', { detail: blockLinks });

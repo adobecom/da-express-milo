@@ -128,20 +128,20 @@ export function delayFloatingCtaUntilViewportPassed(
 ) {
   if (!target) return;
 
-  // Keep the CTA out of the initial marquee view, then reveal it after the
-  // user has moved one viewport beyond the marquee's starting position.
+  // Keep the CTA out of the initial hero view, then reveal it once the hero
+  // has fully scrolled above the viewport.
   floatButtonWrapper.classList.add('floating-button--hero-suppressed');
   syncFloatingCtaAccessibility(floatButtonWrapper);
 
   const updateSuppression = () => {
-    const initialViewportHasPassed = target.getBoundingClientRect().top <= -window.innerHeight;
+    const heroHasPassed = target.getBoundingClientRect().bottom <= 0;
     floatButtonWrapper.classList.toggle(
       'floating-button--hero-suppressed',
-      !initialViewportHasPassed,
+      !heroHasPassed,
     );
     syncFloatingCtaAccessibility(floatButtonWrapper);
 
-    if (initialViewportHasPassed) {
+    if (heroHasPassed) {
       restoreButtonPosition();
     } else {
       floatingButton.style.bottom = '0px';

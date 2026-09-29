@@ -1,14 +1,9 @@
-import { addTempWrapperDeprecated } from '../../scripts/utils.js';
+import { addTempWrapperDeprecated, isIPad } from '../../scripts/utils.js';
 import {
   createFloatingButton,
   collectFloatingButtonData,
 } from '../../scripts/widgets/floating-cta.js';
 import { formatDynamicCartLink } from '../../scripts/utils/pricing.js';
-
-function isIPad() {
-  return /iPad/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
 
 export default async function decorate(block) {
   addTempWrapperDeprecated(block, 'floating-button');
