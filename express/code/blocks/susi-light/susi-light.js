@@ -552,8 +552,8 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
 
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
-  const image = rows[3]?.querySelector('img');
   const mobileTitle = rows[3]?.textContent?.trim();
+  const image = rows[4]?.querySelector('img');
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
@@ -591,16 +591,26 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
     ...params,
     onSuccessfulToken: () => window.location.assign(destURL.toString()),
   }));
+  if (mobileTitle) {
+    titleDiv.classList.add('desktop-only');
+  }
+  const mobileTitleDiv = mobileTitle
+    ? createTag('div', { class: 'title mobile-only' }, mobileTitle)
+    : null;
   if (image && isColor) {
     image.classList.add('susi-image');
     el.classList.add('has-image');
-    const formPane = createTag('div', { class: 'susi-form-pane' }, [createLogo(), titleDiv, susiWrapper]);
+    const formPaneChildren = [createLogo(), titleDiv];
+    if (mobileTitleDiv) {
+      formPaneChildren.push(mobileTitleDiv);
+    }
+    formPaneChildren.push(susiWrapper);
+    const formPane = createTag('div', { class: 'susi-form-pane' }, formPaneChildren);
     return createTag('div', { class: 'susi-layout' }, [image, formPane]);
   }
   const layoutChildren = [createLogo(), titleDiv];
-  if (mobileTitle) {
-    titleDiv.classList.add('desktop-only');
-    layoutChildren.push(createTag('div', { class: 'title mobile-only' }, mobileTitle));
+  if (mobileTitleDiv) {
+    layoutChildren.push(mobileTitleDiv);
   }
   layoutChildren.push(susiWrapper);
   const layout = createTag('div', { class: 'susi-layout' }, layoutChildren);
