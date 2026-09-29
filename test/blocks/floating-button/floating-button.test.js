@@ -63,6 +63,8 @@ describe('Floating Button', () => {
         <div class="floating-button meta-powered"><div>desktop</div></div>
       </div>
     </main>`;
+    const hero = document.querySelector('.verb-express-hero');
+    hero.getBoundingClientRect = () => ({ bottom: 500 });
     const main = document.querySelector('main');
     const append = main.append.bind(main);
     let suppressedWhenInserted = false;
