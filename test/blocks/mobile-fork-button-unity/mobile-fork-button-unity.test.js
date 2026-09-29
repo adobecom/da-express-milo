@@ -83,6 +83,72 @@ describe('Mobile Fork Button Unity', () => {
     expect(block.classList.contains('meta-powered')).to.be.true;
   });
 
+  it('selects and qualifies the mobile Unity CTA for modern iPad Safari', async () => {
+    const userAgentDescriptor = Object.getOwnPropertyDescriptor(navigator, 'userAgent');
+    const platformDescriptor = Object.getOwnPropertyDescriptor(navigator, 'platform');
+    const touchPointsDescriptor = Object.getOwnPropertyDescriptor(navigator, 'maxTouchPoints');
+    Object.defineProperties(navigator, {
+      userAgent: { value: DESKTOP_USER_AGENT, configurable: true },
+      platform: { value: 'MacIntel', configurable: true },
+      maxTouchPoints: { value: 5, configurable: true },
+    });
+    document.body.dataset.device = 'desktop';
+    setDocumentMetadata({ 'fork-eligibility-check': 'on' });
+    const hero = document.createElement('div');
+    hero.className = 'verb-express-hero';
+    document.querySelector('main').prepend(hero);
+
+    try {
+      await buildAutoBlocks();
+      const block = document.querySelector('.mobile-fork-button-unity');
+      expect(block).to.exist;
+      expect(block.firstElementChild.textContent).to.equal('mobile');
+      block.parentElement.classList.add('section');
+
+      await decorate(block);
+
+      const wrapper = document.querySelector('.floating-button-wrapper');
+      expect(wrapper.dataset.audience).to.equal('mobile');
+      expect(wrapper.classList.contains('mobile-fork-button-tablet')).to.be.true;
+      expect(wrapper.querySelector('.mobile-gating-header').textContent).to.equal('iOS header');
+    } finally {
+      if (userAgentDescriptor) Object.defineProperty(navigator, 'userAgent', userAgentDescriptor);
+      if (platformDescriptor) Object.defineProperty(navigator, 'platform', platformDescriptor);
+      else delete navigator.platform;
+      if (touchPointsDescriptor) Object.defineProperty(navigator, 'maxTouchPoints', touchPointsDescriptor);
+      else delete navigator.maxTouchPoints;
+    }
+  });
+
+  it('inserts the Android fork CTA with its hidden Unity state already applied', async () => {
+    Object.defineProperty(navigator, 'userAgent', { value: ANDROID_USER_AGENT, configurable: true });
+    setDocumentMetadata();
+    const main = document.querySelector('main');
+    const hero = document.createElement('div');
+    hero.className = 'verb-express-hero';
+    main.prepend(hero);
+    const block = document.createElement('div');
+    block.className = 'mobile-fork-button-unity meta-powered';
+    block.innerHTML = '<div>mobile</div>';
+    document.querySelector('main .section').append(block);
+    const append = main.append.bind(main);
+    let insertionState;
+    main.append = (...nodes) => {
+      const wrapper = nodes.find((node) => node.classList?.contains('floating-button-wrapper'));
+      if (wrapper) {
+        insertionState = {
+          isUnity: wrapper.classList.contains('mobile-fork-button-unity'),
+          isSuppressed: wrapper.classList.contains('floating-button--hero-suppressed'),
+        };
+      }
+      append(...nodes);
+    };
+
+    await decorate(block);
+
+    expect(insertionState).to.deep.equal({ isUnity: true, isSuppressed: true });
+  });
+
   it('renders Android-prefixed fork metadata for Android', async () => {
     await render(ANDROID_USER_AGENT);
 
