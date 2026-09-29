@@ -48,6 +48,11 @@ export function getCachedMetadata(name) {
   return cachedMetadata[name];
 }
 
+export function isIPad() {
+  return /iPad/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 export function getMobileOperatingSystem() {
   const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
@@ -635,8 +640,14 @@ export function buildAutoBlocks() {
     const newDiv = document.createElement('div');
     lastDiv.insertAdjacentElement('afterend', newDiv);
     const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable', 'mobile-fork-button-os-split', 'mobile-fork-button-unity'];
-    const device = document.body.dataset?.device;
-    const blockName = getMetadata(`${device}-floating-cta`);
+    const configuredDevice = document.body.dataset?.device;
+    const mobileBlockName = getMetadata('mobile-floating-cta');
+    const device = isIPad() && mobileBlockName === 'mobile-fork-button-unity'
+      ? 'mobile'
+      : configuredDevice;
+    const blockName = device === 'mobile'
+      ? mobileBlockName
+      : getMetadata(`${device}-floating-cta`);
 
     if (blockName && validButtonVersion.includes(blockName) && newDiv) {
       const button = createTag('div', { class: blockName });

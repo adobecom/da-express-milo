@@ -259,7 +259,7 @@ async function buildLottieArrow(wrapper, floatingBtn, data) {
 }
 
 /* istanbul ignore next */
-export async function createFloatingButton(block, audience, data) {
+export async function createFloatingButton(block, audience, data, wrapperClasses = []) {
   const { loadStyle, decorateLinks } = await import(`${getLibs()}/utils/utils.js`);
   const aTag = makeCTAFromSheet(block, data);
   const main = document.querySelector('main');
@@ -309,6 +309,7 @@ export async function createFloatingButton(block, audience, data) {
 
   const floatButtonWrapperOld = aTag.closest('.floating-button-wrapper');
   const floatButtonWrapper = createTag('div', { class: 'section floating-button-wrapper' });
+  floatButtonWrapper.classList.add(...wrapperClasses);
   const floatButton = createTag('div', {
     class: 'floating-button block',
     'data-block-name': 'floating-button',
