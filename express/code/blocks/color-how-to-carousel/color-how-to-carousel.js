@@ -7,7 +7,7 @@ import { createExpressTooltip } from '../../scripts/color-shared/spectrum/compon
 import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { wrapInTheme } from '../../scripts/color-shared/spectrum/utils/theme.js';
-import { applyCreateNowLink } from '../../scripts/color-shared/utils/utilities.js';
+import { applyCreateNowLink, trackColorExport } from '../../scripts/color-shared/utils/utilities.js';
 
 const GRAPH_SYMBOLS = ['hero-marquee', 'hero-marquee-localized', 'hands-and-heart', 'color-how-to-graph', 'color-bistro', 'color-how-to-bento'];
 
@@ -332,6 +332,7 @@ async function resolvePlaceholder(key, fallback) {
 async function copySpecsValue(value, label, strings) {
   try {
     await navigator.clipboard.writeText(value);
+    trackColorExport('copy-clipboard');
     showExpressToast({
       message: strings.copied.replace('{value}', value),
       variant: 'positive',

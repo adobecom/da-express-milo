@@ -14,6 +14,7 @@ import {
   simulateHex as simulateHexService,
 } from '../../../../scripts/color-shared/services/createColorBlindnessService.js';
 import { DEFAULT_PLACEHOLDERS as SWATCH_RAIL_DEFAULTS } from '../../../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import { trackColorExport } from '../../../../scripts/color-shared/utils/utilities.js';
 
 
 const MAX_SWATCHES = 10;
@@ -507,6 +508,7 @@ export class ColorSwatchRail extends LitElement {
     try {
       const copied = await this._copyText(hex);
       if (!copied) throw new Error('clipboard_copy_failed');
+      trackColorExport('copy-clipboard');
       // Opt-in only: lets a consumer show its own richer toast
       if (this.onCopyHex) {
         this.onCopyHex(hex);

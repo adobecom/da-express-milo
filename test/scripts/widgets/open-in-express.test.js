@@ -107,7 +107,7 @@ describe('mini-editor open-in-express', () => {
     it('sets referrer, feature flag, and canvas size', async () => {
       const url = new URL(await buildExpressUrl(MODEL));
       expect(url.searchParams.get('referrer')).to.equal('express-mini-editor');
-      expect(url.searchParams.get('feature-enable')).to.equal('acom-mini-editor-entry');
+      expect(url.searchParams.get('feature-enable')).to.equal('acom-mini-editor-entry,enable-emoji-clr-support');
       expect(url.searchParams.get('width')).to.equal('1084');
       expect(url.searchParams.get('height')).to.equal('700');
       expect(url.searchParams.get('unit')).to.equal('px');
