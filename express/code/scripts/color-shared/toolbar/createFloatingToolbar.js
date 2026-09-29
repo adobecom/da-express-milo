@@ -219,6 +219,18 @@ function setupStickyBehavior(wrapper, options = {}) {
  * @param {boolean} [options.inModal=false] - When true, skips the page footer /
  *   banner-bg "hide on scroll" observers (the toolbar is mounted inline inside a
  *   modal, where that behavior would incorrectly translate it off-screen).
+ * @param {Function} [options.onCTA] - Overrides the default "open in Express" CTA
+ *   click behavior.
+ * @param {Function} [options.onEditClick] - Overrides the default "navigate to
+ *   /create/color-wheel" edit-button click behavior.
+ * @param {boolean}  [options.showEditLabel=false] - Shows a persistent visible
+ *   text label (i18n `edit` string) next to the edit icon instead of tooltip-only.
+ * @param {Array<{icon:string, label:string, tooltip?:string, onClick:Function,
+ *   analyticsLabel?:string}>} [options.actionButtons] - Overrides the default
+ *   Share/Download/Save-to-library icon set with a custom one.
+ * @param {Object}  [options.i18nOverrides] - Merged on top of the fetched toolbar
+ *   i18n strings, for consumers that need one or two custom-worded strings
+ *   without owning the whole placeholder set.
  * @returns {Promise<{ toolbar, palette, getLibraryContext, wrapper, mount, setVariant, destroy }>}
  */
 // eslint-disable-next-line import/prefer-default-export
@@ -245,6 +257,11 @@ export async function initFloatingToolbar(container, options = {}) {
     librariesStrings = {},
     libraryNameLabel = '',
     libraryId,
+    onCTA,
+    onEditClick,
+    showEditLabel = false,
+    actionButtons,
+    i18nOverrides = {},
   } = options;
 
   // 'raised' gives sticky visuals (band, shadow) without sticky positioning
@@ -276,8 +293,12 @@ export async function initFloatingToolbar(container, options = {}) {
     editPaletteName,
     editPaletteLink,
     getLibraryContext: () => getLibraryContext(toolbarI18n.networkError),
-    i18n: toolbarI18n,
+    i18n: { ...toolbarI18n, ...i18nOverrides },
     drawerI18n,
+    onCTA,
+    onEditClick,
+    showEditLabel,
+    actionButtons,
   });
 
   wrapper.appendChild(toolbar.element);

@@ -60,6 +60,32 @@ function toAttachedFormatForMiniEditor(properties) {
     });
 }
 
+function toAttachedFormatForExport(properties) {
+  return toAttachedFormat(properties).map((entry) => {
+    if (entry.propertyName === 'event.event_date') {
+      return {
+        ...entry,
+        propertyName: 'event_date',
+      };
+    }
+
+    return entry;
+  });
+}
+
+function getPageNameFromPathname() {
+  const pathSegments = window.location.pathname.replace(/^\//, '').split('/').filter(Boolean);
+  return `adobe.com:${pathSegments.join(':')}`;
+}
+
+function isAuthenticatedUser() {
+  try {
+    return !!window.adobeIMS?.isSignedInUser?.();
+  } catch {
+    return false;
+  }
+}
+
 let expressLandingPageType;
 switch (true) {
   case (
@@ -416,6 +442,78 @@ function trackColorPageLoad() {
   }
 }
 
+/**
+ * Builds the standard Express AEP event envelope (event/user/source/hz/custom
+ * namespaces) shared by trackExpressFeaturePageLoad and trackExportComplete.
+ * Callers own anything that legitimately differs between event types
+ * (isAuthenticated resolution, pageName resolution, the `custom` block).
+ */
+async function buildExportEventEnvelope({
+  eventName, isAuthenticated, category, subcategory, subtype, type, workflow, pageName, custom,
+}) {
+  const isMobile = isMobileWeb();
+  const dtsStart = new Date().toISOString();
+  const eventDate = dtsStart.slice(0, 10);
+  const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
+  const mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID || '';
+  const guid = generateGuid();
+  const accessCountry = await getAccessCountry();
+  const deviceInfo = await getDeviceInfo();
+
+  let userGuid = '';
+  if (isAuthenticated && window.adobeIMS?.getProfile) {
+    try {
+      const profile = await window.adobeIMS.getProfile();
+      userGuid = profile?.userId || '';
+    } catch {
+      userGuid = '';
+    }
+  }
+
+  let userAccountType = 'unknown';
+  try {
+    userAccountType = window.adobeIMS?.getAccountType?.() || 'unknown';
+  } catch {
+    userAccountType = 'unknown';
+  }
+
+  const payload = {
+    event: {
+      pagename: eventName,
+      platform_name: isMobile ? 'mobile-web' : 'desktop-web',
+      aa: { page_name: pageName },
+      url: loc.href,
+      event_date: eventDate,
+      dts_start: dtsStart,
+      user_agent: navigator.userAgent,
+      guid,
+      user_guid: userGuid,
+      category,
+      subcategory,
+      subtype,
+      type,
+      workflow,
+      is_authenticated: isAuthenticated,
+      mcid_guid: mcidGuid,
+    },
+    user: { aa: { post_page_url: loc.href } },
+    source: { name: SOURCE_NAME, client_id: SOURCE_CLIENT_ID },
+    hz: {
+      source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
+      device_name: deviceInfo.deviceName,
+      user: {
+        access_country: accessCountry,
+        os_name: deviceInfo.osName,
+        os_version: deviceInfo.osVersion,
+      },
+    },
+    custom,
+  };
+
+  addIfDefined(payload.hz.user, 'account_type', userAccountType);
+  return payload;
+}
+
 export async function trackExpressFeaturePageLoad() {
   try {
     const pageType = getMetadata('pagetype');
@@ -431,82 +529,21 @@ export async function trackExpressFeaturePageLoad() {
     } catch { /* no referrer or invalid */ }
 
     const isMiniEditorPage = pageType === 'mini-editor';
-    const isMobile = isMobileWeb();
-    const dtsStart = isMiniEditorPage ? new Date().toISOString() : '';
-    const eventDate = isMiniEditorPage ? dtsStart.slice(0, 10) : '';
-    const guid = isMiniEditorPage ? generateGuid() : '';
     const ims = isMiniEditorPage ? await waitForAdobeIMS() : null;
     const isAuthenticated = isMiniEditorPage
       ? !!ims?.isSignedInUser?.()
       : false;
-    let userGuid = '';
-
-    if (isMiniEditorPage && isAuthenticated && ims?.getProfile) {
-      try {
-        const profile = await ims.getProfile();
-        userGuid = profile?.userId || '';
-      } catch {
-        userGuid = '';
-      }
-    }
-
-    const deviceInfo = isMiniEditorPage ? await getDeviceInfo() : null;
-    const accessCountry = isMiniEditorPage ? await getAccessCountry() : 'Unknown';
-    let userAccountType = 'unknown';
-    let mcidGuid = '';
     const pageName = getPageName();
 
-    if (isMiniEditorPage) {
-      // eslint-disable-next-line no-underscore-dangle
-      const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
-      mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID || '';
-
-      try {
-        userAccountType = ims?.getAccountType?.() || 'unknown';
-      } catch {
-        userAccountType = 'unknown';
-      }
-    }
-
-    const miniEditorSdmPayload = isMiniEditorPage ? {
-      event: {
-        pagename: eventName,
-        platform_name: isMobile ? 'mobile-web' : 'desktop-web',
-        aa: {
-          page_name: pageName,
-        },
-        url: loc.href,
-        event_date: eventDate,
-        dts_start: dtsStart,
-        user_agent: navigator.userAgent,
-        guid,
-        user_guid: userGuid,
-        category: 'WEB',
-        subcategory: 'operations',
-        subtype: 'acom',
-        type: 'render',
-        workflow: 'lifecycle',
-        is_authenticated: isAuthenticated,
-        mcid_guid: mcidGuid,
-      },
-      user: {
-        aa: {
-          post_page_url: loc.href,
-        },
-      },
-      source: {
-        name: SOURCE_NAME,
-        client_id: SOURCE_CLIENT_ID,
-      },
-      hz: {
-        source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
-        device_name: deviceInfo.deviceName,
-        user: {
-          access_country: accessCountry,
-          os_name: deviceInfo.osName,
-          os_version: deviceInfo.osVersion,
-        },
-      },
+    const miniEditorSdmPayload = isMiniEditorPage ? await buildExportEventEnvelope({
+      eventName,
+      isAuthenticated,
+      category: 'WEB',
+      subcategory: 'operations',
+      subtype: 'acom',
+      type: 'render',
+      workflow: 'lifecycle',
+      pageName,
       custom: {
         aa: {
           ref_domain: refDomain,
@@ -521,11 +558,7 @@ export async function trackExpressFeaturePageLoad() {
           name: getMiniEditorTaskName(),
         },
       },
-    } : null;
-
-    if (miniEditorSdmPayload) {
-      addIfDefined(miniEditorSdmPayload.hz.user, 'account_type', userAccountType);
-    }
+    }) : null;
 
     const fireEvent = () => {
       _satellite.track('event', {
@@ -616,6 +649,76 @@ export function trackColorBlockLoad(blockType) {
     safelyFireAnalyticsEvent(fireEvent);
   } catch (error) {
     window.lana?.log(`Failed to track color block load: ${error}`, { tags: 'color, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
+}
+
+const EXPORT_EVENT_NAME_AUTH = 'export-project-complete';
+const EXPORT_EVENT_NAME_UNAUTH = 'export-project-complete-unauth';
+
+/**
+ * Fires the shared `export-project-complete[-unauth]` event used to report a
+ * completed export-style action (download, copy, share, save) to Express DE via AEP.
+ *
+ * @param {Object} options
+ * @param {string} options.exportMethod - e.g. 'download', 'copy-clipboard', 'share',
+ *   'save-to-library'
+ * @param {string} options.taskName - value for `custom.task.name`
+ * @param {string} options.uiLocation - value for `custom.ui.location`
+ */
+export async function trackExportComplete({ exportMethod, taskName, uiLocation } = {}) {
+  if (!exportMethod) return;
+
+  const isAuthenticated = isAuthenticatedUser();
+  const eventName = isAuthenticated ? EXPORT_EVENT_NAME_AUTH : EXPORT_EVENT_NAME_UNAUTH;
+  const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
+  const pageName = corpnewData?.page?.pageInfo?.pageName
+    || getPageNameFromPathname();
+
+  const sdmPayload = await buildExportEventEnvelope({
+    eventName,
+    isAuthenticated,
+    category: 'WEB',
+    subcategory: 'document',
+    subtype: 'export-project',
+    type: 'success',
+    workflow: 'export',
+    pageName,
+    custom: {
+      export_method: exportMethod,
+      ui: {
+        location: uiLocation,
+      },
+      displayedLanguage: getLanguage(),
+      task: {
+        name: taskName,
+      },
+    },
+  });
+
+  const fireEvent = () => {
+    window._satellite.track('event', {
+      xdm: {},
+      data: {
+        eventType: 'web.webinteraction.linkClicks',
+        web: {
+          webInteraction: {
+            name: eventName,
+            linkClicks: { value: 1 },
+            type: 'other',
+          },
+        },
+        _adobe_corpnew: {
+          sdm: sdmPayload,
+          custom: toAttachedFormatForExport(sdmPayload),
+        },
+      },
+    });
+  };
+
+  try {
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track export complete: ${error}`, { tags: 'export, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
   }
 }
 
