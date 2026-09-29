@@ -89,7 +89,8 @@ describe('createImageExtractComponent', () => {
       component = null;
     });
 
-    // it('syncs is-dragging to the drag overlay when the class is added to the container', async () => {
+    // it('syncs is-dragging to the drag overlay when the class 
+    // is added to the container', async () => {
     //   component = createImageExtractComponent({ controller: makeController() });
     //   const dragOverlay = document.body.querySelector('.color-extract-drag-overlay');
     //   component.element.classList.add('is-dragging');
