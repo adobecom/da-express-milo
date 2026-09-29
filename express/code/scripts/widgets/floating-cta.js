@@ -263,7 +263,9 @@ export async function createFloatingButton(block, audience, data) {
   const { loadStyle, decorateLinks } = await import(`${getLibs()}/utils/utils.js`);
   const aTag = makeCTAFromSheet(block, data);
   const main = document.querySelector('main');
-  loadStyle('/express/code/scripts/widgets/floating-cta.css');
+  await new Promise((resolve) => {
+    loadStyle('/express/code/scripts/widgets/floating-cta.css', resolve);
+  });
 
   // Floating button html
   const floatButtonLink = aTag.cloneNode(true);
@@ -316,14 +318,18 @@ export async function createFloatingButton(block, audience, data) {
   [...block.classList].filter((c) => c === 'closed').forEach((c) => floatButtonWrapper.classList.add(c));
   const floatButtonInnerWrapper = createTag('div', { class: 'floating-button-inner-wrapper' });
 
-  // Pre-apply suppressed state on mobile when suppression gating is enabled
-  // to avoid initial visibility flicker before observers attach.
-  if (audience === 'mobile' && data.enableSuppressGating) {
-    const hasSuppressTargets = !!document.querySelector('.suppress-until-not-visible');
-    if (hasSuppressTargets) {
-      floatButtonWrapper.classList.add('floating-button--suppressed');
-      syncFloatingCtaAccessibility(floatButtonWrapper);
-    }
+  // Apply initial suppression before insertion so the CTA cannot animate out from a visible state.
+  const miniEditor = document.querySelector('.mini-editor');
+  const shouldDelayFloatingCta = audience === 'mobile' || !!data.delayUntilViewportPassed;
+  if (audience === 'mobile' && data.enableSuppressGating
+    && document.querySelector('.suppress-until-not-visible')) {
+    floatButtonWrapper.classList.add('floating-button--suppressed');
+  }
+  if (shouldDelayFloatingCta && miniEditor) {
+    floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
+  }
+  if (shouldDelayFloatingCta && data.delayUntilViewportPassed) {
+    floatButtonWrapper.classList.add('floating-button--hero-suppressed');
   }
 
   if (audience) {
@@ -334,6 +340,11 @@ export async function createFloatingButton(block, audience, data) {
   floatButtonInnerWrapper.append(floatButtonLink);
   floatButton.append(floatButtonInnerWrapper);
   floatButtonWrapper.append(floatButton);
+  const initiallySuppressed = ACCESSIBILITY_HIDDEN_CLASSES
+    .some((className) => floatButtonWrapper.classList.contains(className));
+  if (initiallySuppressed) {
+    syncFloatingCtaAccessibility(floatButtonWrapper);
+  }
   main.append(floatButtonWrapper);
   if (floatButtonWrapperOld) {
     const parent = floatButtonWrapperOld.parentElement;
@@ -376,11 +387,11 @@ export async function createFloatingButton(block, audience, data) {
     }
   };
 
-  if (floatButtonWrapper.dataset.audience === 'mobile') {
+  if (shouldDelayFloatingCta) {
     delayFloatingCtaUntilMiniEditorPassed(
       floatButtonWrapper,
       floatButton,
-      document.querySelector('.mini-editor'),
+      miniEditor,
       restoreButtonPosition,
     );
 

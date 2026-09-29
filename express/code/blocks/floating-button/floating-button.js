@@ -5,6 +5,11 @@ import {
 } from '../../scripts/widgets/floating-cta.js';
 import { formatDynamicCartLink } from '../../scripts/utils/pricing.js';
 
+function isIPad() {
+  return /iPad/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 export default async function decorate(block) {
   addTempWrapperDeprecated(block, 'floating-button');
   if (!block.classList.contains('meta-powered')) {
@@ -19,6 +24,9 @@ export default async function decorate(block) {
 
   const parentSection = block.closest('.section');
   const data = collectFloatingButtonData();
+  if (audience === 'desktop' && isIPad()) {
+    data.delayUntilViewportPassed = document.querySelector('.resume-hero, .verb-express-hero');
+  }
 
   const blockWrapper = await createFloatingButton(
     block,
