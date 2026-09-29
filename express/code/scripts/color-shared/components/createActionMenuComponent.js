@@ -419,6 +419,7 @@ export async function createActionMenuComponent(options = {}) {
     getCurrentPalette: getCurrentPaletteFn,
     undo: handleUndoState,
     redo: handleRedoState,
+    generateRandom: handleGenerateRandom,
     destroy() {
       document.removeEventListener(eventName, handleHistoryIndexChanged);
       container.remove();
