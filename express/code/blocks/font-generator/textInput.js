@@ -6,6 +6,12 @@ const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;
 const DEBOUNCE_MS = 300;
 
+// Characters with only partial unicode font support (MWPW-206090). Fixed and
+// style-independent — it flags the input itself, not a specific font's own
+// character map (see unicodeEngine.js), so it applies no matter which
+// category/style is selected.
+const PARTIAL_SUPPORT_PATTERN = /[áàâãäåæçéèêëíìîïñóòôõøœúùûüßÁÀÂÃÄÅÆÇÉÈÊËÍÌÎÏÑÓÒÔÕØŒÚÙÛÜ]/;
+
 // Unique-id counter so each instance's visible label associates with its own
 // textarea (avoids duplicate ids if more than one input is ever rendered).
 let instanceId = 0;
@@ -37,6 +43,10 @@ template.innerHTML = `<div class="font-generator-text-input">
         </div>
       </div>
     </div>
+  </div>
+  <div class="disclaimer" aria-live="polite">
+    <img class="disclaimer-icon" src="/express/code/icons/S2_Icon_AlertTriangle_20_N.svg" alt="" aria-hidden="true">
+    <span class="disclaimer-text"></span>
   </div>
 </div>`;
 
@@ -118,6 +128,13 @@ function syncCounter(textarea, counter) {
   counter.textContent = `${length.toLocaleString()}/${textarea.maxLength.toLocaleString()}`;
 }
 
+// Shows/hides the partial-unicode-support disclaimer in real time as the
+// user types — not debounced, unlike the previewText store write, since the
+// message needs to appear/disappear immediately (MWPW-206090).
+function syncDisclaimer(textarea, disclaimer) {
+  disclaimer.classList.toggle('is-visible', PARTIAL_SUPPORT_PATTERN.test(textarea.value));
+}
+
 // "Active" (design QA's darker border) is triggered by clicking/tapping into
 // the field, or by typing once the textarea has keyboard focus. .is-active is
 // set on pointerdown so it's already applied by the time focus lands, and
@@ -134,6 +151,7 @@ function initActiveState(panel) {
 function initTextInput(panel) {
   const textarea = panel.querySelector('textarea.label');
   const counter = panel.querySelector('.character-count');
+  const disclaimer = panel.querySelector('.disclaimer');
   if (!textarea || !counter) return () => {};
 
   // Restore state set by initFromUrl before this panel was created, truncating
@@ -145,6 +163,7 @@ function initTextInput(panel) {
     if (truncated !== initial) setState({ previewText: truncated });
   }
   syncCounter(textarea, counter);
+  if (disclaimer) syncDisclaimer(textarea, disclaimer);
 
   let timer;
   const flush = (value) => {
@@ -156,6 +175,7 @@ function initTextInput(panel) {
 
   textarea.addEventListener('input', () => {
     syncCounter(textarea, counter);
+    if (disclaimer) syncDisclaimer(textarea, disclaimer);
     flush(textarea.value);
   });
 
@@ -195,6 +215,7 @@ function initTagsFade(panel) {
 function initSuggestionPills(panel, cancelPendingInput) {
   const textarea = panel.querySelector('textarea.label');
   const counter = panel.querySelector('.character-count');
+  const disclaimer = panel.querySelector('.disclaimer');
   const wrap = panel.querySelector('.tags-wrap');
   if (!textarea || !wrap) return;
 
@@ -208,6 +229,9 @@ function initSuggestionPills(panel, cancelPendingInput) {
     cancelPendingInput();
     textarea.value = truncated;
     if (counter) syncCounter(textarea, counter);
+    // .value doesn't fire 'input', so the disclaimer needs the same manual
+    // nudge as the counter above.
+    if (disclaimer) syncDisclaimer(textarea, disclaimer);
     setState({ previewText: truncated });
     clearActivePill();
     pill.classList.add('is-active');
@@ -242,6 +266,8 @@ function applyStrings(panel, strings = {}) {
   if (previewLabel && strings.previewTextLabel) previewLabel.textContent = strings.previewTextLabel;
   const tryThese = panel.querySelector('.text-wrapper');
   if (tryThese && strings.tryThese) tryThese.textContent = strings.tryThese;
+  const disclaimerText = panel.querySelector('.disclaimer-text');
+  if (disclaimerText && strings.disclaimerText) disclaimerText.textContent = strings.disclaimerText;
 }
 
 export default function createTextInput(config = {}) {
