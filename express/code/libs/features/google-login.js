@@ -7,6 +7,11 @@ const ACTIVE_CLASS = 'google-one-tap-active';
 const setPromptActive = (active) => {
   document.body.classList.toggle(ACTIVE_CLASS, active);
 };
+const setPromptStatus = (status, reason = '') => {
+  document.body.dataset.googleOneTapStatus = status;
+  if (reason) document.body.dataset.googleOneTapReason = reason;
+  else delete document.body.dataset.googleOneTapReason;
+};
 
 const getDestination = async (getMetadata, getConfig) => {
   const redirect = getMetadata('google-login-redirect')?.trim();
@@ -52,11 +57,22 @@ const onToken = async (getMetadata, getConfig, data) => {
 };
 
 const onPromptMoment = (notification) => {
-  if (notification.isNotDisplayed?.()
-      || notification.isSkippedMoment?.()
-      || notification.isDismissedMoment?.()) {
-    setPromptActive(false);
+  let status;
+  let reason;
+  if (notification.isNotDisplayed?.()) {
+    status = 'not-displayed';
+    reason = notification.getNotDisplayedReason?.();
+  } else if (notification.isSkippedMoment?.()) {
+    status = 'skipped';
+    reason = notification.getSkippedReason?.();
+  } else if (notification.isDismissedMoment?.()) {
+    status = 'dismissed';
+    reason = notification.getDismissedReason?.();
   }
+  if (!status) return;
+  setPromptStatus(status, reason);
+  setPromptActive(false);
+  window.lana?.log(`Google One Tap ${status}${reason ? `: ${reason}` : ''}`, { tags: 'google-login' });
 };
 
 export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
@@ -89,9 +105,11 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript, 
     callback: (data) => onToken(getMetadata, getConfig, data),
     ...(placeholder && { prompt_parent_id: PLACEHOLDER }),
     cancel_on_tap_outside: false,
+    itp_support: true,
     auto_select: getMetadata('google-yolo-zero-tap')?.toLowerCase() === 'on',
   });
   setPromptActive(true);
+  setPromptStatus('requested');
   googleIdentity.prompt(onPromptMoment);
   return true;
 }

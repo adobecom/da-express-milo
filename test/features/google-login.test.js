@@ -35,6 +35,8 @@ describe('Google login', () => {
     delete window.adobeid;
     delete window.DISABLE_PAGE_RELOAD;
     document.body.classList.remove('google-one-tap-active');
+    delete document.body.dataset.googleOneTapStatus;
+    delete document.body.dataset.googleOneTapReason;
     document.body.innerHTML = '';
   });
 
@@ -60,10 +62,12 @@ describe('Google login', () => {
       client_id: '530526366930-l874a90ipfkn26naa71r010u8epp39jt.apps.googleusercontent.com',
       prompt_parent_id: 'feds-googleLogin',
       cancel_on_tap_outside: false,
+      itp_support: true,
       auto_select: true,
     });
     expect(prompt.calledOnce).to.be.true;
     expect(document.body.classList.contains('google-one-tap-active')).to.be.true;
+    expect(document.body.dataset.googleOneTapStatus).to.equal('requested');
   });
 
   it('restores floating CTAs when Google skips the prompt', async () => {
@@ -77,6 +81,7 @@ describe('Google login', () => {
     });
 
     expect(document.body.classList.contains('google-one-tap-active')).to.be.false;
+    expect(document.body.dataset.googleOneTapStatus).to.equal('skipped');
   });
 
   it('restores floating CTAs when Google dismisses the prompt', async () => {
