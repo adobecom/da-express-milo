@@ -220,6 +220,7 @@
 }
 
 @media (max-width: 1199px) {
+<<<<<<< Updated upstream
   .susi-light.color .title {
     box-sizing: border-box;
     width: 100%;
@@ -284,6 +285,16 @@
   .dialog-modal:has(.susi-light.color.has-image) > .fragment > .section,
   .dialog-modal:has(.susi-light.color.has-image) > .fragment > .section > .content {
     height: 100%;
+=======
+  .susi-layout .title.desktop-only {
+    display: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .susi-layout .title.mobile-only {
+    display: none;
+>>>>>>> Stashed changes
   }
 }
 

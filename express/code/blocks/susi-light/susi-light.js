@@ -553,6 +553,7 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
   const image = rows[3]?.querySelector('img');
+  const mobileTitle = rows[3]?.textContent?.trim();
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
@@ -596,7 +597,14 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
     const formPane = createTag('div', { class: 'susi-form-pane' }, [createLogo(), titleDiv, susiWrapper]);
     return createTag('div', { class: 'susi-layout' }, [image, formPane]);
   }
-  return createTag('div', { class: 'susi-layout' }, [createLogo(), titleDiv, susiWrapper]);
+  const layoutChildren = [createLogo(), titleDiv];
+  if (mobileTitle) {
+    titleDiv.classList.add('desktop-only');
+    layoutChildren.push(createTag('div', { class: 'title mobile-only' }, mobileTitle));
+  }
+  layoutChildren.push(susiWrapper);
+  const layout = createTag('div', { class: 'susi-layout' }, layoutChildren);
+  return layout;
 }
 
 function blurModalCurtain() {
