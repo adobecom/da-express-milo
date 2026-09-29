@@ -13,6 +13,9 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   inputLabel: 'Preview text input',
   previewTextLabel: 'Preview Text',
   tryThese: 'Try these:',
+  // Shown below the input when it contains a character with only partial
+  // unicode font support (see PARTIAL_SUPPORT_PATTERN in textInput.js).
+  disclaimerText: 'Some unicode fonts might not exist for certain characters.',
   // Semicolon-separated preview suggestions rendered as pills (semicolons,
   // not commas, so a suggestion can itself contain a comma).
   suggestions: 'The quick brown fox jumps over the lazy dog;ABCDEFGHIJKLMNOPQRSTUVWXYZ;Realigned equestrian fez bewilders picky monarch;Roger, hungry: ate 236 peaches & cantaloupes in 1904!',
@@ -46,6 +49,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   inputLabel: 'font-generator-input-label',
   previewTextLabel: 'font-generator-preview-text-label',
   tryThese: 'font-generator-try-these',
+  disclaimerText: 'font-generator-disclaimer-text',
   suggestions: 'font-generator-suggestions',
   maxLength: 'font-generator-max-length',
   filterTrigger: 'font-generator-filter',
