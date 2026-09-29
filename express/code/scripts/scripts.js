@@ -19,6 +19,7 @@ import {
   getRedirectUri,
   getIconElementDeprecated,
   getContentRoot,
+  isMobileForkButtonViewport,
 } from './utils.js';
 
 // Add project-wide style path here.
@@ -506,6 +507,21 @@ const listenAlloy = () => {
   }, 3000);
 };
 
+async function loadMobileGoogleLogin(loadIms, loadScript, getConfig) {
+  if (!isMobileForkButtonViewport()) return false;
+  const queryValue = new URLSearchParams(window.location.search).get('google-login');
+  const googleLogin = (queryValue || getMetadata('google-login'))?.trim().toLowerCase();
+  if (!['mobile', 'on'].includes(googleLogin)) return false;
+
+  try {
+    const { default: initGoogleLogin } = await import('../libs/features/google-login.js');
+    return await initGoogleLogin(loadIms, getMetadata, loadScript, getConfig);
+  } catch (error) {
+    window.lana?.log(`Google One Tap failed: ${error?.message || error}`, { tags: 'google-login', severity: 'error' });
+    return false;
+  }
+}
+
 async function loadPage() {
   if (window.isTestEnv) return;
   const {
@@ -514,6 +530,8 @@ async function loadPage() {
     setConfig,
     loadLana,
     createTag,
+    loadIms,
+    loadScript,
   } = await import(`${miloLibs}/utils/utils.js`);
 
   const footer = createTag('meta', { name: 'footer', content: 'global-footer' });
@@ -526,9 +544,9 @@ async function loadPage() {
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
 
-  const googleLoginRedirect = createTag('meta', { name: 'google-login', content: 'desktop' });
-  document.head.append(googleLoginRedirect);
-  // end TODO remove metadata after we go live
+  if (!isMobileForkButtonViewport()) {
+    document.head.append(createTag('meta', { name: 'google-login', content: 'desktop' }));
+  }
 
   const config = setConfig({ ...CONFIG, miloLibs });
 
@@ -551,8 +569,9 @@ async function loadPage() {
     const { default: replaceContent } = await import('./utils/content-replace.js');
     await replaceContent(document.querySelector('main'));
   }
-  // Decorate the page with site specific needs.
+  // Start One Tap before block decoration so its state can suppress generated floating CTAs.
   decorateArea();
+  const mobileGoogleLogin = loadMobileGoogleLogin(loadIms, loadScript, () => config);
 
   loadLana({ clientId: 'express' });
 
@@ -590,7 +609,7 @@ async function loadPage() {
     icon.dataset.svgInjected = 'true';
   });
 
-  await loadArea();
+  await Promise.all([loadArea(), mobileGoogleLogin]);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));

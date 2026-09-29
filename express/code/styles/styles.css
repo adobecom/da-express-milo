@@ -1084,6 +1084,11 @@ main .section.max-width-900 {
   margin-inline: auto;
 }
 
+body.google-one-tap-active[data-device] main .floating-button-wrapper[data-section-status][data-audience],
+body.google-one-tap-active main .floating-button-wrapper:not([data-audience]) {
+  display: none;
+}
+
 @media (max-width: 899px) {
   main .section.panel {
     margin: 0 var(--spacing-500) var(--spacing-600) var(--spacing-500);
