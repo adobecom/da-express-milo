@@ -122,6 +122,12 @@ main .section .verb-express-hero p {
   width: 100%;
 }
 
+/* Keep the authored primary CTA in Challenger 1 when the mobile fork uses
+   the same destination. The global same-fcta rule otherwise hides it. */
+.verb-express-hero[data-block-status] .cta-dropzone .action-area a.con-button.same-fcta {
+  display: block;
+}
+
 /* Figma's "mini dropzone" uses a smaller icon than verb-dropzone's
    full-size 49px widget-icon. */
 .verb-express-hero .widget-icon {
