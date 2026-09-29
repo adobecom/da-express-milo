@@ -13,7 +13,7 @@ let filterPanelCount = 0;
 // in font-styles.json (Gothic A1, Noto Sans, …). The names the kit exposes in
 // CSS must match each font's `fontSupported` value for cards to render in the
 // intended face.
-const ADOBE_FONTS_KIT_ID = 'iqd6egj';
+const ADOBE_FONTS_KIT_ID = 'zlz1zki';
 
 // This kit's web-project CSS endpoint (use.typekit.net/<id>.css) is domain-
 // locked and 412s off allow-listed domains, but the JS embed kit serves
