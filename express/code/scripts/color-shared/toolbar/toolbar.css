@@ -164,6 +164,20 @@
   min-inline-size: 0;
 }
 
+/* ── Edit button — opt-in persistent label (showEditLabel) ────── */
+
+.ax-edit-btn--labeled {
+  inline-size: auto;
+}
+
+.ax-edit-btn-label {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  font-weight: 700;
+  color: var(--color-default-font);
+  white-space: nowrap;
+}
+
 /* ── Toolbar actions ─────────────────────────────────────────── */
 
 .ax-toolbar-actions {

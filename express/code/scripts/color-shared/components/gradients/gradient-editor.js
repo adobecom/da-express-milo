@@ -4,7 +4,7 @@ import loadMiloStyle from '../../utils/loadMiloStyle.js';
 import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
 import { showExpressToast } from '../../spectrum/components/express-toast.js';
 import { createGradientEditorPlaceholders } from '../../i18n/loadGradientEditorPlaceholders.js';
-import { interpolate } from '../../utils/utilities.js';
+import { interpolate, trackColorExport } from '../../utils/utilities.js';
 import { safeClipboardWrite } from '../../../../libs/services/plugins/download/actions/helpers.js';
 import { getColorModeChannels } from '../../../../libs/color-components/utils/colorModeChannels.js';
 
@@ -732,6 +732,7 @@ export function createGradientEditor(initialGradient, options = {}) {
           const copyHex = getCopyValue(typeof stop.color === 'string' ? stop.color : sampledHex);
           safeClipboardWrite(copyHex, 'gradient-stop').then((ok) => {
             if (ok) {
+              trackColorExport('copy-clipboard');
               announceToScreenReader(strings.copySuccessSr, 'polite');
               showCopiedTooltipFeedback(handle);
             } else {
@@ -854,6 +855,7 @@ export function createGradientEditor(initialGradient, options = {}) {
               const copyHex = getCopyValue(typeof stop.color === 'string' ? stop.color : sampledHex);
               safeClipboardWrite(copyHex, 'gradient-stop').then((ok) => {
                 if (ok) {
+                  trackColorExport('copy-clipboard');
                   announceToScreenReader(strings.copySuccessSr, 'polite');
                   showCopiedTooltipFeedback(handle);
                 } else {

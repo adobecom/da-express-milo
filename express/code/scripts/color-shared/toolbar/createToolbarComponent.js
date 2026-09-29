@@ -1,5 +1,8 @@
 import { announceToScreenReader } from '../spectrum/index.js';
-import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
+import {
+  isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi,
+  decorateAnalyticsAttributes, trackColorExport,
+} from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { createIconButton, createSpectrumIcon } from '../utils/icons.js';
@@ -69,6 +72,7 @@ async function handleShare({ name, colors }, t) {
 
   try {
     await navigator.share({ title: name, url: shareUrl });
+    trackColorExport('share');
     announceToScreenReader(t.sharedSuccessfully);
     showExpressToast({ message: t.sharedSuccessfully, variant: 'positive' });
     return;
@@ -78,6 +82,7 @@ async function handleShare({ name, colors }, t) {
 
   try {
     await navigator.clipboard.writeText(shareUrl);
+    trackColorExport('share');
     announceToScreenReader(t.urlCopiedToClipboard);
     showExpressToast({ message: t.urlCopiedToClipboard, variant: 'positive' });
   } catch (err) {
@@ -192,6 +197,7 @@ function buildDownloadMenu(type, getPalette, t, onDownloaded) {
         };
         const downloadProvider = await serviceManager.getProvider('download');
         await downloadProvider?.[entry.method]?.(themeData);
+        trackColorExport('download');
         announceToScreenReader(t.downloadStarted);
         onDownloaded?.(palette, value);
       } catch (err) {
@@ -233,7 +239,10 @@ async function handleSave(
       paletteData: palette,
       type,
       anchorElement: container,
-      onSave: () => { activeDrawer = null; },
+      onSave: () => {
+        trackColorExport('save-to-library');
+        activeDrawer = null;
+      },
       onClose: () => { activeDrawer = null; },
       ccLibraryProvider,
       onLibraryCreated: (newLib) => {
@@ -297,7 +306,8 @@ function createSwatchBand(colors, type, angle) {
 
 /* ── Toolbar Builders ────────────────────────────────────────── */
 
-function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
+function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t, editOptions = {}) {
+  const { showEditLabel = false } = editOptions;
   const paletteSummary = createTag('div', { class: 'ax-palette-summary' });
   paletteSummary.appendChild(createColorStrip(colors, type, angle, t));
   if (showEdit) {
@@ -309,10 +319,34 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
     });
     editBtn.classList.add('ax-edit-btn');
     decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette' });
-    attachTooltip(editBtn, t.edit, { dismissOnActivate: true });
+    if (showEditLabel) {
+      editBtn.classList.add('ax-edit-btn--labeled');
+      editBtn.appendChild(createTag('span', { class: 'ax-edit-btn-label' }, t.edit));
+    } else {
+      attachTooltip(editBtn, t.edit, { dismissOnActivate: true });
+    }
     paletteSummary.appendChild(editBtn);
   }
   return paletteSummary;
+}
+
+function buildCustomActionButtons(actionButtons) {
+  const actions = createTag('div', { class: 'ax-toolbar-actions' });
+  actionButtons.forEach((entry) => {
+    // A pre-built element (e.g. a dropdown menu action) is appended as-is.
+    if (entry.element) {
+      actions.appendChild(entry.element);
+      return;
+    }
+    const {
+      icon, label, tooltip, onClick, analyticsLabel, dismissOnActivate = false,
+    } = entry;
+    const btn = createIconButton({ icon, label, size: 'm', onClick });
+    if (analyticsLabel) decorateAnalyticsAttributes(btn, { linkLabel: analyticsLabel });
+    if (tooltip) attachTooltip(btn, tooltip, { dismissOnActivate });
+    actions.appendChild(btn);
+  });
+  return { actions, ccLibBtn: null, downloadMenu: null };
 }
 
 function buildActionButtons(handlers, t, type, getPalette) {
@@ -682,6 +716,9 @@ export function createToolbar(options) {
     editPaletteLink = null,
     getLibraryContext,
     onCTA,
+    onEditClick: customOnEditClick,
+    showEditLabel = false,
+    actionButtons: customActionButtons,
     i18n = {},
     drawerI18n = {},
     deps = {},
@@ -749,6 +786,10 @@ export function createToolbar(options) {
     async () => {
       const currentPalette = getPaletteWithName();
       emit('edit', { palette: currentPalette });
+      if (customOnEditClick) {
+        customOnEditClick(currentPalette);
+        return;
+      }
       if (window.isTestEnv) return;
       if (editPaletteLink) {
         window.location.href = editPaletteLink;
@@ -765,32 +806,35 @@ export function createToolbar(options) {
       }
     },
     t,
+    { showEditLabel },
   );
 
-  const { actions, ccLibBtn, downloadMenu } = buildActionButtons({
-    onShare: async () => {
-      const currentPalette = getPaletteWithName();
-      await handleShare({ name: currentPalette.name, colors: currentPalette.colors }, t);
-      emit('share', { palette: currentPalette });
-    },
-    onDownloaded: (currentPalette, format) => {
-      emit('download', { palette: currentPalette, format });
-    },
-    onSave: async () => {
-      const ctx = await fetchLibCtxOnce();
-      const { libraries, provider: ccLibraryProvider } = ctx;
-      await handleSave(
-        getPaletteWithName(),
-        type,
-        ccLibBtn,
-        libraries,
-        ccLibraryProvider,
-        libCtxCache,
-        drawerI18n,
-      );
-      emit('save', { palette: getPaletteWithName() });
-    },
-  }, t, type, getPaletteWithName);
+  const { actions, ccLibBtn, downloadMenu } = customActionButtons
+    ? buildCustomActionButtons(customActionButtons)
+    : buildActionButtons({
+      onShare: async () => {
+        const currentPalette = getPaletteWithName();
+        await handleShare({ name: currentPalette.name, colors: currentPalette.colors }, t);
+        emit('share', { palette: currentPalette });
+      },
+      onDownloaded: (currentPalette, format) => {
+        emit('download', { palette: currentPalette, format });
+      },
+      onSave: async () => {
+        const ctx = await fetchLibCtxOnce();
+        const { libraries, provider: ccLibraryProvider } = ctx;
+        await handleSave(
+          getPaletteWithName(),
+          type,
+          ccLibBtn,
+          libraries,
+          ccLibraryProvider,
+          libCtxCache,
+          drawerI18n,
+        );
+        emit('save', { palette: getPaletteWithName() });
+      },
+    }, t, type, getPaletteWithName);
 
   const actionContainer = createTag('div', { class: 'ax-action-container' });
   actionContainer.appendChild(paletteSummary);
@@ -849,7 +893,7 @@ export function createToolbar(options) {
         await handleSave(
           getPaletteWithName(),
           type,
-          ccLibBtn,
+          ccLibBtn || actions,
           ctx.libraries,
           ctx.provider,
           libCtxCache,
