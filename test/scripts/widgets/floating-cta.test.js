@@ -1,4 +1,5 @@
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 import {
   delayFloatingCtaUntilMiniEditorPassed,
   delayFloatingCtaUntilViewportPassed,
@@ -22,9 +23,14 @@ describe('Floating CTA mini editor delay', () => {
         };
       }
     };
+    sinon.stub(window, 'requestAnimationFrame').callsFake((callback) => {
+      queueMicrotask(() => callback(performance.now()));
+      return 1;
+    });
   });
 
   afterEach(() => {
+    sinon.restore();
     window.IntersectionObserver = originalIntersectionObserver;
     document.body.replaceChildren();
   });
@@ -90,7 +96,7 @@ describe('Floating CTA mini editor delay', () => {
 
     miniEditorBottom = 0;
     window.dispatchEvent(new Event('scroll'));
-    await new Promise(requestAnimationFrame);
+    await Promise.resolve();
 
     expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.false;
     expect(restored).to.be.true;
@@ -108,7 +114,14 @@ describe('Floating CTA mini editor delay', () => {
 });
 
 describe('Floating CTA hero delay', () => {
+  beforeEach(() => {
+    sinon.stub(window, 'requestAnimationFrame').callsFake((callback) => {
+      queueMicrotask(() => callback(performance.now()));
+      return 1;
+    });
+  });
   afterEach(() => {
+    sinon.restore();
     document.body.replaceChildren();
   });
 
@@ -138,14 +151,14 @@ describe('Floating CTA hero delay', () => {
 
     heroBottom = 1;
     window.dispatchEvent(new Event('scroll'));
-    await new Promise(requestAnimationFrame);
+    await Promise.resolve();
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
     expect(button.style.bottom).to.equal('0px');
     expect(restored).to.be.false;
 
     heroBottom = 0;
     window.dispatchEvent(new Event('scroll'));
-    await new Promise(requestAnimationFrame);
+    await Promise.resolve();
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.false;
     expect(wrapper.hasAttribute('aria-hidden')).to.be.false;
     expect(wrapper.hasAttribute('inert')).to.be.false;
