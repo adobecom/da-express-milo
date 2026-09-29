@@ -1,4 +1,11 @@
-import { getLibs, getMobileOperatingSystem, getIconElementDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import {
+  addTempWrapperDeprecated,
+  getIconElementDeprecated,
+  getLibs,
+  getMobileOperatingSystem,
+  isIPad,
+  isMobileForkButtonViewport,
+} from '../../scripts/utils.js';
 import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
 import { collectFloatingButtonData, collectOsSplitFloatingButtonData, SUPPORTED_MWEB_OS } from '../../scripts/utils/mobile-fork-button-utils.js';
 
@@ -15,9 +22,10 @@ function buildUnityAction(entry, buttonType) {
   return wrapper;
 }
 
-async function createUnityMultiFunctionButton(block, data, audience) {
-  const buttonWrapper = await createFloatingButton(block, audience, data);
-  buttonWrapper.classList.add('multifunction', 'mobile-fork-button-unity');
+async function createUnityMultiFunctionButton(block, data, audience, isTablet) {
+  const wrapperClasses = ['multifunction', 'mobile-fork-button-unity'];
+  if (isTablet) wrapperClasses.push('mobile-fork-button-tablet');
+  const buttonWrapper = await createFloatingButton(block, audience, data, wrapperClasses);
 
   const floatingButton = buttonWrapper.querySelector('.floating-button');
   floatingButton.firstElementChild?.remove();
@@ -34,8 +42,11 @@ async function createUnityMultiFunctionButton(block, data, audience) {
 
 export default async function decorate(block) {
   ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
+  const useDeviceOverride = document.body.dataset.device !== 'mobile'
+    && isMobileForkButtonViewport();
+  const os = isIPad() || useDeviceOverride ? 'iOS' : getMobileOperatingSystem();
   const eligibilityOn = getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() === 'on';
-  if (eligibilityOn && !SUPPORTED_MWEB_OS.includes(getMobileOperatingSystem())) {
+  if (eligibilityOn && !SUPPORTED_MWEB_OS.includes(os)) {
     const { default: decorateNormal } = await import('../floating-button/floating-button.js');
     decorateNormal(block);
     return;
@@ -48,7 +59,6 @@ export default async function decorate(block) {
     block.closest('.section').remove();
   }
 
-  const os = getMobileOperatingSystem();
   const osPrefixes = { Android: 'android', iOS: 'ios' };
   const platform = osPrefixes[os];
   const data = platform
@@ -59,7 +69,12 @@ export default async function decorate(block) {
     data.delayUntilViewportPassed = document.querySelector('.resume-hero, .verb-express-hero');
   }
 
-  const blockWrapper = await createUnityMultiFunctionButton(block, data, audience);
+  const blockWrapper = await createUnityMultiFunctionButton(
+    block,
+    data,
+    audience,
+    useDeviceOverride,
+  );
   const blockLinks = blockWrapper.querySelectorAll('a');
   if (blockLinks && blockLinks.length > 0) {
     const linksPopulated = new CustomEvent('linkspopulated', { detail: blockLinks });

@@ -52,6 +52,42 @@ describe('Floating Button', () => {
     expect(floatingButton).to.exist;
   });
 
+  it('suppresses the desktop floating CTA on iPad until the hero viewport passes', async () => {
+    const platformDescriptor = Object.getOwnPropertyDescriptor(navigator, 'platform');
+    const touchPointsDescriptor = Object.getOwnPropertyDescriptor(navigator, 'maxTouchPoints');
+    Object.defineProperty(navigator, 'platform', { value: 'MacIntel', configurable: true });
+    Object.defineProperty(navigator, 'maxTouchPoints', { value: 5, configurable: true });
+    document.body.innerHTML = `<main>
+      <div class="verb-express-hero"></div>
+      <div class="section">
+        <div class="floating-button meta-powered"><div>desktop</div></div>
+      </div>
+    </main>`;
+    const main = document.querySelector('main');
+    const append = main.append.bind(main);
+    let suppressedWhenInserted = false;
+    main.append = (...nodes) => {
+      const wrapper = nodes.find((node) => node.classList?.contains('floating-button-wrapper'));
+      if (wrapper) suppressedWhenInserted = wrapper.classList.contains('floating-button--hero-suppressed');
+      append(...nodes);
+    };
+
+    try {
+      await decorate(document.querySelector('.floating-button'));
+      const wrapper = document.querySelector('.floating-button-wrapper[data-audience="desktop"]');
+
+      expect(suppressedWhenInserted).to.be.true;
+      expect(wrapper).to.exist;
+      expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
+      expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
+    } finally {
+      if (platformDescriptor) Object.defineProperty(navigator, 'platform', platformDescriptor);
+      else delete navigator.platform;
+      if (touchPointsDescriptor) Object.defineProperty(navigator, 'maxTouchPoints', touchPointsDescriptor);
+      else delete navigator.maxTouchPoints;
+    }
+  });
+
   it('Floating Button has the right elements and if mobile, .section should be removed', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     const floatingButton = document.querySelector('.floating-button');

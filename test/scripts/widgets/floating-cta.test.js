@@ -64,6 +64,38 @@ describe('Floating CTA mini editor delay', () => {
     expect(restored).to.be.true;
   });
 
+  it('tracks mini editor position when IntersectionObserver is unavailable', async () => {
+    window.IntersectionObserver = undefined;
+    document.body.innerHTML = `
+      <div class="mini-editor"></div>
+      <div class="floating-button-wrapper">
+        <div class="floating-button"></div>
+      </div>`;
+    const miniEditor = document.querySelector('.mini-editor');
+    const wrapper = document.querySelector('.floating-button-wrapper');
+    const button = document.querySelector('.floating-button');
+    let miniEditorBottom = 500;
+    let restored = false;
+    miniEditor.getBoundingClientRect = () => ({ bottom: miniEditorBottom });
+
+    delayFloatingCtaUntilMiniEditorPassed(
+      wrapper,
+      button,
+      miniEditor,
+      () => { restored = true; },
+    );
+
+    expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.true;
+    expect(button.style.bottom).to.equal('0px');
+
+    miniEditorBottom = 0;
+    window.dispatchEvent(new Event('scroll'));
+    await new Promise(requestAnimationFrame);
+
+    expect(wrapper.classList.contains('floating-button--mini-editor-suppressed')).to.be.false;
+    expect(restored).to.be.true;
+  });
+
   it('does nothing when a mini editor is not authored', () => {
     const wrapper = document.createElement('div');
     const button = document.createElement('div');
@@ -80,7 +112,7 @@ describe('Floating CTA hero delay', () => {
     document.body.replaceChildren();
   });
 
-  it('reveals after scrolling one viewport past the hero start', async () => {
+  it('reveals after the hero fully exits the viewport', async () => {
     document.body.innerHTML = `
       <div class="resume-hero"></div>
       <div class="floating-button-wrapper">
@@ -89,9 +121,9 @@ describe('Floating CTA hero delay', () => {
     const hero = document.querySelector('.resume-hero');
     const wrapper = document.querySelector('.floating-button-wrapper');
     const button = document.querySelector('.floating-button');
-    let heroTop = 0;
+    let heroBottom = 500;
     let restored = false;
-    hero.getBoundingClientRect = () => ({ top: heroTop });
+    hero.getBoundingClientRect = () => ({ bottom: heroBottom });
 
     delayFloatingCtaUntilViewportPassed(
       wrapper,
@@ -104,14 +136,14 @@ describe('Floating CTA hero delay', () => {
     expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
     expect(wrapper.hasAttribute('inert')).to.be.true;
 
-    heroTop = -(window.innerHeight - 1);
+    heroBottom = 1;
     window.dispatchEvent(new Event('scroll'));
     await new Promise(requestAnimationFrame);
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
     expect(button.style.bottom).to.equal('0px');
     expect(restored).to.be.false;
 
-    heroTop = -window.innerHeight;
+    heroBottom = 0;
     window.dispatchEvent(new Event('scroll'));
     await new Promise(requestAnimationFrame);
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.false;
@@ -149,6 +181,33 @@ describe('Floating CTA hero delay', () => {
 
     expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
     expect(wrapper.hasAttribute('inert')).to.be.true;
+  });
+
+  it('removes and restores focusability when inert is unavailable', () => {
+    const inertDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'inert');
+    delete HTMLElement.prototype.inert;
+    document.body.innerHTML = `
+      <div class="floating-button-wrapper floating-button--suppressed">
+        <a href="/express/">Create</a>
+        <button tabindex="2">Upload</button>
+      </div>`;
+    const wrapper = document.querySelector('.floating-button-wrapper');
+    const [link, button] = wrapper.querySelectorAll('a, button');
+
+    try {
+      syncFloatingCtaAccessibility(wrapper);
+      expect(link.getAttribute('tabindex')).to.equal('-1');
+      expect(button.getAttribute('tabindex')).to.equal('-1');
+
+      wrapper.classList.remove('floating-button--suppressed');
+      syncFloatingCtaAccessibility(wrapper);
+      expect(link.hasAttribute('tabindex')).to.be.false;
+      expect(button.getAttribute('tabindex')).to.equal('2');
+    } finally {
+      if (inertDescriptor) {
+        Object.defineProperty(HTMLElement.prototype, 'inert', inertDescriptor);
+      }
+    }
   });
 
   it('does nothing when a hero is not authored', () => {
