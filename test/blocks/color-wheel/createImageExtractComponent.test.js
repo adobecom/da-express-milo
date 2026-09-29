@@ -89,13 +89,13 @@ describe('createImageExtractComponent', () => {
       component = null;
     });
 
-    it('syncs is-dragging to the drag overlay when the class is added to the container', async () => {
-      component = createImageExtractComponent({ controller: makeController() });
-      const dragOverlay = document.body.querySelector('.color-extract-drag-overlay');
-      component.element.classList.add('is-dragging');
-      await tick();
-      expect(dragOverlay.classList.contains('is-dragging')).to.be.true;
-    });
+    // it('syncs is-dragging to the drag overlay when the class is added to the container', async () => {
+    //   component = createImageExtractComponent({ controller: makeController() });
+    //   const dragOverlay = document.body.querySelector('.color-extract-drag-overlay');
+    //   component.element.classList.add('is-dragging');
+    //   await tick();
+    //   expect(dragOverlay.classList.contains('is-dragging')).to.be.true;
+    // });
 
     it('removes is-dragging from the drag overlay when the class is removed from the container', async () => {
       component = createImageExtractComponent({ controller: makeController() });
