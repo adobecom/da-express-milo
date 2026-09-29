@@ -27,6 +27,18 @@
   src: local('Trebuchet MS'), local('TrebuchetMS'), local('Arial'), local('Helvetica');
 }
 
+/* Dedicated 900-weight match: local bold faces render wider/taller than adobe-clean 900, so metrics are tuned separately */
+@font-face {
+  font-family: 'adobe-clean-fallback';
+  font-display: swap;
+  size-adjust: 103%;
+  font-weight: 900;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+  src: local('Trebuchet MS Bold'), local('Trebuchet MS'), local('Arial Bold'), local('Arial'), local('Helvetica');
+}
+
 /* Arabic fallback chain: Trebuchet MS has no Arabic glyph coverage, so use Arial first */
 @font-face {
   font-family: 'adobe-clean-fallback-ar';
