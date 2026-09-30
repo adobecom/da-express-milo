@@ -731,9 +731,18 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
 
   window.addEventListener('resize', handleResize);
 
+  let resizeFrame;
   const resizeObserver = new ResizeObserver(() => {
-    synchronizePlanCellHeights(comparisonBlock);
-    synchronizeIconWrapperTextHeights(comparisonBlock);
+    if (resizeFrame) return;
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = null;
+      if (!comparisonBlock.isConnected) {
+        resizeObserver.disconnect();
+        return;
+      }
+      synchronizePlanCellHeights(comparisonBlock);
+      synchronizeIconWrapperTextHeights(comparisonBlock);
+    });
   });
 
   const planCellWrappers = comparisonBlock.querySelectorAll('.plan-cell-wrapper');
