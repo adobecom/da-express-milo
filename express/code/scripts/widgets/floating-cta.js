@@ -221,13 +221,12 @@ function makeCTAFromSheet(block, data) {
   const audienceSpecificText = audience && ['desktop', 'mobile'].includes(audience) ? data.mainCta[`${audience}Text`] : null;
   const buttonContainer = createTag('div', { class: 'button-container' });
   const ctaText = audienceSpecificText || data.mainCta.text;
-  const ctaFromSheet = createTag('a', { href: audienceSpecificUrl || data.mainCta.href, title: ctaText });
+  const ctaFromSheet = createTag('button', { href: audienceSpecificUrl || data.mainCta.href, title: ctaText });
   ctaFromSheet.textContent = ctaText;
   setDaaLL(ctaFromSheet, ctaText);
   buttonContainer.append(ctaFromSheet);
   block.setAttribute('daa-lh', 'floating-cta');
   block.append(buttonContainer);
-
   return ctaFromSheet;
 }
 
@@ -296,16 +295,16 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   new ResizeObserver(outputsize).observe(floatButtonLink);
 
   // Hide CTAs with same url & text as the Floating CTA && is NOT a Floating CTA (in mobile/tablet)
-  const aTagURL = new URL(aTag.href);
-  const sameUrlCTAs = Array.from(main.querySelectorAll('a.button:any-link, a.con-button:any-link'))
-    .filter((a) => (
-      a.textContent.trim() === aTag.textContent.trim()
-        || (new URL(a.href).pathname === aTagURL.pathname && new URL(a.href).hash === aTagURL.hash))
-        && !a.parentElement.parentElement.classList.contains('floating-button')
-        && !a.closest('.cta-carousel'));
-  sameUrlCTAs.forEach((cta) => {
-    cta.classList.add('same-fcta');
-  });
+  // const aTagURL = new URL(aTag.href);
+  // const sameUrlCTAs = Array.from(main.querySelectorAll('a.button:any-link, a.con-button:any-link'))
+  //   .filter((a) => (
+  //     a.textContent.trim() === aTag.textContent.trim()
+  //       || (new URL(a.href).pathname === aTagURL.pathname && new URL(a.href).hash === aTagURL.hash))
+  //       && !a.parentElement.parentElement.classList.contains('floating-button')
+  //       && !a.closest('.cta-carousel'));
+  // sameUrlCTAs.forEach((cta) => {
+  //   cta.classList.add('same-fcta');
+  // });
 
   const floatButtonWrapperOld = aTag.closest('.floating-button-wrapper');
   const floatButtonWrapper = createTag('div', { class: 'section floating-button-wrapper' });
