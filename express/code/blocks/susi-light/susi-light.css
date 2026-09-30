@@ -61,17 +61,18 @@
   box-sizing: border-box;
   width: 100%;
   padding-inline: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   background-color: var(--color-gray-150);
 }
 
-.susi-layout .footer.susi-banner > p {
-  margin: 0;
+.susi-layout .footer.susi-banner.stacked,
+.susi-layout .footer.susi-banner.stacked > p {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.susi-layout .footer.susi-banner.stacked > p {
+  margin: 0;
 }
 
 .susi-layout .footer.susi-bubbles {
