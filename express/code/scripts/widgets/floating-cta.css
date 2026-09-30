@@ -86,6 +86,7 @@ body.branch-banner-is-active .floating-button-wrapper .floating-button {
     transition: width .3s, margin .3s, min-width .3s, background-color .3s, color .3s, border .3s, background-position 2s ease-out, padding-left .3s;
 }
 
+.floating-button a.button:any-link,
 .floating-button button.button {
     position: relative;
     display: block;
@@ -98,6 +99,10 @@ body.branch-banner-is-active .floating-button-wrapper .floating-button {
     pointer-events: auto;
 }
 
+.floating-button a.button:any-link,
+.floating-button a.button:any-link:hover,
+.floating-button a.button:any-link:active,
+.floating-button a.button:any-link:focus,
 .floating-button button.button,
 .floating-button button.button:hover,
 .floating-button button.button:active,
@@ -106,6 +111,7 @@ body.branch-banner-is-active .floating-button-wrapper .floating-button {
 }
 
 
+.floating-button-wrapper.floating-button--above-the-fold:not(.floating-button--scrolled) a.button:any-link,
 .floating-button-wrapper.floating-button--above-the-fold:not(.floating-button--scrolled) button.button {
     padding: 13px 80px 14px 48px;
 }
@@ -215,6 +221,7 @@ body[data-suppressfloatingcta="true"] main .floating-button-wrapper[data-audienc
         background-color: rgba(0,0,0,0);
     }
 
+    .floating-button--below-the-fold .floating-button a.button:any-link,
     .floating-button--below-the-fold .floating-button button.button {
         margin-right: 0;
         min-width: 250px;
@@ -237,6 +244,10 @@ body[data-suppressfloatingcta="true"] main .floating-button-wrapper[data-audienc
         opacity: 0.9;
     }
 
+    .floating-button a.button:any-link,
+    .floating-button a.button:any-link:hover,
+    .floating-button a.button:any-link:active,
+    .floating-button a.button:any-link:focus,
     .floating-button button.button,
     .floating-button button.button:hover,
     .floating-button button.button:active,
@@ -246,6 +257,8 @@ body[data-suppressfloatingcta="true"] main .floating-button-wrapper[data-audienc
 }
 
 @media screen and (max-width: 350px) {
+    .floating-button a.button:any-link,
+    .floating-button--scrolled .floating-button a.button:any-link,
     .floating-button button.button,
     .floating-button--scrolled .floating-button button.button {
         min-width: unset

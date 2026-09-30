@@ -606,7 +606,7 @@ main video {
 }
 
 main a.button:any-link,
-main button.button,
+main .floating-button button.button,
 main a.con-button:any-link {
   text-decoration: none;
   border-radius: 18px;
@@ -660,7 +660,7 @@ main .xl-button a.con-button:any-link {
 }
 
 main a.button.xlarge:any-link,
-main button.button.xlarge,
+main .floating-button button.button.xlarge,
 main a.con-button.xlarge:any-link,
 main a.con-button.button-xxl:any-link,
 main a.con-button.xxl-button:any-link,
@@ -681,7 +681,7 @@ main .small a.con-button:any-link {
 }
 
 main a.button:any-link,
-main button.button,
+main .floating-button button.button,
 main a.button.accent:any-link,
 main a.con-button.blue:any-link,
 main .dark a.con-button.blue:any-link,
@@ -692,7 +692,7 @@ main a.button.primaryCTA:any-link {
 }
 
 main a.button:any-link:hover,
-main button.button:hover,
+main .floating-button button.button:hover,
 main a.button.accent:any-link:hover,
 main a.con-button.blue:any-link:hover,
 main .dark a.con-button.blue:any-link:hover,
@@ -702,7 +702,7 @@ main a.button.primaryCTA:any-link:hover {
 }
 
 main a.button:any-link:active,
-main button.button:active,
+main .floating-button button.button:active,
 main a.button.accent:any-link:active,
 main a.con-button.blue:any-link:active,
 main .dark a.con-button.blue:any-link:active,
@@ -712,7 +712,7 @@ main a.button.primaryCTA:any-link:active {
 }
 
 main a.button:focus,
-main button.button:focus,
+main .floating-button button.button:focus,
 main a.button.accent:focus,
 main a.con-button.blue:focus,
 main .dark a.con-button.blue:focus,
@@ -886,7 +886,7 @@ main a.con-button.wide {
 
 
 main a.button.gradient:any-link,
-main button.button.gradient  {
+main .floating-button button.button.gradient {
   color: var(--color-white);
   border-color: transparent;
   background: var(--S2-Buttons-Premium);
@@ -899,24 +899,24 @@ main button.button.gradient  {
 }
 
 main a.button.gradient:any-link:hover,
-main button.button.gradient:hover {
+main .floating-button button.button.gradient:hover {
   background: var(--S2-Buttons-Premium-Hover);
 }
 
 main a.button.gradient:any-link:focus,
-main button.button.gradient:focus {
+main .floating-button button.button.gradient:focus {
   outline: 2px solid var(--color-info-accent);
   outline-offset: 2px;
   background: var(--S2-Buttons-Premium);
 }
 
 main a.button.gradient:any-link:active,
-main button.button.gradient:active {
+main .floating-button button.button.gradient:active {
   background: var(--S2-Buttons-Premium-Down);
 }
 
 main a.button.gradient.disabled:any-link,
-main button.button.gradient.disabled {
+main .floating-button button.button.gradient.disabled {
   color: var(--color-gray-500);
   background: var(--color-gray-200);
   pointer-events: none;

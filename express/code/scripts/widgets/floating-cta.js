@@ -214,30 +214,26 @@ export function initLottieArrow(lottieScrollButton, floatButtonWrapper, scrollAn
   }, { passive: true });
 }
 
-document.addEventListener('click', (e) => {
-  const button = e.target.closest('button[title="Apply now"], button[aria-label="floating-button"]');
-  
-  if (!button) return;
-  const url = button.dataset.href;
-  if(!url) return;
-  window.open(url, '_blank', 'noopener,noreferrer');
-});
-
-/* istanbul ignore next */
-function makeCTAFromSheet(block, data) {
+export function makeCTAFromSheet(block, data) {
   const audience = block.querySelector(':scope > div').textContent.trim();
   const audienceSpecificUrl = audience && ['desktop', 'mobile'].includes(audience) ? data.mainCta[`${audience}Href`] : null;
   const audienceSpecificText = audience && ['desktop', 'mobile'].includes(audience) ? data.mainCta[`${audience}Text`] : null;
   const buttonContainer = createTag('div', { class: 'button-container' });
   const ctaText = audienceSpecificText || data.mainCta.text;
-  const ctaFromSheet = createTag('button', { 'aria-label': 'floating-button', type: 'button', title: ctaText, 'data-href': audienceSpecificUrl || data.mainCta.href });
-  // ctaFromSheet.addEventListener('click', (e) => {
-  //   e.preventDefault();
-  //   console.log('button is clicked');
-  //   const url = audienceSpecificUrl || data.mainCta.href;
-  //   if(!url) return;
-  //   window.open(url, '_blank', 'noopener,noreferrer');
-  // })
+  const href = audienceSpecificUrl || data.mainCta.href;
+  const isFrenchLocale = document.documentElement.lang.toLowerCase().startsWith('fr');
+  const ctaFromSheet = isFrenchLocale
+    ? createTag('button', {
+      'aria-label': 'floating-button', type: 'button', title: ctaText, 'data-href': href,
+    })
+    : createTag('a', { href, title: ctaText });
+
+  if (isFrenchLocale) {
+    ctaFromSheet.addEventListener('click', () => {
+      window.open(href, '_blank', 'noopener,noreferrer');
+    });
+  }
+
   ctaFromSheet.textContent = ctaText;
   setDaaLL(ctaFromSheet, ctaText);
   buttonContainer.append(ctaFromSheet);
@@ -310,17 +306,17 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
 
   new ResizeObserver(outputsize).observe(floatButtonLink);
 
-  // Hide CTAs with same url & text as the Floating CTA && is NOT a Floating CTA (in mobile/tablet)
-  // const aTagURL = new URL(aTag.href);
-  // const sameUrlCTAs = Array.from(main.querySelectorAll('a.button:any-link, a.con-button:any-link'))
-  //   .filter((a) => (
-  //     a.textContent.trim() === aTag.textContent.trim()
-  //       || (new URL(a.href).pathname === aTagURL.pathname && new URL(a.href).hash === aTagURL.hash))
-  //       && !a.parentElement.parentElement.classList.contains('floating-button')
-  //       && !a.closest('.cta-carousel'));
-  // sameUrlCTAs.forEach((cta) => {
-  //   cta.classList.add('same-fcta');
-  // });
+  // Hide matching non-floating CTAs on mobile/tablet.
+  const ctaUrl = new URL(aTag.href || aTag.dataset.href, window.location.href);
+  const sameUrlCTAs = Array.from(main.querySelectorAll('a.button:any-link, a.con-button:any-link'))
+    .filter((a) => (
+      a.textContent.trim() === aTag.textContent.trim()
+        || (new URL(a.href).pathname === ctaUrl.pathname && new URL(a.href).hash === ctaUrl.hash))
+        && !a.parentElement.parentElement.classList.contains('floating-button')
+        && !a.closest('.cta-carousel'));
+  sameUrlCTAs.forEach((cta) => {
+    cta.classList.add('same-fcta');
+  });
 
   const floatButtonWrapperOld = aTag.closest('.floating-button-wrapper');
   const floatButtonWrapper = createTag('div', { class: 'section floating-button-wrapper' });
