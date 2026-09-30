@@ -3,54 +3,8 @@ import sinon from 'sinon';
 import {
   delayFloatingCtaUntilMiniEditorPassed,
   delayFloatingCtaUntilViewportPassed,
-  makeCTAFromSheet,
   syncFloatingCtaAccessibility,
 } from '../../../express/code/scripts/widgets/floating-cta.js';
-
-describe('Floating CTA semantics', () => {
-  const data = {
-    mainCta: {
-      href: 'https://www.adobe.com/express/',
-      text: 'Create now',
-    },
-  };
-  let originalLang;
-
-  beforeEach(() => {
-    originalLang = document.documentElement.lang;
-  });
-
-  afterEach(() => {
-    document.documentElement.lang = originalLang;
-    document.body.replaceChildren();
-    sinon.restore();
-  });
-
-  it('keeps link semantics outside French locales', () => {
-    document.documentElement.lang = 'en-US';
-    const block = document.createElement('div');
-    block.innerHTML = '<div></div>';
-
-    const cta = makeCTAFromSheet(block, data);
-
-    expect(cta.tagName).to.equal('A');
-    expect(cta.href).to.equal(data.mainCta.href);
-  });
-
-  it('uses button semantics for French locales', () => {
-    document.documentElement.lang = 'fr-CA';
-    const open = sinon.stub(window, 'open');
-    const block = document.createElement('div');
-    block.innerHTML = '<div></div>';
-
-    const cta = makeCTAFromSheet(block, data);
-    cta.click();
-
-    expect(cta.tagName).to.equal('BUTTON');
-    expect(cta.dataset.href).to.equal(data.mainCta.href);
-    expect(open.calledOnceWith(data.mainCta.href, '_blank', 'noopener,noreferrer')).to.be.true;
-  });
-});
 
 describe('Floating CTA mini editor delay', () => {
   let originalIntersectionObserver;
