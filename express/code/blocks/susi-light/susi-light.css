@@ -96,6 +96,8 @@
   border-radius: 8px;
   padding: 4px;
   display: flex;
+  box-sizing: border-box;
+  max-width: calc(min(var(--susi-tabs-width), 95vw) - 2 * var(--spacing-300));
   gap: var(--spacing-75);
   background-color: var(--susi-grey);
 }
@@ -106,6 +108,10 @@
 
 .susi-light.tabs [role='tab'] {
   border: initial;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: center;
   padding: var(--spacing-100) var(--spacing-200) 10px;
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-xs);
