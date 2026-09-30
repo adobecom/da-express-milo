@@ -214,6 +214,15 @@ export function initLottieArrow(lottieScrollButton, floatButtonWrapper, scrollAn
   }, { passive: true });
 }
 
+document.addEventListener('click', (e) => {
+  const button = e.target.closest('button[title="Apply now"], button[aria-label="floating-button"]');
+  
+  if (!button) return;
+  const url = button.dataset.href;
+  if(!url) return;
+  window.open(url, '_blank', 'noopener,noreferrer');
+});
+
 /* istanbul ignore next */
 function makeCTAFromSheet(block, data) {
   const audience = block.querySelector(':scope > div').textContent.trim();
@@ -221,7 +230,14 @@ function makeCTAFromSheet(block, data) {
   const audienceSpecificText = audience && ['desktop', 'mobile'].includes(audience) ? data.mainCta[`${audience}Text`] : null;
   const buttonContainer = createTag('div', { class: 'button-container' });
   const ctaText = audienceSpecificText || data.mainCta.text;
-  const ctaFromSheet = createTag('button', { href: audienceSpecificUrl || data.mainCta.href, title: ctaText });
+  const ctaFromSheet = createTag('button', { 'aria-label': 'floating-button', type: 'button', title: ctaText, 'data-href': audienceSpecificUrl || data.mainCta.href });
+  // ctaFromSheet.addEventListener('click', (e) => {
+  //   e.preventDefault();
+  //   console.log('button is clicked');
+  //   const url = audienceSpecificUrl || data.mainCta.href;
+  //   if(!url) return;
+  //   window.open(url, '_blank', 'noopener,noreferrer');
+  // })
   ctaFromSheet.textContent = ctaText;
   setDaaLL(ctaFromSheet, ctaText);
   buttonContainer.append(ctaFromSheet);
