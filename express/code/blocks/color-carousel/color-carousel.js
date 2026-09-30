@@ -82,6 +82,7 @@ async function getCkgColors() {
     if (!canonicalName || !link || !hexCode) return null;
     let href = link.startsWith('/') ? `${prefix}${link}` : link;
     if (isColorChildPage && link.startsWith('/')) {
+      // Workaround until CKG updates its index to return /meanings paths for these pages.
       const slug = link.split('/').filter(Boolean).pop();
       if (slug) href = `${prefix}/meanings/${slug}`;
     }
