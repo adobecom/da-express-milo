@@ -27,6 +27,22 @@
   src: local('Trebuchet MS'), local('TrebuchetMS'), local('Arial'), local('Helvetica');
 }
 
+/*
+ * Dedicated fallback for adobe-clean-display (900-weight display cut used in large headlines).
+ * Its metrics (wider average glyph width, shorter ascent/descent) differ from the body cut of
+ * Adobe Clean, so reusing adobe-clean-fallback here still causes a visible reflow on swap.
+ */
+@font-face {
+  font-family: 'adobe-clean-display-fallback';
+  font-display: swap;
+  font-weight: 900;
+  size-adjust: 109%;
+  ascent-override: 90.7%;
+  descent-override: 24.8%;
+  line-gap-override: 0%;
+  src: local('Trebuchet MS Bold'), local('TrebuchetMS-Bold'), local('Arial Bold'), local('Arial'), local('Helvetica');
+}
+
 /* Arabic fallback chain: Trebuchet MS has no Arabic glyph coverage, so use Arial first */
 @font-face {
   font-family: 'adobe-clean-fallback-ar';
@@ -116,7 +132,7 @@
 
   /* font families */
   --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
-  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean-display-fallback', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
 
   /* body */
   --body-background-color: var(--color-white);
