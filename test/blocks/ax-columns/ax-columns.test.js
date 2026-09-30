@@ -171,20 +171,30 @@ describe('Columns', () => {
     expect(button.classList.contains('dark')).to.be.true;
   });
 
+  it('Supports a Milo-authored black fill button', async () => {
+    document.body.innerHTML = '<div class="ax-columns"><div><div><p><strong><a href="https://www.adobe.com/#_button-fill">CTA</a></strong></p></div></div></div>';
+    const columns = document.querySelector('.ax-columns');
+    await decorate(columns);
+
+    const button = columns.querySelector('a.button.fill');
+    expect(button).to.exist;
+    expect(button.href).to.equal('https://www.adobe.com/');
+  });
+
   it('Should decorate two buttons in a row', async () => {
     document.body.innerHTML = fullsizeTwoButtons;
     const columns = document.querySelector('.ax-columns');
     await decorate(columns);
 
-    const buttons = columns.querySelectorAll('.con-button');
+    const buttons = columns.querySelectorAll('.button');
     expect(buttons.length).to.equal(2);
 
     const primaryButton = buttons[0];
-    expect(primaryButton.classList.contains('blue')).to.be.true;
+    expect(primaryButton.classList.contains('accent')).to.be.true;
     expect(primaryButton.classList.contains('primaryCTA')).to.be.true;
 
     const secondaryButton = buttons[1];
-    expect(secondaryButton.classList.contains('outline')).to.be.true;
+    expect(secondaryButton.classList.contains('primary')).to.be.true;
     expect(secondaryButton.classList.contains('reverse')).to.be.true;
   });
 });
