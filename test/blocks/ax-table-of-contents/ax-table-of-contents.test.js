@@ -9,7 +9,7 @@ const { getLibs } = imports[0];
 const { default: decorate } = imports[2];
 const { addFreePlanWidget } = imports[3];
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
-  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
+  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'iwo3rvz.css' } } });
 });
 
 describe('table-of-contents', () => {
