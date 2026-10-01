@@ -15,14 +15,13 @@ function setExpanded(button, panel, expanded) {
   panel.toggleAttribute('inert', !expanded);
 }
 
-function buildAccordionItem(row, index, instanceId) {
+function buildAccordionItem(row, index, instanceId, openByDefault) {
   const [titleCell, contentCell] = [...row.children];
   const title = titleCell?.textContent.trim();
   if (!title || !contentCell) return null;
 
   const buttonId = `color-img-accordion-button-${instanceId}-${index}`;
   const panelId = `color-img-accordion-panel-${instanceId}-${index}`;
-  const titleId = `color-img-accordion-title-${instanceId}-${index}`;
   const item = createTag('div', { class: 'color-img-accordion-item' });
   const button = createTag('button', {
     class: 'color-img-accordion-button',
@@ -33,7 +32,6 @@ function buildAccordionItem(row, index, instanceId) {
   });
   const titleElement = createTag('span', {
     class: 'color-img-accordion-title',
-    id: titleId,
   }, title);
   const icon = createTag('span', {
     class: 'color-img-accordion-icon',
@@ -54,7 +52,7 @@ function buildAccordionItem(row, index, instanceId) {
   button.append(titleElement, icon);
   item.append(button, panel);
 
-  if (index === 0) setExpanded(button, panel, true);
+  if (openByDefault) setExpanded(button, panel, true);
   return item;
 }
 
@@ -153,7 +151,7 @@ export default async function decorate(block) {
 
   if (headingCell) heading.append(...headingCell.childNodes);
   itemRows.forEach((row, index) => {
-    const item = buildAccordionItem(row, index, instanceId);
+    const item = buildAccordionItem(row, index, instanceId, accordion.children.length === 0);
     if (item) accordion.append(item);
   });
 

@@ -50,6 +50,18 @@ describe('color-img-accordion', () => {
     expect(panel.hasAttribute('inert')).to.be.false;
   });
 
+  it('opens the first valid item when an earlier authored row is incomplete', async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/default.html' });
+    const block = document.querySelector('.color-img-accordion');
+    const incompleteRow = document.createElement('div');
+    incompleteRow.append(document.createElement('div'));
+    block.firstElementChild.after(incompleteRow);
+
+    await decorate(block);
+
+    expect(block.querySelector('.color-img-accordion-button').getAttribute('aria-expanded')).to.equal('true');
+  });
+
   it('keeps at most one item open', async () => {
     const block = await prepBlock('./mocks/default.html');
     const buttons = [...block.querySelectorAll('.color-img-accordion-button')];
