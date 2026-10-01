@@ -1324,7 +1324,6 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   text-decoration-skip-ink: auto;
 }
 
-
 @keyframes scaleSlideIn {
   from {
     transform: translateY(-100%) scaleY(0.8);
