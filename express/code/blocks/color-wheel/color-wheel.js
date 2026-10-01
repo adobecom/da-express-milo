@@ -1302,14 +1302,34 @@ export default async function decorate(block) {
     }
   }
 
-  await init();
+  // Serializes init() calls so overlapping breakpoint-change events (the width
+  // oscillating near 1200px, devtools open/close, orientation change, etc.) can never
+  // run concurrently. The currentInitToken guard inside init() only catches a stale
+  // run at a few checkpoints — several DOM-building steps (createColorToolLayout,
+  // buildTabs) happen before those checks, so two overlapping runs could previously
+  // both build/append tab content, duplicating the "Base color"/"Image"/"Color Wheel"
+  // labels. Chaining onto initChain guarantees a run fully settles before the next starts.
+  let initChain = Promise.resolve();
+  const queueInit = () => {
+    initChain = initChain.then(() => init());
+    return initChain;
+  };
 
-  const onBreakpointChange = async () => {
+  await queueInit();
+
+  // Debounce: matchMedia 'change' can fire multiple times in quick succession while the
+  // viewport width oscillates around the breakpoint (a continuous resize drag, devtools
+  // open/close, orientation change). Collapsing bursts into a single queueInit() call
+  // avoids stacking up redundant rebuilds; queueInit() itself still guarantees any
+  // rebuild that does run is fully serialized against the others.
+  let breakpointDebounceTimer = null;
+  const onBreakpointChange = () => {
     if (!block.isConnected) {
       desktopQuery.removeEventListener('change', onBreakpointChange);
       return;
     }
-    await init();
+    clearTimeout(breakpointDebounceTimer);
+    breakpointDebounceTimer = setTimeout(() => { queueInit(); }, 150);
   };
   desktopQuery.addEventListener('change', onBreakpointChange);
 }
