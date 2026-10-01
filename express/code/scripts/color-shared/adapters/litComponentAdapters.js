@@ -45,6 +45,32 @@ export function loadSwatchRailElement() {
   ));
 }
 
+// WebKit (Safari 27) can throw mid-construction when upgrading an
+// already-defined custom element, which the spec requires catching and
+// reporting internally rather than propagating — so the instance silently
+// stays un-upgraded (no Lit lifecycle) instead of erroring visibly. That
+// failure is permanent for that one instance, but unrelated to the class
+// itself, so a fresh instance gets its own independent upgrade attempt.
+// Skip retrying when the class isn't registered yet — that's the normal,
+// legitimate case (see loadSwatchRailElement) and resolves on its own once
+// defined, via the browser's standard auto-upgrade-on-define.
+function createSwatchRailElement(maxAttempts = 3) {
+  let element = document.createElement('color-swatch-rail');
+  if (!customElements.get('color-swatch-rail')) return element;
+  let attempt = 1;
+  while (typeof element.requestUpdate !== 'function' && attempt < maxAttempts) {
+    element = document.createElement('color-swatch-rail');
+    attempt += 1;
+  }
+  if (typeof element.requestUpdate !== 'function') {
+    window.lana?.log('color-swatch-rail failed to upgrade after retries', {
+      tags: 'color-swatch-rail,webkit-upgrade',
+      severity: 'warning',
+    });
+  }
+  return element;
+}
+
 export function createSwatchRailAdapter(paletteOrController, options = {}) {
   loadSwatchRailElement();
 
@@ -53,7 +79,7 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
     ? paletteOrController
     : createSwatchRailController(paletteOrController);
 
-  const element = document.createElement('color-swatch-rail');
+  const element = createSwatchRailElement();
   if (!isController) element.className = 'rail-palette';
   let responsiveUnsubscribe = null;
   const byOrientation = options.swatchFeaturesByOrientation;
