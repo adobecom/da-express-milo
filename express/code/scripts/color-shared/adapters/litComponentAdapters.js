@@ -36,7 +36,10 @@ function resolveVerticalResponsive() {
 // Fire-and-forget with no catch would leave `color-swatch-rail` permanently
 // undefined (empty rail, no retry) if a cold/uncached first load hits a
 // transient network failure — retry once before giving up silently.
-function loadSwatchRailElement() {
+// Exported so callers (createModalManager) can kick this off early — e.g. as
+// soon as the page's modal manager is created — instead of only on first
+// use, which is what caused the rail to visibly pop in after a modal opened.
+export function loadSwatchRailElement() {
   import('../../../libs/color-components/components/color-swatch-rail/index.js').catch(() => (
     import('../../../libs/color-components/components/color-swatch-rail/index.js').catch(() => {})
   ));

@@ -4,23 +4,11 @@ import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectru
 import { createSpectrumIcon } from '../utils/icons.js';
 import { addSwipeToClose, saveFocusedElement, restoreFocusedElement, getNextOverlayZIndex, interpolate } from '../utils/utilities.js';
 import { createColorModalPlaceholders } from '../i18n/loadColorModalPlaceholders.js';
+import { loadSwatchRailElement } from '../adapters/litComponentAdapters.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
-// Rail content is built (and its custom element import kicked off) before
-// open() runs, so without this the modal would slide in with an empty rail
-// that visibly pops in once the async definition resolves. Bounded so a
-// stalled/failed import (see createSwatchRailAdapter) can't hang the modal.
-const SWATCH_RAIL_READY_TIMEOUT_MS = 1500;
 
 let stylesLoadPromise = null;
-
-function waitForSwatchRailReady(root) {
-  if (!root?.querySelector?.('color-swatch-rail')) return Promise.resolve();
-  return Promise.race([
-    customElements.whenDefined('color-swatch-rail'),
-    new Promise((resolve) => { setTimeout(resolve, SWATCH_RAIL_READY_TIMEOUT_MS); }),
-  ]);
-}
 
 function ensureModalStyles() {
   if (stylesLoadPromise) return stylesLoadPromise;
@@ -34,6 +22,11 @@ function ensureModalStyles() {
 
 // eslint-disable-next-line import/prefer-default-export -- named export for createModalManager
 export function createModalManager(strings = createColorModalPlaceholders()) {
+  // Kicked off as early as possible (well before any modal open) so
+  // color-swatch-rail is already defined by the time it's actually used,
+  // instead of visibly popping in after the modal content it belongs to.
+  loadSwatchRailElement();
+
   // Persistent shell — created once, never removed until destroy().
   let overlay = null;
   let container = null;
@@ -228,8 +221,6 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
       fallback.setAttribute('role', 'status');
       bodyEl.appendChild(fallback);
     }
-
-    await waitForSwatchRailReady(bodyEl);
 
     previousActiveElement = saveFocusedElement();
     document.body.classList.add('ax-color-modal-open');
