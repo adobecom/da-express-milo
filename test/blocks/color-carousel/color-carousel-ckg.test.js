@@ -42,6 +42,7 @@ beforeEach(() => {
 afterEach(() => {
   fetchStub.restore();
   tasksMeta.remove();
+  document.head.querySelectorAll('meta[name="pagetype"]').forEach((m) => m.remove());
 });
 
 async function prepBlock(filePath) {
@@ -70,5 +71,18 @@ describe('Color Carousel / ckg + failsafe variants', () => {
     const block = await prepBlock('./mocks/empty.html');
     expect(block.classList.contains('ckg')).to.be.true;
     expect(block.querySelectorAll('.color-carousel-chip').length).to.equal(3);
+  });
+
+  it('rebases the CKG link onto /meanings, keeping the slug, when pagetype=color (the color-meanings vertical)', async () => {
+    const pageTypeMeta = document.createElement('meta');
+    pageTypeMeta.name = 'pagetype';
+    pageTypeMeta.content = 'color';
+    document.head.append(pageTypeMeta);
+
+    const block = await prepBlock('./mocks/ckg.html');
+    const chip = [...block.querySelectorAll('a.color-carousel-chip')]
+      .find((c) => c.querySelector('.color-carousel-chip-name')?.textContent === 'Pink');
+    expect(chip).to.exist;
+    expect(chip.getAttribute('href')).to.equal('/meanings/hot-pink');
   });
 });
