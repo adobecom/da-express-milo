@@ -885,10 +885,10 @@ main a.button.fill:any-link {
 
 main a.con-button.fill:any-link:hover,
 main a.con-button.fill:any-link:active,
-main a.con-button.fill:any-link:focus,
+main a.con-button.fill:any-link:focus-visible,
 main a.button.fill:any-link:hover,
 main a.button.fill:any-link:active,
-main a.button.fill:any-link:focus {
+main a.button.fill:any-link:focus-visible {
   color: var(--color-white);
   background-color: var(--Background-Primary-Hover);
   border-color: var(--Background-Primary-Hover);
@@ -907,16 +907,16 @@ main a.button.fill.dark:any-link {
 
 main .dark a.con-button.fill:any-link:hover,
 main .dark a.con-button.fill:any-link:active,
-main .dark a.con-button.fill:any-link:focus,
+main .dark a.con-button.fill:any-link:focus-visible,
 main .dark a.button.fill:any-link:hover,
 main .dark a.button.fill:any-link:active,
-main .dark a.button.fill:any-link:focus,
+main .dark a.button.fill:any-link:focus-visible,
 main a.con-button.fill.dark:any-link:hover,
 main a.con-button.fill.dark:any-link:active,
-main a.con-button.fill.dark:any-link:focus,
+main a.con-button.fill.dark:any-link:focus-visible,
 main a.button.fill.dark:any-link:hover,
 main a.button.fill.dark:any-link:active,
-main a.button.fill.dark:any-link:focus {
+main a.button.fill.dark:any-link:focus-visible {
   color: var(--color-black);
   background-color: var(--color-gray-100);
   border-color: var(--color-gray-100);
