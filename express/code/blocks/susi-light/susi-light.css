@@ -77,6 +77,7 @@
 
 .susi-layout .footer.susi-bubbles {
   padding-bottom: var(--spacing-500);
+  padding-inline: var(--spacing-300);
 }
 
 .susi-layout .footer.susi-bubbles h2 {
