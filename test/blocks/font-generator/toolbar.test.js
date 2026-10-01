@@ -78,6 +78,14 @@ describe('font-generator/toolbar', () => {
       .to.equal(`1 bold ${DEFAULT_PLACEHOLDERS.fontCountLabel}`);
   });
 
+  it('uses the localized category label in the count when provided', () => {
+    const custom = createToolbar({ panelId: 'p', strings: { categoryLabels: { bold: 'Fett' } } });
+    setState({ activeFilters: ['bold'] });
+    expect(custom.toolbar.querySelector('.toolbar-count').textContent)
+      .to.equal(`1 Fett ${DEFAULT_PLACEHOLDERS.fontCountLabel}`);
+    custom.unsubscribe();
+  });
+
   it('omits the category from the count once filters are cleared', () => {
     setState({ activeFilters: ['bold'] });
     setState({ activeFilters: [] });
