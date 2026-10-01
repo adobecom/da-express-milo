@@ -33,8 +33,17 @@ function resolveVerticalResponsive() {
   return window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`).matches ? 'vertical' : 'stacked';
 }
 
+// Fire-and-forget with no catch would leave `color-swatch-rail` permanently
+// undefined (empty rail, no retry) if a cold/uncached first load hits a
+// transient network failure — retry once before giving up silently.
+function loadSwatchRailElement() {
+  import('../../../libs/color-components/components/color-swatch-rail/index.js').catch(() => (
+    import('../../../libs/color-components/components/color-swatch-rail/index.js').catch(() => {})
+  ));
+}
+
 export function createSwatchRailAdapter(paletteOrController, options = {}) {
-  import('../../../libs/color-components/components/color-swatch-rail/index.js');
+  loadSwatchRailElement();
 
   const isController = typeof paletteOrController?.subscribe === 'function';
   const controller = isController

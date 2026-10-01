@@ -6,8 +6,21 @@ import { addSwipeToClose, saveFocusedElement, restoreFocusedElement, getNextOver
 import { createColorModalPlaceholders } from '../i18n/loadColorModalPlaceholders.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
+// Rail content is built (and its custom element import kicked off) before
+// open() runs, so without this the modal would slide in with an empty rail
+// that visibly pops in once the async definition resolves. Bounded so a
+// stalled/failed import (see createSwatchRailAdapter) can't hang the modal.
+const SWATCH_RAIL_READY_TIMEOUT_MS = 1500;
 
 let stylesLoadPromise = null;
+
+function waitForSwatchRailReady(root) {
+  if (!root?.querySelector?.('color-swatch-rail')) return Promise.resolve();
+  return Promise.race([
+    customElements.whenDefined('color-swatch-rail'),
+    new Promise((resolve) => { setTimeout(resolve, SWATCH_RAIL_READY_TIMEOUT_MS); }),
+  ]);
+}
 
 function ensureModalStyles() {
   if (stylesLoadPromise) return stylesLoadPromise;
@@ -215,6 +228,8 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
       fallback.setAttribute('role', 'status');
       bodyEl.appendChild(fallback);
     }
+
+    await waitForSwatchRailReady(bodyEl);
 
     previousActiveElement = saveFocusedElement();
     document.body.classList.add('ax-color-modal-open');
