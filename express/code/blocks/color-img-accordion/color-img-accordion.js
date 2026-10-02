@@ -57,18 +57,13 @@ function buildAccordionItem(row, index, instanceId, openByDefault) {
   return item;
 }
 
-function setupAccordion(block, accordion) {
-  const buttons = [...accordion.querySelectorAll('.color-img-accordion-button')];
-
+function setupAccordion(block) {
   block.addEventListener('click', (event) => {
     const button = event.target.closest('.color-img-accordion-button');
     if (!button || !block.contains(button)) return;
 
-    const shouldExpand = button.getAttribute('aria-expanded') !== 'true';
-    buttons.forEach((itemButton) => {
-      const panel = document.getElementById(itemButton.getAttribute('aria-controls'));
-      if (panel) setExpanded(itemButton, panel, itemButton === button && shouldExpand);
-    });
+    const panel = document.getElementById(button.getAttribute('aria-controls'));
+    if (panel) setExpanded(button, panel, button.getAttribute('aria-expanded') !== 'true');
   });
 }
 
@@ -181,5 +176,5 @@ export default async function decorate(block) {
   if (media) inner.append(media);
   inner.append(content);
   block.replaceChildren(inner);
-  setupAccordion(block, accordion);
+  setupAccordion(block);
 }

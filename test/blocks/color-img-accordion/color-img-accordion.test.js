@@ -62,17 +62,21 @@ describe('color-img-accordion', () => {
     expect(block.querySelector('.color-img-accordion-button').getAttribute('aria-expanded')).to.equal('true');
   });
 
-  it('keeps at most one item open', async () => {
+  it('toggles items independently so multiple panels can stay open', async () => {
     const block = await prepBlock('./mocks/default.html');
     const buttons = [...block.querySelectorAll('.color-img-accordion-button')];
+    const firstPanel = document.getElementById(buttons[0].getAttribute('aria-controls'));
+    const secondPanel = document.getElementById(buttons[1].getAttribute('aria-controls'));
 
     buttons[1].click();
-    expect(buttons[0].getAttribute('aria-expanded')).to.equal('false');
+    expect(buttons[0].getAttribute('aria-expanded')).to.equal('true');
     expect(buttons[1].getAttribute('aria-expanded')).to.equal('true');
-    expect(document.getElementById(buttons[0].getAttribute('aria-controls')).hasAttribute('inert')).to.be.true;
+    expect(firstPanel.hasAttribute('inert')).to.be.false;
+    expect(secondPanel.hasAttribute('inert')).to.be.false;
 
     buttons[1].click();
-    expect(buttons.every((button) => button.getAttribute('aria-expanded') === 'false')).to.be.true;
+    expect(buttons[0].getAttribute('aria-expanded')).to.equal('true');
+    expect(buttons[1].getAttribute('aria-expanded')).to.equal('false');
   });
 
   it('preserves structured and image content inside panels', async () => {

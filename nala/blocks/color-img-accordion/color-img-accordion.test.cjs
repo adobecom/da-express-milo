@@ -42,15 +42,20 @@ test.describe('ColorImgAccordionBlock Test Suite', () => {
         swatches.map((swatch) => getComputedStyle(swatch).backgroundColor)
       ));
       expect(new Set(swatchColors).size).toBeGreaterThan(1);
+      const imageBox = await block.image.boundingBox();
+      const paletteBox = await block.palette.boundingBox();
+      expect(Math.abs(imageBox.x - paletteBox.x)).toBeLessThan(1);
+      expect(Math.abs(imageBox.width - paletteBox.width)).toBeLessThan(1);
+      expect(Math.abs(imageBox.y + imageBox.height - paletteBox.y)).toBeLessThan(1);
       await expect(block.buttons).toHaveCount(4);
       await expect(block.buttons.first()).toHaveAttribute('aria-expanded', 'true');
     });
 
-    await test.step('step-3: Verify one-open-at-a-time behavior', async () => {
+    await test.step('step-3: Verify multiple-open behavior', async () => {
       await block.buttons.nth(1).click();
-      await expect(block.buttons.first()).toHaveAttribute('aria-expanded', 'false');
+      await expect(block.buttons.first()).toHaveAttribute('aria-expanded', 'true');
       await expect(block.buttons.nth(1)).toHaveAttribute('aria-expanded', 'true');
-      await expect(block.panels.first()).toHaveAttribute('aria-hidden', 'true');
+      await expect(block.panels.first()).toHaveAttribute('aria-hidden', 'false');
       await expect(block.panels.nth(1)).toHaveAttribute('aria-hidden', 'false');
     });
 
