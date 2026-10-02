@@ -159,10 +159,11 @@ export default function createToolbar({ panelId, strings = {} } = {}) {
     // activeFilters is single-select (0 or 1 category) — name it in the
     // count so a filtered result reads as a confirmation, not just a number.
     const [category] = activeFilters;
-    const categoryLabel = s.categoryLabels?.[category] || category;
-    count.textContent = category
-      ? `${activeFonts.length} ${categoryLabel} ${s.fontCountLabel}`
-      : `${activeFonts.length} ${s.fontCountLabel}`;
+    // Each category has its own authored phrase so locales control word order.
+    const label = category
+      ? s.categoryCountLabels?.[category] || `${category} ${s.fontCountLabel}`
+      : s.fontCountLabel;
+    count.textContent = `${activeFonts.length} ${label}`;
   }
 
   // ── Events ───────────────────────────────────────────────────────────────

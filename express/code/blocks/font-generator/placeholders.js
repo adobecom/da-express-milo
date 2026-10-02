@@ -7,7 +7,8 @@ import { getLibs } from '../../scripts/utils.js';
 // 'font-generator-symbol', 'font-generator-filters',
 // 'font-generator-close-filters', 'font-generator-promo-title',
 // 'font-generator-promo-cta') via filters.js/panel.js fetchStrings() —
-// and category labels / font names are resolved per-catalog by loadFontLabels().
+// and per-category count phrases / font names are resolved per-catalog by
+// loadFontLabels().
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   // Input panel
   previewPlaceholder: 'Type the preview text you want to get started...',
@@ -78,24 +79,29 @@ function isResolvedPlaceholder(value, key) {
   return value && value !== key.replaceAll('-', ' ');
 }
 
-// Category keys are shared with the filter buttons in filters.js
-// (e.g. 'Cool' -> 'font-generator-cool').
-export const getCategoryKey = (category) => `font-generator-${category.toLowerCase()}`;
+// Filtered toolbar count copy is authored as a whole phrase per category
+// (e.g. 'Cool' -> 'font-generator-cool-font-count' = "Cool unicode fonts") so
+// locales can place the category before or after "unicode fonts".
+export const getCategoryCountKey = (category) => `font-generator-${category.toLowerCase()}-font-count`;
 // Font names are keyed by their stable font-styles.json id
 // (e.g. 'light-text-bubble' -> 'font-generator-light-text-bubble').
 export const getFontNameKey = (fontId) => `font-generator-${fontId}`;
 
 /**
- * Resolves localized category labels and font display names for the loaded
- * catalog in a single batched lookup, falling back to the raw category /
- * styleName from font-styles.json for anything not yet authored.
+ * Resolves per-category toolbar count phrases and font display names for the
+ * loaded catalog in a single batched lookup. Font names fall back to the
+ * styleName from font-styles.json; count phrases are only included when
+ * authored (the toolbar composes its own fallback).
  *
  * @param {import('./types.js').FontDef[]} fonts
- * @returns {Promise<{ categoryLabels: Record<string, string>, fontNames: Record<string, string> }>}
+ * @returns {Promise<{
+ *   categoryCountLabels: Record<string, string>,
+ *   fontNames: Record<string, string>,
+ * }>}
  */
 export async function loadFontLabels(fonts = []) {
   const categories = [...new Set(fonts.map((f) => f.category).filter(Boolean))];
-  const categoryLabels = Object.fromEntries(categories.map((c) => [c, c]));
+  const categoryCountLabels = {};
   const fontNames = Object.fromEntries(fonts.map((f) => [f.id, f.styleName]));
 
   try {
@@ -104,12 +110,14 @@ export async function loadFontLabels(fonts = []) {
       import(`${getLibs()}/features/placeholders.js`),
     ]);
 
-    const categoryKeys = categories.map(getCategoryKey);
+    const categoryKeys = categories.map(getCategoryCountKey);
     const fontKeys = fonts.map((f) => getFontNameKey(f.id));
     const values = await replaceKeyArray([...categoryKeys, ...fontKeys], getConfig());
 
     categories.forEach((category, i) => {
-      if (isResolvedPlaceholder(values[i], categoryKeys[i])) categoryLabels[category] = values[i];
+      if (isResolvedPlaceholder(values[i], categoryKeys[i])) {
+        categoryCountLabels[category] = values[i];
+      }
     });
     fonts.forEach((font, i) => {
       const value = values[categoryKeys.length + i];
@@ -119,7 +127,7 @@ export async function loadFontLabels(fonts = []) {
     // Fall through with the English catalog values.
   }
 
-  return { categoryLabels, fontNames };
+  return { categoryCountLabels, fontNames };
 }
 
 /**

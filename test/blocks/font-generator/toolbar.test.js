@@ -78,11 +78,14 @@ describe('font-generator/toolbar', () => {
       .to.equal(`1 bold ${DEFAULT_PLACEHOLDERS.fontCountLabel}`);
   });
 
-  it('uses the localized category label in the count when provided', () => {
-    const custom = createToolbar({ panelId: 'p', strings: { categoryLabels: { bold: 'Fett' } } });
+  it('uses the authored per-category count phrase, preserving locale word order', () => {
+    const custom = createToolbar({
+      panelId: 'p',
+      strings: { categoryCountLabels: { bold: 'polices Unicode à effet bold' } },
+    });
     setState({ activeFilters: ['bold'] });
     expect(custom.toolbar.querySelector('.toolbar-count').textContent)
-      .to.equal(`1 Fett ${DEFAULT_PLACEHOLDERS.fontCountLabel}`);
+      .to.equal('1 polices Unicode à effet bold');
     custom.unsubscribe();
   });
 

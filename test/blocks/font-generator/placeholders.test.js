@@ -10,7 +10,7 @@ const {
   default: loadFontGeneratorPlaceholders,
   DEFAULT_PLACEHOLDERS,
   loadFontLabels,
-  getCategoryKey,
+  getCategoryCountKey,
   getFontNameKey,
 } = await import('../../../express/code/blocks/font-generator/placeholders.js');
 
@@ -68,16 +68,16 @@ describe('font-generator/placeholders', () => {
       { id: 'dark-text-bubble', styleName: 'Dark text bubble', category: 'Cool' },
     ];
 
-    it('reuses the filter category keys and keys font names by id', () => {
-      expect(getCategoryKey('Cool')).to.equal('font-generator-cool');
-      expect(getCategoryKey('Glitch')).to.equal('font-generator-glitch');
-      expect(getCategoryKey('Symbol')).to.equal('font-generator-symbol');
+    it('keys count phrases per category and font names by id', () => {
+      expect(getCategoryCountKey('Cool')).to.equal('font-generator-cool-font-count');
+      expect(getCategoryCountKey('Glitch')).to.equal('font-generator-glitch-font-count');
+      expect(getCategoryCountKey('Symbol')).to.equal('font-generator-symbol-font-count');
       expect(getFontNameKey('light-text-bubble')).to.equal('font-generator-light-text-bubble');
     });
 
-    it('falls back to the raw catalog values when nothing is authored', async () => {
-      const { categoryLabels, fontNames } = await loadFontLabels(FONTS);
-      expect(categoryLabels).to.deep.equal({ Cool: 'Cool', Glitch: 'Glitch' });
+    it('falls back to the catalog font names and omits unauthored count phrases', async () => {
+      const { categoryCountLabels, fontNames } = await loadFontLabels(FONTS);
+      expect(categoryCountLabels).to.deep.equal({});
       expect(fontNames).to.deep.equal({
         'light-text-bubble': 'Light text bubble',
         bandaid: 'Bandaid',
@@ -86,7 +86,7 @@ describe('font-generator/placeholders', () => {
     });
 
     it('returns empty maps for an empty catalog', async () => {
-      expect(await loadFontLabels()).to.deep.equal({ categoryLabels: {}, fontNames: {} });
+      expect(await loadFontLabels()).to.deep.equal({ categoryCountLabels: {}, fontNames: {} });
     });
   });
 });
