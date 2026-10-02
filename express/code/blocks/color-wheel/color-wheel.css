@@ -1,3 +1,8 @@
+.color-wheel {
+  --cw-sidebar-fr: 4fr;
+  --cw-canvas-fr: 8fr;
+}
+
 /* Hide authored <div> children during the loading phase on desktop.
    The real UI mounts inside a <section>; authored divs are not LCP content
    (the H1 lives in the separate color-headline block) so hiding them is safe.
@@ -45,7 +50,7 @@ body {
   margin-inline: 0;
 }
 
-.color-wheel sp-tabs {
+.color-wheel ax-tabs {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-300);
@@ -54,7 +59,7 @@ body {
   max-width: 100%;
 }
 
-.color-wheel sp-tab-panel {
+.color-wheel ax-tab-panel {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -339,7 +344,7 @@ color-wheel-express {
 }
 
 .color-wheel-harmony-current-name {
-  color: var(--Alias-content-typography-Body, #505050); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  color: var(--Alias-content-typography-Body);
   font-size: var(--Global-Typography-Size-Label-Label-L);
   line-height: var(--Global-Typography-Line-height-Label-Label-L);
 }
@@ -453,6 +458,17 @@ color-wheel-express {
   }
 }
 
+@media (max-width: 1199px) {
+  .color-wheel .action-menu-full {
+    padding-block: var(--spacing-100);
+    border-bottom: 1px solid var(--Palette-gray-100);
+  }
+
+  .color-wheel .action-menu-full .action-menu-controls {
+    display: none;
+  }
+}
+
 @media (max-width: 599px) {
   .color-wheel .ax-toolbar-standalone .ax-palette-name {
       display: flex;
@@ -474,6 +490,12 @@ color-wheel-express {
 @media (min-width: 600px) {
   .color-wheel .ax-color-tool-layout {
     --ax-padding-sidebar-mobile: 0 0 var(--spacing-400);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .color-wheel .action-menu-full {
+    padding-block: 0 var(--spacing-100);
   }
 }
 
@@ -524,7 +546,7 @@ color-wheel-express {
 
   .color-wheel .ax-color-tool-layout {
     grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-columns: minmax(0, var(--cw-sidebar-fr, 4fr)) minmax(0, 8fr); /* stylelint-disable-line declaration-property-value-disallowed-list */
+    grid-template-columns: minmax(0, var(--cw-sidebar-fr)) minmax(0, var(--cw-canvas-fr));
     align-items: stretch;
     transition: grid-template-columns 0.35s ease, column-gap 0.35s ease;
   }
@@ -570,7 +592,7 @@ color-wheel-express {
     display: block;
   }
 
-  .color-wheel sp-tabs {
+  .color-wheel ax-tabs {
     flex: 1 1 0;
     min-height: 0;
   }
@@ -580,33 +602,33 @@ color-wheel-express {
   }
 
   .color-wheel .action-menu-controls-only {
-    padding-block-end: 0;
+    display: none;
   }
 
   .color-wheel color-wheel-express {
     max-width: 350px;
   }
 
-  .color-wheel sp-tab-panel[selected] .image-extract,
-  .color-wheel sp-tab-panel[selected] .color-extract-landing,
-  .color-wheel sp-tab-panel[selected] .color-extract-landing-content,
-  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit,
-  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-stage,
-  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-left {
+  .color-wheel ax-tab-panel[selected] .image-extract,
+  .color-wheel ax-tab-panel[selected] .color-extract-landing,
+  .color-wheel ax-tab-panel[selected] .color-extract-landing-content,
+  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-edit,
+  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-edit-stage,
+  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-edit-left {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: stretch;
   }
 
-  .color-wheel sp-tab-panel[selected] .image-upload-dropzone-container,
-  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-bg {
+  .color-wheel ax-tab-panel[selected] .image-upload-dropzone-container,
+  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-edit-bg {
     flex: 1;
     display: flex;
     justify-content: center;
   }
 
-  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-landing {
+  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-landing {
     display: none;
   }
 
