@@ -91,6 +91,8 @@ describe('color-img-accordion', () => {
     const swatches = [...palette.querySelectorAll('.color-img-accordion-swatch')];
     expect(swatches).to.have.length(6);
     swatches.forEach((swatch) => expect(swatch.style.background).to.not.equal(''));
+    const colors = new Set(swatches.map((swatch) => swatch.style.background));
+    expect(colors.size).to.be.greaterThan(1);
   });
 
   it('supports the simple-image and image-left variants', async () => {

@@ -37,6 +37,11 @@ test.describe('ColorImgAccordionBlock Test Suite', () => {
 
       await expect(block.image).toBeVisible();
       await expect(block.swatches).toHaveCount(6);
+      await expect(block.palette).toHaveClass(/is-ready/);
+      const swatchColors = await block.swatches.evaluateAll((swatches) => (
+        swatches.map((swatch) => getComputedStyle(swatch).backgroundColor)
+      ));
+      expect(new Set(swatchColors).size).toBeGreaterThan(1);
       await expect(block.buttons).toHaveCount(4);
       await expect(block.buttons.first()).toHaveAttribute('aria-expanded', 'true');
     });

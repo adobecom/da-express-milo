@@ -1,6 +1,7 @@
 import { getLibs } from '../../scripts/utils.js';
 import {
   applyPaletteToChips,
+  drawImageToCanvas,
   extractPaletteFromImageElement,
 } from '../../scripts/color-shared/utils/imageExtractUtils.js';
 
@@ -71,10 +72,30 @@ function setupAccordion(block, accordion) {
   });
 }
 
+async function extractPalette(image) {
+  try {
+    const canvas = drawImageToCanvas(image);
+    const context = canvas.getContext('2d');
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const { extractColorsFromImage } = await import(
+      '../../scripts/color-shared/utils/extractWorker.js'
+    );
+    const { colors } = await extractColorsFromImage(
+      imageData,
+      canvas.width,
+      canvas.height,
+      PALETTE_SIZE,
+    );
+    return colors;
+  } catch {
+    return extractPaletteFromImageElement(image, PALETTE_SIZE);
+  }
+}
+
 function setupPalette(block, image, palette, chips) {
-  const updatePalette = () => {
-    const colors = extractPaletteFromImageElement(image, PALETTE_SIZE);
-    if (!colors) return;
+  const updatePalette = async () => {
+    const colors = await extractPalette(image);
+    if (!colors?.length) return;
     applyPaletteToChips(colors, chips);
     palette.classList.add('is-ready');
   };
