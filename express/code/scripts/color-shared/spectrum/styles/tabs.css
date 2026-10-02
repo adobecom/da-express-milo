@@ -4,53 +4,53 @@
  * Applies Express design system styling to <sp-tabs>.
  */
 
-:is(sp-tabs, ax-tabs) {
+sp-tabs {
   --spectrum-tabs-font-family: var(--body-font-family);
 }
 
 /* Quiet tabs styling */
-:is(sp-tabs, ax-tabs)[quiet] {
+sp-tabs[quiet] {
   --spectrum-tabs-divider-background-color: transparent;
 }
 
 /* Tab item styling */
-:is(sp-tab, ax-tab) {
+sp-tab {
   --spectrum-tabs-item-font-weight: var(--font-weight-medium);
 }
 
 /* Selected tab indicator */
-:is(sp-tabs, ax-tabs)::part(tab-indicator) {
+sp-tabs::part(tab-indicator) {
   --spectrum-tabs-selection-indicator-color: var(--color-info-accent);
 }
 
 /* Size variants */
-:is(sp-tabs, ax-tabs)[size="s"] {
+sp-tabs[size="s"] {
   --spectrum-tabs-item-height: 28px;
   --spectrum-tabs-font-size: 12px;
 }
 
-:is(sp-tabs, ax-tabs)[size="m"] {
+sp-tabs[size="m"] {
   --spectrum-tabs-item-height: 32px;
   --spectrum-tabs-font-size: 14px;
   --mod-tabs-icon-size: 20px;
   --mod-tabs-top-to-icon: 13px;
 }
 
-:is(sp-tabs, ax-tabs)[size="l"] {
+sp-tabs[size="l"] {
   --spectrum-tabs-item-height: 40px;
   --spectrum-tabs-font-size: 16px;
 }
 
-:is(sp-tabs, ax-tabs)[size="xl"] {
+sp-tabs[size="xl"] {
   --spectrum-tabs-item-height: 48px;
   --spectrum-tabs-font-size: 18px;
 }
 
-:is(sp-tabs, ax-tabs) .ax-custom-icon {
+sp-tabs .ax-custom-icon {
   display: inline-block;
 }
 
-:is(sp-tabs, ax-tabs) .ax-custom-icon svg {
+sp-tabs .ax-custom-icon svg {
   max-width: 100%;
   max-height: 100%;
 }

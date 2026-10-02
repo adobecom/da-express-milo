@@ -13,9 +13,6 @@ CSS switches between persistent desktop controls and canvas controls at 1200px;
 both control sets share the same action-menu history. Breakpoint changes only
 reset the desktop expanded view, preserving the palette, harmony, selected tab,
 uploaded image, and undo/redo history without rebuilding the block.
-Its Spectrum tab family uses Express-specific `ax-tabs`, `ax-tab`, and
-`ax-tab-panel` names to prevent AEM Sidekick's isolated-world Spectrum
-registrations from rendering the page's tabs a second time.
 
 ## Testing
 ```sh

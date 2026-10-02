@@ -25,31 +25,6 @@ import { loadOverrideStyles } from './style-loader.js';
 import { createTag } from '../../../utils.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css';
-const SPECTRUM_TAGS = { tabs: 'sp-tabs', tab: 'sp-tab', panel: 'sp-tab-panel' };
-const EXPRESS_TAGS = { tabs: 'ax-tabs', tab: 'ax-tab', panel: 'ax-tab-panel' };
-
-async function registerExpressTags() {
-  const { css } = await import('../../../widgets/spectrum/dist/lit.js');
-  const registry = window.customElements;
-  for (const [key, name] of Object.entries(EXPRESS_TAGS)) {
-    if (!registry.get(name)) {
-      const SpectrumElement = registry.get(SPECTRUM_TAGS[key]);
-      registry.define(name, class extends SpectrumElement {
-        static get styles() {
-          if (key !== 'tabs') return super.styles;
-          return [
-            super.styles,
-            css`
-              :host([disabled]) ::slotted(ax-tab) {
-                color: var(--mod-tabs-color-disabled, var(--spectrum-tabs-color-disabled));
-              }
-            `,
-          ];
-        }
-      });
-    }
-  }
-}
 
 const TABBABLE_SELECTOR = [
   'a[href]',
@@ -86,8 +61,6 @@ function getTabbableAdjacentTo(el, reverse = false) {
  * @param {'s'|'m'|'l'|'xl'} [config.size='m']
  * @param {boolean} [config.quiet=false]
  * @param {'auto'|'compact'} [config.direction='auto']
- * @param {boolean} [config.useExpressTagNames=false] — avoid Sidekick's global
- * Spectrum registrations by using ax-tabs, ax-tab, and ax-tab-panel
  * @param {Array<{
  * label: string, value: string, disabled?: boolean,
  * spIcon?: string, iconSlotHtml?: string
@@ -112,21 +85,17 @@ export async function createExpressTabs(config = {}) {
     size = 'm',
     quiet = false,
     direction = 'auto',
-    useExpressTagNames = false,
     tabs: tabConfigs = [],
     onSelectionChange,
     enterPanelOnTab = false,
   } = config;
 
   await loadTabs();
-  // Sidekick can register and render generic Spectrum tags in an isolated world.
-  if (useExpressTagNames) await registerExpressTags();
-  const tags = useExpressTagNames ? EXPRESS_TAGS : SPECTRUM_TAGS;
   await loadOverrideStyles('tabs', STYLES_PATH);
 
   const theme = createThemeWrapper();
 
-  const tabsEl = createTag(tags.tabs, {
+  const tabsEl = createTag('sp-tabs', {
     size,
     ...(selected ? { selected } : {}),
     ...(quiet ? { quiet: '' } : {}),
@@ -134,7 +103,7 @@ export async function createExpressTabs(config = {}) {
   });
 
   tabConfigs.forEach(({ label, value, disabled, spIcon, iconSlotHtml }) => {
-    const tab = createTag(tags.tab, {
+    const tab = createTag('sp-tab', {
       label,
       value,
       ...(disabled ? { disabled: '' } : {}),
@@ -166,7 +135,7 @@ export async function createExpressTabs(config = {}) {
       customFn();
       return;
     }
-    const panel = tabsEl.querySelector(`${tags.panel}[value="${selectedValue}"]`);
+    const panel = tabsEl.querySelector(`sp-tab-panel[value="${selectedValue}"]`);
     getFirstTabbable(panel)?.focus();
   }
 
@@ -186,8 +155,8 @@ export async function createExpressTabs(config = {}) {
   // Tab skips the panel by default; selected tabs can opt into panel entry.
   theme.addEventListener('keydown', (e) => {
     const path = e.composedPath();
-    const isOnTab = path.some((node) => node.localName === tags.tab);
-    const isInPanel = path.some((node) => node.localName === tags.panel);
+    const isOnTab = path.some((node) => node.tagName === 'SP-TAB');
+    const isInPanel = path.some((node) => node.tagName === 'SP-TAB-PANEL');
     if (!isOnTab || isInPanel) return;
 
     if (e.key === 'Tab') {
@@ -221,7 +190,7 @@ export async function createExpressTabs(config = {}) {
     * @returns {HTMLElement} — the created tab panel
      */
     addPanel(value, content) {
-      const panel = createTag(tags.panel, { value });
+      const panel = createTag('sp-tab-panel', { value });
       if (content) panel.appendChild(content);
       tabsEl.appendChild(panel);
       return panel;
@@ -233,7 +202,7 @@ export async function createExpressTabs(config = {}) {
      * @returns {HTMLElement|null}
      */
     getPanel(value) {
-      return tabsEl.querySelector(`${tags.panel}[value="${value}"]`);
+      return tabsEl.querySelector(`sp-tab-panel[value="${value}"]`);
     },
 
     /**

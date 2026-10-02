@@ -50,7 +50,7 @@ body {
   margin-inline: 0;
 }
 
-.color-wheel ax-tabs {
+.color-wheel sp-tabs {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-300);
@@ -59,7 +59,7 @@ body {
   max-width: 100%;
 }
 
-.color-wheel ax-tab-panel {
+.color-wheel sp-tab-panel {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -592,7 +592,7 @@ color-wheel-express {
     display: block;
   }
 
-  .color-wheel ax-tabs {
+  .color-wheel sp-tabs {
     flex: 1 1 0;
     min-height: 0;
   }
@@ -609,26 +609,26 @@ color-wheel-express {
     max-width: 350px;
   }
 
-  .color-wheel ax-tab-panel[selected] .image-extract,
-  .color-wheel ax-tab-panel[selected] .color-extract-landing,
-  .color-wheel ax-tab-panel[selected] .color-extract-landing-content,
-  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-edit,
-  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-edit-stage,
-  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-edit-left {
+  .color-wheel sp-tab-panel[selected] .image-extract,
+  .color-wheel sp-tab-panel[selected] .color-extract-landing,
+  .color-wheel sp-tab-panel[selected] .color-extract-landing-content,
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit,
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-stage,
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-left {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: stretch;
   }
 
-  .color-wheel ax-tab-panel[selected] .image-upload-dropzone-container,
-  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-edit-bg {
+  .color-wheel sp-tab-panel[selected] .image-upload-dropzone-container,
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-bg {
     flex: 1;
     display: flex;
     justify-content: center;
   }
 
-  .color-wheel ax-tab-panel[selected] .image-extract.has-image .color-extract-landing {
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-landing {
     display: none;
   }
 

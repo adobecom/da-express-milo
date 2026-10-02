@@ -604,7 +604,6 @@ async function buildTabs(controller, suggestionsRow, {
   // Create the tabs shell and the color-wheel panel content in parallel
   const [tabsInstance, cwContent] = await Promise.all([
     createExpressTabs({
-      useExpressTagNames: true,
       selected: 'color-wheel',
       size: 'm',
       quiet: true,
