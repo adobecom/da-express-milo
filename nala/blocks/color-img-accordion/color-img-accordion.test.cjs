@@ -42,11 +42,22 @@ test.describe('ColorImgAccordionBlock Test Suite', () => {
         swatches.map((swatch) => getComputedStyle(swatch).backgroundColor)
       ));
       expect(new Set(swatchColors).size).toBeGreaterThan(1);
-      const imageBox = await block.image.boundingBox();
-      const paletteBox = await block.palette.boundingBox();
-      expect(Math.abs(imageBox.x - paletteBox.x)).toBeLessThan(1);
-      expect(Math.abs(imageBox.width - paletteBox.width)).toBeLessThan(1);
-      expect(Math.abs(imageBox.y + imageBox.height - paletteBox.y)).toBeLessThan(1);
+      const breakpoints = [
+        { width: 375, imageHeight: 192.9375, paletteHeight: 48 },
+        { width: 899, imageHeight: 228.09375, paletteHeight: 56 },
+        { width: 1440, imageHeight: 375.75, paletteHeight: 88 },
+        { width: 1920, imageHeight: 443.25, paletteHeight: 102 },
+      ];
+      for (const { width, imageHeight, paletteHeight } of breakpoints) {
+        await page.setViewportSize({ width, height: 1000 });
+        const imageBox = await block.image.boundingBox();
+        const paletteBox = await block.palette.boundingBox();
+        expect(Math.abs(imageBox.height - imageHeight)).toBeLessThan(0.1);
+        expect(Math.abs(paletteBox.height - paletteHeight)).toBeLessThan(0.1);
+        expect(Math.abs(imageBox.x - paletteBox.x)).toBeLessThan(0.1);
+        expect(Math.abs(imageBox.width - paletteBox.width)).toBeLessThan(0.1);
+        expect(Math.abs(imageBox.y + imageBox.height - paletteBox.y - 1)).toBeLessThan(0.1);
+      }
       await expect(block.buttons).toHaveCount(4);
       await expect(block.buttons.first()).toHaveAttribute('aria-expanded', 'true');
     });
