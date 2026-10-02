@@ -90,8 +90,7 @@ function filterFeaturedPosts(index, config, max) {
   const filterCategory = config.category?.toLowerCase().trim();
   const filterTags = normalizeTagList(config.tag);
 
-  index.data.some((post) => {
-    if (results.length >= max) return true;
+  const matches = index.data.filter((post) => {
     const postCategory = post.category?.toLowerCase() || '';
     const postTagList = normalizeTagList(post.tags || post.tag || post['cq:tags']);
     const categoryMatch = !filterCategory || postCategory.includes(filterCategory);
@@ -100,9 +99,11 @@ function filterFeaturedPosts(index, config, max) {
       const matchedTag = filterTags.find((filterTag) => postTagList.includes(filterTag));
       if (!matchedTag) return false;
     }
-    results.push(post);
-    return false;
+    return true;
   });
+
+  matches.sort((a, b) => new Date(b.date) - new Date(a.date));
+  results.push(...matches.slice(0, max));
   return results;
 }
 
