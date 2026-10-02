@@ -120,10 +120,4 @@ describe('Color SEO Hero', () => {
 
     expect(values).to.include.members(['JPEG', 'ASE']);
   });
-
-  it('gives the hero CTA an explicit aria-label matching its visible text', () => {
-    const cta = block.querySelector('.color-seo-hero-cta');
-    expect(cta).to.exist;
-    expect(cta.getAttribute('aria-label')).to.equal(cta.textContent.trim());
-  });
 });

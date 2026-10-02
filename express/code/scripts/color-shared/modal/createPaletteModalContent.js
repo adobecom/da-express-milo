@@ -4,19 +4,8 @@ import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { decorateAnalyticsAttributes, trackColorExport } from '../utils/utilities.js';
-import { createColorModesHeader } from './createColorModesHeader.js';
-import { getPreferredColorMode } from '../utils/colorModePreference.js';
-import { createColorStrip } from '../toolbar/colorStrip.js';
 
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
-// The swatch rail (color-swatch-rail/index.js) is built around a hard 10-swatch
-// ceiling (its own MAX_SWATCHES) — this modal doesn't support more than that,
-// so a palette with extra colors should just have them dropped, not overflow.
-const MAX_PALETTE_COLORS = 10;
-const STRIP_DEFAULTS = {
-  swatchLabel: 'Color {index}: {hex}',
-  swatchStripLabel: '{count} colors in {type}',
-};
 
 let contentStylesLoaded = false;
 export async function ensurePaletteContentStyles() {
@@ -25,14 +14,6 @@ export async function ensurePaletteContentStyles() {
     await Promise.all([
       loadMiloStyle('scripts/color-shared/modal/modal-palette-content.css'),
       loadMiloStyle('scripts/color-shared/components/strips/color-strip.css'),
-      loadMiloStyle('scripts/color-shared/modal/modal-color-modes-header.css'),
-      // The color-modes header's "Copy as code" menu and the palette-summary
-      // strip reuse ax-lib-card__action-menu* (libraries.css) and ax-swatch*
-      // (toolbar.css) — normally only loaded by the Library modal / toolbar
-      // footer respectively. Load them directly here instead of depending on
-      // initFloatingToolbar's async init to have already applied them.
-      loadMiloStyle('scripts/color-shared/components/libraries/libraries.css'),
-      loadMiloStyle('scripts/color-shared/toolbar/toolbar.css'),
     ]);
     contentStylesLoaded = true;
   } catch {
@@ -45,15 +26,13 @@ export function getPaletteColors(palette = {}) {
     return palette.colors
       .map((c) => String(c || '').trim())
       .filter(Boolean)
-      .map((c) => (c.startsWith('#') ? c : `#${c}`))
-      .slice(0, MAX_PALETTE_COLORS);
+      .map((c) => (c.startsWith('#') ? c : `#${c}`));
   }
   if (Array.isArray(palette.colorStops) && palette.colorStops.length) {
     return palette.colorStops
       .map((s) => String(s?.color || '').trim())
       .filter(Boolean)
-      .map((c) => (c.startsWith('#') ? c : `#${c}`))
-      .slice(0, MAX_PALETTE_COLORS);
+      .map((c) => (c.startsWith('#') ? c : `#${c}`));
   }
   return [];
 }
@@ -258,8 +237,6 @@ function createPaletteLikeWidget(palette = {}, options = {}) {
 }
 
 function createPaletteMetaSection(palette = {}, options = {}) {
-  const modalStrings = options.modalStrings || {};
-  const noTagsText = modalStrings.noTagsText || 'This color palette has no tags';
   const creatorName = normalizeCreatorName(
     options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
   );
@@ -269,7 +246,7 @@ function createPaletteMetaSection(palette = {}, options = {}) {
     ?? null;
   const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
   const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
-  let tags = [];
+  let tags = ['Color', 'Palette'];
   if (hasOptionTags) tags = options.tags;
   else if (hasItemTags) tags = palette.tags;
 
@@ -303,19 +280,13 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   thumbnailContainer.appendChild(creatorNameEl);
   thumbTagsRow.appendChild(thumbnailContainer);
 
-  if (tags.length) {
-    const tagsContainer = createTag('div', { class: 'modal-tags-container', 'aria-label': 'Tags', role: 'list' });
-    tags.forEach((tag) => {
-      const tagEl = createTag('span', { class: 'modal-tag', role: 'listitem' });
-      tagEl.textContent = String(tag);
-      tagsContainer.appendChild(tagEl);
-    });
-    thumbTagsRow.appendChild(tagsContainer);
-  } else {
-    const noTagsEl = createTag('p', { class: 'modal-no-tags' });
-    noTagsEl.textContent = noTagsText;
-    thumbTagsRow.appendChild(noTagsEl);
-  }
+  const tagsContainer = createTag('div', { class: 'modal-tags-container', 'aria-label': 'Tags', role: 'list' });
+  tags.forEach((tag) => {
+    const tagEl = createTag('span', { class: 'modal-tag', role: 'listitem' });
+    tagEl.textContent = String(tag);
+    tagsContainer.appendChild(tagEl);
+  });
+  thumbTagsRow.appendChild(tagsContainer);
   section.appendChild(thumbTagsRow);
 
   return section;
@@ -418,7 +389,6 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
 
   const colorCount = normalizedPalette.colors.length;
   const root = createTag('main', { class: 'modal-content', 'daa-lh': 'color-palette-modal' });
-  const contentScroll = createTag('div', { class: 'modal-content-scroll' });
 
   const railSection = createTag('section', {
     class: 'modal-palette-container modal-palette-container--color-rail',
@@ -432,29 +402,9 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     ...(Number.isFinite(verticalMaxPerRow) ? { verticalMaxPerRow } : {}),
     ...(colorSwatchRailStrings ? { strings: colorSwatchRailStrings } : {}),
   });
-  railAdapter.rail.colorMode = getPreferredColorMode();
-
-  const colorModesHeader = createColorModesHeader(
-    { name: palette?.name ?? 'Palette', colors: normalizedPalette.colors },
-    {
-      type: 'palette',
-      strings: modalStrings,
-      onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
-    },
-  );
-  contentScroll.appendChild(colorModesHeader.element);
-
-  // Mobile/tablet-only condensed strip above the full swatch list (Figma:
-  // "Add palette summary above color strips on color palettes"). Hidden at
-  // desktop via CSS (modal-palette-content.css) since the L layout doesn't
-  // need it.
-  const paletteSummaryStrip = createTag('div', { class: 'modal-palette-summary-strip', 'aria-hidden': 'true' });
-  paletteSummaryStrip.appendChild(createColorStrip(normalizedPalette.colors, 'palette', null, STRIP_DEFAULTS));
-  contentScroll.appendChild(paletteSummaryStrip);
-
   railWrap.appendChild(railAdapter.element);
   railSection.appendChild(railWrap);
-  contentScroll.appendChild(railSection);
+  root.appendChild(railSection);
 
   if (colorCountRange === 'large') {
     const updateFade = () => {
@@ -487,8 +437,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
 
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
-  contentScroll.appendChild(createPaletteMetaSection(normalizedPalette, options));
-  root.appendChild(contentScroll);
+  root.appendChild(createPaletteMetaSection(normalizedPalette, options));
 
   const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
   root.appendChild(toolbarMount);
@@ -509,10 +458,8 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   return {
     element: root,
     initNav: initTabIndexes,
-    waitForColorModesReady: () => colorModesHeader.waitForReady(),
     destroy: () => {
       railAdapter.destroy?.();
-      colorModesHeader.destroy?.();
     },
   };
 }

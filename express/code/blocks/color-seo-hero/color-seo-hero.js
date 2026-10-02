@@ -638,9 +638,6 @@ export default function decorate(block) {
   if (ctaLink) {
     ctaLink.classList.add('color-seo-hero-cta', 'button', 'xlarge', 'primary');
     ctaLink.closest('p').classList.add('color-seo-hero-cta-row');
-    if (!ctaLink.hasAttribute('aria-label')) {
-      ctaLink.setAttribute('aria-label', ctaLink.textContent.trim());
-    }
   }
 
   const layout = createTag('div', { class: 'color-seo-hero-layout' });

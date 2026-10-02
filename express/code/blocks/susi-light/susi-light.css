@@ -58,26 +58,12 @@
 }
 
 .susi-layout .footer.susi-banner {
-  box-sizing: border-box;
   width: 100%;
-  padding-inline: 10px;
   background-color: var(--color-gray-150);
-}
-
-.susi-layout .footer.susi-banner.stacked,
-.susi-layout .footer.susi-banner.stacked > p {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.susi-layout .footer.susi-banner.stacked > p {
-  margin: 0;
 }
 
 .susi-layout .footer.susi-bubbles {
   padding-bottom: var(--spacing-500);
-  padding-inline: var(--spacing-300);
 }
 
 .susi-layout .footer.susi-bubbles h2 {
@@ -110,8 +96,6 @@
   border-radius: 8px;
   padding: 4px;
   display: flex;
-  box-sizing: border-box;
-  max-width: calc(min(var(--susi-tabs-width), 95vw) - 2 * var(--spacing-300));
   gap: var(--spacing-75);
   background-color: var(--susi-grey);
 }
@@ -122,10 +106,6 @@
 
 .susi-light.tabs [role='tab'] {
   border: initial;
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  text-align: center;
   padding: var(--spacing-100) var(--spacing-200) 10px;
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-xs);

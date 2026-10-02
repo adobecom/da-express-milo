@@ -32,7 +32,7 @@ describe('createLibraryDownloadMenu', () => {
     expect(labels).to.include(strings.librariesDownloadAsJPEG);
   });
 
-  it('renders JPEG, PNG and SVG options for gradients', () => {
+  it('renders PNG and SVG options for gradients', () => {
     menu = createLibraryDownloadMenu({
       item: {
         type: 'gradient',
@@ -46,7 +46,6 @@ describe('createLibraryDownloadMenu', () => {
 
     const labels = [...menu.element.querySelectorAll('sp-menu-item')].map((item) => item.textContent);
     expect(labels).to.deep.equal([
-      strings.librariesDownloadAsJPEG,
       strings.librariesDownloadAsPNG,
       strings.librariesDownloadAsSVG,
     ]);

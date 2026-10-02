@@ -148,7 +148,7 @@
 
 .pricing-table .row-heading {
   position: sticky;
-  z-index: 2;
+  z-index: 3;
   background-color: var(--color-white);
 }
 
@@ -595,7 +595,7 @@ main .section .pricing-table-wrapper:has(.pricing-table.many-cols) {
   background-color: var(--color-gray-600);
   -webkit-mask-image: url('./dash.svg');
   mask-image: url('./dash.svg');
-  z-index: 1;
+  z-index: 2;
 }
 
 .pricing-table .cross {
@@ -604,7 +604,7 @@ main .section .pricing-table-wrapper:has(.pricing-table.many-cols) {
   background-color: var(--color-gray-600);
   -webkit-mask-image: url('./crossmark.svg');
   mask-image: url('./crossmark.svg');
-  z-index: 1;
+  z-index: 2;
 }
 
 .pricing-table .dim .col-content span {
@@ -650,7 +650,7 @@ main .section .pricing-table-wrapper:has(.pricing-table.many-cols) {
   background-color: var(--checkmark-color);
   -webkit-mask-image: url('./check.svg');
   mask-image: url('./check.svg');
-  z-index: 1;
+  z-index: 2;
 }
 
 .pricing-table.vertical-shading .row.shaded {

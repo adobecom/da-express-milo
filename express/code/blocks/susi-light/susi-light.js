@@ -24,16 +24,6 @@ export const DCTX_ID_MAP = {
 
 const usp = new URLSearchParams(window.location.search);
 
-// English "Not ready to Sign in? Continue as a guest" is 41 characters and stays inline;
-// longer localized copy (e.g. French, 76 characters) stacks the prompt above the link.
-export const SUSI_BANNER_STACK_THRESHOLD = 50;
-
-export function decorateSusiBanner(footer) {
-  footer.classList.add('footer', 'susi-banner');
-  const { length } = footer.textContent.replace(/\s+/g, ' ').trim();
-  footer.classList.toggle('stacked', length > SUSI_BANNER_STACK_THRESHOLD);
-}
-
 const onRedirect = (e) => {
   // eslint-disable-next-line no-console
   console.log('redirecting to:', e.detail);
@@ -279,7 +269,7 @@ async function buildB2B(el, locale, imsClientId, noRedirect) {
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
   const footer = rows[3];
-  if (footer) decorateSusiBanner(footer);
+  footer?.classList.add('footer', 'susi-banner');
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
   const susiConfigs = {
@@ -310,7 +300,7 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
   const title = rows[2]?.textContent?.trim();
   const studentCheckText = rows[3]?.textContent?.trim();
   const footer = rows[4];
-  if (footer) decorateSusiBanner(footer);
+  footer?.classList.add('footer', 'susi-banner');
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
   if (checked) {
@@ -506,8 +496,9 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     susiScriptReady.then(() => susiWrapper.append(createSUSIComponent(option)));
 
     if (footer) {
+      footer.classList.add('footer');
       if (footer.querySelector('h2')) {
-        footer.classList.add('footer', 'susi-bubbles');
+        footer.classList.add('susi-bubbles');
         const bubbleContainer = createTag('div', { class: 'susi-bubble-container' });
         [...footer.querySelectorAll('p')].forEach((p) => {
           p.classList.add('susi-bubble');
@@ -515,7 +506,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
         });
         footer.append(bubbleContainer);
       } else {
-        decorateSusiBanner(footer);
+        footer.classList.add('susi-banner');
       }
       panel.append(footer);
     }

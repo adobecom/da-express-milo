@@ -45,7 +45,22 @@ function toAttachedFormat(properties, prefix = '') {
   });
 }
 
-function toAttachedFormatForEnvelope(properties) {
+function toAttachedFormatForMiniEditor(properties) {
+  return toAttachedFormat(properties)
+    .filter((entry) => entry.propertyName !== 'custom.ui.location')
+    .map((entry) => {
+      if (entry.propertyName === 'event.event_date') {
+        return {
+          ...entry,
+          propertyName: 'event_date',
+        };
+      }
+
+      return entry;
+    });
+}
+
+function toAttachedFormatForExport(properties) {
   return toAttachedFormat(properties).map((entry) => {
     if (entry.propertyName === 'event.event_date') {
       return {
@@ -56,11 +71,6 @@ function toAttachedFormatForEnvelope(properties) {
 
     return entry;
   });
-}
-
-function withAttachedCustomEntries(newEntries) {
-  const existing = window.alloy_all?.data?._adobe_corpnew?.event?.custom;
-  return Array.isArray(existing) ? [...existing, ...newEntries] : newEntries;
 }
 
 function getPageNameFromPathname() {
@@ -564,11 +574,7 @@ export async function trackExpressFeaturePageLoad() {
           },
           _adobe_corpnew: {
             ...(isMiniEditorPage && {
-              event: {
-                custom: withAttachedCustomEntries(
-                  toAttachedFormatForEnvelope(miniEditorSdmPayload),
-                ),
-              },
+              custom: toAttachedFormatForMiniEditor(miniEditorSdmPayload),
             }),
             sdm: isMiniEditorPage
               ? miniEditorSdmPayload
@@ -703,9 +709,7 @@ export async function trackExportComplete({ exportMethod, taskName, uiLocation }
         },
         _adobe_corpnew: {
           sdm: sdmPayload,
-          event: {
-            custom: withAttachedCustomEntries(toAttachedFormatForEnvelope(sdmPayload)),
-          },
+          custom: toAttachedFormatForExport(sdmPayload),
         },
       },
     });

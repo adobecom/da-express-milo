@@ -97,7 +97,7 @@ describe('instrument mini-editor analytics', () => {
     await Promise.resolve();
 
     const [, payload] = trackStub.firstCall.args;
-    const { event: { custom } } = getCorpnewPayload(payload);
+    const { custom } = getCorpnewPayload(payload);
     expect(findProperty(custom, 'custom.task.name')).to.deep.equal({
       propertyName: 'custom.task.name',
       propertyValue: 'social',
@@ -115,8 +115,7 @@ describe('instrument mini-editor analytics', () => {
     expect(eventName).to.equal('event');
 
     const corpnew = getCorpnewPayload(payload);
-    const { sdm, event } = corpnew;
-    const { custom } = event;
+    const { sdm, custom } = corpnew;
     expect(sdm.event).to.deep.include({
       pagename: 'view-acom-express-features',
       event_date: '2026-09-01',

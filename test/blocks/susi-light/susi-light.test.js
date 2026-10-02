@@ -19,7 +19,6 @@ const [{
 }, _, {
   default: decorate, SUSIUtils, DCTX_ID_MAP, resolveTabsPanelMinHeight,
   resolveModalWrapperProfile, resolveModalWrapperHeight, applyModalWrapperReserve,
-  decorateSusiBanner,
 }] = imports;
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   const conf = { locales };
@@ -88,26 +87,6 @@ describe('Susi-light', async () => {
       expect(wrapper).to.exist;
       expect(block.dataset.susiWrapperProfile).to.equal('b2b-email-first');
       expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('409px');
-    });
-  });
-
-  describe('susi banner layout', () => {
-    const banner = (html) => {
-      const node = document.createElement('div');
-      node.innerHTML = html;
-      decorateSusiBanner(node);
-      return node;
-    };
-
-    it('keeps short copy inline', () => {
-      const node = banner('Not ready to Sign in? <a href="#">Continue as a guest</a>');
-      expect(node.classList.contains('susi-banner')).to.be.true;
-      expect(node.classList.contains('stacked')).to.be.false;
-    });
-
-    it('stacks long copy regardless of locale', () => {
-      const node = banner('Vous ne souhaitez pas vous connecter&nbsp;? <a href="#" class="quick-link">Continuer en tant qu’invité ou invitée</a>');
-      expect(node.classList.contains('stacked')).to.be.true;
     });
   });
 
