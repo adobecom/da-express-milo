@@ -15,7 +15,7 @@ sp-tabs[quiet] {
 
 /* Tab item styling */
 sp-tab {
-  --spectrum-tabs-item-font-weight: var(--font-weight-medium, 500);
+  --spectrum-tabs-item-font-weight: var(--font-weight-medium);
 }
 
 /* Selected tab indicator */
