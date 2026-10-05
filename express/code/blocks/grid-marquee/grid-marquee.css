@@ -46,8 +46,8 @@ main .section .grid-marquee h1 {
   font-size: 1rem;
 }
 
-.grid-marquee .headline .ctas {
-  display: none;
+.grid-marquee .headline .ctas, .grid-marquee .headline .ctas a.button.same-fcta {
+  display: inline-block;
 }
 
 .grid-marquee .headline a:not(.primaryCTA) {
