@@ -27,7 +27,7 @@
 
 .palette-columns .palette-columns-content :is(h1, h2, h3, h4, h5, h6) {
   color: var(--color-gray-900);
-  font-size: var(--heading-font-size-m);
+  font-size: var(--typography-headings-xl);
   font-weight: var(--heading-font-weight);
   line-height: 1.04;
 }
@@ -200,10 +200,6 @@
 }
 
 @media (min-width: 1200px) {
-  .palette-columns .palette-columns-content :is(h1, h2, h3, h4, h5, h6) {
-    font-size: var(--heading-font-size-l);
-  }
-
   .palette-columns .palette-columns-content p {
     font-size: var(--body-font-size-xl);
   }
