@@ -4,11 +4,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-400);
-  /* Figma Grid/container-max-width (1600px); no global variable exists for it yet. */
-  max-width: calc(1600px + 2 * var(--Grid-container-padding-side));
-  margin: 0 auto;
+  max-width: var(--ax-grid-container-width);
+  margin-inline: auto;
   padding: var(--section-padding-xl) var(--Grid-container-padding-side);
-  box-sizing: border-box;
 }
 
 /* ── Text column ───────────────────────────────────────────────── */
