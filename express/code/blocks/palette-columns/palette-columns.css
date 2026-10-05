@@ -48,7 +48,6 @@
 
 .palette-columns .palette-columns-rail {
   --figma-strip-radius: var(--palette-columns-radius);
-  --Corner-radius-corner-radius-200: var(--palette-columns-radius);
 
   /* Reserves the stacked rail's height (5 × 48px rows + 4 × 2px gaps) before it renders. */
   min-height: 248px;

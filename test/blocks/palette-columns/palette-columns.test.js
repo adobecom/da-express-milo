@@ -8,7 +8,7 @@ const [{ getLibs }] = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
   import('../../../express/code/scripts/scripts.js'),
 ]);
-const { setConfig } = await import(`${getLibs()}/utils/utils.js`);
+const { setConfig, getConfig } = await import(`${getLibs()}/utils/utils.js`);
 setConfig({});
 
 const {
@@ -58,16 +58,20 @@ async function setup(mock, { mobile = false } = {}) {
 
 describe('palette-columns', () => {
   let satelliteTrack;
+  let originalLana;
 
   beforeEach(() => {
     resetPresetQueue();
     satelliteTrack = sinon.spy();
     window[SATELLITE] = { track: satelliteTrack };
+    originalLana = window.lana;
   });
 
   afterEach(() => {
     sinon.restore();
     delete window[SATELLITE];
+    if (originalLana === undefined) delete window.lana;
+    else window.lana = originalLana;
     document.body.innerHTML = '';
   });
 
@@ -179,6 +183,38 @@ describe('palette-columns', () => {
       expect(decodeURIComponent(href)).to.include(hexes.join(','));
     });
 
+    describe('?palette-link override', () => {
+      const originalUrl = window.location.href;
+      let originalEnv;
+
+      beforeEach(() => {
+        originalEnv = getConfig().env;
+        const url = new URL(window.location.href);
+        url.searchParams.set('palette-link', '/mock/override');
+        window.history.replaceState(null, '', url);
+      });
+
+      afterEach(() => {
+        getConfig().env = originalEnv;
+        window.history.replaceState(null, '', originalUrl);
+      });
+
+      it('is honored outside prod', async () => {
+        getConfig().env = { name: 'stage' };
+        const { block } = await setup('basic.html');
+        const href = block.querySelector('.palette-columns-edit').getAttribute('href');
+        expect(href.startsWith('/mock/override?')).to.be.true;
+      });
+
+      it('is ignored on prod', async () => {
+        getConfig().env = { name: 'prod' };
+        const { block } = await setup('basic.html');
+        const href = block.querySelector('.palette-columns-edit').getAttribute('href');
+        expect(href).to.include('/create/color-wheel');
+        expect(href).to.not.include('/mock/override');
+      });
+    });
+
     it('buildEditHref encodes the palette colors', () => {
       const href = buildEditHref('/create/color-wheel', ['#AABBCC', '#112233']);
       expect(href.startsWith('/create/color-wheel?')).to.be.true;
@@ -216,6 +252,7 @@ describe('palette-columns', () => {
       const { block } = await setup('basic.html');
       const before = getRailHexes(block);
       sinon.stub(Math, 'random').returns(0.5);
+      const clock = sinon.useFakeTimers({ toFake: ['setTimeout'] });
 
       block.querySelector('.palette-columns-generate').click();
 
@@ -225,7 +262,7 @@ describe('palette-columns', () => {
       expect(decodeURIComponent(block.querySelector('.palette-columns-edit').getAttribute('href')))
         .to.include('800000,800000,800000,800000,800000');
 
-      await new Promise((resolve) => { setTimeout(resolve, 150); });
+      clock.runAll();
       const region = document.getElementById('express-spectrum-live-region');
       expect(region.textContent).to.include('New random palette generated');
     });
@@ -264,7 +301,6 @@ describe('palette-columns', () => {
       expect(window.lana.log.calledOnce).to.be.true;
       expect(window.lana.log.firstCall.args[0]).to.include('boom');
       expect(block.classList.contains('is-ready')).to.be.false;
-      delete window.lana;
     });
   });
 });
