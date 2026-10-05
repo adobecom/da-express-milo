@@ -3,7 +3,11 @@ import { expect } from '@esm-bundle/chai';
 // Set before importing scripts.js so its module-scope loadPage() bails out;
 // a static import would be hoisted above this flag.
 window.isTestEnv = true;
-const { decorateAreaWithLCP, preloadCriticalResources } = await import('../../express/code/scripts/scripts.js');
+const {
+  decorateAreaWithLCP,
+  preloadCriticalResources,
+  preloadPersonalization,
+} = await import('../../express/code/scripts/scripts.js');
 
 describe('LCP Image Optimization', () => {
   beforeEach(() => {
@@ -353,5 +357,52 @@ describe('preloadCriticalResources', () => {
     document.body.innerHTML = '<main><div><a href="/express/fragments/pricing">a</a></div></main>';
     preloadCriticalResources();
     expect(hints()).to.deep.equal([]);
+  });
+});
+
+describe('preloadPersonalization', () => {
+  const originalUrl = window.location.href;
+  let meta;
+  const fetchHints = () => [...document.head.querySelectorAll('link[rel="preload"][as="fetch"]')]
+    .map((l) => l.getAttribute('href'));
+  const clear = () => document.head
+    .querySelectorAll('link[rel="modulepreload"], link[rel="preload"]')
+    .forEach((l) => l.remove());
+
+  beforeEach(() => {
+    clear();
+    meta = document.createElement('meta');
+    meta.name = 'personalization';
+    meta.content = 'https://main--da-express-milo--adobecom.aem.page/express/personalization/a.json,  /express/personalization/b.json?v=2, https://example.com/c.json';
+    document.head.append(meta);
+  });
+
+  afterEach(() => {
+    clear();
+    meta.remove();
+    window.history.replaceState({}, '', originalUrl);
+  });
+
+  it('preloads manifests as the same-origin paths Milo requests, plus personalization.js', () => {
+    preloadPersonalization();
+    expect(fetchHints()).to.deep.equal([
+      '/express/personalization/a.json',
+      '/express/personalization/b.json?v=2',
+    ]);
+    const mod = document.head.querySelector('link[rel="modulepreload"]');
+    expect(mod.getAttribute('href')).to.match(/\/features\/personalization\/personalization\.js$/);
+    expect(mod.getAttribute('crossorigin')).to.equal('anonymous');
+  });
+
+  it('does nothing without personalization metadata or with ?mep=off', () => {
+    window.history.replaceState({}, '', '/express/?mep=off');
+    preloadPersonalization();
+    expect(fetchHints()).to.deep.equal([]);
+
+    window.history.replaceState({}, '', originalUrl);
+    meta.remove();
+    preloadPersonalization();
+    expect(fetchHints()).to.deep.equal([]);
+    expect(document.head.querySelector('link[rel="modulepreload"]')).to.equal(null);
   });
 });

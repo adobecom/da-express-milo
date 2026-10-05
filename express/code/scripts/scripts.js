@@ -435,6 +435,38 @@ export function preloadCriticalResources(root = document) {
     });
   });
 }
+
+// Milo's loadArea awaits personalization (MEP) before decorating any section, and
+// only discovers MEP's files after its utils.js loads. Request them now instead.
+// URLs mirror Milo's normalizePath/getXLGListURL so its own preloads dedupe onto ours.
+export function preloadPersonalization() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('mep') === 'off') return;
+  const manifests = ['personalization', 'personalization-roc']
+    .flatMap((key) => (getMetadata(key) || '').split(','))
+    .map((path) => path.trim())
+    .filter(Boolean);
+  if (!manifests.length) return;
+
+  const { origin, hostname } = window.location;
+  const fetchHint = (href) => addHint({ rel: 'preload', as: 'fetch', crossorigin: 'anonymous', href });
+  addHint({ rel: 'modulepreload', crossorigin: 'anonymous', href: `${miloLibs}/features/personalization/personalization.js` });
+  manifests.forEach((path) => {
+    let url;
+    try {
+      url = new URL(path, origin);
+    } catch {
+      return;
+    }
+    if (url.origin === origin || /\.(aem|hlx)\.(page|live)$|(^|\.)adobe\.com$/.test(url.hostname)) {
+      fetchHint(`${url.pathname}${url.search}`);
+    }
+  });
+  const xlg = '/federal/assets/data/mep-xlg-tags.json';
+  if (hostname === 'www.adobe.com') fetchHint(`${origin}${xlg}?sheet=prod`);
+  else if (hostname.endsWith('.aem.live')) fetchHint(`https://main--federal--adobecom.aem.live${xlg}?sheet=stage`);
+}
+preloadPersonalization();
 preloadCriticalResources();
 
 let fragmentLcpPreloaded = false;
