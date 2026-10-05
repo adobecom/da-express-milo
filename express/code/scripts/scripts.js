@@ -377,8 +377,67 @@ function preloadLCPImage(img) {
   }
 }());
 
+// Express-owned blocks that commonly lead a page. Milo resolves these to codeRoot
+// (none collide with Milo's C1_BLOCKS), so their URLs are known before Milo loads.
+const HERO_BLOCKS = new Set([
+  'ax-marquee', 'ax-marquee-dynamic-hero', 'banner', 'color-search-marquee',
+  'frictionless-quick-action', 'frictionless-quick-action-mobile', 'fullscreen-marquee',
+  'grid-marquee', 'grid-marquee-hero', 'headline', 'hero-color', 'interactive-marquee',
+  'prompt-marquee', 'quick-action-hub', 'resume-hero', 'search-marquee', 'template-x',
+  'transparent-img-marquee', 'verb-express-hero',
+]);
+
+function addHint(attrs) {
+  if (document.head.querySelector(`link[rel="${attrs.rel}"][href="${attrs.href}"]`)) return;
+  const link = document.createElement('link');
+  Object.entries(attrs).forEach(([k, v]) => link.setAttribute(k, v));
+  document.head.append(link);
+}
+
+// Start downloading the first section's block code and the page's fragments while
+// Milo's utils.js is still loading, instead of after loadArea discovers them.
+export function preloadCriticalResources(root = document) {
+  const firstSection = root.querySelector('body > main > div:nth-child(1)');
+  firstSection?.querySelectorAll(':scope > div[class]').forEach((block) => {
+    const name = block.classList[0];
+    if (!HERO_BLOCKS.has(name)) return;
+    const base = `${CONFIG.codeRoot}/blocks/${name}/${name}`;
+    addHint({ rel: 'modulepreload', href: `${base}.js` });
+    addHint({ rel: 'preload', as: 'style', href: `${base}.css` });
+  });
+
+  // Mirror Milo's fragment request (same-origin fetch of `${path}.plain.html`) so
+  // the preload is reused. Skip modal links (hash), federated and cross-locale paths
+  // that Milo would rewrite, and ?cache=off which changes the fetch cache mode.
+  const { contentRoot } = CONFIG;
+  if (!contentRoot || new URLSearchParams(window.location.search).get('cache') === 'off') return;
+  const { origin, pathname } = window.location;
+  const rootIndex = pathname.indexOf(`${contentRoot}/`);
+  if (rootIndex < 0) return;
+  const pagePrefix = pathname.slice(0, rootIndex + contentRoot.length + 1);
+  root.querySelectorAll('main a[href*="/fragments/"]').forEach((a) => {
+    let url;
+    try {
+      url = new URL(a.href);
+    } catch {
+      return;
+    }
+    if (url.hash && !url.hash.startsWith('#_')) return;
+    if (url.hash.includes('lingo')) return;
+    if (url.origin !== origin && url.hostname !== 'www.adobe.com') return;
+    if (!url.pathname.startsWith(pagePrefix)) return;
+    addHint({
+      rel: 'preload',
+      as: 'fetch',
+      crossorigin: 'anonymous',
+      fetchpriority: 'low',
+      href: `${origin}${url.pathname}.plain.html`,
+    });
+  });
+}
+preloadCriticalResources();
+
 let fragmentLcpPreloaded = false;
-// eslint-disable-next-line import/prefer-default-export
 export function decorateAreaWithLCP(area = document, options = {}) {
   const { fragmentLink } = options;
   if (fragmentLink && !fragmentLcpPreloaded) {
