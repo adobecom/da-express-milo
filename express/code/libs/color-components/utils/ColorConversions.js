@@ -349,26 +349,32 @@ export const rgbToHSL = (red, green, blue) => {
     },
     degToRad = deg => deg * Math.PI / 180 - Math.PI;
 
+const getRelativeLuminance = ({ red, green, blue }) => {
+    const toLinear = (c) => {
+        const s = c / 255;
+        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * toLinear(red) + 0.7152 * toLinear(green) + 0.0722 * toLinear(blue);
+};
+
 /**
- * Return high-contrast text color for a background hex.
- * Kept for compatibility with color-swatch-rail imports.
+ * Return whichever of black/white has the higher WCAG 2 contrast ratio
+ * against the background hex (always >= 4.58:1, so AA passes for any background).
  * @param {string} hex
  * @returns {string} '#000000' | '#FFFFFF'
  */
 export const getContrastTextColor = (hex) => {
     const rgb = hexToRGB(hex);
     if (!rgb) return '#000000';
-    const luminance = (0.299 * rgb.red + 0.587 * rgb.green + 0.114 * rgb.blue) / 255;
-    return luminance > 0.5 ? '#000000' : '#FFFFFF';
+    const L = getRelativeLuminance(rgb);
+    const contrastWithBlack = (L + 0.05) / 0.05;
+    const contrastWithWhite = 1.05 / (L + 0.05);
+    return contrastWithBlack >= contrastWithWhite ? '#000000' : '#FFFFFF';
 };
 
 export const isSuperLight = (hex) => {
     const rgb = hexToRGB(hex);
     if (!rgb) return false;
-    const toLinear = (c) => {
-        const s = c / 255;
-        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-    };
-    const L = 0.2126 * toLinear(rgb.red) + 0.7152 * toLinear(rgb.green) + 0.0722 * toLinear(rgb.blue);
+    const L = getRelativeLuminance(rgb);
     return (1.05 / (L + 0.05)) < 1.5;
 };

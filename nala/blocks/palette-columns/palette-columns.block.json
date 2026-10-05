@@ -1,0 +1,55 @@
+{
+  "block": "palette-columns",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@palette-columns-right",
+      "selector": "div.palette-columns.palette-right",
+      "path": "/drafts/nala/blocks/color/palette-columns?martech=off",
+      "layout": "palette-right",
+      "data": {
+        "semantic": {
+          "texts": [
+            { "selector": ".palette-columns-content h2", "text": "Create your own color palette." },
+            { "selector": ".palette-columns-content p", "text": "Nunc eget donec nunc" }
+          ],
+          "media": [],
+          "interactives": [
+            { "type": "link", "selector": "a.palette-columns-edit", "href": "/create/color-wheel", "text": "Edit in the color palette tool" },
+            { "type": "button", "selector": "button.palette-columns-generate", "text": "Generate random" }
+          ]
+        }
+      },
+      "tags": ["@palette-columns", "@palette-columns-right", "@express", "@color"]
+    },
+    {
+      "tcid": "1",
+      "name": "@palette-columns-left",
+      "selector": "div.palette-columns.palette-left",
+      "path": "/drafts/nala/blocks/color/palette-columns?martech=off",
+      "layout": "palette-left",
+      "data": {
+        "semantic": {
+          "texts": [
+            { "selector": ".palette-columns-content h2", "text": "Create your own color palette." },
+            { "selector": ".palette-columns-content p", "text": "Nunc eget donec nunc" }
+          ],
+          "media": [],
+          "interactives": [
+            { "type": "link", "selector": "a.palette-columns-edit", "href": "/create/color-wheel", "text": "Edit in the color palette tool" },
+            { "type": "button", "selector": "button.palette-columns-generate", "text": "Generate random" }
+          ]
+        }
+      },
+      "tags": ["@palette-columns", "@palette-columns-left", "@express", "@color"]
+    },
+    {
+      "tcid": "2",
+      "name": "@palette-columns-mobile",
+      "selector": "div.palette-columns.palette-right",
+      "path": "/drafts/nala/blocks/color/palette-columns?martech=off",
+      "viewport": { "width": 375, "height": 812 },
+      "tags": ["@palette-columns", "@palette-columns-mobile", "@express", "@color"]
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+.palette-columns {
+  --palette-columns-radius: 16px;
+  --palette-columns-gap: var(--spacing-400);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--palette-columns-gap);
+  margin: 0 auto;
+  padding: var(--spacing-600) var(--spacing-300);
+  box-sizing: border-box;
+}
+
+/* ── Text column ───────────────────────────────────────────────── */
+
+.palette-columns .palette-columns-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--spacing-300);
+  min-width: 0;
+}
+
+.palette-columns .palette-columns-content > * {
+  margin: 0;
+}
+
+.palette-columns .palette-columns-content :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--color-gray-900);
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.04;
+}
+
+.palette-columns .palette-columns-content p {
+  color: var(--color-gray-700-variant);
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+/* ── Palette column ────────────────────────────────────────────── */
+
+.palette-columns .palette-columns-swatches {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  min-width: 0;
+}
+
+.palette-columns .palette-columns-rail {
+  --figma-strip-radius: var(--palette-columns-radius);
+  --Corner-radius-corner-radius-200: var(--palette-columns-radius);
+
+  /* Reserves the stacked rail's height (5 × 48px rows + 4 × 2px gaps) before it renders. */
+  min-height: 248px;
+  border-radius: var(--palette-columns-radius);
+  overflow: hidden;
+}
+
+.palette-columns .palette-columns-rail > sp-theme {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── CTAs ──────────────────────────────────────────────────────── */
+
+.palette-columns .palette-columns-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.palette-columns .palette-columns-ctas:empty {
+  display: none;
+}
+
+/* Extra .palette-columns-ctas specificity beats `main a.con-button:any-link` in styles.css. */
+.palette-columns .palette-columns-ctas .palette-columns-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: var(--spacing-600);
+  margin: 0;
+  padding: 0;
+  border-width: var(--spacing-50);
+  border-style: solid;
+  border-radius: 24px;
+  font-family: var(--body-font-family);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: var(--spacing-350);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.13s ease-out, border-color 0.13s ease-out, color 0.13s ease-out;
+}
+
+.palette-columns .palette-columns-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 7px 7px 7px var(--spacing-300);
+}
+
+.palette-columns .palette-columns-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.palette-columns .palette-columns-cta-label {
+  padding: var(--spacing-100) var(--spacing-325) var(--spacing-100) 0;
+}
+
+/* TODO: remove the color rules below once #820 (universal fill button) merges;
+   add palette-columns to its :is() list instead. */
+.palette-columns a.palette-columns-edit:any-link {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+}
+
+.palette-columns a.palette-columns-edit:is(:hover, :active, :focus-visible) {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
+.palette-columns .palette-columns-generate {
+  color: var(--Background-Primary-Default);
+  background-color: transparent;
+  border-color: var(--Background-Primary-Default);
+}
+
+.palette-columns .palette-columns-generate:is(:hover, :active, :focus-visible) {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
+.palette-columns .palette-columns-cta:focus-visible {
+  outline: 2px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .palette-columns .palette-columns-ctas .palette-columns-cta {
+    transition: none;
+  }
+}
+
+/* ── Tablet + desktop: two columns, CTAs overlaid on the rail ──── */
+
+@media (min-width: 600px) {
+  .palette-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas: 'content palette';
+    align-items: center;
+    padding: var(--spacing-600) var(--spacing-500);
+  }
+
+  .palette-columns.palette-left {
+    grid-template-areas: 'palette content';
+  }
+
+  .palette-columns .palette-columns-content {
+    grid-area: content;
+  }
+
+  .palette-columns .palette-columns-swatches {
+    grid-area: palette;
+    display: block;
+  }
+
+  .palette-columns .palette-columns-rail {
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+  }
+
+  .palette-columns .palette-columns-ctas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: max-content;
+    min-width: min(335px, 100% - var(--spacing-500));
+    max-width: calc(100% - var(--spacing-500));
+    box-sizing: border-box;
+    /* Figma: 40px on a 406px+ rail; shrinks on narrow tablet rails. */
+    padding: clamp(var(--spacing-300), 10%, var(--spacing-600));
+    background: rgb(255 255 255 / 70%);
+    border: 1px solid rgb(255 255 255 / 50%);
+    border-radius: var(--palette-columns-radius);
+    box-shadow: 0 0 10px rgb(0 0 0 / 10%);
+    backdrop-filter: blur(20px);
+  }
+}
+
+@media (min-width: 1200px) {
+  .palette-columns {
+    max-width: calc(1360px + 2 * var(--spacing-600));
+    padding: var(--spacing-900) var(--spacing-600);
+  }
+
+  .palette-columns .palette-columns-content :is(h1, h2, h3, h4, h5, h6) {
+    font-size: 36px;
+  }
+
+  .palette-columns .palette-columns-content p {
+    font-size: 20px;
+  }
+
+  .palette-columns .palette-columns-rail {
+    aspect-ratio: 3 / 2;
+  }
+}
