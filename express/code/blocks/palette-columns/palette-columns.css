@@ -131,7 +131,7 @@
 
 .palette-columns .palette-columns-generate {
   color: var(--Background-Primary-Default);
-  background-color: var(--color-white);
+  background-color: transparent;
   border-color: var(--Background-Primary-Default);
 }
 
