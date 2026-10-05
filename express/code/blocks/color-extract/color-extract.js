@@ -18,6 +18,8 @@ import {
 import buildSuggestedImages from '../../scripts/color-shared/components/image-extract/buildSuggestedImages.js';
 import { buildDragOverlay, buildLoadingOverlay } from '../../scripts/color-shared/components/image-extract/buildExtractOverlays.js';
 
+let colorExtractKbCleanup = null;
+
 const placeholdersPromise = Promise.all([
   loadColorExtractPlaceholders(),
   loadImageUploadPlaceholders(),
@@ -573,6 +575,24 @@ function renderColorVariant(block, rows, config, strings = {}) {
     history.push(getHistoryState());
   }
 
+  colorExtractKbCleanup?.();
+  const onExtractKeyDown = (e) => {
+    if (!e.metaKey && !e.ctrlKey) return;
+    if (e.key !== 'z') return;
+    const el = document.activeElement;
+    if (el && el !== document.body && el !== document.documentElement) {
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(el.tagName)) return;
+      if (el.isContentEditable) return;
+      if (parseInt(el.getAttribute('tabindex') ?? '-1', 10) >= 0) return;
+      if (['button', 'link', 'tab', 'slider', 'textbox', 'combobox'].includes(el.getAttribute('role'))) return;
+    }
+    e.preventDefault();
+    if (e.shiftKey) history.redo(getHistoryState());
+    else history.undo(getHistoryState());
+  };
+  document.addEventListener('keydown', onExtractKeyDown);
+  colorExtractKbCleanup = () => document.removeEventListener('keydown', onExtractKeyDown);
+
   async function runExtraction(canvas, mood, count) {
     const swatchCount = count || controller.getState().swatches.length || resolvedConfig.maxColors;
     const ctx = canvas.getContext('2d');
@@ -1028,6 +1048,24 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   function historySnapshot() {
     history.push(getHistoryState());
   }
+
+  colorExtractKbCleanup?.();
+  const onGradientKeyDown = (e) => {
+    if (!e.metaKey && !e.ctrlKey) return;
+    if (e.key !== 'z') return;
+    const el = document.activeElement;
+    if (el && el !== document.body && el !== document.documentElement) {
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(el.tagName)) return;
+      if (el.isContentEditable) return;
+      if (parseInt(el.getAttribute('tabindex') ?? '-1', 10) >= 0) return;
+      if (['button', 'link', 'tab', 'slider', 'textbox', 'combobox'].includes(el.getAttribute('role'))) return;
+    }
+    e.preventDefault();
+    if (e.shiftKey) history.redo(getHistoryState());
+    else history.undo(getHistoryState());
+  };
+  document.addEventListener('keydown', onGradientKeyDown);
+  colorExtractKbCleanup = () => document.removeEventListener('keydown', onGradientKeyDown);
 
   gradientEditor.element.addEventListener('pointerdown', () => {
     if (!gradientInteracting) {
