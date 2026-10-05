@@ -204,7 +204,7 @@
     /* Figma: 40px on a 406px+ rail; shrinks on narrow tablet rails. */
     padding: clamp(var(--spacing-300), 10%, var(--spacing-600));
     background: rgb(255 255 255 / 70%);
-    border: 1px solid rgb(255 255 255 / 50%);
+    border: 1px solid rgb(255 255 255 / 70%);
     border-radius: var(--Corner-radius-corner-radius-200);
     box-shadow: 0 0 10px rgb(0 0 0 / 10%);
     backdrop-filter: blur(20px);
