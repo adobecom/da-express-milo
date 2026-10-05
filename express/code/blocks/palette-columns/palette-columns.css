@@ -56,6 +56,8 @@
   min-height: 248px;
   border-radius: var(--palette-columns-radius);
   overflow: hidden;
+  /* Contains the rail's hover/focus z-index so swatches can't paint over the CTA overlay. */
+  isolation: isolate;
 }
 
 .palette-columns .palette-columns-rail > sp-theme {
