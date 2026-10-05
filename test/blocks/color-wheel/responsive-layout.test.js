@@ -111,6 +111,11 @@ describe('color-wheel responsive layout', () => {
       expect(getComputedStyle(mobileMenu.element).display === 'none').to.equal(isDesktop);
       expect(desktopControls.querySelector('.undo-btn').getBoundingClientRect().width > 0).to.equal(isDesktop);
       expect(mobileMenu.element.querySelector('.undo-btn').getBoundingClientRect().width > 0).to.equal(!isDesktop);
+      const visibleMenu = isDesktop ? desktopMenu : mobileMenu;
+      const undoIcon = visibleMenu.element.querySelector('.undo-btn svg');
+      expect(undoIcon.querySelector('[id], mask, [mask], rect')).to.be.null;
+      expect(undoIcon.firstElementChild.localName).to.equal('path');
+      expect(undoIcon.getBBox().width).to.be.within(15, 19);
       expect([...root.children]).to.deep.equal(initialSlots);
       expect(desktopMenu.getCurrentPalette()).to.deep.equal(['#FF0000', '#00FF00']);
     }
