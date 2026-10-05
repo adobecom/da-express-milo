@@ -83,22 +83,10 @@ function transformToVideoColumn(cell, aTag, block) {
   }
 }
 
-function decorateIconList(columnCell, rowNum, blockClasses) {
+function decorateIconList(columnCell, rowNum) {
   const icons = [...columnCell.querySelectorAll('img.icon, svg.icon')].filter(
     (icon) => !icon.closest('p')?.classList?.contains('social-links'),
   );
-
-  // decorate offer icons
-  if (rowNum === 0 && blockClasses.contains('offer')) {
-    const titleIcon = columnCell.querySelector('img.icon, svg.icon');
-    const title = columnCell.querySelector('h1, h2, h3, h4, h5, h6');
-    if (title && titleIcon) {
-      const titleIconWrapper = createTag('span', { class: 'columns-offer-icon' });
-      titleIconWrapper.append(titleIcon);
-      title.prepend(titleIconWrapper);
-    }
-    return;
-  }
 
   if (
     rowNum === 0
@@ -390,25 +378,6 @@ export default async function decorate(block) {
     addHeaderClass(block, 'xl');
   }
 
-  if (block.classList.contains('narrow')) {
-    let count = 1;
-    rows.forEach((ele) => {
-      const headers = ele.querySelectorAll('h2');
-      if (headers.length > 0) {
-        headers.forEach((header) => {
-          const span = document.createElement('span');
-          span.style.background = 'linear-gradient(to top, rgb(201, 101, 214), rgb(239, 133, 120))';
-          span.style.webkitBackgroundClip = 'text';
-          span.style.backgroundClip = 'text';
-          span.style.color = 'transparent';
-          span.textContent = `${count}. `;
-          header.prepend(span);
-          count += 1;
-        });
-      }
-    });
-  }
-
   let numCols = 0;
   if (rows[0]) numCols = rows[0].children.length;
 
@@ -468,7 +437,7 @@ export default async function decorate(block) {
       }
 
       if (cell.querySelector('img.icon, svg.icon')) {
-        decorateIconList(cell, rowNum, block.classList);
+        decorateIconList(cell, rowNum);
       }
       if (isVideoLink(aTag?.href)) {
         handleVideos(cell, aTag, block, pics[0]);
@@ -613,25 +582,6 @@ export default async function decorate(block) {
   addAnimationToggle(block);
   addHeaderSizing(block, getConfig, 'columns-heading');
 
-  // decorate offer
-  if (block.classList.contains('offer')) {
-    block
-      .querySelectorAll('a.button, a.con-button')
-      .forEach((aTag) => aTag.classList.add('large', 'wide'));
-    if (rows.length > 1) {
-      // move all content into first row
-      rows.forEach((row, rowNum) => {
-        if (rowNum > 0) {
-          const cells = Array.from(row.children);
-          cells.forEach((cell, cellNum) => {
-            rows[0].children[cellNum].append(...cell.children);
-          });
-          row.remove();
-        }
-      });
-    }
-  }
-
   // add free plan widget to first columns block on every page except blog
   if (document.querySelector('main .ax-columns.marquee') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
     addFreePlanWidget(
@@ -672,64 +622,6 @@ export default async function decorate(block) {
     block.querySelectorAll('a.button, a.con-button').forEach((button) => {
       button.classList.add('dark');
     });
-  }
-
-  if (block.className === 'columns fullsize top block width-3-columns') {
-    const setElementsHeight = (columns) => {
-      const elementsMinHeight = {
-        PICTURE: 0,
-        H3: 0,
-        'columns-iconlist': 0,
-      };
-
-      const onIntersect = (entries, observer) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && columns.length) {
-            columns.forEach((col) => {
-              const childDivs = col.querySelectorAll(':scope > *');
-              if (!childDivs.length) return;
-
-              childDivs.forEach((div) => {
-                const referrer = div.className || div.tagName;
-                const targetEl = referrer === 'PICTURE' ? div.querySelector('img') : div;
-                elementsMinHeight[referrer] = Math.max(
-                  elementsMinHeight[referrer],
-                  targetEl.offsetHeight,
-                );
-              });
-            });
-
-            columns.forEach((col) => {
-              const childDivs = col.querySelectorAll(':scope > *');
-              if (!childDivs.length) return;
-
-              childDivs.forEach((div) => {
-                const referrer = div.className || div.tagName;
-                if (!elementsMinHeight[referrer]) return;
-
-                if (div.offsetHeight < elementsMinHeight[referrer]) {
-                  if (referrer === 'PICTURE') {
-                    const img = div.querySelector('img');
-                    if (!img) return;
-                    img.style.objectFit = 'contain';
-                    img.style.minHeight = `${elementsMinHeight[referrer]}px`;
-                  } else {
-                    div.style.minHeight = `${elementsMinHeight[referrer]}px`;
-                  }
-                }
-              });
-            });
-
-            observer.unobserve(block);
-          }
-        });
-      };
-
-      const observer = new IntersectionObserver(onIntersect, { threshold: 0 });
-      observer.observe(block);
-    };
-
-    setElementsHeight(block.querySelectorAll('.column'));
   }
 
   // variant for the colors pages
