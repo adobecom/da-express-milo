@@ -195,17 +195,30 @@ async function scanOne(scanDir, pathRoot) {
   const files = await collectHtmlFiles(scanDir);
   const pages = [];
   let totalMatches = 0;
-  await Promise.all(files.map(async (file) => {
-    const content = await readFile(file, 'utf8');
-    const { count, context } = matcher(content);
-    if (count > 0) {
-      totalMatches += count;
-      const relPath = relative(pathRoot, file).split(sep).join('/');
-      pages.push({
-        file: relPath, path: toPagePathPure(relPath), matches: count, context,
-      });
+  let cursor = 0;
+
+  async function scanFiles() {
+    for (;;) {
+      const index = cursor;
+      cursor += 1;
+      if (index >= files.length) return;
+
+      const file = files[index];
+      // eslint-disable-next-line no-await-in-loop
+      const content = await readFile(file, 'utf8');
+      const { count, context } = matcher(content);
+      if (count > 0) {
+        totalMatches += count;
+        const relPath = relative(pathRoot, file).split(sep).join('/');
+        pages.push({
+          file: relPath, path: toPagePathPure(relPath), matches: count, context,
+        });
+      }
     }
-  }));
+  }
+
+  const concurrency = Math.min(32, files.length);
+  await Promise.all(Array.from({ length: concurrency }, scanFiles));
   return { files, pages, totalMatches };
 }
 
