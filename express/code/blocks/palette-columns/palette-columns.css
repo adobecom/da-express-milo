@@ -121,7 +121,7 @@
   border-color: var(--Background-Primary-Default);
 }
 
-.palette-columns a.palette-columns-edit:is(:hover, :active, :focus-visible) {
+.palette-columns a.palette-columns-edit:is(:active, :focus-visible) {
   color: var(--color-white);
   background-color: var(--Background-Primary-Hover);
   border-color: var(--Background-Primary-Hover);
@@ -129,14 +129,24 @@
 
 .palette-columns .palette-columns-generate {
   color: var(--Background-Primary-Default);
-  background-color: transparent;
+  background-color: var(--color-white);
   border-color: var(--Background-Primary-Default);
 }
 
-.palette-columns .palette-columns-generate:is(:hover, :active, :focus-visible) {
+.palette-columns .palette-columns-generate:is(:active, :focus-visible) {
   color: var(--color-white);
   background-color: var(--Background-Primary-Hover);
   border-color: var(--Background-Primary-Hover);
+}
+
+/* Touch browsers keep :hover applied after a tap, so only style hover for real pointers. */
+@media (hover: hover) {
+  .palette-columns a.palette-columns-edit:hover,
+  .palette-columns .palette-columns-generate:hover {
+    color: var(--color-white);
+    background-color: var(--Background-Primary-Hover);
+    border-color: var(--Background-Primary-Hover);
+  }
 }
 
 .palette-columns .palette-columns-cta:focus-visible {
