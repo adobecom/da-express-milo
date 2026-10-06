@@ -873,6 +873,52 @@ main .dark a.con-button.outline:any-link:focus {
   color: var(--color-info-accent-hover);
 }
 
+/* Black fill button — Milo authoring: a `#_button-fill` link hash adds `fill`
+   (Milo decorateButtons for con-buttons, decorateButtonsDeprecated for legacy
+   `.button`s). Colors follow the Express SoT Background/Primary tokens. Only
+   color changes; each block keeps its own button geometry.
+   Whitelisted blocks only — add a block to every `:is()` list below to opt in:
+   ax-columns, blog-columns, font-bento, comparison-table-v2. */
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+  a:is(.con-button, .button).fill:any-link {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+}
+
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+  a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible) {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
+/* On dark surfaces the fill inverts to white. Covers a `.dark` section
+   ancestor, a `.dark` block/inner wrapper, and the button-level `.dark` class. */
+main :is(
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2) .dark
+) a:is(.con-button, .button).fill:any-link,
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+  a:is(.con-button, .button).fill.dark:any-link {
+  color: var(--Background-Primary-Default);
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+}
+
+main :is(
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2) .dark
+) a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible),
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+  a:is(.con-button, .button).fill.dark:any-link:is(:hover, :active, :focus-visible) {
+  color: var(--Background-Primary-Hover);
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-100);
+}
+
 main a.button.wide,
 main a.con-button.wide {
   display: block;
