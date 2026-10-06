@@ -102,7 +102,8 @@ function filterFeaturedPosts(index, config, max) {
     return true;
   });
 
-  matches.sort((a, b) => new Date(b.date) - new Date(a.date));
+  // query-index dates are epoch seconds; undated posts ("") sort last instead of yielding NaN
+  matches.sort((a, b) => (Number(b.date) || 0) - (Number(a.date) || 0));
   results.push(...matches.slice(0, max));
   return results;
 }
