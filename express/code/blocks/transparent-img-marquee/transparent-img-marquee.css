@@ -121,13 +121,15 @@
    override sizing so the pill is 40px tall (per design; milo's default is ~36px)
    and long labels wrap + stay inside the column rather than ellipsis-truncating
    (milo's con-button default is overflow:hidden; text-overflow:ellipsis). */
-.transparent-img-marquee a.con-button:any-link {
+main .transparent-img-marquee a.con-button:any-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   min-height: 40px;
   max-width: 100%;
+  padding: 3px 17px;
+  line-height: 30px;
   margin: 0;
   overflow: visible;
   text-overflow: clip;
