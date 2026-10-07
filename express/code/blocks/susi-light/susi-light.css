@@ -9,8 +9,7 @@
   --susi-wrapper-edu-express: 400px;
   --susi-wrapper-simplified: 400px;
   --susi-standard-padding: 24px;
-  --susi-image-modal-width: 1120px;
-  --susi-image-modal-height: 600px;
+  --susi-image-modal-width: 1200px;
 }
 
 .susi-light {
@@ -241,16 +240,10 @@
 }
 
 @media (min-width: 1200px) {
-  .susi-light.color.has-media {
-    height: 100%;
-  }
-
   .susi-light.color.has-media .susi-layout {
     flex-direction: row;
     align-items: stretch;
     text-align: initial;
-    height: 100%;
-    overflow: hidden;
   }
 
   .susi-light.color.has-media .susi-media {
@@ -258,11 +251,10 @@
     box-sizing: border-box;
     display: flex;
     width: 50%;
-    height: 100%;
     flex: 1 1 50%;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-500);
+    padding: var(--spacing-600) var(--spacing-800);
   }
 
   .susi-light.color.has-media .susi-image {
@@ -282,28 +274,31 @@
     flex: 1 1 50%;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     text-align: center;
-    gap: var(--spacing-400);
-    padding: var(--spacing-500) var(--spacing-500) var(--spacing-600);
+    padding: var(--spacing-500) var(--spacing-500) 0;
     overflow-y: auto;
   }
 
   .susi-light.color.has-media .express-logo {
+    height: 34px;
     padding-top: 0;
     padding-bottom: 0;
   }
 
-  .dialog-modal:has(.susi-light.color.has-media) {
-    width: var(--susi-image-modal-width);
-    height: var(--susi-image-modal-height);
-    overflow: hidden;
+  .susi-light.color.has-media .title {
+    font-size: var(--heading-font-size-m);
+    line-height: var(--heading-line-height);
+    margin: var(--spacing-100) 0 var(--spacing-300);
   }
 
-  .dialog-modal:has(.susi-light.color.has-media) > .fragment,
-  .dialog-modal:has(.susi-light.color.has-media) > .fragment > .section,
-  .dialog-modal:has(.susi-light.color.has-media) > .fragment > .section > .content {
-    height: 100%;
+  .susi-light.color.has-media .susi-wrapper {
+    max-width: 348px;
+    margin: 0 auto;
+  }
+
+  .dialog-modal:has(.susi-light.color.has-media) {
+    width: var(--susi-image-modal-width);
   }
 
   .susi-layout .title.mobile-only {
