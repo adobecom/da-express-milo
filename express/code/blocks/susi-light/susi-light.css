@@ -232,20 +232,20 @@
   }
 }
 
-.susi-light.color.has-image .susi-image {
+.susi-light.color.has-media .susi-media {
   display: none;
 }
 
-.susi-light.color.has-image .susi-form-pane {
+.susi-light.color.has-media .susi-form-pane {
   width: 100%;
 }
 
 @media (min-width: 1200px) {
-  .susi-light.color.has-image {
+  .susi-light.color.has-media {
     height: 100%;
   }
 
-  .susi-light.color.has-image .susi-layout {
+  .susi-light.color.has-media .susi-layout {
     flex-direction: row;
     align-items: stretch;
     text-align: initial;
@@ -253,15 +253,31 @@
     overflow: hidden;
   }
 
-  .susi-light.color.has-image .susi-image {
-    display: block;
+  .susi-light.color.has-media .susi-media {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
     width: 50%;
     height: 100%;
     flex: 1 1 50%;
-    object-fit: cover;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-500);
   }
 
-  .susi-light.color.has-image .susi-form-pane {
+  .susi-light.color.has-media .susi-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .susi-light.color.has-media .video-container {
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .susi-light.color.has-media .susi-form-pane {
     display: flex;
     flex: 1 1 50%;
     flex-direction: column;
@@ -273,20 +289,20 @@
     overflow-y: auto;
   }
 
-  .susi-light.color.has-image .express-logo {
+  .susi-light.color.has-media .express-logo {
     padding-top: 0;
     padding-bottom: 0;
   }
 
-  .dialog-modal:has(.susi-light.color.has-image) {
+  .dialog-modal:has(.susi-light.color.has-media) {
     width: var(--susi-image-modal-width);
     height: var(--susi-image-modal-height);
     overflow: hidden;
   }
 
-  .dialog-modal:has(.susi-light.color.has-image) > .fragment,
-  .dialog-modal:has(.susi-light.color.has-image) > .fragment > .section,
-  .dialog-modal:has(.susi-light.color.has-image) > .fragment > .section > .content {
+  .dialog-modal:has(.susi-light.color.has-media) > .fragment,
+  .dialog-modal:has(.susi-light.color.has-media) > .fragment > .section,
+  .dialog-modal:has(.susi-light.color.has-media) > .fragment > .section > .content {
     height: 100%;
   }
 
