@@ -1920,15 +1920,23 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   }
 }
 
+/* Fill colors come from the global rule in styles.css; ax-columns keeps its pill shape. */
 main .ax-columns a.button.fill {
-  background-color: var(--Background-Primary-Default);
-  border-color: var(--Background-Primary-Default);
   border-radius: 999px;
-  color: var(--color-white);
 }
 
-main .ax-columns a.button.fill:any-link:hover,
-main .ax-columns a.button.fill:any-link:active {
-     background-color: var(--color-info-accent-hover);
-    border-color: var(--color-info-accent-hover);
+/* .highlight.dark renders a white card (.dark only recolors the section header),
+   so keep the black fill instead of the global dark-surface inversion. */
+main .ax-columns.dark.highlight a.button.fill:any-link {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+}
+
+main .ax-columns.dark.highlight a.button.fill:any-link:hover,
+main .ax-columns.dark.highlight a.button.fill:any-link:active,
+main .ax-columns.dark.highlight a.button.fill:any-link:focus-visible {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
 }
