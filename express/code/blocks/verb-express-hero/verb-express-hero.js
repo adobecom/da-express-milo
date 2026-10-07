@@ -1,4 +1,4 @@
-import { setLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { setLibs, getIconElementDeprecated, getMetadata } from '../../scripts/utils.js';
 import trackBranchParameters from '../../scripts/branchlinks.js';
 
 function isOldBrowser() {
@@ -46,6 +46,7 @@ async function loadPlaceholders(prefix) {
 
 const MB20 = 20971520;
 const DOC_ONLY = ['.pdf', '.doc', '.docx'];
+const LOGO_INJECT_VALUES = ['on', 'yes', 'true'];
 
 // This block only ships the resume-builder verb; kept as a LIMITS map (rather
 // than a flat constant) to match verb-dropzone's shape so the rest of this
@@ -270,6 +271,15 @@ function buildDragOverlay(overlayText) {
 }
 
 function getBrandingLogo() {
+  const metadataValues = [
+    getMetadata('inject-branding-logo'),
+    getMetadata('marquee-inject-logo'),
+  ];
+  const shouldInject = metadataValues.some((value) => (
+    LOGO_INJECT_VALUES.includes(value?.toLowerCase()?.trim())
+  ));
+  if (!shouldInject) return null;
+
   const logo = getIconElementDeprecated('adobe-brand-logo');
   logo.classList.add('express-logo');
   return logo;
@@ -479,7 +489,9 @@ export default async function decorate(element) {
   // Mirrors Figma's "logo-headline-subcopy" group, which has its own gap
   // distinct from the top-level copy-column gap.
   const headingGroup = createTag('div', { class: 'heading-group' });
-  headingGroup.append(getBrandingLogo(), copy);
+  const brandingLogo = getBrandingLogo();
+  if (brandingLogo) headingGroup.append(brandingLogo);
+  headingGroup.append(copy);
 
   const ctaLink = ctaPara?.querySelector('a');
 
