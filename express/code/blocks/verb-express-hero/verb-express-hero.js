@@ -292,10 +292,6 @@ export default async function decorate(element) {
     window.location.href = EOLBrowserPage;
     return;
   }
-  // Unlike verb-dropzone (typically below the fold), this block is a hero —
-  // flip the section visible before any of the awaited work below so it
-  // doesn't sit hidden any longer than necessary.
-  element.parentNode.style.display = 'block';
   window.mph = window.mph || {};
   await loadPlaceholders(['verb-dropzone', 'verb-widget', 'close-dialog']);
   const rawVerb = element.classList[1] || 'resume-builder';
