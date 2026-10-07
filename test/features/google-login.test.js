@@ -61,6 +61,7 @@ describe('Google login', () => {
       client_id: '530526366930-l874a90ipfkn26naa71r010u8epp39jt.apps.googleusercontent.com',
       prompt_parent_id: 'feds-googleLogin',
       cancel_on_tap_outside: false,
+      itp_support: true,
       auto_select: true,
     });
     expect(prompt.calledOnce).to.be.true;
