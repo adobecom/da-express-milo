@@ -1,0 +1,125 @@
+.section .simple-marquee {
+  max-width: initial;
+  text-align: center;
+}
+
+.simple-marquee .foreground {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.simple-marquee .express-logo {
+  width: initial;
+  height: 30px;
+  max-width: 340px;
+  padding: var(--spacing-500) 0 var(--spacing-200);
+}
+
+main .section .simple-marquee h1 {
+  font-size: var(--heading-font-size-m);
+  padding-bottom: var(--spacing-100);
+}
+
+.simple-marquee strong,
+.simple-marquee a,
+.simple-marquee button {
+  font-family: var(--body-font-family);
+}
+
+.simple-marquee .headline {
+  max-width: 340px;
+  padding-bottom: var(--spacing-400);
+}
+
+.simple-marquee .headline p {
+  margin: 0;
+  font-size: var(--body-font-size-m);
+}
+
+.simple-marquee .headline .ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--spacing-100);
+  padding-top: var(--spacing-300);
+}
+
+.simple-marquee .headline a.button {
+  margin: 0;
+}
+
+.simple-marquee .headline a:not(.primaryCTA) {
+  background-color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+.simple-marquee .headline a.button .text-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.simple-marquee .headline a.button .icon {
+  display: inline-flex;
+  width: var(--spacing-300);
+  height: var(--spacing-300);
+}
+
+.simple-marquee .headline a.button .icon > :is(img, svg) {
+  width: 100%;
+  height: 100%;
+}
+
+:lang(ar) .simple-marquee .headline a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+}
+
+@media (min-width: 768px) {
+  .simple-marquee .headline {
+    max-width: 1200px;
+    padding-inline: var(--spacing-500);
+  }
+}
+
+@media (min-width: 1024px) {
+  main .section .simple-marquee h1 {
+    font-size: var(--heading-font-size-l);
+  }
+}
+
+@media (min-width: 1280px) {
+  .simple-marquee .express-logo {
+    padding-top: var(--spacing-600);
+  }
+
+  .simple-marquee .headline {
+    max-width: var(--block-wd-grid-max-width);
+    padding-bottom: var(--spacing-600);
+  }
+
+  .simple-marquee .headline.no-cta {
+    padding-bottom: 0;
+  }
+
+  main .section .simple-marquee h1 {
+    font-size: var(--heading-font-size-xl);
+    font-weight: var(--heading-font-weight-extra);
+  }
+
+  .simple-marquee .headline .ctas {
+    padding-top: var(--spacing-400);
+  }
+
+  .simple-marquee .headline a.button {
+    border-width: 1px;
+    border-radius: 50px;
+    padding: var(--spacing-200) var(--spacing-400);
+    font-size: var(--body-font-size-l);
+    line-height: 1.3;
+  }
+}
