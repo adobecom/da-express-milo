@@ -70,6 +70,7 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript, 
     callback: (data) => onToken(getMetadata, getConfig, data),
     ...(placeholder && { prompt_parent_id: PLACEHOLDER }),
     cancel_on_tap_outside: false,
+    itp_support: true,
     auto_select: getMetadata('google-yolo-zero-tap')?.toLowerCase() === 'on',
   });
   window.google?.accounts?.id?.prompt();
