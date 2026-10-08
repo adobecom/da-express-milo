@@ -591,23 +591,13 @@ async function loadPage() {
   // Disable Milo's loader so Express owns Google login on every viewport.
   const miloGoogleLoginMeta = document.head.querySelector('meta[name="google-login"]')
     || createTag('meta', { name: 'google-login' });
-  const previousMiloGoogleLogin = miloGoogleLoginMeta.content;
   miloGoogleLoginMeta.content = 'off';
   if (!miloGoogleLoginMeta.isConnected) document.head.append(miloGoogleLoginMeta);
 
   const expressGoogleLoginMeta = document.head.querySelector('meta[name="express-google-login"]')
     || createTag('meta', { name: 'express-google-login' });
-  const previousExpressGoogleLogin = expressGoogleLoginMeta.content;
   expressGoogleLoginMeta.content = 'on';
   if (!expressGoogleLoginMeta.isConnected) document.head.append(expressGoogleLoginMeta);
-  // eslint-disable-next-line no-console
-  console.log('[MWPW-188779][Scripts] Google login metadata ownership updated', {
-    atMs: Math.round(performance.now()),
-    previousMiloGoogleLogin,
-    currentMiloGoogleLogin: miloGoogleLoginMeta.content,
-    previousExpressGoogleLogin,
-    currentExpressGoogleLogin: expressGoogleLoginMeta.content,
-  });
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));

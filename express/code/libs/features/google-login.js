@@ -6,30 +6,7 @@ const PLACEHOLDER = 'feds-googleLogin';
 const WRAPPER = 'feds-profile';
 const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
 const REGULAR_CTA_PENDING_CLASS = 'google-login-prompt-pending';
-const DIAGNOSTIC_PREFIX = '[MWPW-188779][Google One Tap]';
 const REGULAR_CTA_SUPPRESSION_MS = 1000;
-
-const diagnosticLog = (message, details = {}) => {
-  // eslint-disable-next-line no-console
-  console.log(DIAGNOSTIC_PREFIX, message, { atMs: Math.round(performance.now()), ...details });
-};
-
-const getRegularCtaDiagnostics = () => (
-  [...document.querySelectorAll('.floating-button-wrapper:not(.mobile-fork-button)')]
-    .map((cta, index) => {
-      const style = window.getComputedStyle(cta);
-      return {
-        index,
-        className: cta.className,
-        connected: cta.isConnected,
-        display: style.display,
-        visibility: style.visibility,
-        opacity: style.opacity,
-        audience: cta.dataset.audience,
-        sectionStatus: cta.dataset.sectionStatus,
-      };
-    })
-);
 
 const getDestination = async (getMetadata, getConfig) => {
   const redirect = getMetadata('google-login-redirect')?.trim();
@@ -77,39 +54,13 @@ const onToken = async (getMetadata, getConfig, data) => {
 };
 
 const promptGoogleLogin = (hideRegularCta = false) => {
-  diagnosticLog('Prompt requested', {
-    hideRegularCta,
-    pendingClassBefore: document.body.classList.contains(REGULAR_CTA_PENDING_CLASS),
-    regularCtasBefore: getRegularCtaDiagnostics(),
-    googlePromptAvailable: typeof window.google?.accounts?.id?.prompt === 'function',
-  });
-  if (hideRegularCta) {
-    document.body.classList.add(REGULAR_CTA_PENDING_CLASS);
-    diagnosticLog('Regular CTA suppression applied', {
-      pendingClass: document.body.classList.contains(REGULAR_CTA_PENDING_CLASS),
-      regularCtas: getRegularCtaDiagnostics(),
-    });
-  }
+  if (hideRegularCta) document.body.classList.add(REGULAR_CTA_PENDING_CLASS);
   try {
     window.google?.accounts?.id?.prompt();
-    diagnosticLog('Google prompt invoked', {
-      pendingClass: document.body.classList.contains(REGULAR_CTA_PENDING_CLASS),
-      regularCtas: getRegularCtaDiagnostics(),
-    });
-  } catch (error) {
-    diagnosticLog('Google prompt threw', { message: error?.message || String(error) });
-    throw error;
   } finally {
     if (hideRegularCta) {
-      diagnosticLog('Regular CTA suppression release scheduled', {
-        delayMs: REGULAR_CTA_SUPPRESSION_MS,
-      });
       window.setTimeout(() => {
         document.body.classList.remove(REGULAR_CTA_PENDING_CLASS);
-        diagnosticLog('Regular CTA suppression removed', {
-          pendingClass: document.body.classList.contains(REGULAR_CTA_PENDING_CLASS),
-          regularCtas: getRegularCtaDiagnostics(),
-        });
       }, REGULAR_CTA_SUPPRESSION_MS);
     }
   }
@@ -117,38 +68,15 @@ const promptGoogleLogin = (hideRegularCta = false) => {
 
 export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
   const os = getMobileOperatingSystem();
-  diagnosticLog('Initialization started', {
-    googleLogin: getMetadata('google-login')?.trim().toLowerCase(),
-    expressGoogleLogin: getMetadata('express-google-login')?.trim().toLowerCase(),
-    zeroTap: getMetadata('google-yolo-zero-tap')?.trim().toLowerCase(),
-    hasMobileFork: Boolean(document.querySelector('.mobile-fork-button.mweb-mobile-fork')),
-    hasProfileWrapper: Boolean(document.querySelector(`.${WRAPPER}`)),
-    os,
-  });
-  if (os === 'iOS') {
-    diagnosticLog('Initialization stopped because One Tap is unavailable on iOS');
-    return;
-  }
+  if (os === 'iOS') return;
   try {
     await loadIms();
-    diagnosticLog('IMS load completed', {
-      hasAdobeIms: Boolean(window.adobeIMS),
-      signedIn: Boolean(window.adobeIMS?.isSignedInUser()),
-    });
-  } catch (error) {
-    diagnosticLog('IMS load failed', { message: error?.message || String(error) });
+  } catch {
     return;
   }
-  if (window.adobeIMS?.isSignedInUser()) {
-    diagnosticLog('Initialization stopped for signed-in user');
-    return;
-  }
+  if (window.adobeIMS?.isSignedInUser()) return;
 
-  diagnosticLog('Loading Google GSI script', { src: GOOGLE_SCRIPT });
   await loadScript(GOOGLE_SCRIPT);
-  diagnosticLog('Google GSI script load completed', {
-    hasGoogleIdApi: Boolean(window.google?.accounts?.id),
-  });
   const wrapper = document.querySelector(`.${WRAPPER}`);
   let placeholder;
   if (wrapper) {
@@ -166,23 +94,12 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript, 
     itp_support: true,
     auto_select: autoSelect,
   });
-  diagnosticLog('Google GSI initialized', {
-    autoSelect,
-    hasPromptParent: Boolean(placeholder),
-    hasMobileFork: Boolean(document.querySelector('.mobile-fork-button.mweb-mobile-fork')),
-  });
 
   if (document.querySelector('.mobile-fork-button.mweb-mobile-fork')) {
-    diagnosticLog('Waiting for mobile fork resolution');
-    document.addEventListener(MOBILE_FORK_RESOLVED_EVENT, (event) => {
-      diagnosticLog('Received mobileforkresolved', {
-        detail: event.detail,
-        regularCtas: getRegularCtaDiagnostics(),
-      });
+    document.addEventListener(MOBILE_FORK_RESOLVED_EVENT, () => {
       promptGoogleLogin(true);
     }, { once: true });
   } else {
-    diagnosticLog('No dismissable mobile fork found; prompting immediately');
     promptGoogleLogin();
   }
 }

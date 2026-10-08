@@ -3,20 +3,10 @@ import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
 import { createMultiFunctionButton, collectFloatingButtonData, createMetadataMap, SUPPORTED_MWEB_OS } from '../../scripts/utils/mobile-fork-button-utils.js';
 
 const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
-const DIAGNOSTIC_PREFIX = '[MWPW-188779][Mobile Fork]';
-
-const diagnosticLog = (message, details = {}) => {
-  // eslint-disable-next-line no-console
-  console.log(DIAGNOSTIC_PREFIX, message, { atMs: Math.round(performance.now()), ...details });
-};
 
 let createTag; let getMetadata;
 
 async function mWebStickyCTA() {
-  diagnosticLog('Starting regular CTA replacement', {
-    mobileForkCount: document.querySelectorAll('.mobile-fork-button').length,
-    regularCtaCount: document.querySelectorAll('.floating-button-wrapper:not(.mobile-fork-button)').length,
-  });
   const newBlock = createTag(
     'div',
     { class: 'floating-button-wrapper' },
@@ -24,10 +14,6 @@ async function mWebStickyCTA() {
   );
   const oldBlock = document.querySelector('.mobile-fork-button');
   oldBlock.replaceWith(newBlock);
-  diagnosticLog('Inserted temporary regular CTA wrapper', {
-    connected: newBlock.isConnected,
-    className: newBlock.className,
-  });
 
   const audience = 'mobile';
   const metadataMap = createMetadataMap();
@@ -45,14 +31,7 @@ async function mWebStickyCTA() {
   data.mainCta.text = data.mainCta.forkStickyMobileText || data.mainCta.text;
   data.mainCta.href = data.mainCta.forkStickyMobileHref || data.mainCta.href;
   await createFloatingButton(oldBlock, audience, data);
-  diagnosticLog('Regular CTA creation completed', {
-    temporaryWrapperConnected: newBlock.isConnected,
-    regularCtaCount: document.querySelectorAll('.floating-button-wrapper:not(.mobile-fork-button)').length,
-  });
   newBlock.remove();
-  diagnosticLog('Removed temporary regular CTA wrapper', {
-    regularCtaCount: document.querySelectorAll('.floating-button-wrapper:not(.mobile-fork-button)').length,
-  });
 }
 
 function mWebOverlayScroll() {
@@ -82,25 +61,11 @@ function mWebCloseEvents() {
     element.addEventListener('click', (event) => {
       event.preventDefault();
       const action = element.classList.contains('mweb-close') ? 'close' : 'continue';
-      diagnosticLog('Fork resolution selected', {
-        action,
-        bodyOverflow: document.body.style.overflow,
-        pendingClass: document.body.classList.contains('google-login-prompt-pending'),
-      });
       mWebStickyCTA();
       mWebOverlayScroll();
-      diagnosticLog('Dispatching mobileforkresolved', {
-        action,
-        bodyOverflow: document.body.style.overflow,
-        regularCtaCount: document.querySelectorAll('.floating-button-wrapper:not(.mobile-fork-button)').length,
-      });
       document.dispatchEvent(new CustomEvent(MOBILE_FORK_RESOLVED_EVENT, {
         detail: { action },
       }));
-      diagnosticLog('mobileforkresolved dispatch completed', {
-        action,
-        pendingClass: document.body.classList.contains('google-login-prompt-pending'),
-      });
     });
   });
 }
@@ -117,12 +82,6 @@ export default async function decorate(block) {
   const eligibilityOn = getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() === 'on';
   const os = getMobileOperatingSystem();
   const shouldShowDismissable = eligibilityOn ? os === 'Android' : SUPPORTED_MWEB_OS.includes(os);
-  diagnosticLog('Dismissable fork eligibility evaluated', {
-    eligibilityOn,
-    os,
-    shouldShowDismissable,
-    googleLogin: getMetadata('google-login')?.trim().toLowerCase(),
-  });
   if (!shouldShowDismissable) {
     const { default: decorateNormal } = await import('../floating-button/floating-button.js');
     decorateNormal(block);
@@ -161,9 +120,4 @@ export default async function decorate(block) {
   }
   if (data.longText) blockWrapper.classList.add('long-text');
   mWebVariant();
-  diagnosticLog('Dismissable fork decorated', {
-    audience,
-    linkCount: blockLinks.length,
-    bodyOverflow: document.body.style.overflow,
-  });
 }
