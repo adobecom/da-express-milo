@@ -68,7 +68,12 @@ describe('Google login', () => {
   });
 
   it('defers One Tap until the dismissable mobile fork resolves', async () => {
-    document.body.innerHTML += '<div class="mobile-fork-button mweb-mobile-fork"></div>';
+    document.body.innerHTML += '<div class="floating-button-wrapper"></div>'
+      + '<div class="mobile-fork-button mweb-mobile-fork"></div>';
+    let ctaHiddenWhenPrompted = false;
+    prompt.callsFake(() => {
+      ctaHiddenWhenPrompted = document.body.classList.contains('google-login-prompt-pending');
+    });
 
     await initGoogleLogin(loadIms, getMetadata, loadScript, getConfig);
 
@@ -83,6 +88,14 @@ describe('Google login', () => {
     }));
 
     expect(prompt.calledOnce).to.be.true;
+    expect(ctaHiddenWhenPrompted).to.be.true;
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
+
+    await new Promise((resolve) => {
+      window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
+    });
+
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
   });
 
   it('uses default prompt placement when the profile container is absent', async () => {

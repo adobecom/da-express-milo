@@ -3,6 +3,7 @@ const GOOGLE_ID = '530526366930-l874a90ipfkn26naa71r010u8epp39jt.apps.googleuser
 const PLACEHOLDER = 'feds-googleLogin';
 const WRAPPER = 'feds-profile';
 const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
+const REGULAR_CTA_PENDING_CLASS = 'google-login-prompt-pending';
 
 const getDestination = async (getMetadata, getConfig) => {
   const redirect = getMetadata('google-login-redirect')?.trim();
@@ -49,6 +50,22 @@ const onToken = async (getMetadata, getConfig, data) => {
   }
 };
 
+const promptGoogleLogin = (hideRegularCta = false) => {
+  if (hideRegularCta) document.body.classList.add(REGULAR_CTA_PENDING_CLASS);
+  try {
+    window.google?.accounts?.id?.prompt();
+  } finally {
+    if (hideRegularCta) {
+      // Keep the replacement CTA out of the first paint while GSI creates its prompt.
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          document.body.classList.remove(REGULAR_CTA_PENDING_CLASS);
+        });
+      });
+    }
+  }
+};
+
 export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
   try {
     await loadIms();
@@ -76,9 +93,9 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript, 
   });
   if (document.querySelector('.mobile-fork-button.mweb-mobile-fork')) {
     document.addEventListener(MOBILE_FORK_RESOLVED_EVENT, () => {
-      window.google?.accounts?.id?.prompt();
+      promptGoogleLogin(true);
     }, { once: true });
   } else {
-    window.google?.accounts?.id?.prompt();
+    promptGoogleLogin();
   }
 }
