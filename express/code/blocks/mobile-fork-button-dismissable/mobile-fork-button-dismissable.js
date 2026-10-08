@@ -2,6 +2,8 @@ import { getLibs, getMobileOperatingSystem, getIconElementDeprecated, addTempWra
 import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
 import { createMultiFunctionButton, collectFloatingButtonData, createMetadataMap, SUPPORTED_MWEB_OS } from '../../scripts/utils/mobile-fork-button-utils.js';
 
+const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
+
 let createTag; let getMetadata;
 
 async function mWebStickyCTA() {
@@ -60,6 +62,9 @@ function mWebCloseEvents() {
       event.preventDefault();
       mWebStickyCTA();
       mWebOverlayScroll();
+      document.dispatchEvent(new CustomEvent(MOBILE_FORK_RESOLVED_EVENT, {
+        detail: { action: element.classList.contains('mweb-close') ? 'close' : 'continue' },
+      }));
     });
   });
 }

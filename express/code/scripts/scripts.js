@@ -589,7 +589,10 @@ async function loadPage() {
   await loadArea();
 
   // Set after loadArea so milo's delayed doesn't pick it up — express-delayed owns google login
-  document.head.append(createTag('meta', { name: 'google-login', content: 'on' }));
+  const googleLoginMeta = document.head.querySelector('meta[name="google-login"]')
+    || createTag('meta', { name: 'google-login' });
+  googleLoginMeta.content = 'on';
+  if (!googleLoginMeta.isConnected) document.head.append(googleLoginMeta);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));

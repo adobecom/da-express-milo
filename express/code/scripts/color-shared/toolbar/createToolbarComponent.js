@@ -429,7 +429,7 @@ function setupResponsiveLayout(nameField, ctaBtn, paletteSummary) {
 }
 
 function loadSpectrumDeps() {
-  Promise.all([loadButton(), loadActionButton(), loadTooltip()]).catch((err) => {
+  Promise.all([loadButton(), loadActionButton(), loadTooltip(), loadMenu()]).catch((err) => {
     window.lana?.log(`Spectrum load failed: ${err.message}`, {
       tags: 'color-floating-toolbar,spectrum',
       severity: 'error',
