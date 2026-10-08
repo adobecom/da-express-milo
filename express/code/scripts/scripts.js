@@ -588,17 +588,17 @@ async function loadPage() {
 
   await loadArea();
 
-  // Split ownership so Milo initializes desktop and Express initializes mobile exactly once.
+  // Disable Milo's loader so Express owns Google login on every viewport.
   const miloGoogleLoginMeta = document.head.querySelector('meta[name="google-login"]')
     || createTag('meta', { name: 'google-login' });
   const previousMiloGoogleLogin = miloGoogleLoginMeta.content;
-  miloGoogleLoginMeta.content = 'desktop';
+  miloGoogleLoginMeta.content = 'off';
   if (!miloGoogleLoginMeta.isConnected) document.head.append(miloGoogleLoginMeta);
 
   const expressGoogleLoginMeta = document.head.querySelector('meta[name="express-google-login"]')
     || createTag('meta', { name: 'express-google-login' });
   const previousExpressGoogleLogin = expressGoogleLoginMeta.content;
-  expressGoogleLoginMeta.content = 'mobile';
+  expressGoogleLoginMeta.content = 'on';
   if (!expressGoogleLoginMeta.isConnected) document.head.append(expressGoogleLoginMeta);
   // eslint-disable-next-line no-console
   console.log('[MWPW-188779][Scripts] Google login metadata ownership updated', {
