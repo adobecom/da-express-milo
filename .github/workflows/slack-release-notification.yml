@@ -55,7 +55,8 @@ jobs:
             // 1. Find the release PR (the PR merged into main that triggered this run)
             let releasePr = null;
             if (context.eventName === 'pull_request') {
-              releasePr = context.payload.pull_request;
+              // Test runs from a non-release PR fall back to the latest merged release PR
+              if (context.payload.pull_request.base.ref === 'main') releasePr = context.payload.pull_request;
             } else {
               const { data: associated } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 owner,
