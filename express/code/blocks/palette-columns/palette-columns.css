@@ -100,7 +100,8 @@
 .palette-columns .palette-columns-icon {
   display: inline-flex;
   flex-shrink: 0;
-  padding: 7px 7px 7px var(--spacing-300);
+  padding-block: 7px;
+  padding-inline: var(--spacing-300) 7px;
 }
 
 .palette-columns .palette-columns-icon svg {
@@ -110,7 +111,8 @@
 }
 
 .palette-columns .palette-columns-cta-label {
-  padding: var(--spacing-100) var(--spacing-325) var(--spacing-100) 0;
+  padding-block: var(--spacing-100);
+  padding-inline: 0 var(--spacing-325);
 }
 
 /* TODO: remove the color rules below once #820 (universal fill button) merges;
