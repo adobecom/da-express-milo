@@ -1,5 +1,6 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 
 // Set up mocks BEFORE any imports to prevent external calls
 if (typeof window !== 'undefined') {
@@ -74,15 +75,19 @@ const imports = await Promise.all([
 
 const { default: decorate } = imports[1];
 
-const setupTest = async (htmlFile) => {
+const setupTest = async (htmlFile, {
+  width = 1024,
+  startBlock = 'highlight',
+  hideStartSection = false,
+} = {}) => {
   const testBody = await readFile({ path: htmlFile });
   window.isTestEnv = true;
 
-  // Mock window width to be desktop (>= 1024px) for consistent testing
+  // Default to desktop unless the test exercises a smaller viewport.
   Object.defineProperty(window, 'innerWidth', {
     writable: true,
     configurable: true,
-    value: 1024,
+    value: width,
   });
 
   document.documentElement.innerHTML = testBody;
@@ -124,14 +129,6 @@ const setupTest = async (htmlFile) => {
     tocBlock.appendChild(row);
   });
 
-  // Add highlight element that TOC needs
-  const highlight = document.createElement('div');
-  highlight.classList.add('section');
-  const highlightDiv = document.createElement('div');
-  highlightDiv.classList.add('highlight');
-  highlight.appendChild(highlightDiv);
-  document.body.appendChild(highlight);
-
   // Check if main section already exists in the HTML, if not create it
   let mainSection = document.querySelector('main');
   if (!mainSection) {
@@ -151,6 +148,21 @@ const setupTest = async (htmlFile) => {
     section.appendChild(content);
     mainSection.appendChild(section);
     document.body.appendChild(mainSection);
+  }
+
+  const tocSection = document.createElement('div');
+  tocSection.classList.add('section');
+  tocSection.append(tocBlock);
+  mainSection.prepend(tocSection);
+
+  if (startBlock) {
+    const startSection = document.createElement('div');
+    startSection.classList.add('section');
+    const startElement = document.createElement('div');
+    startElement.classList.add(startBlock);
+    startSection.append(startElement);
+    if (hideStartSection) startSection.style.display = 'none';
+    mainSection.prepend(startSection);
   }
 
   await decorate(tocBlock);
@@ -344,5 +356,133 @@ describe('Table of Contents SEO - Empty Block Test', () => {
     expect(block.style.display).to.equal('none');
 
     cleanupTest();
+  });
+});
+
+describe('Table of Contents SEO - Independent Positioning', () => {
+  beforeEach(() => {
+    // Background browser tabs may pause animation frames during the full suite.
+    sinon.stub(window, 'requestAnimationFrame').callsFake((callback) => (
+      setTimeout(() => callback(performance.now()), 0)
+    ));
+  });
+
+  afterEach(() => {
+    sinon.restore();
+    cleanupTest();
+  });
+
+  const nextFrame = () => new Promise((resolve) => {
+    requestAnimationFrame(resolve);
+  });
+
+  [
+    { width: 390, startBlock: 'highlight', hideStartSection: true },
+    { width: 768, startBlock: 'highlight', hideStartSection: true },
+    { width: 390, startBlock: null },
+    { width: 390, startBlock: 'blog-article-marquee', hideStartSection: true },
+    { width: 1024, startBlock: 'highlight' },
+    { width: 1280, startBlock: 'blog-article-marquee' },
+    { width: 1280, startBlock: null },
+  ].forEach((options) => {
+    it(`keeps the TOC at its authored position at ${options.width}px with ${options.startBlock || 'no preceding block'}`, async () => {
+      const toc = await setupTest('./mocks/body-positioning.html', options);
+      const block = document.querySelector('.toc-seo');
+      const section = document.querySelector('.section.long-form');
+
+      expect(toc).to.exist;
+      expect(toc.parentElement).to.equal(block.parentElement);
+      expect(toc.nextElementSibling).to.equal(block);
+      expect(toc.parentElement.nextElementSibling).to.equal(section);
+      expect(toc.getBoundingClientRect().height).to.be.greaterThan(0);
+
+      if (options.width < 1024) {
+        expect(toc.classList.contains('open')).to.be.true;
+        const title = toc.querySelector('.toc-title');
+        title.click();
+        expect(title.getAttribute('aria-expanded')).to.equal('false');
+        title.click();
+        expect(title.getAttribute('aria-expanded')).to.equal('true');
+
+        const header = section.querySelector('h2');
+        const scrollIntoView = sinon.stub(header, 'scrollIntoView');
+        toc.querySelector('.toc-link').click();
+        expect(scrollIntoView.calledOnceWith({ behavior: 'smooth', block: 'start' })).to.be.true;
+      }
+    });
+  });
+
+  it('calculates desktop placement from long-form content and clears the sticky navigation', async () => {
+    const toc = await setupTest('./mocks/body-positioning.html', { startBlock: null });
+    const section = document.querySelector('.section.long-form');
+    let sectionTop = 320;
+    sinon.stub(section, 'getBoundingClientRect').callsFake(() => ({
+      top: sectionTop, height: 600, bottom: sectionTop + 600,
+    }));
+
+    window.dispatchEvent(new Event('resize'));
+    await nextFrame();
+    expect(toc.style.getPropertyValue('--toc-top-position')).to.equal('344px');
+    expect(toc.classList.contains('toc-desktop')).to.be.true;
+
+    sectionTop = -200;
+    window.dispatchEvent(new Event('scroll'));
+    await nextFrame();
+    expect(toc.style.getPropertyValue('--toc-top-position')).to.equal('95px');
+
+    window.innerWidth = 390;
+    window.dispatchEvent(new Event('resize'));
+    await nextFrame();
+    expect(toc.classList.contains('toc-desktop')).to.be.false;
+    expect(toc.style.getPropertyValue('--toc-top-position')).to.equal('');
+    expect(toc.classList.contains('open')).to.be.true;
+
+    window.innerWidth = 1280;
+    window.dispatchEvent(new Event('resize'));
+    await nextFrame();
+    expect(toc.classList.contains('toc-desktop')).to.be.true;
+    expect(toc.style.getPropertyValue('--toc-top-position')).to.equal('95px');
+  });
+
+  it('updates the mobile floating button from the independent TOC position', async () => {
+    const toc = await setupTest('./mocks/body-positioning.html', {
+      width: 390, hideStartSection: true,
+    });
+    let tocTop = -500;
+    sinon.stub(toc, 'getBoundingClientRect').callsFake(() => ({
+      top: tocTop, bottom: tocTop + 200, height: 200,
+    }));
+    const floatingButton = document.querySelector('.toc-floating-button');
+
+    window.dispatchEvent(new Event('scroll'));
+    await nextFrame();
+    expect(floatingButton.classList.contains('visible')).to.be.true;
+
+    const scrollTo = sinon.stub(window, 'scrollTo');
+    floatingButton.click();
+    expect(scrollTo.calledOnceWith({ top: 0, behavior: 'smooth' })).to.be.true;
+
+    tocTop = 100;
+    window.dispatchEvent(new Event('scroll'));
+    await nextFrame();
+    expect(floatingButton.classList.contains('visible')).to.be.false;
+  });
+
+  it('keeps the desktop TOC above the configured stop element', async () => {
+    const toc = await setupTest('./mocks/body-positioning.html', { startBlock: null });
+    const section = document.querySelector('.section.long-form');
+    sinon.stub(section, 'getBoundingClientRect').returns({ top: -200, height: 600 });
+    sinon.stub(window, 'pageYOffset').get(() => 500);
+    const stopElement = document.createElement('div');
+    stopElement.classList.add('article-end');
+    stopElement.style.height = '100px';
+    section.after(stopElement);
+    sinon.stub(stopElement, 'getBoundingClientRect').returns({ top: 200, height: 100 });
+    toc.dataset.stopSelector = '.article-end';
+
+    window.dispatchEvent(new Event('scroll'));
+    await nextFrame();
+    const expectedTop = Math.min(95, 200 - toc.offsetHeight - 20);
+    expect(toc.style.getPropertyValue('--toc-top-position')).to.equal(`${expectedTop}px`);
   });
 });
