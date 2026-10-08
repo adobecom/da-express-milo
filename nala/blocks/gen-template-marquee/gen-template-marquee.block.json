@@ -1,0 +1,96 @@
+{
+  "block": "gen-template-marquee",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@gen-template-marquee-default",
+      "selector": "div.gen-template-marquee",
+      "path": "/drafts/echen/mwpw-210024-gen-template-marquee",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Generate templates with AI.",
+              "markup": null
+            },
+            {
+              "selector": ".gen-template-text > p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Create a fully editable template from a single prompt in minutes.",
+              "markup": null
+            },
+            {
+              "selector": ".gen-template-suggestions-label",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get started with an example prompt",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".gen-template-logo",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": ""
+            },
+            {
+              "selector": ".gen-template-card picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": null,
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "textbox",
+              "selector": ".gen-template-prompt-input",
+              "nth": 0,
+              "text": null,
+              "href": null,
+              "ariaLabel": "Prompt",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": ".gen-template-prompt-submit",
+              "nth": 0,
+              "text": "Generate",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": ".gen-template-suggestion",
+              "nth": 0,
+              "text": "Dog trainer advertisement",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@gen-template-marquee",
+        "@default",
+        "@express",
+        "@smoke",
+        "@regression"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,403 @@
+main .section:has(.gen-template-marquee) > div:not(.gen-template-marquee) {
+  max-width: none;
+  padding: 0;
+}
+
+.gen-template-marquee {
+  /* Exact component dimensions from Figma frame 363:71646. */
+  --gen-template-marquee-height: 1506px;
+  --gen-template-gallery-top: 445px;
+  --gen-template-card-width: 250px;
+  --gen-template-column-gap: var(--spacing-600);
+  --gen-template-card-gap: 52px;
+  --gen-template-heading-line-height: 32px;
+  --gen-template-body-subtle: rgb(0 0 0 / 64%);
+  position: relative;
+  box-sizing: border-box;
+  height: var(--gen-template-marquee-height);
+  overflow: clip;
+  padding: var(--spacing-500) var(--spacing-300) 0;
+  background: var(--color-white);
+  color: var(--Alias-content-typography-Heading);
+}
+
+.gen-template-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-350);
+  width: 100%;
+  max-width: 666px;
+  margin: 0 auto;
+}
+
+.gen-template-text,
+.gen-template-logo-heading,
+.gen-template-prompt,
+.gen-template-prompt-form,
+.gen-template-prompt-field,
+.gen-template-suggestions {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.gen-template-text,
+.gen-template-logo-heading {
+  align-items: center;
+  gap: var(--spacing-100);
+  text-align: center;
+}
+
+.gen-template-marquee .gen-template-logo.icon {
+  display: block;
+  width: 124px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.gen-template-marquee .gen-template-logo-heading :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+  font-family: var(--s2a-font-family-heading);
+  font-size: var(--heading-font-size-l);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: var(--gen-template-heading-line-height);
+  letter-spacing: -1px;
+  text-wrap: balance;
+}
+
+main .section .gen-template-text > p {
+  width: 100%;
+  margin: 0;
+  color: var(--gen-template-body-subtle);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  line-height: var(--spacing-350);
+  text-wrap: pretty;
+}
+
+.gen-template-prompt {
+  align-items: center;
+  gap: var(--spacing-300);
+}
+
+.gen-template-prompt-form {
+  box-sizing: border-box;
+  padding: var(--spacing-100);
+  border: 1px solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-200);
+  background: var(--color-white);
+}
+
+.gen-template-prompt-field {
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200);
+  border-radius: var(--spacing-200);
+  background: var(--color-gray-100);
+}
+
+.gen-template-prompt-label {
+  color: var(--gen-template-body-subtle);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  font-weight: var(--subheading-font-weight);
+  line-height: var(--spacing-325);
+}
+
+.gen-template-prompt-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  margin: 0;
+  padding: 0;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--Alias-content-neutral-default);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  line-height: var(--spacing-325);
+}
+
+.gen-template-prompt-input::placeholder {
+  color: var(--gen-template-body-subtle);
+  opacity: 1;
+}
+
+.gen-template-prompt-input:focus-visible {
+  border-radius: var(--corner-radius-80);
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: var(--spacing-50);
+}
+
+.gen-template-prompt-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-80);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 90px;
+  min-height: var(--spacing-700);
+  margin: 0;
+  padding: var(--spacing-100) var(--spacing-350) var(--spacing-100) var(--spacing-325);
+  border: 0;
+  border-radius: var(--spacing-400);
+  background: var(--Background-Primary-Default);
+  color: var(--color-white);
+  cursor: pointer;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  font-weight: var(--subheading-font-weight);
+  line-height: var(--spacing-350);
+}
+
+.gen-template-prompt-submit:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: var(--spacing-50);
+}
+
+.gen-template-prompt-submit .icon {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  filter: brightness(0) invert(1);
+}
+
+.gen-template-suggestions {
+  align-items: center;
+  gap: var(--spacing-200);
+  overflow: hidden;
+}
+
+main .section .gen-template-suggestions-label {
+  margin: 0;
+  color: var(--gen-template-body-subtle);
+  font-size: var(--body-font-size-s);
+  line-height: var(--spacing-325);
+  text-align: center;
+}
+
+.gen-template-suggestion-list {
+  display: flex;
+  gap: var(--spacing-200);
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.gen-template-suggestion-list::after {
+  position: absolute;
+  inset-inline-end: 0;
+  width: var(--spacing-600);
+  height: 44px;
+  background: linear-gradient(to left, var(--color-white) 26%, transparent);
+  content: '';
+  pointer-events: none;
+}
+
+.gen-template-suggestion {
+  flex: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--spacing-200) var(--spacing-300);
+  border: 1px solid var(--color-gray-300-variant);
+  border-radius: var(--corner-radius-80);
+  background: var(--color-gray-100);
+  color: var(--Alias-content-typography-Heading);
+  cursor: pointer;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  font-weight: var(--subheading-font-weight);
+  line-height: var(--spacing-325);
+  white-space: nowrap;
+}
+
+.gen-template-suggestion:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: var(--spacing-50);
+}
+
+.gen-template-gallery {
+  position: absolute;
+  top: var(--gen-template-gallery-top);
+  left: 50%;
+  display: flex;
+  gap: var(--gen-template-column-gap);
+  width: max-content;
+  transform: translateX(-50%);
+}
+
+.gen-template-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gen-template-card-gap);
+  width: var(--gen-template-card-width);
+}
+
+.gen-template-column-edge {
+  display: none;
+}
+
+.gen-template-column:nth-child(3) {
+  padding-top: 105px;
+}
+
+.gen-template-card {
+  position: relative;
+  flex: none;
+  width: 100%;
+  aspect-ratio: 250 / 338;
+  overflow: hidden;
+  border-radius: var(--Corner-radius-corner-radius-200);
+}
+
+.gen-template-card-square {
+  aspect-ratio: 1;
+}
+
+.gen-template-card picture,
+.gen-template-card img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.gen-template-card img {
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .gen-template-column:nth-child(odd) {
+      animation: gen-template-column-rise linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    .gen-template-column:nth-child(even) {
+      animation: gen-template-column-fall linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+@keyframes gen-template-column-rise {
+  from { transform: translateY(var(--spacing-600)); }
+  to { transform: translateY(calc(-1 * var(--spacing-600))); }
+}
+
+@keyframes gen-template-column-fall {
+  from { transform: translateY(calc(-1 * var(--spacing-600))); }
+  to { transform: translateY(var(--spacing-600)); }
+}
+
+@media (min-width: 600px) {
+  .gen-template-marquee {
+    /* Exact tablet dimensions from Figma frame 363:71373. */
+    --gen-template-marquee-height: 1732px;
+    --gen-template-gallery-top: 414px;
+    --gen-template-card-width: 291px;
+    --gen-template-column-gap: 70px;
+    --gen-template-card-gap: 100px;
+    padding: var(--spacing-700) var(--spacing-500) 0;
+  }
+
+  .gen-template-content {
+    max-width: 666px;
+  }
+
+  .gen-template-prompt-form {
+    padding: var(--spacing-200);
+  }
+
+  .gen-template-prompt-field {
+    padding: var(--spacing-300);
+  }
+
+  .gen-template-prompt-submit {
+    align-self: flex-end;
+    width: auto;
+  }
+
+  .gen-template-suggestion-list {
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .gen-template-suggestion-list::after {
+    content: none;
+  }
+
+  .gen-template-column-edge {
+    display: flex;
+  }
+
+  .gen-template-column:nth-child(1),
+  .gen-template-column:nth-child(5) {
+    transform: translateY(-176px);
+  }
+
+  .gen-template-column:nth-child(2) {
+    transform: translateY(-105px);
+  }
+
+  .gen-template-column:nth-child(3) {
+    padding-top: 105px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .gen-template-marquee {
+    /* Exact desktop dimensions from Figma frame 363:71100. */
+    --gen-template-marquee-height: 1842px;
+    --gen-template-gallery-top: 308px;
+    --gen-template-column-gap: 97px;
+    --gen-template-heading-line-height: 56px;
+    padding-top: var(--spacing-800);
+  }
+
+  .gen-template-marquee .gen-template-logo.icon {
+    width: 181px;
+    height: var(--spacing-400);
+  }
+
+  .gen-template-marquee .gen-template-logo-heading :is(h1, h2, h3, h4, h5, h6) {
+    font-size: 56px;
+    line-height: var(--gen-template-heading-line-height);
+    letter-spacing: -1.68px;
+  }
+
+  .gen-template-column:nth-child(1),
+  .gen-template-column:nth-child(5) {
+    transform: none;
+  }
+
+  .gen-template-column:nth-child(2),
+  .gen-template-column:nth-child(4) {
+    transform: translateY(176px);
+  }
+
+  .gen-template-column:nth-child(3) {
+    padding-top: 281px;
+  }
+}
+
+@media (min-width: 1680px) {
+  .gen-template-marquee {
+    /* Exact widescreen dimensions from Figma frame 363:70836. */
+    --gen-template-marquee-height: 1899px;
+    --gen-template-gallery-top: 304px;
+    --gen-template-card-width: 308px;
+    --gen-template-column-gap: 95px;
+  }
+}
