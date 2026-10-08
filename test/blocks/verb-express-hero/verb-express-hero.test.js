@@ -30,13 +30,40 @@ await Promise.all(styleSheets.map((href) => new Promise((resolve, reject) => {
 })));
 
 async function prepBlock(filePath) {
-  document.body.innerHTML = await readFile({ path: filePath });
+  const html = await readFile({ path: filePath });
+  const fixture = new DOMParser().parseFromString(html, 'text/html');
+  document.body.replaceChildren(
+    ...[...fixture.body.childNodes].map((node) => document.importNode(node, true)),
+  );
   const block = document.querySelector('.verb-express-hero');
   await decorate(block);
   return block;
 }
 
 describe('verb-express-hero', () => {
+  const logoMetadataKeys = ['inject-branding-logo', 'marquee-inject-logo'];
+  const metadataSelector = logoMetadataKeys
+    .map((key) => `meta[name="${key}"]`)
+    .join(', ');
+  let originalMetadata;
+
+  function setLogoMetadata(name, content) {
+    const meta = document.createElement('meta');
+    meta.name = name;
+    meta.content = content;
+    document.head.append(meta);
+  }
+
+  beforeEach(() => {
+    originalMetadata = [...document.head.querySelectorAll(metadataSelector)];
+    originalMetadata.forEach((meta) => meta.remove());
+  });
+
+  afterEach(() => {
+    document.head.querySelectorAll(metadataSelector).forEach((meta) => meta.remove());
+    document.head.append(...originalMetadata);
+  });
+
   it('decorates successfully', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block).to.exist;
@@ -50,9 +77,40 @@ describe('verb-express-hero', () => {
     expect(block.querySelector('.image-column picture')).to.exist;
   });
 
-  it('injects the Adobe brand logo into the heading group', async () => {
+  it('omits the logo without metadata and preserves authored copy', async () => {
     const block = await prepBlock('./mocks/default.html');
-    expect(block.querySelector('.copy-column .heading-group > .express-logo')).to.exist;
+    expect(block.querySelector('.express-logo')).not.to.exist;
+    expect(block.querySelector('.copy h1')).to.exist;
+    expect(block.querySelector('.copy p')).to.exist;
+    expect(block.querySelector('.heading-group').textContent).not.to.include('null');
+  });
+
+  logoMetadataKeys.forEach((key) => {
+    ['on', 'yes', 'true', ' ON ', ' Yes ', ' TRUE '].forEach((value) => {
+      it(`injects the Adobe brand logo when ${key} is "${value}"`, async () => {
+        setLogoMetadata(key, value);
+        const block = await prepBlock('./mocks/default.html');
+        expect(block.querySelector('.copy-column .heading-group > .express-logo')).to.exist;
+      });
+    });
+  });
+
+  ['', 'off', 'no', 'false'].forEach((value) => {
+    it(`omits the logo when both metadata keys are "${value}"`, async () => {
+      logoMetadataKeys.forEach((key) => setLogoMetadata(key, value));
+      const block = await prepBlock('./mocks/default.html');
+      expect(block.querySelector('.express-logo')).not.to.exist;
+    });
+  });
+
+  logoMetadataKeys.forEach((enabledKey) => {
+    it(`injects the logo when only ${enabledKey} is enabled`, async () => {
+      logoMetadataKeys.forEach((key) => {
+        setLogoMetadata(key, key === enabledKey ? 'yes' : 'off');
+      });
+      const block = await prepBlock('./mocks/default.html');
+      expect(block.querySelector('.copy-column .heading-group > .express-logo')).to.exist;
+    });
   });
 
   it('keeps the authored heading and body copy, separate from the dropzone', async () => {
