@@ -59,6 +59,36 @@ describe('createActionMenuComponent', () => {
     expect(instance.element.querySelector('.redo-btn')).to.exist;
   });
 
+  it('renders independent undo arrows when either persistent menu is hidden', async () => {
+    instance = await createActionMenuComponent({
+      type: 'full',
+      controls: VALID_CONTROLS,
+    });
+    const mobileMenu = await createActionMenuComponent({
+      type: 'controls-only',
+      controls: VALID_CONTROLS,
+    });
+    document.body.append(instance.element, mobileMenu.element);
+    try {
+      for (const visibleMenu of [mobileMenu, instance]) {
+        instance.element.style.display = visibleMenu === instance ? 'block' : 'none';
+        mobileMenu.element.style.display = visibleMenu === mobileMenu ? 'block' : 'none';
+        const svg = visibleMenu.element.querySelector('.undo-btn svg');
+        expect(svg.getAttribute('aria-hidden')).to.equal('true');
+        expect(svg.getAttribute('viewBox')).to.equal('0 0 20 20');
+        expect(svg.children).to.have.lengthOf(1);
+        expect(svg.firstElementChild.localName).to.equal('path');
+        expect(svg.firstElementChild.getAttribute('fill')).to.equal('#292929');
+        expect(svg.querySelector('[id], mask, [mask], rect')).to.be.null;
+        const bounds = svg.getBBox();
+        expect(bounds.width).to.be.within(15, 19);
+        expect(bounds.height).to.be.within(10, 19);
+      }
+    } finally {
+      mobileMenu.destroy();
+    }
+  });
+
   it('expand control updates aria-label when toggled', async () => {
     let expandedValue = null;
     instance = await createActionMenuComponent({
