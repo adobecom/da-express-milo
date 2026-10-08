@@ -6,6 +6,14 @@ Official repo for adobe.com/express
 1. Run `aem up` this repo's folder. (opens your browser at `http://localhost:3000`)
 1. Open this repo's folder in your favorite editor and start coding.
 
+### Color Wheel responsive layout
+
+The Color Wheel initializes its layout, tabs, controller, and image panel once.
+CSS switches between persistent desktop controls and canvas controls at 1200px;
+both control sets share the same action-menu history. Breakpoint changes only
+reset the desktop expanded view, preserving the palette, harmony, selected tab,
+uploaded image, and undo/redo history without rebuilding the block.
+
 ## Testing
 ```sh
 npm run test
