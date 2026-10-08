@@ -1,5 +1,17 @@
 /* default content */
 
+/* Match Milo's Adobe Clean Display Black metrics without changing body fallbacks. */
+@font-face {
+  font-family: 'Arial Bold Adjusted';
+  font-weight: 900;
+  font-display: swap;
+  size-adjust: 93%;
+  ascent-override: 91%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('ArialBold');
+}
+
 /*
  * Font-display swap ensures text is visible while fonts load (FCP optimization)
  * Font metric overrides minimize layout shift when fonts swap (CLS optimization)
@@ -116,7 +128,7 @@
 
   /* font families */
   --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
-  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --s2a-font-family-heading: 'Adobe Clean Display Black', adobe-clean-display, 'Arial Bold Adjusted', sans-serif;
 
   /* body */
   --body-background-color: var(--color-white);
