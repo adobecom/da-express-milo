@@ -588,18 +588,25 @@ async function loadPage() {
 
   await loadArea();
 
-  // Set after loadArea so milo's delayed doesn't pick it up — express-delayed owns google login
-  const googleLoginMeta = document.head.querySelector('meta[name="google-login"]')
+  // Split ownership so Milo initializes desktop and Express initializes mobile exactly once.
+  const miloGoogleLoginMeta = document.head.querySelector('meta[name="google-login"]')
     || createTag('meta', { name: 'google-login' });
-  const previousGoogleLogin = googleLoginMeta.content;
-  googleLoginMeta.content = 'on';
-  if (!googleLoginMeta.isConnected) document.head.append(googleLoginMeta);
+  const previousMiloGoogleLogin = miloGoogleLoginMeta.content;
+  miloGoogleLoginMeta.content = 'desktop';
+  if (!miloGoogleLoginMeta.isConnected) document.head.append(miloGoogleLoginMeta);
+
+  const expressGoogleLoginMeta = document.head.querySelector('meta[name="express-google-login"]')
+    || createTag('meta', { name: 'express-google-login' });
+  const previousExpressGoogleLogin = expressGoogleLoginMeta.content;
+  expressGoogleLoginMeta.content = 'mobile';
+  if (!expressGoogleLoginMeta.isConnected) document.head.append(expressGoogleLoginMeta);
   // eslint-disable-next-line no-console
-  console.log('[MWPW-188779][Scripts] Google login metadata updated', {
+  console.log('[MWPW-188779][Scripts] Google login metadata ownership updated', {
     atMs: Math.round(performance.now()),
-    previousGoogleLogin,
-    currentGoogleLogin: googleLoginMeta.content,
-    created: !previousGoogleLogin,
+    previousMiloGoogleLogin,
+    currentMiloGoogleLogin: miloGoogleLoginMeta.content,
+    previousExpressGoogleLogin,
+    currentExpressGoogleLogin: expressGoogleLoginMeta.content,
   });
 
   const { fixIcons } = await import('./utils.js');

@@ -68,6 +68,7 @@ describe('Google login', () => {
   });
 
   it('defers One Tap until the dismissable mobile fork resolves', async () => {
+    const clock = sinon.useFakeTimers();
     document.body.innerHTML += '<div class="floating-button-wrapper"></div>'
       + '<div class="mobile-fork-button mweb-mobile-fork"></div>';
     let ctaHiddenWhenPrompted = false;
@@ -91,10 +92,10 @@ describe('Google login', () => {
     expect(ctaHiddenWhenPrompted).to.be.true;
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
 
-    await new Promise((resolve) => {
-      window.requestAnimationFrame(() => window.requestAnimationFrame(resolve));
-    });
+    clock.tick(999);
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
 
+    clock.tick(1);
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
   });
 

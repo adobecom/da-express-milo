@@ -73,7 +73,7 @@ async function addJapaneseSectionHeaderSizing() {
 }
 
 async function loadGoogleLogin() {
-  const googleLogin = getMetadata('google-login')?.trim().toLowerCase();
+  const googleLogin = getMetadata('express-google-login')?.trim().toLowerCase();
   const signedIn = Boolean(window.adobeIMS?.isSignedInUser());
   const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
   const supportedMetadata = ['mobile', 'desktop', 'on'].includes(googleLogin);
@@ -84,6 +84,7 @@ async function loadGoogleLogin() {
 
   diagnosticLog('Google login eligibility evaluated', {
     googleLogin,
+    miloGoogleLogin: getMetadata('google-login')?.trim().toLowerCase(),
     signedIn,
     desktopViewport,
     supportedMetadata,

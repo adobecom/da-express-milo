@@ -5,6 +5,7 @@ const WRAPPER = 'feds-profile';
 const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
 const REGULAR_CTA_PENDING_CLASS = 'google-login-prompt-pending';
 const DIAGNOSTIC_PREFIX = '[MWPW-188779][Google One Tap]';
+const REGULAR_CTA_SUPPRESSION_MS = 1000;
 
 const diagnosticLog = (message, details = {}) => {
   // eslint-disable-next-line no-console
@@ -98,20 +99,16 @@ const promptGoogleLogin = (hideRegularCta = false) => {
     throw error;
   } finally {
     if (hideRegularCta) {
-      // Keep the replacement CTA out of the first paint while GSI creates its prompt.
-      window.requestAnimationFrame(() => {
-        diagnosticLog('First reveal frame reached', {
+      diagnosticLog('Regular CTA suppression release scheduled', {
+        delayMs: REGULAR_CTA_SUPPRESSION_MS,
+      });
+      window.setTimeout(() => {
+        document.body.classList.remove(REGULAR_CTA_PENDING_CLASS);
+        diagnosticLog('Regular CTA suppression removed', {
           pendingClass: document.body.classList.contains(REGULAR_CTA_PENDING_CLASS),
           regularCtas: getRegularCtaDiagnostics(),
         });
-        window.requestAnimationFrame(() => {
-          document.body.classList.remove(REGULAR_CTA_PENDING_CLASS);
-          diagnosticLog('Regular CTA suppression removed', {
-            pendingClass: document.body.classList.contains(REGULAR_CTA_PENDING_CLASS),
-            regularCtas: getRegularCtaDiagnostics(),
-          });
-        });
-      });
+      }, REGULAR_CTA_SUPPRESSION_MS);
     }
   }
 };
@@ -119,6 +116,7 @@ const promptGoogleLogin = (hideRegularCta = false) => {
 export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
   diagnosticLog('Initialization started', {
     googleLogin: getMetadata('google-login')?.trim().toLowerCase(),
+    expressGoogleLogin: getMetadata('express-google-login')?.trim().toLowerCase(),
     zeroTap: getMetadata('google-yolo-zero-tap')?.trim().toLowerCase(),
     hasMobileFork: Boolean(document.querySelector('.mobile-fork-button.mweb-mobile-fork')),
     hasProfileWrapper: Boolean(document.querySelector(`.${WRAPPER}`)),
