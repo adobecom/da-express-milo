@@ -51,154 +51,160 @@ jobs:
         with:
           script: |
             const { owner, repo } = context.repo;
-            
-            console.log('🔍 Fetching recent PRs with detailed information...');
-            
-            // Get recent commits
-            const commits = await github.rest.repos.listCommits({
+
+            // 1. Find the release PR (the PR merged into main that triggered this run)
+            let releasePr = null;
+            if (context.eventName === 'pull_request') {
+              releasePr = context.payload.pull_request;
+            } else {
+              const { data: associated } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: context.sha,
+              });
+              releasePr = associated.find((pr) => pr.base.ref === 'main' && pr.merged_at);
+            }
+            if (!releasePr) {
+              const { data: closed } = await github.rest.pulls.list({
+                owner,
+                repo,
+                base: 'main',
+                state: 'closed',
+                sort: 'updated',
+                direction: 'desc',
+                per_page: 20,
+              });
+              releasePr = closed
+                .filter((pr) => pr.merged_at)
+                .sort((a, b) => new Date(b.merged_at) - new Date(a.merged_at))[0];
+            }
+            if (!releasePr) {
+              core.setOutput('prList', 'No release PR found');
+              return;
+            }
+            console.log(`Release PR: #${releasePr.number} "${releasePr.title}"`);
+
+            // 2. Resolve the PRs included in the release from the release PR's commits
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
               owner,
               repo,
-              sha: 'main',
-              per_page: 10
+              pull_number: releasePr.number,
+              per_page: 100,
             });
-            
-            const mergeCommits = commits.data.filter(commit => 
-              commit.commit.message.includes('Merge pull request')
-            );
-            
-            console.log(`Found ${mergeCommits.length} merge commits`);
-            
-            if (mergeCommits.length === 0) {
-              return {
-                prList: 'No recent PRs found'
-              };
+            console.log(`Release PR contains ${commits.length} commits`);
+
+            const prNumbers = [];
+            for (const commit of commits) {
+              const headline = commit.commit.message.split('\n')[0];
+              // Skip sync merges (e.g. "Merge branch 'main' into stage")
+              if (commit.parents.length > 1 && !/^Merge pull request #\d+/.test(headline)) continue;
+
+              const match = headline.match(/\(#(\d+)\)\s*$/) || headline.match(/^Merge pull request #(\d+)/);
+              let prNumber = match ? parseInt(match[1], 10) : null;
+              if (!prNumber) {
+                try {
+                  const { data: associated } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                    owner,
+                    repo,
+                    commit_sha: commit.sha,
+                  });
+                  const pr = associated.find((p) => p.merged_at && p.number !== releasePr.number);
+                  prNumber = pr ? pr.number : null;
+                } catch (error) {
+                  console.log(`Failed to look up PRs for ${commit.sha}: ${error.message}`);
+                }
+              }
+              if (prNumber && prNumber !== releasePr.number && !prNumbers.includes(prNumber)) {
+                prNumbers.push(prNumber);
+              }
             }
-            
-            // Extract PR numbers from merge commits
-            const prNumbers = mergeCommits.map(commit => {
-              const match = commit.commit.message.match(/#(\d+)/);
-              return match ? parseInt(match[1]) : null;
-            }).filter(num => num !== null);
-            
-            console.log(`Extracted PR numbers: ${prNumbers.join(', ')}`);
-            
-            // Get detailed PR information
-            const prDetails = [];
+            // Hotfixes merged directly into main have no nested PRs; list the PR itself
+            if (prNumbers.length === 0) prNumbers.push(releasePr.number);
+            console.log(`PRs in release: ${prNumbers.join(', ')}`);
+
+            // 3. Build the list with Jira links where a ticket is available
+            const ticketPattern = /MWPW-\d+/;
+            const prList = [];
             for (const prNumber of prNumbers) {
               try {
-                const pr = await github.rest.pulls.get({
-                  owner,
-                  repo,
-                  pull_number: prNumber
-                });
-                
-                const title = pr.data.title;
-                const body = pr.data.body || '';
-                
-                // Look for ticket numbers in various formats
-                let ticketNumber = null;
-                let cleanTitle = title;
-                
-                // Check title first (MWPW-XXXXXX pattern)
-                const titleMatch = title.match(/(MWPW-\d+)/);
-                if (titleMatch) {
-                  ticketNumber = titleMatch[1];
-                  cleanTitle = title.replace(`${ticketNumber}: `, '');
+                const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+                const title = pr.title;
+                const ticketNumber = (title.match(ticketPattern) || (pr.body || '').match(ticketPattern) || [])[0];
+                const cleanTitle = title
+                  .replace(/[([]?MWPW-\d+[)\]]?/g, '')
+                  .replace(/^[\s:\-|]+/, '')
+                  .replace(/\s{2,}/g, ' ')
+                  .trim() || title;
+                const safeTitle = cleanTitle.replace(/[<>|]/g, '').replace(/&/g, '&amp;');
+
+                if (ticketNumber) {
+                  prList.push(`- <https://jira.corp.adobe.com/browse/${ticketNumber}|${ticketNumber}: ${safeTitle}> (<${pr.html_url}|#${prNumber}>)`);
                 } else {
-                  // Check PR body for ticket numbers
-                  const bodyMatch = body.match(/(MWPW-\d+)/);
-                  if (bodyMatch) {
-                    ticketNumber = bodyMatch[1];
-                  }
-                  
-                  // Also check for other ticket patterns in body
-                  const otherTicketMatch = body.match(/([A-Z]+-\d+)/);
-                  if (otherTicketMatch && !ticketNumber) {
-                    ticketNumber = otherTicketMatch[1];
-                  }
+                  prList.push(`- <${pr.html_url}|${safeTitle}> (#${prNumber})`);
                 }
-                
-                prDetails.push({
-                  number: prNumber,
-                  title: cleanTitle,
-                  originalTitle: title,
-                  body: body,
-                  ticketNumber: ticketNumber,
-                  url: pr.data.html_url
-                });
-                
                 console.log(`PR #${prNumber}: "${cleanTitle}" ${ticketNumber ? `(Ticket: ${ticketNumber})` : '(No ticket found)'}`);
-                
               } catch (error) {
                 console.log(`Failed to get PR #${prNumber}: ${error.message}`);
               }
             }
-            
-            // Format the PR list
-            let prList = '';
-            prDetails.forEach(pr => {
-              if (pr.ticketNumber) {
-                // Show ticket number in title, link to Jira, show GitHub PR at end
-                const displayTitle = `${pr.ticketNumber}: ${pr.title}`;
-                prList += `- <https://jira.corp.adobe.com/browse/${pr.ticketNumber}|${displayTitle}> (#${pr.number})\n`;
-              } else {
-                // Link to GitHub PR
-                prList += `- <https://github.com/${owner}/${repo}/pull/${pr.number}|${pr.title}> (#${pr.number})\n`;
-              }
-            });
-            
-            core.setOutput('prList', prList);
+
+            core.setOutput('prList', prList.join('\n') || 'No PRs found');
+
+      - name: Build Slack payload
+        id: build-payload
+        if: steps.extract-prs.outputs.prList != ''
+        env:
+          PR_LIST: ${{ steps.extract-prs.outputs.prList }}
+          TEST_SUFFIX: ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && ' (TEST MODE)' || '' }}
+          COMMIT_URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+          SHORT_SHA: ${{ steps.short-sha.outputs.short-sha }}
+        run: |
+          jq -n \
+            --arg prList "$PR_LIST" \
+            --arg testSuffix "$TEST_SUFFIX" \
+            --arg commitUrl "$COMMIT_URL" \
+            --arg shortSha "$SHORT_SHA" \
+            '{
+              text: "<!subteam^S07RK2JSX8X|@ax-devs> <!subteam^S07QX6W03UN|@acom-express-pdms> 🚀 *Express Milo Release Deployed*\($testSuffix)",
+              attachments: [
+                {
+                  color: "#0066cc",
+                  fields: [
+                    { title: "🌿 Branch", value: "main", short: true },
+                    { title: "🔗 Commit", value: "<\($commitUrl)|\($shortSha)>", short: true }
+                  ]
+                },
+                {
+                  color: "#ff6b35",
+                  fields: [
+                    {
+                      title: "🌐 Test URLs",
+                      value: "• <https://main--da-express-milo--adobecom.aem.page/express|main--da-express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
+                      short: false
+                    }
+                  ]
+                },
+                {
+                  color: "#28a745",
+                  fields: [
+                    { title: "📋 Changes in this Release", value: $prList, short: false }
+                  ]
+                }
+              ]
+            }' > slack-payload.json
+          cat slack-payload.json
 
       - name: Send release notification with bot token
-        if: env.SLACK_BOT_TOKEN != '' && steps.extract-prs.outputs.prList != ''
+        if: env.SLACK_BOT_TOKEN != '' && steps.build-payload.outcome == 'success'
         id: send-notification
         run: |
           echo "📤 Sending release notification with bot token..."
           
           # Use bot token to send message and get message details
-          MESSAGE_RESPONSE=$(curl -s -X POST -H "Authorization: Bearer ${{ env.SLACK_BOT_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "channel": "${{ env.SLACK_CHANNEL_ID }}",
-              "text": "<!subteam^S07RK2JSX8X|@ax-devs> <!subteam^S07QX6W03UN|@acom-express-pdms> 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST_MODE)' || '' }}",
-              "attachments": [
-                {
-                  "color": "#0066cc",
-                  "fields": [
-                    {
-                      "title": "🌿 Branch", 
-                      "value": "main",
-                      "short": true
-                    },
-                    {
-                      "title": "🔗 Commit",
-                      "value": "<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ steps.short-sha.outputs.short-sha }}>",
-                      "short": true
-                    }
-                  ]
-                },
-                {
-                  "color": "#ff6b35",
-                  "fields": [
-                    {
-                      "title": "🌐 Test URLs",
-                      "value": "• <https://main--da-express-milo--adobecom.aem.page/express|main--da-express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
-                      "short": false
-                    }
-                  ]
-                },
-                {
-                  "color": "#28a745",
-                  "fields": [
-                    {
-                      "title": "📋 Changes in this Release",
-                      "value": "${{ steps.extract-prs.outputs.prList }}",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }' \
+          MESSAGE_RESPONSE=$(jq --arg channel "${{ env.SLACK_CHANNEL_ID }}" '. + {channel: $channel}' slack-payload.json | \
+            curl -s -X POST -H "Authorization: Bearer ${{ env.SLACK_BOT_TOKEN }}" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data-binary @- \
             "https://slack.com/api/chat.postMessage")
           
           echo "Message response: $MESSAGE_RESPONSE"
@@ -214,52 +220,13 @@ jobs:
           fi
 
       - name: Send release notification with webhook (fallback)
-        if: env.SLACK_WEBHOOK_URL != '' && env.SLACK_BOT_TOKEN == '' && steps.extract-prs.outputs.prList != ''
+        if: env.SLACK_WEBHOOK_URL != '' && env.SLACK_BOT_TOKEN == '' && steps.build-payload.outcome == 'success'
         id: send-notification-webhook
         run: |
           echo "📤 Sending release notification with webhook (no pinning available)..."
           
-          curl -X POST -H 'Content-type: application/json' \
-            --data '{
-              "text": "<!subteam^S07RK2JSX8X|@ax-devs> <!subteam^S07QX6W03UN|@acom-express-pdms> 🚀 *Express Milo Release Deployed* ${{ (github.event.inputs.test_mode == 'true' || (github.event_name == 'pull_request' && contains(github.event.label.name, 'test-release-notification'))) && '(TEST MODE)' || '' }}",
-              "attachments": [
-                {
-                  "color": "#0066cc",
-                  "fields": [
-                    {
-                      "title": "🌿 Branch", 
-                      "value": "main",
-                      "short": true
-                    },
-                    {
-                      "title": "🔗 Commit",
-                      "value": "<https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ steps.short-sha.outputs.short-sha }}>",
-                      "short": true
-                    }
-                  ]
-                },
-                {
-                  "color": "#ff6b35",
-                  "fields": [
-                    {
-                      "title": "🌐 Test URLs",
-                      "value": "• <https://main--da-express-milo--adobecom.aem.page/express|main--da-express-milo--adobecom.aem.page/express>\n• <https://adobecom.com/express|adobecom.com/express>",
-                      "short": false
-                    }
-                  ]
-                },
-                {
-                  "color": "#28a745",
-                  "fields": [
-                    {
-                      "title": "📋 Changes in this Release",
-                      "value": "${{ steps.extract-prs.outputs.prList }}",
-                      "short": false
-                    }
-                  ]
-                }
-              ]
-            }' \
+          curl -X POST -H 'Content-type: application/json; charset=utf-8' \
+            --data-binary @slack-payload.json \
             ${{ env.SLACK_WEBHOOK_URL }}
           
           echo "✅ Webhook notification sent (no pinning available)"
