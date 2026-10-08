@@ -1,3 +1,5 @@
+@import url("./library-card-action-menu.css");
+
 /* Libraries accordion shell — item cards reuse color-explore strips (color-palette, gradient visual) */
 
 .ax-libraries {
@@ -5,7 +7,7 @@
   --ax-lib-border: var(--color-gray-150);
   --ax-lib-heading-color: var(--Alias-content-typography-Heading);
   --ax-lib-detail-color: var(--Alias-content-typography-Detail);
-  --ax-lib-body-color: var(--Alias-content-typography-Body, #505050);
+  --ax-lib-body-color: var(--Alias-content-typography-Body);
   --ax-lib-accent: var(--S2-Buttons-Accent-Color-Default);
   --ax-lib-header-height: 76px;
   --ax-lib-strip-height: 56px;
@@ -23,7 +25,7 @@
    Mobile-first: base styles target S; min-width queries layer on M and L. */
 .ax-lib-header {
   position: sticky;
-  top: var(--ax-lib-header-sticky-top, var(--global-height-nav, 0px));
+  top: var(--ax-lib-header-sticky-top);
   z-index: 3;
   width: 100%;
   background: var(--ax-lib-bg);
@@ -144,7 +146,9 @@
    the Figma typography to this slot only. */
 .ax-lib-header__sort-picker sp-picker.filter-picker {
   flex-grow: 1;
+  width: 100%;
   min-width: 0;
+  --mod-picker-min-width: 144px;
   --mod-picker-font-size: var(--body-font-size-s);
   --mod-picker-line-height: 18px;
 
@@ -560,97 +564,6 @@
   align-items: center;
   gap: var(--spacing-80);
   flex-shrink: 0;
-}
-
-.ax-lib-card__action-menu {
-  position: relative;
-  --ax-lib-bg: var(--color-white);
-}
-
-.ax-lib-card__action-menu-popover {
-  position: absolute;
-  top: calc(100% + var(--spacing-100));
-  left: 0;
-  right: auto;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  width: max-content;
-  min-width: 0;
-  padding: var(--spacing-100);
-  background: var(--ax-lib-bg);
-  border-radius: var(--Corner-radius-corner-radius-100);
-  box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-elevated-key);
-}
-
-/* Flipped when a left-aligned popover would overflow the viewport's right edge
-   (cards on the far right); anchors the popover's right edge to the trigger. */
-.ax-lib-card__action-menu-popover--align-right {
-  left: auto;
-  right: 0;
-}
-
-/* Flipped above the trigger when the downward popover would overflow the bottom
-   of its clipping boundary (cards near the viewport bottom, or the toolbar in a
-   modal footer) so it stays in the visible area. */
-.ax-lib-card__action-menu-popover--align-up {
-  top: auto;
-  bottom: calc(100% + var(--spacing-100));
-}
-
-.ax-lib-card__action-menu-popover[hidden] {
-  display: none;
-}
-
-.ax-lib-card__action-menu-list {
-  --mod-menu-item-label-inline-edge-to-content: var(--spectrum-component-edge-to-visual-only-200);
-  --mod-menu-item-selectable-edge-to-text-not-selected: var(--spectrum-component-edge-to-visual-only-200);
-  --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
-  --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
-  --mod-menu-item-background-color-default: transparent;
-  --mod-menu-item-background-color-key-focus: transparent;
-  --mod-menu-item-background-color-hover: var(--color-gray-150);
-  --mod-menu-item-background-color-down: var(--color-gray-150);
-
-  display: block;
-  inline-size: max-content;
-  width: max-content;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
-}
-
-.ax-lib-card__action-menu-list sp-menu-item {
-  background: transparent;
-  white-space: nowrap;
-}
-
-.ax-lib-card__action-menu-list sp-menu-item:hover {
-  background: var(--color-gray-150);
-}
-
-.ax-lib-card__action-menu-list sp-menu-item:focus,
-.ax-lib-card__action-menu-list sp-menu-item:focus-visible,
-.ax-lib-card__action-menu-list sp-menu-item[focused],
-.ax-lib-card__action-menu-list sp-menu-item[aria-selected="true"] {
-  background: transparent;
-  font-weight: 400;
-}
-
-.ax-lib-card__action {
-  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
-  --mod-actionbutton-background-color-hover: var(--color-light-gray-2);
-  --mod-actionbutton-background-color-down: var(--color-gray-300-variant);
-  --mod-actionbutton-background-color-focus: var(--color-light-gray-2);
-  --mod-actionbutton-content-color-hover: var(--color-default-font);
-  --mod-actionbutton-content-color-down: var(--color-default-font);
-  --mod-actionbutton-content-color-focus: var(--color-default-font);
-  cursor: pointer;
-}
-
-.ax-lib-card__action-menu sp-action-button.ax-lib-card__action[aria-expanded="true"] {
-  --mod-actionbutton-background-color-default: var(--color-light-gray-2);
 }
 
 /* ── Empty search state ─────────────────────────────────────── */
