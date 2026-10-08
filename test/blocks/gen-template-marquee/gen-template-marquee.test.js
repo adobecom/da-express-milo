@@ -70,4 +70,28 @@ describe('gen-template-marquee', () => {
 
     expect(document.activeElement).to.equal(input);
   });
+
+  it('preserves reserved characters in the routed desktop prompt', async () => {
+    const block = await prepareBlock();
+    const form = block.querySelector('.gen-template-prompt-form');
+    const input = block.querySelector('.gen-template-prompt-input');
+    const originalMatchMedia = window.matchMedia;
+    const originalLocationAssign = window.t_locationAssign;
+    const originalTrackingAppender = window.t_getTrackingAppendedURL;
+    window.matchMedia = () => ({ matches: true });
+    window.t_getTrackingAppendedURL = (url) => Promise.resolve(url);
+
+    const redirectPromise = new Promise((resolve) => {
+      window.t_locationAssign = resolve;
+    });
+    input.value = 'A + B & #1';
+    form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
+    const routedUrl = new URL(await redirectPromise);
+
+    window.matchMedia = originalMatchMedia;
+    window.t_locationAssign = originalLocationAssign;
+    window.t_getTrackingAppendedURL = originalTrackingAppender;
+    expect(routedUrl.pathname).to.equal('/neural-editor');
+    expect(routedUrl.searchParams.get('prompt')).to.equal('A + B & #1');
+  });
 });

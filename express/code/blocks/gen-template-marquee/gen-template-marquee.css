@@ -1,4 +1,4 @@
-main .section:has(.gen-template-marquee) > div:not(.gen-template-marquee) {
+main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
   max-width: none;
   padding: 0;
 }
@@ -201,6 +201,11 @@ main .section .gen-template-suggestions-label {
   content: '';
   pointer-events: none;
 }
+
+[dir="rtl"] .gen-template-suggestion-list::after {
+  background: linear-gradient(to right, var(--color-white) 26%, transparent);
+}
+
 
 .gen-template-suggestion {
   flex: none;

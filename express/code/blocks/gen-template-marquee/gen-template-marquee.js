@@ -17,6 +17,22 @@ function getCellLink(cell) {
   return cell?.querySelector('a')?.href || '';
 }
 
+function redirect(url) {
+  if (window.isTestEnv && typeof window.t_locationAssign === 'function') {
+    window.t_locationAssign(url);
+    return;
+  }
+  window.location.assign(url);
+}
+
+async function appendTracking(destination) {
+  if (window.isTestEnv && typeof window.t_getTrackingAppendedURL === 'function') {
+    return window.t_getTrackingAppendedURL(destination);
+  }
+  const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
+  return getTrackingAppendedURL(destination, { placement: 'gen-template-marquee' });
+}
+
 function buildPromptForm(configRow) {
   const cells = [...(configRow?.children || [])];
   const [labelCell, placeholderCell, buttonCell, desktopLinkCell,
@@ -153,13 +169,11 @@ function addInteractions(block) {
       : form.dataset.mobileHref;
     if (!destination) return;
 
-    const url = new URL(destination, window.location.href);
+    const trackedDestination = await appendTracking(destination);
+
+    const url = new URL(trackedDestination, window.location.href);
     url.searchParams.set('prompt', prompt);
-    const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
-    const trackedUrl = await getTrackingAppendedURL(url.toString(), {
-      placement: 'gen-template-marquee',
-    });
-    window.location.assign(trackedUrl);
+    redirect(url.toString());
   });
 }
 
