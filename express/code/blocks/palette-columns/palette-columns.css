@@ -115,20 +115,8 @@
   padding-inline: 0 var(--spacing-325);
 }
 
-/* TODO: remove the color rules below once #820 (universal fill button) merges;
-   add palette-columns to its :is() list instead. */
-.palette-columns a.palette-columns-edit:any-link {
-  color: var(--color-white);
-  background-color: var(--Background-Primary-Default);
-  border-color: var(--Background-Primary-Default);
-}
-
-.palette-columns a.palette-columns-edit:is(:active, :focus-visible) {
-  color: var(--color-white);
-  background-color: var(--Background-Primary-Hover);
-  border-color: var(--Background-Primary-Hover);
-}
-
+/* Edit link colors come from the global `.fill` rules in styles.css (#820).
+   That has no outline variant, so the Generate button's colors live here. */
 .palette-columns .palette-columns-generate {
   color: var(--Background-Primary-Default);
   background-color: transparent;
@@ -143,7 +131,6 @@
 
 /* Touch browsers keep :hover applied after a tap, so only style hover for real pointers. */
 @media (hover: hover) {
-  .palette-columns a.palette-columns-edit:hover,
   .palette-columns .palette-columns-generate:hover {
     color: var(--color-white);
     background-color: var(--Background-Primary-Hover);
