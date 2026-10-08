@@ -2,6 +2,69 @@ import { getLibs, getLottie, lazyLoadLottiePlayer, createTag, getMobileOperating
 import { setDaaLL } from '../utils/analytics.js';
 import BlockMediator from '../block-mediator.min.js';
 
+const ACCESSIBILITY_HIDDEN_CLASSES = [
+  'floating-button--hidden',
+  'floating-button--suppressed',
+  'floating-button--hero-suppressed',
+  'floating-button--mini-editor-suppressed',
+];
+
+const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]';
+const legacyTabIndexes = new WeakMap();
+
+function disableLegacyFocusableElements(wrapper) {
+  if ('inert' in HTMLElement.prototype) return;
+  wrapper.querySelectorAll(FOCUSABLE_SELECTOR).forEach((element) => {
+    if (!legacyTabIndexes.has(element)) {
+      legacyTabIndexes.set(element, element.getAttribute('tabindex'));
+    }
+    element.setAttribute('tabindex', '-1');
+  });
+}
+
+function restoreLegacyFocusableElements(wrapper) {
+  wrapper.querySelectorAll(FOCUSABLE_SELECTOR).forEach((element) => {
+    if (!legacyTabIndexes.has(element)) return;
+    const tabIndex = legacyTabIndexes.get(element);
+    if (tabIndex === null) element.removeAttribute('tabindex');
+    else element.setAttribute('tabindex', tabIndex);
+    legacyTabIndexes.delete(element);
+  });
+}
+
+function trackViewportChanges(update) {
+  let updatePending = false;
+  const updateOnAnimationFrame = () => {
+    updatePending = false;
+    update();
+  };
+  const scheduleUpdate = () => {
+    if (updatePending) return;
+    updatePending = true;
+    requestAnimationFrame(updateOnAnimationFrame);
+  };
+
+  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  window.addEventListener('resize', scheduleUpdate);
+  update();
+}
+
+export function syncFloatingCtaAccessibility(floatButtonWrapper) {
+  const isHidden = ACCESSIBILITY_HIDDEN_CLASSES
+    .some((className) => floatButtonWrapper.classList.contains(className));
+
+  if (isHidden) {
+    if (floatButtonWrapper.contains(document.activeElement)) document.activeElement.blur();
+    floatButtonWrapper.setAttribute('aria-hidden', 'true');
+    floatButtonWrapper.setAttribute('inert', '');
+    disableLegacyFocusableElements(floatButtonWrapper);
+  } else {
+    floatButtonWrapper.removeAttribute('aria-hidden');
+    floatButtonWrapper.removeAttribute('inert');
+    restoreLegacyFocusableElements(floatButtonWrapper);
+  }
+}
+
 export const hideScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   floatButtonWrapper.classList.add('floating-button--scrolled');
   if (lottieScrollButton) {
@@ -14,6 +77,79 @@ export const showScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
   floatButtonWrapper.classList.remove('floating-button--scrolled');
   if (lottieScrollButton) lottieScrollButton.removeAttribute('tabIndex');
 };
+
+export function delayFloatingCtaUntilMiniEditorPassed(
+  floatButtonWrapper,
+  floatingButton,
+  miniEditor,
+  restoreButtonPosition,
+) {
+  if (!miniEditor) return;
+
+  // Keep the CTA hidden before IntersectionObserver reports its initial state.
+  floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
+  syncFloatingCtaAccessibility(floatButtonWrapper);
+
+  const updateSuppression = (miniEditorBottom) => {
+    const miniEditorHasPassed = miniEditorBottom <= 0;
+    floatButtonWrapper.classList.toggle(
+      'floating-button--mini-editor-suppressed',
+      !miniEditorHasPassed,
+    );
+    syncFloatingCtaAccessibility(floatButtonWrapper);
+
+    if (miniEditorHasPassed) {
+      restoreButtonPosition();
+    } else {
+      floatingButton.style.bottom = '0px';
+    }
+  };
+
+  if (typeof window.IntersectionObserver !== 'function') {
+    trackViewportChanges(() => updateSuppression(miniEditor.getBoundingClientRect().bottom));
+    return;
+  }
+
+  const miniEditorObserver = new IntersectionObserver(([entry]) => {
+    updateSuppression(entry.boundingClientRect.bottom);
+  }, {
+    root: null,
+    threshold: 0,
+  });
+
+  miniEditorObserver.observe(miniEditor);
+}
+
+export function delayFloatingCtaUntilViewportPassed(
+  floatButtonWrapper,
+  floatingButton,
+  target,
+  restoreButtonPosition,
+) {
+  if (!target) return;
+
+  // Keep the CTA out of the initial hero view, then reveal it once the hero
+  // has fully scrolled above the viewport.
+  floatButtonWrapper.classList.add('floating-button--hero-suppressed');
+  syncFloatingCtaAccessibility(floatButtonWrapper);
+
+  const updateSuppression = () => {
+    const heroHasPassed = target.getBoundingClientRect().bottom <= 0;
+    floatButtonWrapper.classList.toggle(
+      'floating-button--hero-suppressed',
+      !heroHasPassed,
+    );
+    syncFloatingCtaAccessibility(floatButtonWrapper);
+
+    if (heroHasPassed) {
+      restoreButtonPosition();
+    } else {
+      floatingButton.style.bottom = '0px';
+    }
+  };
+
+  trackViewportChanges(updateSuppression);
+}
 
 export function openToolBox(wrapper, lottie, data) {
   const toolbox = wrapper.querySelector('.toolbox');
@@ -123,11 +259,13 @@ async function buildLottieArrow(wrapper, floatingBtn, data) {
 }
 
 /* istanbul ignore next */
-export async function createFloatingButton(block, audience, data) {
+export async function createFloatingButton(block, audience, data, wrapperClasses = []) {
   const { loadStyle, decorateLinks } = await import(`${getLibs()}/utils/utils.js`);
   const aTag = makeCTAFromSheet(block, data);
   const main = document.querySelector('main');
-  loadStyle('/express/code/scripts/widgets/floating-cta.css');
+  await new Promise((resolve) => {
+    loadStyle('/express/code/scripts/widgets/floating-cta.css', resolve);
+  });
 
   // Floating button html
   const floatButtonLink = aTag.cloneNode(true);
@@ -171,6 +309,7 @@ export async function createFloatingButton(block, audience, data) {
 
   const floatButtonWrapperOld = aTag.closest('.floating-button-wrapper');
   const floatButtonWrapper = createTag('div', { class: 'section floating-button-wrapper' });
+  floatButtonWrapper.classList.add(...wrapperClasses);
   const floatButton = createTag('div', {
     class: 'floating-button block',
     'data-block-name': 'floating-button',
@@ -180,13 +319,18 @@ export async function createFloatingButton(block, audience, data) {
   [...block.classList].filter((c) => c === 'closed').forEach((c) => floatButtonWrapper.classList.add(c));
   const floatButtonInnerWrapper = createTag('div', { class: 'floating-button-inner-wrapper' });
 
-  // Pre-apply suppressed state on mobile when suppression gating is enabled
-  // to avoid initial visibility flicker before observers attach.
-  if (audience === 'mobile' && data.enableSuppressGating) {
-    const hasSuppressTargets = !!document.querySelector('.suppress-until-not-visible');
-    if (hasSuppressTargets) {
-      floatButtonWrapper.classList.add('floating-button--suppressed');
-    }
+  // Apply initial suppression before insertion so the CTA cannot animate out from a visible state.
+  const miniEditor = document.querySelector('.mini-editor');
+  const shouldDelayFloatingCta = audience === 'mobile' || !!data.delayUntilViewportPassed;
+  if (audience === 'mobile' && data.enableSuppressGating
+    && document.querySelector('.suppress-until-not-visible')) {
+    floatButtonWrapper.classList.add('floating-button--suppressed');
+  }
+  if (shouldDelayFloatingCta && miniEditor) {
+    floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
+  }
+  if (shouldDelayFloatingCta && data.delayUntilViewportPassed) {
+    floatButtonWrapper.classList.add('floating-button--hero-suppressed');
   }
 
   if (audience) {
@@ -197,6 +341,11 @@ export async function createFloatingButton(block, audience, data) {
   floatButtonInnerWrapper.append(floatButtonLink);
   floatButton.append(floatButtonInnerWrapper);
   floatButtonWrapper.append(floatButton);
+  const initiallySuppressed = ACCESSIBILITY_HIDDEN_CLASSES
+    .some((className) => floatButtonWrapper.classList.contains(className));
+  if (initiallySuppressed) {
+    syncFloatingCtaAccessibility(floatButtonWrapper);
+  }
   main.append(floatButtonWrapper);
   if (floatButtonWrapperOld) {
     const parent = floatButtonWrapperOld.parentElement;
@@ -229,6 +378,32 @@ export async function createFloatingButton(block, audience, data) {
     }
   });
 
+  const restoreButtonPosition = () => {
+    if (promoBar && promoBar.block) {
+      floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
+    } else if (currentBottom) {
+      floatButton.style.bottom = currentBottom;
+    } else {
+      floatButton.style.removeProperty('bottom');
+    }
+  };
+
+  if (shouldDelayFloatingCta) {
+    delayFloatingCtaUntilMiniEditorPassed(
+      floatButtonWrapper,
+      floatButton,
+      miniEditor,
+      restoreButtonPosition,
+    );
+
+    delayFloatingCtaUntilViewportPassed(
+      floatButtonWrapper,
+      floatButton,
+      data.delayUntilViewportPassed,
+      restoreButtonPosition,
+    );
+  }
+
   // Intersection observer - hide button when scrolled to footer
   const footer = document.querySelector('footer');
   if (footer) {
@@ -237,15 +412,12 @@ export async function createFloatingButton(block, audience, data) {
       if (entry.intersectionRatio > 0 || entry.isIntersecting) {
         // Visually and accessibly hide the floating CTA when the footer is in view
         floatButtonWrapper.classList.add('floating-button--hidden');
-        floatButtonWrapper.setAttribute('aria-hidden', 'true');
-        // Prevent focus and remove from the accessibility tree in supporting browsers
-        floatButtonWrapper.setAttribute('inert', '');
+        syncFloatingCtaAccessibility(floatButtonWrapper);
         floatButton.style.bottom = '0px';
       } else {
         // Restore visibility and accessibility when the footer is not in view
         floatButtonWrapper.classList.remove('floating-button--hidden');
-        floatButtonWrapper.removeAttribute('aria-hidden');
-        floatButtonWrapper.removeAttribute('inert');
+        syncFloatingCtaAccessibility(floatButtonWrapper);
         if (promoBar && promoBar.block) {
           floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
         } else if (currentBottom) {
@@ -314,10 +486,12 @@ export async function createFloatingButton(block, audience, data) {
       const updateSuppressedState = (anyVisible) => {
         if (anyVisible) {
           floatButtonWrapper.classList.add('floating-button--suppressed');
+          syncFloatingCtaAccessibility(floatButtonWrapper);
           // Keep CTA pinned to bottom visually when suppressed
           floatButton.style.bottom = '0px';
         } else {
           floatButtonWrapper.classList.remove('floating-button--suppressed');
+          syncFloatingCtaAccessibility(floatButtonWrapper);
           if (promoBar && promoBar.block) {
             floatButton.style.bottom = currentBottom ? `${currentBottom + promoBarHeight}px` : `${promoBarHeight}px`;
           } else if (currentBottom) {

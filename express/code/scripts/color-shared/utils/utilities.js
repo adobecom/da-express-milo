@@ -1,4 +1,5 @@
 import { createTag } from '../../utils.js';
+import { trackExportComplete } from '../../instrument.js';
 
 export function interpolate(template, vars) {
   return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), template);
@@ -23,6 +24,23 @@ export function decorateAnalyticsAttributes(element, { linkLabel } = {}) {
     linkLabel || element.getAttribute('aria-label') || element.textContent || 'action',
   );
   element.setAttribute('daa-ll', value);
+}
+
+const COLOR_EXPORT_TASK_NAME = 'color';
+const COLOR_EXPORT_UI_LOCATION = 'acom-color-page';
+
+/**
+ * Fires the shared export-tracking event (DOTCOM-197011) for a completed
+ * export-style action (download, copy, share, save-to-library) on a color.adobe.com page.
+ *
+ * @param {string} exportMethod - e.g. 'download', 'copy-clipboard', 'share', 'save-to-library'
+ */
+export function trackColorExport(exportMethod) {
+  return trackExportComplete({
+    exportMethod,
+    taskName: COLOR_EXPORT_TASK_NAME,
+    uiLocation: COLOR_EXPORT_UI_LOCATION,
+  });
 }
 
 const SWIPE_CLOSE_THRESHOLD_PX = 120;
@@ -354,7 +372,9 @@ export async function applyCreateNowLink(anchor, colorName) {
   if (!anchor || !colorName) return;
   const { default: trackBranchParameters } = await import('../../branchlinks.js');
   anchor.href = CREATE_NOW_BASE_URL;
-  await trackBranchParameters([anchor]);
+  const links = [anchor];
+  links.isSearchOverride = true;
+  await trackBranchParameters(links);
   const url = new URL(anchor.href);
   url.searchParams.set('q', colorName.toLowerCase());
   url.searchParams.set('searchCategory', 'templates');

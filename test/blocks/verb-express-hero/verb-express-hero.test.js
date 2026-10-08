@@ -1,4 +1,4 @@
-import { readFile } from '@web/test-runner-commands';
+import { readFile, setViewport } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
@@ -15,6 +15,19 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 });
 
 const { default: decorate } = await import('../../../express/code/blocks/verb-express-hero/verb-express-hero.js');
+
+const styleSheets = [
+  '/express/code/styles/styles.css',
+  '/express/code/blocks/verb-express-hero/verb-express-hero.css',
+];
+await Promise.all(styleSheets.map((href) => new Promise((resolve, reject) => {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  link.addEventListener('load', resolve, { once: true });
+  link.addEventListener('error', reject, { once: true });
+  document.head.append(link);
+})));
 
 async function prepBlock(filePath) {
   document.body.innerHTML = await readFile({ path: filePath });
@@ -53,6 +66,20 @@ describe('verb-express-hero', () => {
     const ctaLink = block.querySelector('.cta-dropzone > .action-area a');
     expect(ctaLink).to.exist;
     expect(ctaLink.classList.contains('con-button')).to.be.true;
+  });
+
+  it('keeps the authored primary CTA visible with the mobile floating CTA', async () => {
+    await setViewport({ width: 375, height: 812 });
+    try {
+      const block = await prepBlock('./mocks/default.html');
+      const ctaLink = block.querySelector('.cta-dropzone > .action-area a');
+      ctaLink.classList.add('same-fcta');
+
+      expect(ctaLink.textContent.trim()).to.equal('Create your resume');
+      expect(getComputedStyle(ctaLink).display).to.equal('block');
+    } finally {
+      await setViewport({ width: 800, height: 600 });
+    }
   });
 
   it('builds a real interactive dropzone with a file input', async () => {

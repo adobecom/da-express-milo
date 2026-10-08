@@ -1,5 +1,8 @@
 import { announceToScreenReader } from '../spectrum/index.js';
-import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
+import {
+  isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi,
+  decorateAnalyticsAttributes, trackColorExport,
+} from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { createIconButton, createSpectrumIcon } from '../utils/icons.js';
@@ -9,6 +12,9 @@ import { loadButton, loadActionButton, loadTooltip, loadMenu } from '../spectrum
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { createLibraryAccessibilityMenu } from '../components/libraries/createLibraryAccessibilityMenu.js';
 import { createLibraryDownloadMenu } from '../components/libraries/createLibraryDownloadMenu.js';
+import { createLibraryCardActionMenu } from '../components/libraries/createLibraryCardActionMenu.js';
+import { isIOSDevice } from '../components/libraries/libraryDownloadUtils.js';
+import { createColorStrip } from './colorStrip.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 import { triggerSignInFlow, ensureIms, waitForSignedInUser } from '../../../libs/services/middlewares/auth.middleware.js';
@@ -50,6 +56,8 @@ const TOOLBAR_DEFAULTS = {
   saveChangesSuccess: 'Changes saved',
   saveChangesFailed: 'Unable to save changes. Please try again.',
   saving: 'Saving\u2026',
+  downloadAsFormat: 'Download as {format}',
+  downloadFailed: 'Download failed. Please try again.',
 };
 
 let toolbarInstanceCounter = 0;
@@ -64,6 +72,7 @@ async function handleShare({ name, colors }, t) {
 
   try {
     await navigator.share({ title: name, url: shareUrl });
+    trackColorExport('share');
     announceToScreenReader(t.sharedSuccessfully);
     showExpressToast({ message: t.sharedSuccessfully, variant: 'positive' });
     return;
@@ -73,6 +82,7 @@ async function handleShare({ name, colors }, t) {
 
   try {
     await navigator.clipboard.writeText(shareUrl);
+    trackColorExport('share');
     announceToScreenReader(t.urlCopiedToClipboard);
     showExpressToast({ message: t.urlCopiedToClipboard, variant: 'positive' });
   } catch (err) {
@@ -148,59 +158,61 @@ async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
   await openInExpress({ id, name, colors }, prodBaseUrl);
 }
 
-async function handleDownload(palette, t) {
-  try {
-    const themeData = paletteToThemeData(palette);
-    const downloadProvider = await serviceManager.getProvider('download');
-    await downloadProvider.downloadJPEG(themeData);
-    announceToScreenReader(t.downloadStarted);
-  } catch (err) {
-    window.lana?.log(`Download failed: ${err.message}`, {
-      tags: 'color-floating-toolbar,download',
-      severity: 'error',
-    });
-  }
-}
+// `format` is the fixed technical acronym shown in the menu (ASE/JPEG/PNG/SVG)
+// — not translated. Only the surrounding "Download as {format}" template
+// (t.downloadAsFormat) is localized.
+const PALETTE_DOWNLOAD_FORMATS = [
+  { value: 'ase', method: 'downloadASE', format: 'ASE' },
+  { value: 'jpeg', method: 'downloadJPEG', format: 'JPEG' },
+];
 
-/* Renders gradient to canvas for download. Uses even stop distribution since the
-   toolbar palette only carries a flat colors array — stop positions from the
-   gradient editor are not propagated to the toolbar. */
-async function handleGradientDownload(palette, t) {
-  try {
-    const { name = 'gradient', colors = [], angle = 90 } = palette;
-    const canvas = document.createElement('canvas');
-    canvas.width = 1920;
-    canvas.height = 1080;
-    const ctx = canvas.getContext('2d');
-    const rad = (angle - 90) * (Math.PI / 180);
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const len = Math.hypot(canvas.width, canvas.height) / 2;
-    const grad = ctx.createLinearGradient(
-      cx - Math.cos(rad) * len,
-      cy - Math.sin(rad) * len,
-      cx + Math.cos(rad) * len,
-      cy + Math.sin(rad) * len,
-    );
-    colors.forEach((hex, i) => {
-      grad.addColorStop(colors.length > 1 ? i / (colors.length - 1) : 0.5, hex);
-    });
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const blob = await new Promise((resolve) => { canvas.toBlob(resolve, 'image/jpeg', 0.95); });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${name}.jpg`;
-    a.click();
-    URL.revokeObjectURL(url);
-    announceToScreenReader(t.downloadStarted);
-  } catch (err) {
-    window.lana?.log(`Gradient download failed: ${err.message}`, {
-      tags: 'color-floating-toolbar,download',
-      severity: 'error',
-    });
-  }
+const GRADIENT_DOWNLOAD_FORMATS = [
+  { value: 'jpeg', method: 'downloadJPEG', format: 'JPEG' },
+  { value: 'png', method: 'downloadPNG', format: 'PNG' },
+  { value: 'svg', method: 'downloadSVG', format: 'SVG' },
+];
+
+/** Popover menu exposing every download format the DownloadProvider supports
+ * for this content type, replacing the old single-format download button. */
+function buildDownloadMenu(type, getPalette, t, onDownloaded) {
+  const isGradient = type === 'gradient';
+  let formats = isGradient ? GRADIENT_DOWNLOAD_FORMATS : PALETTE_DOWNLOAD_FORMATS;
+  if (!isGradient && isIOSDevice()) formats = formats.filter((f) => f.value !== 'ase');
+
+  const menu = createLibraryCardActionMenu({
+    triggerIcon: 'sp-icon-download',
+    triggerLabel: t.downloadPalette,
+    tooltipLabel: t.download,
+    items: formats.map((f) => ({
+      value: f.value,
+      label: interpolate(t.downloadAsFormat, { format: f.format }),
+    })),
+    onSelect: async (value, { closePopover }) => {
+      const entry = formats.find((f) => f.value === value);
+      try {
+        const palette = getPalette();
+        const themeData = {
+          ...paletteToThemeData(palette),
+          ...(isGradient ? { assetType: 'gradient' } : {}),
+        };
+        const downloadProvider = await serviceManager.getProvider('download');
+        await downloadProvider?.[entry.method]?.(themeData);
+        trackColorExport('download');
+        announceToScreenReader(t.downloadStarted);
+        onDownloaded?.(palette, value);
+      } catch (err) {
+        window.lana?.log(`Download failed [${value}]: ${err.message}`, {
+          tags: 'color-floating-toolbar,download',
+          severity: 'error',
+        });
+        showExpressToast({ message: t.downloadFailed, variant: 'negative', timeout: 2000 });
+      } finally {
+        closePopover({ focusTrigger: true });
+      }
+    },
+  });
+  menu.element.classList.add('ax-download-menu');
+  return menu;
 }
 
 let activeDrawer = null;
@@ -227,7 +239,10 @@ async function handleSave(
       paletteData: palette,
       type,
       anchorElement: container,
-      onSave: () => { activeDrawer = null; },
+      onSave: () => {
+        trackColorExport('save-to-library');
+        activeDrawer = null;
+      },
       onClose: () => { activeDrawer = null; },
       ccLibraryProvider,
       onLibraryCreated: (newLib) => {
@@ -258,38 +273,18 @@ function attachTooltip(actionBtn, text, { dismissOnActivate = false } = {}) {
   }).catch(() => {});
 }
 
+// createLibraryCardActionMenu's own trigger button (Codes/Download/etc.) is
+// nested inside a theme-wrapper div, not returned directly, so its tooltip has
+// to be attached to the actual trigger found inside the menu's element rather
+// than the menu wrapper itself.
+function attachMenuTooltip(menuEl) {
+  const trigger = menuEl?.querySelector('.ax-lib-card__action');
+  if (trigger) {
+    attachTooltip(trigger, trigger.getAttribute('data-tooltip-content'), { dismissOnActivate: true });
+  }
+}
+
 /* ── DOM Builders ────────────────────────────────────────────── */
-
-function createSwatchStrip(colors, type, t) {
-  const safeColors = colors ?? [];
-  const count = Math.min(safeColors.length, 10);
-  const swatches = safeColors.slice(0, 10).map((hex, i) => createTag('div', {
-    class: 'ax-swatch',
-    style: `background-color:${hex}`,
-    'aria-label': interpolate(t.swatchLabel, { index: i + 1, hex }),
-  }));
-  return createTag('div', {
-    class: 'ax-swatch-strip',
-    'aria-label': interpolate(t.swatchStripLabel, { count, type }),
-  }, swatches);
-}
-
-function createGradientStrip(colors, angle, t) {
-  const stops = colors ?? [];
-  const deg = angle ?? 135;
-  const css = `linear-gradient(${deg}deg, ${stops.join(', ')})`;
-  return createTag('div', {
-    class: 'ax-swatch-strip ax-gradient-strip',
-    style: `background: ${css}`,
-    'aria-label': interpolate(t.gradientLabel, { stops: stops.join(' \u2192 ') }),
-  });
-}
-
-function createColorStrip(colors, type, angle, t) {
-  return type === 'gradient'
-    ? createGradientStrip(colors, angle, t)
-    : createSwatchStrip(colors, type, t);
-}
 
 function createSwatchBand(colors, type, angle) {
   if (type === 'gradient') {
@@ -351,10 +346,10 @@ function buildCustomActionButtons(actionButtons) {
     if (tooltip) attachTooltip(btn, tooltip, { dismissOnActivate });
     actions.appendChild(btn);
   });
-  return { actions, ccLibBtn: null };
+  return { actions, ccLibBtn: null, downloadMenu: null };
 }
 
-function buildActionButtons(handlers, t) {
+function buildActionButtons(handlers, t, type, getPalette) {
   const actions = createTag('div', { class: 'ax-toolbar-actions' });
 
   const shareBtn = createIconButton({
@@ -367,15 +362,9 @@ function buildActionButtons(handlers, t) {
   attachTooltip(shareBtn, t.share);
   actions.appendChild(shareBtn);
 
-  const downloadBtn = createIconButton({
-    icon: 'Download',
-    label: t.downloadPalette,
-    size: 'm',
-    onClick: handlers.onDownload,
-  });
-  decorateAnalyticsAttributes(downloadBtn, { linkLabel: 'Download' });
-  attachTooltip(downloadBtn, t.download, { dismissOnActivate: true });
-  actions.appendChild(downloadBtn);
+  const downloadMenu = buildDownloadMenu(type, getPalette, t, handlers.onDownloaded);
+  actions.appendChild(downloadMenu.element);
+  attachMenuTooltip(downloadMenu.element);
 
   const ccLibBtn = createIconButton({
     icon: 'CCLibrary',
@@ -387,7 +376,7 @@ function buildActionButtons(handlers, t) {
   attachTooltip(ccLibBtn, t.saveToLibrary, { dismissOnActivate: true });
   actions.appendChild(ccLibBtn);
 
-  return { actions, ccLibBtn };
+  return { actions, ccLibBtn, downloadMenu };
 }
 
 function buildCTAButton(getCTAText, onClick) {
@@ -610,13 +599,6 @@ function buildLibraryToolbar(options) {
 
   // Reuse the library card menus so download (ASE/JPEG) and accessibility
   // (contrast / color-blindness) behave identically to the libraries grid.
-  const attachMenuTooltip = (menuEl) => {
-    const trigger = menuEl?.querySelector('.ax-lib-card__action');
-    if (trigger) {
-      attachTooltip(trigger, trigger.getAttribute('data-tooltip-content'), { dismissOnActivate: true });
-    }
-  };
-
   const downloadMenu = createLibraryDownloadMenu({ item, strings: librariesStrings });
   actions.appendChild(downloadMenu.element);
   attachMenuTooltip(downloadMenu.element);
@@ -827,7 +809,7 @@ export function createToolbar(options) {
     { showEditLabel },
   );
 
-  const { actions, ccLibBtn } = customActionButtons
+  const { actions, ccLibBtn, downloadMenu } = customActionButtons
     ? buildCustomActionButtons(customActionButtons)
     : buildActionButtons({
       onShare: async () => {
@@ -835,14 +817,8 @@ export function createToolbar(options) {
         await handleShare({ name: currentPalette.name, colors: currentPalette.colors }, t);
         emit('share', { palette: currentPalette });
       },
-      onDownload: async () => {
-        const currentPalette = getPaletteWithName();
-        if (type === 'gradient') {
-          await handleGradientDownload(currentPalette, t);
-        } else {
-          await handleDownload(currentPalette, t);
-        }
-        emit('download', { palette: currentPalette });
+      onDownloaded: (currentPalette, format) => {
+        emit('download', { palette: currentPalette, format });
       },
       onSave: async () => {
         const ctx = await fetchLibCtxOnce();
@@ -858,7 +834,7 @@ export function createToolbar(options) {
         );
         emit('save', { palette: getPaletteWithName() });
       },
-    }, t);
+    }, t, type, getPaletteWithName);
 
   const actionContainer = createTag('div', { class: 'ax-action-container' });
   actionContainer.appendChild(paletteSummary);
@@ -985,6 +961,7 @@ export function createToolbar(options) {
       if (desktopMql && repositionNameField) {
         desktopMql.removeEventListener('change', repositionNameField);
       }
+      downloadMenu?.destroy?.();
       theme.remove();
     },
   };
