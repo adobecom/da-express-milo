@@ -399,6 +399,9 @@ CONFIG.decorateArea = decorateAreaWithLCP;
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
+  if (!document.querySelector('link[data-s2a-tokens="true"]')) {
+    paths.unshift('https://www.adobe.com/libs/c2/styles/s2a-tokens.css');
+  }
   if (getMetadata('theme') !== 'doodlebug') {
     paths.push('/express/code/styles/styles.css');
   }
@@ -407,9 +410,15 @@ CONFIG.decorateArea = decorateAreaWithLCP;
   }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
+    const existing = document.querySelector(`link[href="${path}"]`);
+    if (existing) return;
+
     const link = document.createElement('link');
     link.setAttribute('rel', 'stylesheet');
     link.setAttribute('href', path);
+    if (path === 'https://www.adobe.com/libs/c2/styles/s2a-tokens.css') {
+      link.dataset.s2aTokens = 'true';
+    }
     document.head.appendChild(link);
   });
 }());

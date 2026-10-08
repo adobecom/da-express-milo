@@ -483,10 +483,10 @@ describe('resume-hero', () => {
 
       expect(contentStyles.gap).to.equal('8px');
       expect(headingStyles.color).to.equal('rgb(44, 44, 44)');
-      expect(headingStyles.fontSize).to.equal('24px');
+      expect(headingStyles.fontSize).to.equal('18px');
       expect(headingStyles.fontWeight).to.equal('900');
-      expect(headingStyles.letterSpacing).to.equal('-0.48px');
-      expect(headingStyles.lineHeight).to.equal('24px');
+      expect(headingStyles.letterSpacing).to.equal('-0.2px');
+      expect(headingStyles.lineHeight).to.equal('20px');
       expect(headingStyles.textAlign).to.equal('center');
       expect(subcopyStyles.color).to.equal('rgb(0, 0, 0)');
       expect(subcopyStyles.fontWeight).to.equal('400');
