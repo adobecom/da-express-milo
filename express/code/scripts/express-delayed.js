@@ -5,6 +5,13 @@ let createTag; let getMetadata;
 let getConfig; let loadStyle;
 let loadIms; let loadScript;
 
+const DIAGNOSTIC_PREFIX = '[MWPW-188779][Express Delayed]';
+
+const diagnosticLog = (message, details = {}) => {
+  // eslint-disable-next-line no-console
+  console.log(DIAGNOSTIC_PREFIX, message, { atMs: Math.round(performance.now()), ...details });
+};
+
 export function getDestination() {
   const pepDestinationMeta = getMetadata('pep-destination');
   return pepDestinationMeta || BlockMediator.get('primaryCtaUrl')
@@ -67,12 +74,29 @@ async function addJapaneseSectionHeaderSizing() {
 
 async function loadGoogleLogin() {
   const googleLogin = getMetadata('google-login')?.trim().toLowerCase();
-  if (window.adobeIMS?.isSignedInUser() || !['mobile', 'desktop', 'on'].includes(googleLogin)) return;
+  const signedIn = Boolean(window.adobeIMS?.isSignedInUser());
   const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
-  if (googleLogin === 'mobile' && desktopViewport) return;
-  if (googleLogin === 'desktop' && !desktopViewport) return;
+  const supportedMetadata = ['mobile', 'desktop', 'on'].includes(googleLogin);
+  const viewportEligible = googleLogin === 'on'
+    || (googleLogin === 'mobile' && !desktopViewport)
+    || (googleLogin === 'desktop' && desktopViewport);
+  const shouldLoad = !signedIn && supportedMetadata && viewportEligible;
+
+  diagnosticLog('Google login eligibility evaluated', {
+    googleLogin,
+    signedIn,
+    desktopViewport,
+    supportedMetadata,
+    viewportEligible,
+    shouldLoad,
+    hasMobileFork: Boolean(document.querySelector('.mobile-fork-button.mweb-mobile-fork')),
+  });
+  if (!shouldLoad) return;
+
   const { default: initGoogleLogin } = await import('../libs/features/google-login.js');
+  diagnosticLog('Google login module imported');
   await initGoogleLogin(loadIms, getMetadata, loadScript, getConfig);
+  diagnosticLog('Google login initialization completed');
 }
 
 /**

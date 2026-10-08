@@ -591,8 +591,16 @@ async function loadPage() {
   // Set after loadArea so milo's delayed doesn't pick it up — express-delayed owns google login
   const googleLoginMeta = document.head.querySelector('meta[name="google-login"]')
     || createTag('meta', { name: 'google-login' });
+  const previousGoogleLogin = googleLoginMeta.content;
   googleLoginMeta.content = 'on';
   if (!googleLoginMeta.isConnected) document.head.append(googleLoginMeta);
+  // eslint-disable-next-line no-console
+  console.log('[MWPW-188779][Scripts] Google login metadata updated', {
+    atMs: Math.round(performance.now()),
+    previousGoogleLogin,
+    currentGoogleLogin: googleLoginMeta.content,
+    created: !previousGoogleLogin,
+  });
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
