@@ -344,11 +344,11 @@ main .section .gen-template-suggestions-label {
 
   .gen-template-column:nth-child(1),
   .gen-template-column:nth-child(5) {
-    transform: translateY(-176px);
+    translate: 0 -176px;
   }
 
   .gen-template-column:nth-child(2) {
-    transform: translateY(-105px);
+    translate: 0 -105px;
   }
 
   .gen-template-column:nth-child(3) {
@@ -379,12 +379,12 @@ main .section .gen-template-suggestions-label {
 
   .gen-template-column:nth-child(1),
   .gen-template-column:nth-child(5) {
-    transform: none;
+    translate: none;
   }
 
   .gen-template-column:nth-child(2),
   .gen-template-column:nth-child(4) {
-    transform: translateY(176px);
+    translate: 0 176px;
   }
 
   .gen-template-column:nth-child(3) {
