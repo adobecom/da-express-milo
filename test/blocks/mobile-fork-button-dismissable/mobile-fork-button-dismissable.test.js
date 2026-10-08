@@ -113,6 +113,10 @@ describe('Mobile Fork Button', () => {
   it('renders button with both fork-cta-1 and fork-cta-2 metadata and fork-cta-3 metadata', async () => {
     setDocumentMetadata(true, true);
     const b = setMobileDom();
+    let resolution;
+    document.addEventListener('mobileforkresolved', (event) => {
+      resolution = event.detail;
+    }, { once: true });
 
     await decorate(b);
 
@@ -134,8 +138,25 @@ describe('Mobile Fork Button', () => {
     expect(document.body.style.overflow).to.equal('hidden');
     closeButton.click();
     expect(document.body.style.overflow).to.equal('');
+    expect(resolution).to.deep.equal({ action: 'close' });
     const newWrapper = document.querySelector('.floating-button.meta-powered');
     expect(newWrapper).to.exist;
+  });
+
+  it('resolves the fork when the Continue CTA is selected', async () => {
+    setDocumentMetadata(true, true);
+    document.head.querySelector('meta[name="fork-cta-2-link"]').content = '#';
+    const b = setMobileDom();
+    let resolution;
+    document.addEventListener('mobileforkresolved', (event) => {
+      resolution = event.detail;
+    }, { once: true });
+
+    await decorate(b);
+    document.querySelectorAll('.mobile-gating-link')[1].click();
+
+    expect(resolution).to.deep.equal({ action: 'continue' });
+    expect(document.body.style.overflow).to.equal('');
   });
 
   it('builds the dismissible close button and overlay on iOS', async () => {

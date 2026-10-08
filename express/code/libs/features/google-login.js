@@ -2,6 +2,7 @@ const GOOGLE_SCRIPT = 'https://accounts.google.com/gsi/client';
 const GOOGLE_ID = '530526366930-l874a90ipfkn26naa71r010u8epp39jt.apps.googleusercontent.com';
 const PLACEHOLDER = 'feds-googleLogin';
 const WRAPPER = 'feds-profile';
+const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
 
 const getDestination = async (getMetadata, getConfig) => {
   const redirect = getMetadata('google-login-redirect')?.trim();
@@ -73,5 +74,11 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript, 
     itp_support: true,
     auto_select: getMetadata('google-yolo-zero-tap')?.toLowerCase() === 'on',
   });
-  window.google?.accounts?.id?.prompt();
+  if (document.querySelector('.mobile-fork-button.mweb-mobile-fork')) {
+    document.addEventListener(MOBILE_FORK_RESOLVED_EVENT, () => {
+      window.google?.accounts?.id?.prompt();
+    }, { once: true });
+  } else {
+    window.google?.accounts?.id?.prompt();
+  }
 }

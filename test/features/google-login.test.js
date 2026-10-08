@@ -67,6 +67,24 @@ describe('Google login', () => {
     expect(prompt.calledOnce).to.be.true;
   });
 
+  it('defers One Tap until the dismissable mobile fork resolves', async () => {
+    document.body.innerHTML += '<div class="mobile-fork-button mweb-mobile-fork"></div>';
+
+    await initGoogleLogin(loadIms, getMetadata, loadScript, getConfig);
+
+    expect(initialize.calledOnce).to.be.true;
+    expect(prompt.notCalled).to.be.true;
+
+    document.dispatchEvent(new CustomEvent('mobileforkresolved', {
+      detail: { action: 'continue' },
+    }));
+    document.dispatchEvent(new CustomEvent('mobileforkresolved', {
+      detail: { action: 'continue' },
+    }));
+
+    expect(prompt.calledOnce).to.be.true;
+  });
+
   it('uses default prompt placement when the profile container is absent', async () => {
     document.body.innerHTML = '';
 
