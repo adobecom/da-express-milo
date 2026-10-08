@@ -174,8 +174,7 @@
     min-width: min(335px, 100% - var(--spacing-500));
     max-width: calc(100% - var(--spacing-500));
     box-sizing: border-box;
-    /* Figma: 40px on a 406px+ rail; shrinks on narrow tablet rails. */
-    padding: clamp(var(--spacing-300), 10%, var(--spacing-600));
+    padding: var(--spacing-400);
     background: rgb(255 255 255 / 70%);
     border: 1px solid rgb(255 255 255 / 70%);
     border-radius: var(--Corner-radius-corner-radius-200);
@@ -212,6 +211,10 @@
 }
 
 @media (min-width: 1200px) {
+  .palette-columns .palette-columns-ctas {
+    padding: var(--spacing-600);
+  }
+
   .palette-columns .palette-columns-content p {
     font-size: var(--body-font-size-xl);
   }
