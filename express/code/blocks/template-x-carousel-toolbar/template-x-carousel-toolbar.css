@@ -91,14 +91,14 @@
 .template-x-carousel-toolbar .toolbar p.controls-label {
   margin: auto;
   width: fit-content;
-  color: var(--Alias-content-typography-heading, #131313); /* stylelint-disable-line declaration-property-value-disallowed-list */
-  font-size: var(--Font-size-400, 20px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  color: var(--color-default-font);
+  font-size: var(--body-font-size-l);
   font-style: normal;
   font-weight: 700;
   padding-top: var(--spacing-100);
   text-align: center;
-  line-height: var(--Line-height-400, var(--spacing-400)); /* stylelint-disable-line declaration-property-value-disallowed-list */
-  letter-spacing: var(--Letter-spacing, 0); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  line-height: var(--spacing-400);
+  letter-spacing: 0;
 }
 
 /* Search bar in toolbar: 100% wide on mobile */
@@ -279,13 +279,14 @@
 }
 
 .template-x-carousel-toolbar .select .icon-drop-down-arrow {
-  padding: 0 var(--spacing-200) 0 var(--spacing-100);
+  padding-block: 0;
+  padding-inline: var(--spacing-100) var(--spacing-200);
   height: var(--spacing-100);
   width: var(--spacing-100);
 }
 
 .template-x-carousel-toolbar .select[aria-expanded="true"] .icon-drop-down-arrow {
-  padding: 0 var(--spacing-100) 0 var(--spacing-200);
+  padding-inline: var(--spacing-200) var(--spacing-100);
   transform: rotate(180deg);
 }
 
@@ -304,8 +305,8 @@
 .template-x-carousel-toolbar .options {
   position: absolute;
   margin: 0;
-  left: 0;
-  padding-left: 0;
+  inset-inline-start: 0;
+  padding-inline: 0;
   z-index: 1;
   border-radius: 0 0 var(--select-radius) var(--select-radius);
   box-shadow: var(--select-box-shadow);
@@ -327,7 +328,7 @@
 
 .template-x-carousel-toolbar .sizing-proxy {
   /* icon spacing  */
-  padding-right: var(--spacing-300);
+  padding-inline-end: var(--spacing-300);
   position: relative;
   height: 0;
   visibility: hidden;
