@@ -24,6 +24,12 @@ npm run test:watch
 ```
 This will give you several options to debug tests. Note: coverage may not be accurate.
 
+### Table of Contents Placement
+The `toc-seo` block renders at its authored location on mobile and tablet, independently
+of preceding highlight or blog marquee blocks and their audience visibility settings.
+On desktop, its fixed position is calculated from the first `long-form` section,
+with clearance for sticky navigation and the configured stop element.
+
 ### Running a Single Test File
 To run a specific test file with debugging enabled:
 ```sh
