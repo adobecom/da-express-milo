@@ -78,11 +78,36 @@ describe('Color Carousel / ckg + failsafe variants', () => {
     pageTypeMeta.name = 'pagetype';
     pageTypeMeta.content = 'color';
     document.head.append(pageTypeMeta);
+    const savedHref = window.location.href;
+    window.history.replaceState({}, '', '/meanings/pink');
 
-    const block = await prepBlock('./mocks/ckg.html');
-    const chip = [...block.querySelectorAll('a.color-carousel-chip')]
-      .find((c) => c.querySelector('.color-carousel-chip-name')?.textContent === 'Pink');
-    expect(chip).to.exist;
-    expect(chip.getAttribute('href')).to.equal('/meanings/hot-pink');
+    try {
+      const block = await prepBlock('./mocks/ckg.html');
+      const chip = [...block.querySelectorAll('a.color-carousel-chip')]
+        .find((c) => c.querySelector('.color-carousel-chip-name')?.textContent === 'Pink');
+      expect(chip).to.exist;
+      expect(chip.getAttribute('href')).to.equal('/meanings/hot-pink');
+    } finally {
+      window.history.replaceState({}, '', savedHref);
+    }
+  });
+
+  it('mirrors the current page\'s own locale prefix instead of re-deriving it, so a localized page keeps its locale segment', async () => {
+    const pageTypeMeta = document.createElement('meta');
+    pageTypeMeta.name = 'pagetype';
+    pageTypeMeta.content = 'color';
+    document.head.append(pageTypeMeta);
+    const savedHref = window.location.href;
+    window.history.replaceState({}, '', '/de/meanings/pink');
+
+    try {
+      const block = await prepBlock('./mocks/ckg.html');
+      const chip = [...block.querySelectorAll('a.color-carousel-chip')]
+        .find((c) => c.querySelector('.color-carousel-chip-name')?.textContent === 'Pink');
+      expect(chip).to.exist;
+      expect(chip.getAttribute('href')).to.equal('/de/meanings/hot-pink');
+    } finally {
+      window.history.replaceState({}, '', savedHref);
+    }
   });
 });
