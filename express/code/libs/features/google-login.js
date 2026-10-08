@@ -1,3 +1,5 @@
+import { getMobileOperatingSystem } from '../../scripts/utils.js';
+
 const GOOGLE_SCRIPT = 'https://accounts.google.com/gsi/client';
 const GOOGLE_ID = '530526366930-l874a90ipfkn26naa71r010u8epp39jt.apps.googleusercontent.com';
 const PLACEHOLDER = 'feds-googleLogin';
@@ -114,13 +116,19 @@ const promptGoogleLogin = (hideRegularCta = false) => {
 };
 
 export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
+  const os = getMobileOperatingSystem();
   diagnosticLog('Initialization started', {
     googleLogin: getMetadata('google-login')?.trim().toLowerCase(),
     expressGoogleLogin: getMetadata('express-google-login')?.trim().toLowerCase(),
     zeroTap: getMetadata('google-yolo-zero-tap')?.trim().toLowerCase(),
     hasMobileFork: Boolean(document.querySelector('.mobile-fork-button.mweb-mobile-fork')),
     hasProfileWrapper: Boolean(document.querySelector(`.${WRAPPER}`)),
+    os,
   });
+  if (os === 'iOS') {
+    diagnosticLog('Initialization stopped because One Tap is unavailable on iOS');
+    return;
+  }
   try {
     await loadIms();
     diagnosticLog('IMS load completed', {

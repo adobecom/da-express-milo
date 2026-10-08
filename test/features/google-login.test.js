@@ -9,8 +9,10 @@ describe('Google login', () => {
   let loadScript;
   let getMetadata;
   let getConfig;
+  let originalUserAgent;
 
   beforeEach(() => {
+    originalUserAgent = navigator.userAgent;
     document.body.innerHTML = '<div class="feds-profile"></div>';
     initialize = sinon.stub();
     prompt = sinon.stub();
@@ -36,6 +38,10 @@ describe('Google login', () => {
     delete window.adobeid;
     delete window.lana;
     delete window.DISABLE_PAGE_RELOAD;
+    Object.defineProperty(navigator, 'userAgent', {
+      value: originalUserAgent,
+      configurable: true,
+    });
     document.body.innerHTML = '';
   });
 
@@ -47,6 +53,21 @@ describe('Google login', () => {
     expect(loadIms.calledOnce).to.be.true;
     expect(loadScript.notCalled).to.be.true;
     expect(initialize.notCalled).to.be.true;
+  });
+
+  it('does not change the iPhone experience', async () => {
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+      configurable: true,
+    });
+
+    await initGoogleLogin(loadIms, getMetadata, loadScript, getConfig);
+
+    expect(loadIms.notCalled).to.be.true;
+    expect(loadScript.notCalled).to.be.true;
+    expect(initialize.notCalled).to.be.true;
+    expect(prompt.notCalled).to.be.true;
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
   });
 
   it('initializes One Tap in the profile container', async () => {
