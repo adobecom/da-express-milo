@@ -1,6 +1,24 @@
-import { getIconElementDeprecated } from '../../scripts/utils.js';
+import { getIconElementDeprecated, getLibs, getMetadata } from '../../scripts/utils.js';
+import {
+  extractComponentLinkHref,
+  extractRenditionLinkHref,
+  fetchResults,
+  getImageThumbnailSrc,
+  isValidTemplate,
+} from '../../scripts/template-utils.js';
 
 const DESKTOP_QUERY = '(min-width: 1200px)';
+const TEMPLATE_DISPLAY_LIMIT = 14;
+const TEMPLATE_FETCH_LIMIT = 23;
+const COLUMN_CARD_COUNTS = [3, 3, 2, 3, 3];
+const PLACEHOLDERS = {
+  label: ['gen-template-prompt-label', 'Prompt'],
+  input: ['gen-template-prompt-placeholder', 'Describe what template you want to make'],
+  submit: ['gen-template-prompt-submit', 'Generate'],
+  desktopHref: ['gen-template-desktop-destination', 'https://new.express.adobe.com/neural-pixel-editor?entry=create-menu'],
+  mobileHref: ['gen-template-mobile-destination', 'https://new.express.adobe.com/new?category=templates&height=1080&width=1080&unit=px&action=text+to+template'],
+  suggestionsLabel: ['gen-template-suggestions-label', 'Get started with an example prompt'],
+};
 let instanceId = 0;
 
 function createElement(tag, className) {
@@ -13,8 +31,54 @@ function getCellText(cell) {
   return cell?.textContent?.trim() || '';
 }
 
-function getCellLink(cell) {
-  return cell?.querySelector('a')?.href || '';
+async function loadPlaceholders() {
+  const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/features/placeholders.js`),
+  ]);
+  const entries = Object.entries(PLACEHOLDERS);
+  const values = await replaceKeyArray(entries.map(([, [key]]) => key), getConfig());
+
+  return entries.reduce((strings, [name, [key, fallback]], index) => {
+    const metadataValue = getMetadata(key)?.trim();
+    const placeholderValue = values[index]?.trim();
+    const isResolved = placeholderValue
+      && placeholderValue !== key
+      && placeholderValue !== key.replaceAll('-', ' ');
+    strings[name] = metadataValue || (isResolved ? placeholderValue : fallback);
+    return strings;
+  }, {});
+}
+
+function getTemplateRecipe(sourceRow) {
+  const source = getCellText(sourceRow?.firstElementChild).replace(/^\?/, '');
+  if (!source) return '';
+  if (!source.includes('=')) {
+    return new URLSearchParams({
+      collectionId: source.replaceAll('\\:', ':'),
+      limit: TEMPLATE_FETCH_LIMIT,
+    }).toString();
+  }
+  const params = new URLSearchParams(source);
+  if (!params.has('limit')) params.set('limit', TEMPLATE_FETCH_LIMIT);
+  return params.toString();
+}
+
+async function loadTemplates(sourceRow) {
+  const recipe = getTemplateRecipe(sourceRow);
+  if (!recipe) return [];
+  try {
+    const response = await fetchResults(recipe);
+    return (response?.items || [])
+      .filter((template) => isValidTemplate(template))
+      .slice(0, TEMPLATE_DISPLAY_LIMIT);
+  } catch (error) {
+    window.lana?.log(`Error loading gen-template-marquee templates: ${error?.message || error}`, {
+      tags: 'gen-template-marquee',
+      severity: 'error',
+    });
+    return [];
+  }
 }
 
 function redirect(url) {
@@ -33,11 +97,7 @@ async function appendTracking(destination) {
   return getTrackingAppendedURL(destination, { placement: 'gen-template-marquee' });
 }
 
-function buildPromptForm(configRow) {
-  const cells = [...(configRow?.children || [])];
-  const [labelCell, placeholderCell, buttonCell, desktopLinkCell,
-    mobileLinkCell, suggestionsLabelCell, ...promptCells] = cells;
-
+function buildPromptForm(suggestionsRow, strings) {
   const wrapper = createElement('div', 'gen-template-prompt');
   const form = createElement('form', 'gen-template-prompt-form');
   const field = createElement('div', 'gen-template-prompt-field');
@@ -53,27 +113,29 @@ function buildPromptForm(configRow) {
   textarea.id = `gen-template-prompt-${instanceId}`;
   textarea.name = 'prompt';
   textarea.rows = 2;
-  textarea.placeholder = getCellText(placeholderCell);
+  textarea.placeholder = strings.input;
   textarea.enterKeyHint = 'go';
 
   label.htmlFor = textarea.id;
-  label.textContent = getCellText(labelCell);
+  label.textContent = strings.label;
 
   submit.type = 'submit';
   const icon = getIconElementDeprecated('AX_AIGenerate_18_N', 22, '');
   icon.setAttribute('aria-hidden', 'true');
-  buttonText.textContent = getCellText(buttonCell);
+  buttonText.textContent = strings.submit;
   submit.append(icon, buttonText);
 
-  form.dataset.desktopHref = getCellLink(desktopLinkCell);
-  form.dataset.mobileHref = getCellLink(mobileLinkCell);
+  form.dataset.desktopHref = strings.desktopHref;
+  form.dataset.mobileHref = strings.mobileHref;
   field.append(label, textarea, submit);
   form.append(field);
 
-  suggestionsLabel.textContent = getCellText(suggestionsLabelCell);
-  promptCells.forEach((cell) => {
-    const prompt = getCellText(cell);
-    if (!prompt) return;
+  suggestionsLabel.textContent = strings.suggestionsLabel;
+  const authoredSuggestions = getCellText(suggestionsRow?.firstElementChild)
+    .split(',')
+    .map((prompt) => prompt.trim())
+    .filter(Boolean);
+  authoredSuggestions.forEach((prompt) => {
     const button = createElement('button', 'gen-template-suggestion');
     button.type = 'button';
     button.dataset.prompt = prompt;
@@ -86,7 +148,7 @@ function buildPromptForm(configRow) {
   return wrapper;
 }
 
-function buildContent(textRow, configRow) {
+function buildContent(textRow, suggestionsRow, strings) {
   const content = createElement('div', 'gen-template-content');
   const text = createElement('div', 'gen-template-text');
   const logoAndHeading = createElement('div', 'gen-template-logo-heading');
@@ -100,43 +162,47 @@ function buildContent(textRow, configRow) {
   if (heading) logoAndHeading.append(logo, heading);
   else logoAndHeading.append(logo);
   text.append(logoAndHeading, ...body);
-  content.append(text, buildPromptForm(configRow));
+  content.append(text, buildPromptForm(suggestionsRow, strings));
   return content;
 }
 
-function buildGallery(galleryRows) {
+function buildGallery(templates) {
   const gallery = createElement('div', 'gen-template-gallery');
   gallery.setAttribute('aria-hidden', 'true');
+  let templateIndex = 0;
 
-  galleryRows.forEach((row, columnIndex) => {
+  COLUMN_CARD_COUNTS.forEach((cardCount, columnIndex) => {
     const column = createElement('div', 'gen-template-column');
-    if (columnIndex === 0 || columnIndex === galleryRows.length - 1) {
+    if (columnIndex === 0 || columnIndex === COLUMN_CARD_COUNTS.length - 1) {
       column.classList.add('gen-template-column-edge');
     }
 
-    [...row.children].forEach((cell, cardIndex) => {
-      const card = createElement('div', 'gen-template-card');
-      const shapeLabel = [...cell.children].find((child) => child.tagName === 'P');
-      const shape = shapeLabel?.textContent?.trim().toLowerCase();
-      if (shape === 'square' || shape === 'portrait') card.classList.add(`gen-template-card-${shape}`);
-      const pictures = [...cell.querySelectorAll('picture')];
-      pictures.forEach((picture, layerIndex) => {
-        const image = picture.querySelector('img');
-        if (image) {
-          image.alt = '';
-          image.decoding = 'async';
-          image.loading = columnIndex === 2 && cardIndex === 0 ? 'eager' : 'lazy';
-          if (columnIndex === 2 && cardIndex === 0 && layerIndex === 0) {
-            image.fetchPriority = 'high';
-          } else {
-            image.removeAttribute('fetchpriority');
-          }
-        }
-        card.append(picture);
-      });
-      if (pictures.length) column.append(card);
-    });
+    templates.slice(templateIndex, templateIndex + cardCount).forEach((template, cardIndex) => {
+      const page = template.pages?.[0];
+      const thumbnail = page?.rendition?.image?.thumbnail;
+      const imageUrl = getImageThumbnailSrc(
+        extractRenditionLinkHref(template),
+        extractComponentLinkHref(template),
+        page,
+      );
+      if (!imageUrl) return;
 
+      const card = createElement('div', 'gen-template-card');
+      const isSquare = thumbnail?.width && thumbnail?.height
+        && thumbnail.width / thumbnail.height >= 0.85;
+      card.classList.add(`gen-template-card-${isSquare ? 'square' : 'portrait'}`);
+      const picture = createElement('picture');
+      const image = createElement('img');
+      image.src = imageUrl;
+      image.alt = '';
+      image.decoding = 'async';
+      image.loading = columnIndex === 2 && cardIndex === 0 ? 'eager' : 'lazy';
+      if (columnIndex === 2 && cardIndex === 0) image.fetchPriority = 'high';
+      picture.append(image);
+      card.append(picture);
+      column.append(card);
+    });
+    templateIndex += cardCount;
     if (column.children.length) gallery.append(column);
   });
   return gallery;
@@ -179,9 +245,13 @@ function addInteractions(block) {
 
 export default async function decorate(block) {
   const rows = [...block.children];
-  const [textRow, configRow, ...galleryRows] = rows;
-  const content = buildContent(textRow, configRow);
-  const gallery = buildGallery(galleryRows);
+  const [textRow, suggestionsRow, templateSourceRow] = rows;
+  const [strings, templates] = await Promise.all([
+    loadPlaceholders(),
+    loadTemplates(templateSourceRow),
+  ]);
+  const content = buildContent(textRow, suggestionsRow, strings);
+  const gallery = buildGallery(templates);
 
   block.replaceChildren(content, gallery);
   addInteractions(block);
