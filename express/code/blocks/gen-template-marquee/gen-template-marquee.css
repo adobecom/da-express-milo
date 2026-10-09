@@ -6,7 +6,7 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
 .gen-template-marquee {
   /* Gallery overlap offsets from the Figma frames. */
   --gen-template-padding-top: var(--spacing-500);
-  --gen-template-gallery-top: 454px;
+  --gen-template-gallery-top: 514px;
   --gen-template-card-width: 250px;
   --gen-template-column-gap: var(--spacing-600);
   --gen-template-card-gap: 52px;
@@ -252,7 +252,7 @@ main .section .gen-template-suggestions-label {
 }
 
 .gen-template-column:nth-child(3) {
-  padding-top: 105px;
+  padding-top: 85px;
 }
 
 .gen-template-card {
