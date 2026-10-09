@@ -8,7 +8,7 @@ const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
 const REGULAR_CTA_PENDING_CLASS = 'google-login-prompt-pending';
 const REGULAR_CTA_SUPPRESSION_MS = 1000;
 
-const getDestination = async (getMetadata, getConfig) => {
+const resolveDestination = async (getMetadata, getPrimaryDestination) => {
   const redirect = getMetadata('google-login-redirect')?.trim();
   if (redirect) {
     try {
@@ -19,16 +19,16 @@ const getDestination = async (getMetadata, getConfig) => {
   }
 
   try {
-    return await getConfig()?.googleLoginURLCallback?.();
+    return await getPrimaryDestination?.() || window.location.href;
   } catch (error) {
-    window.lana?.log(`Google login redirect callback failed: ${error?.message || error}`, { tags: 'google-login', severity: 'error' });
-    return undefined;
+    window.lana?.log(`Google login primary CTA lookup failed: ${error?.message || error}`, { tags: 'google-login', severity: 'error' });
+    return window.location.href;
   }
 };
 
-const onToken = async (getMetadata, getConfig, data) => {
+const onToken = async (getMetadata, getPrimaryDestination, data) => {
   const acceptedTouList = getMetadata('google-login-accepted-tou-list')?.trim();
-  const destination = await getDestination(getMetadata, getConfig);
+  const destination = await resolveDestination(getMetadata, getPrimaryDestination);
 
   try {
     await window.adobeIMS.socialHeadlessSignIn({
@@ -40,17 +40,13 @@ const onToken = async (getMetadata, getConfig, data) => {
     });
   } catch {
     // New account
-    await window.adobeIMS.signInWithSocialProvider('google', { redirect_uri: destination || window.location.href });
+    await window.adobeIMS.signInWithSocialProvider('google', { redirect_uri: destination });
     return;
   }
 
   if (window.DISABLE_PAGE_RELOAD === true) return;
   // Existing account
-  if (destination) {
-    window.location.assign(destination);
-  } else {
-    window.location.reload();
-  }
+  window.location.assign(destination);
 };
 
 const promptGoogleLogin = (hideRegularCta = false) => {
@@ -66,7 +62,12 @@ const promptGoogleLogin = (hideRegularCta = false) => {
   }
 };
 
-export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
+export default async function initGoogleLogin(
+  loadIms,
+  getMetadata,
+  loadScript,
+  getPrimaryDestination,
+) {
   const os = getMobileOperatingSystem();
   if (os === 'iOS') return;
   try {
@@ -88,7 +89,7 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript, 
   const autoSelect = getMetadata('google-yolo-zero-tap')?.toLowerCase() === 'on';
   window.google?.accounts?.id?.initialize({
     client_id: GOOGLE_ID,
-    callback: (data) => onToken(getMetadata, getConfig, data),
+    callback: (data) => onToken(getMetadata, getPrimaryDestination, data),
     ...(placeholder && { prompt_parent_id: PLACEHOLDER }),
     cancel_on_tap_outside: false,
     itp_support: true,
