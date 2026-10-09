@@ -1,37 +1,37 @@
 # Simple Marquee
 
 ## Overview
-- Renders the headline/body-copy/CTA marquee layout of `grid-marquee` **without** the interactive card grid, drawers, ratings, or app-store logic.
-- Provides authoring teams a dedicated, clearly-named block for the content-only marquee layout they were previously mis-authoring `grid-marquee` for.
-- Centered layout with a branding logo, a heading, body copy, and 1-2 CTA buttons over an optional background/media image.
 
-## Authoring Model
-The block is a single-column table named `simple-marquee`.
+`simple-marquee` provides the headline, body-copy, branding-logo, and CTA layout of `grid-marquee` without its card grid, drawers, ratings, or app-store logic.
 
-- **Content row** (required): holds the marquee copy in this order:
-  - Heading — `h1`–`h6`.
-  - Body copy — one or more paragraphs.
-  - CTAs — 1-2 links in a trailing paragraph. The first link becomes the `primaryCTA`; the wrapping paragraph becomes `.ctas`.
-- **Media row** (optional): a row whose only content is a `picture`/`img`/`video` (no heading). It becomes the `.background`; its images are lazy-loaded.
+## Authoring
 
-### Example
+The required first row contains a heading, optional body copy, and up to two CTA links. An optional media-only row becomes the block background.
 
 | simple-marquee |
 | --- |
 | # The quick and easy create-anything app. <br> Make stunning social posts, images, videos, flyers, and more. <br> [Start free trial](#) [Get Adobe Express](#) |
 | ![background](media.png) |
 
-## Logo Injection
-A branding logo is always injected above the heading, matching the `grid-marquee` contract:
-- `inject-branding-logo` metadata — injects the named icon (e.g. `adobe-express-logo`, `cobrand-lockup-acrobat-express`).
-- `marquee-inject-acrobat-logo` (`on`/`yes`) — injects `cobrand-lockup-acrobat-express`.
-- Otherwise the default `adobe-express-logo` is injected.
+The first link is the primary CTA. The second link is the outlined secondary CTA. CTAs remain visible on mobile. Add the `keep-cta-mobile` variant when the CTA must also remain visible if its URL matches the page's floating CTA.
 
-## Styling
-- All selectors are scoped under `.simple-marquee`.
-- Reuses shared design tokens (`--heading-font-size-*`, `--spacing-*`, `--body-font-size-l`, `--color-black`, etc.).
-- Responsive at the shared `768px` (tablet) and `1280px` (desktop) breakpoints, matching sibling marquee blocks.
+## Variants
 
-## Non-goals
-- Does not render a card grid, drawers, ratings, or app-store links.
-- Does not migrate existing `grid-marquee` authored content.
+Variants may be combined:
+
+- `left-aligned` / `start-aligned` — logically start-aligns the logo, content, and CTAs.
+- `right-aligned` / `end-aligned` — logically end-aligns the logo, content, and CTAs for localized layouts.
+- `dark` — uses light text, the white Adobe Express logo, and the white outlined secondary CTA.
+- `secondary-cta-link` — renders the secondary CTA as an underlined text link.
+- `premium-cta` — applies the shared premium gradient and interaction states to the primary CTA.
+- `keep-cta-mobile` — keeps a CTA visible on mobile when the shared floating-CTA behavior would otherwise hide a duplicate link.
+
+A single authored link naturally renders the single-CTA variant.
+
+## Branding logo
+
+A branding logo is always injected above the heading:
+
+- `inject-branding-logo` injects the named icon.
+- `marquee-inject-acrobat-logo` set to `on` or `yes` injects `cobrand-lockup-acrobat-express` at the 214px design width.
+- Otherwise the block injects `adobe-express-logo`, or `adobe-express-logo-white` for the `dark` variant.

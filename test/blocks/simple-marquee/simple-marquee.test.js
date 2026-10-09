@@ -1,5 +1,4 @@
 /* eslint-env mocha */
-/* eslint-disable no-unused-expressions */
 
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
@@ -9,49 +8,90 @@ const imports = await Promise.all([
   import('../../../express/code/blocks/simple-marquee/simple-marquee.js'),
 ]);
 const { default: decorate } = imports[1];
-
 const basic = await readFile({ path: './mocks/basic.html' });
+
+async function render(...variants) {
+  document.body.innerHTML = basic;
+  const block = document.querySelector('.simple-marquee');
+  block.classList.add(...variants);
+  await decorate(block);
+  return block;
+}
 
 describe('Simple Marquee', () => {
   before(() => {
     window.isTestEnv = true;
   });
 
-  it('decorates headline, eyebrow, body copy and CTAs into the foreground', async () => {
-    document.body.innerHTML = basic;
-    const block = document.querySelector('.simple-marquee');
-    await decorate(block);
-
-    const foreground = block.querySelector('.foreground');
-    const headline = block.querySelector('.headline');
-    const h1 = block.querySelector('.headline h1');
-    const body = block.querySelector('.headline p:not(.ctas)');
-    const ctas = block.querySelector('.headline .ctas');
-    const buttons = block.querySelectorAll('.headline a.button');
-
-    expect(foreground).to.exist;
-    expect(headline).to.exist;
-    expect(foreground.contains(headline)).to.be.true;
-    expect(h1).to.exist;
-    expect(block.querySelector('.express-logo')).to.exist;
-    expect(body).to.exist;
-    expect(ctas).to.exist;
-    expect(buttons.length).to.equal(2);
-    expect(buttons[0].classList.contains('primaryCTA')).to.be.true;
-    expect(buttons[1].classList.contains('primaryCTA')).to.be.false;
+  afterEach(() => {
+    document.head.querySelectorAll('meta[name="inject-branding-logo"], meta[name="marquee-inject-acrobat-logo"]')
+      .forEach((meta) => meta.remove());
   });
 
-  it('promotes a media-only row to the background', async () => {
-    document.body.innerHTML = basic;
-    const block = document.querySelector('.simple-marquee');
-    await decorate(block);
+  it('decorates the headline, body copy, and CTA row', async () => {
+    const block = await render();
+    const buttons = block.querySelectorAll('.headline a.button');
 
+    expect(block.querySelector('.foreground > .headline h1')).to.exist;
+    expect(block.querySelector('.headline p')).to.exist;
+    expect(block.querySelector('.headline .ctas')).to.exist;
+    expect(buttons).to.have.length(2);
+    expect(buttons[0].classList.contains('primaryCTA')).to.be.true;
+    expect(buttons[1].classList.contains('secondaryCTA')).to.be.true;
+    expect([...buttons].every((button) => button.classList.contains('button-l'))).to.be.true;
+  });
+
+  it('injects an authored CTA icon into the button', async () => {
+    const block = await render();
+    const icon = block.querySelector('.primaryCTA .text-group > .icon');
+
+    expect(icon).to.exist;
+    expect(icon.getAttribute('aria-hidden')).to.equal('true');
+    expect(icon.querySelector('.icon-ax-blank')).to.exist;
+  });
+
+  it('promotes a media-only row to a decorative background', async () => {
+    const block = await render();
     const background = block.querySelector('.background');
-    expect(background).to.exist;
-    expect(background.querySelector('img')).to.exist;
-    expect(background.querySelector('img').loading).to.equal('lazy');
-    // Media row must not be treated as the headline.
+    const image = background.querySelector('img');
+
+    expect(background.getAttribute('aria-hidden')).to.equal('true');
+    expect(image.alt).to.equal('');
+    expect(image.loading).to.equal('lazy');
     expect(background.classList.contains('headline')).to.be.false;
+  });
+
+  it('uses the white Adobe Express logo for the dark variant', async () => {
+    const block = await render('dark');
+    const logo = block.querySelector('.express-logo');
+
+    expect(logo.classList.contains('icon-adobe-express-logo-white')).to.be.true;
+  });
+
+  it('marks the Acrobat co-branded logo for the design width', async () => {
+    const meta = document.createElement('meta');
+    meta.name = 'marquee-inject-acrobat-logo';
+    meta.content = 'on';
+    document.head.append(meta);
+    const block = await render();
+    const logo = block.querySelector('.express-logo');
+
+    expect(logo.classList.contains('icon-cobrand-lockup-acrobat-express')).to.be.true;
+    expect(logo.classList.contains('cobrand-logo')).to.be.true;
+  });
+
+  it('marks the primary CTA as premium when authored with the premium variant', async () => {
+    const block = await render('premium-cta');
+    expect(block.querySelector('.primaryCTA').classList.contains('gradient')).to.be.true;
+  });
+
+  it('preserves alignment and secondary-link variants for CSS treatment', async () => {
+    const block = await render('right-aligned', 'secondary-cta-link', 'keep-cta-mobile');
+
+    expect(block.classList.contains('right-aligned')).to.be.true;
+    expect(block.classList.contains('secondary-cta-link')).to.be.true;
+    expect(block.classList.contains('keep-cta-mobile')).to.be.true;
+    expect(block.querySelector('.secondaryCTA')).to.exist;
   });
 
   it('marks a headline with no CTA and runs without throwing', async () => {
@@ -62,9 +102,7 @@ describe('Simple Marquee', () => {
     const block = document.querySelector('.simple-marquee');
     await decorate(block);
 
-    const headline = block.querySelector('.headline');
-    expect(headline).to.exist;
-    expect(headline.classList.contains('no-cta')).to.be.true;
+    expect(block.querySelector('.headline').classList.contains('no-cta')).to.be.true;
     expect(block.querySelector('.background')).to.not.exist;
   });
 });
