@@ -49,6 +49,17 @@
   src: local('Arial'), local('Helvetica');
 }
 
+/* Adobe Clean Display Fallback */
+@font-face {
+  font-family: 'Arial Bold Adjusted';
+  font-weight: 900;
+  size-adjust: 93%;
+  ascent-override: 91%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('ArialBold');
+}
+
 :root {
   --color-white: #fff;
 
@@ -116,7 +127,7 @@
 
   /* font families */
   --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
-  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --heading-font-family: "Adobe Clean Display Black", var(--s2a-font-family-heading), adobe-clean-display, "Arial Bold Adjusted", sans-serif;
 
   /* body */
   --body-background-color: var(--color-white);
