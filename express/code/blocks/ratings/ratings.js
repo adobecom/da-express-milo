@@ -73,9 +73,10 @@ export default async function decorate(block) {
     const thumbWidth = 60;
     const pos = (value - $input.getAttribute('min'))
         / ($input.getAttribute('max') - $input.getAttribute('min'));
-    const thumbCorrect = thumbWidth * (pos - 0.25) * -1 - 0.1;
-    const titlePos = pos * $input.offsetWidth - thumbWidth / 4 + thumbCorrect;
-    $tooltip.style.left = `${titlePos}px`;
+    const isRTL = getComputedStyle(block).direction === 'rtl';
+    const inlinePos = isRTL ? 1 - pos : pos;
+    const titlePos = inlinePos * ($input.offsetWidth - thumbWidth);
+    $tooltip.style.insetInlineStart = `${titlePos}px`;
     $sliderFill.style.width = `${titlePos + thumbWidth / 2}px`;
   }
 
@@ -187,15 +188,20 @@ export default async function decorate(block) {
       }
     };
     input.addEventListener('keyup', (e) => {
-      if (e.code === 'ArrowLeft' || e.code === 'ArrowDown') {
+      const isRTL = getComputedStyle(block).direction === 'rtl';
+      if (e.code === 'ArrowLeft') {
+        input.value = isRTL ? Number(input.value) + 1 : input.value - 1;
+      } else if (e.code === 'ArrowDown') {
         input.value -= 1;
-        updateSliderValue();
-        scrollToScrollAnchor();
-      } else if (e.code === 'ArrowRight' || e.code === 'ArrowUp') {
+      } else if (e.code === 'ArrowRight') {
+        input.value = isRTL ? Number(input.value) - 1 : input.value + 1;
+      } else if (e.code === 'ArrowUp') {
         input.value += 1;
-        updateSliderValue();
-        scrollToScrollAnchor();
+      } else {
+        return;
       }
+      updateSliderValue();
+      scrollToScrollAnchor();
     });
     ['mousedown', 'touchstart'].forEach((event) => {
       input.addEventListener(event, () => {
@@ -205,7 +211,7 @@ export default async function decorate(block) {
     });
     ['mouseup', 'touchend'].forEach((event) => {
       input.addEventListener(event, () => {
-        tooltip.style.transition = 'left .3s, right .3s';
+        tooltip.style.transition = 'inset-inline-start .3s';
         sliderFill.style.transition = 'width .3s';
         if (
           (!textarea.getAttribute('required') && textarea.value !== '')
