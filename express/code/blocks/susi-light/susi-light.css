@@ -9,6 +9,7 @@
   --susi-wrapper-edu-express: 400px;
   --susi-wrapper-simplified: 400px;
   --susi-standard-padding: 24px;
+  --susi-image-modal-width: 1200px;
 }
 
 .susi-light {
@@ -18,6 +19,10 @@
   justify-content: center;
   line-height: initial;
   --susi-grey: #e6e6e6;
+}
+
+.susi-light.color .hero-animation-overlay::before {
+  content: none;
 }
 
 .susi-layout {
@@ -235,6 +240,94 @@
 .susi-light.student input[type='checkbox'] {
   width: 1rem;
   height: 1rem;
+}
+
+@media (max-width: 1199px) {
+  .susi-light.color.has-media .title {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding-inline: var(--spacing-300);
+  }
+
+  .susi-light.color .title.desktop-only {
+    display: none;
+  }
+}
+
+.susi-light.color.has-media .susi-media {
+  display: none;
+}
+
+.susi-light.color.has-media .susi-form-pane {
+  width: 100%;
+}
+
+@media (min-width: 1200px) {
+  .susi-light.color.has-media .susi-layout {
+    flex-direction: row;
+    align-items: stretch;
+    text-align: initial;
+  }
+
+  .susi-light.color.has-media .susi-media {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    width: 50%;
+    flex: 1 1 50%;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-600) var(--spacing-800);
+  }
+
+  .susi-light.color.has-media .susi-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .susi-light.color.has-media .video-container {
+    position: relative;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .susi-light.color.has-media .susi-form-pane {
+    display: flex;
+    flex: 1 1 50%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-500) var(--spacing-500) 0;
+    overflow-y: auto;
+  }
+
+  .susi-light.color.has-media .express-logo {
+    height: 34px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .susi-light.color.has-media .title {
+    font-size: var(--heading-font-size-m);
+    line-height: var(--heading-line-height);
+    margin: var(--spacing-100) 0 var(--spacing-300);
+  }
+
+  .susi-light.color.has-media .susi-wrapper {
+    max-width: 348px;
+    margin: 0 auto;
+  }
+
+  .dialog-modal:has(.susi-light.color.has-media) {
+    width: var(--susi-image-modal-width);
+  }
+
+  .susi-light.color .title.mobile-only {
+    display: none;
+  }
 }
 
 .susi-light .subheading {

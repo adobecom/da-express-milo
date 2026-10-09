@@ -158,17 +158,22 @@ export function isExpiringSoon(expireTimestamp, bufferMs = TOKEN_REFRESH_BUFFER_
 
 /**
  * Trigger the sign-in flow if the user is not already authenticated.
- * Ensures IMS is loaded, then opens the SUSI-light modal when a
- * `susi-target` metadata tag is present on the page.
+ * Ensures IMS is loaded, then opens the SUSI-light modal using the given
+ * `susiTarget` override (`path#hash`), or the page's `susi-target`
+ * metadata tag when no override is provided.
  *
+ * @param {Object} [options]
+ * @param {string} [options.susiTarget] - Explicit `path#hash` override,
+ *   for callers that need a modal other than the page-level default
+ *   (e.g. a contextual SUSI tied to a specific CTA).
  * @returns {Promise<boolean>} `true` if the user is signed in, `false` otherwise
  * @throws {AuthenticationError} If IMS fails to load
  */
-export async function triggerSignInFlow() {
+export async function triggerSignInFlow({ susiTarget: susiTargetOverride } = {}) {
   const ims = await ensureIms();
   if (ims.isSignedInUser()) return true;
 
-  const susiTarget = getMetadata('susi-target');
+  const susiTarget = susiTargetOverride || getMetadata('susi-target');
   if (susiTarget) {
     const [path, hash] = susiTarget.split('#');
     const libs = getLibs();

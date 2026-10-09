@@ -7,7 +7,7 @@ import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { createIconButton, createSpectrumIcon } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
-import { createTag, getLibs } from '../../utils.js';
+import { createTag, getLibs, getMetadata } from '../../utils.js';
 import { loadButton, loadActionButton, loadTooltip, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { createLibraryAccessibilityMenu } from '../components/libraries/createLibraryAccessibilityMenu.js';
@@ -146,12 +146,13 @@ async function openInExpress(palette, prodBaseUrl) {
   window.open(await buildExpressUrl(palette, prodBaseUrl), '_blank', 'noopener noreferrer');
 }
 
-async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
+async function handleOpenInExpress({ id, name, colors }, prodBaseUrl, inModal) {
   const isSignedIn = await checkIsSignedIn();
   if (!isSignedIn) {
     const { setSusiColorRedirect } = await import('../utils/susiRedirect.js');
     setSusiColorRedirect(await buildExpressUrl({ id, name, colors }, prodBaseUrl));
-    await triggerSignInFlow();
+    const susiTarget = inModal ? null : getMetadata('color-palette-susi-target');
+    await triggerSignInFlow(susiTarget ? { susiTarget } : {});
     return;
   }
 
@@ -716,6 +717,7 @@ export function createToolbar(options) {
     editPaletteLink = null,
     getLibraryContext,
     onCTA,
+    inModal = false,
     onEditClick: customOnEditClick,
     showEditLabel = false,
     actionButtons: customActionButtons,
@@ -842,7 +844,7 @@ export function createToolbar(options) {
   main.appendChild(actionContainer);
 
   const ctaBtn = buildCTAButton(getCTAText, () => {
-    (onCTA ?? ((p) => handleOpenInExpress(p, t.ctaBaseUrl)))(getPaletteWithName());
+    (onCTA ?? ((p) => handleOpenInExpress(p, t.ctaBaseUrl, inModal)))(getPaletteWithName());
     emit('cta', { palette: getPaletteWithName() });
   });
   main.appendChild(ctaBtn);
