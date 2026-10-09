@@ -62,6 +62,7 @@ describe('Color Extract — failed image uploads', function failedImageUploads()
   async function expectUploadError(block) {
     await waitFor(() => !!document.querySelector('sp-toast'), 5000);
     const toast = document.querySelector('sp-toast');
+    expect(document.querySelectorAll('sp-toast')).to.have.length(1);
     expect(toast.getAttribute('variant')).to.equal('negative');
     expect(toast.textContent).to.equal('Unable to load image. Please try again.');
     expect(block.classList.contains('is-loading')).to.be.false;
@@ -101,6 +102,43 @@ describe('Color Extract — failed image uploads', function failedImageUploads()
     await expectUploadError(block);
   });
 
+  it('shows only one toast for overlapping failed drops and retries while it is visible', async () => {
+    const block = await mount();
+    const imageErrors = sinon.spy();
+    sinon.stub(window, 'Image').callsFake(() => {
+      const image = document.createElement('img');
+      image.addEventListener('error', imageErrors);
+      return image;
+    });
+    const targets = [
+      block.querySelector('.image-upload-dropzone-upload-label'),
+      block.querySelector('.color-extract-inner'),
+    ];
+    targets.forEach((target) => {
+      target.dispatchEvent(new DragEvent('drop', {
+        dataTransfer: transfer(), bubbles: true, cancelable: true,
+      }));
+    });
+    await waitFor(() => imageErrors.calledTwice, 5000);
+    const toast = await expectUploadError(block);
+    targets[0].dispatchEvent(new DragEvent('drop', {
+      dataTransfer: transfer(), bubbles: true, cancelable: true,
+    }));
+    await waitFor(() => imageErrors.calledThrice, 5000);
+    expect(await expectUploadError(block)).to.equal(toast);
+  });
+
+  it('shows a new error toast after the previous one is manually dismissed', async () => {
+    const block = await mount();
+    selectFile(block);
+    const firstToast = await expectUploadError(block);
+    firstToast.dispatchEvent(new Event('close'));
+    selectFile(block);
+    const nextToast = await expectUploadError(block);
+    expect(nextToast).not.to.equal(firstToast);
+    expect(firstToast.isConnected).to.be.false;
+  });
+
   it('clears the overlay after the file reader fails', async () => {
     const block = await mount();
     sinon.stub(FileReader.prototype, 'readAsDataURL').callsFake(function failReading() {
@@ -138,6 +176,9 @@ describe('Color Extract — failed image uploads', function failedImageUploads()
     expect(toast.isConnected).to.be.false;
     expect(block.classList.contains('is-loading')).to.be.false;
     expect(document.querySelector('.color-extract-loading-overlay').classList.contains('is-loading')).to.be.false;
+    selectFile(block);
+    const nextToast = await expectUploadError(block);
+    expect(nextToast).not.to.equal(toast);
     clock.restore();
   });
 

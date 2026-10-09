@@ -19,17 +19,19 @@ function isImageFile(file) {
   return file && SUPPORTED_TYPES.some((t) => file.type?.startsWith(t));
 }
 
-async function showLoadError(message) {
+async function showLoadError(message, onClose) {
   const { showExpressToast } = await import('../../spectrum/components/express-toast.js');
-  showExpressToast({
+  return showExpressToast({
     message: message || IMAGE_UPLOAD_DEFAULTS.loadError,
     variant: 'negative',
     timeout: 3000,
+    onClose,
   });
 }
 
 /**
  * Create a reusable upload dropzone (dashed-border box with upload button, drag text, file hint).
+ * Repeated load failures share one error toast until it is dismissed.
  *
  * @param {object} options
  * @param {object} [options.strings] - Localized strings (image-upload placeholder bundle).
@@ -144,10 +146,18 @@ export function createUploadDropzone(options = {}) {
     }, 1000);
   };
 
+  let loadErrorToast = null;
   const handleLoadError = () => {
     setLoading(false);
     opts.onImageError?.();
-    showLoadError(opts.loadError);
+    if (!loadErrorToast) {
+      loadErrorToast = showLoadError(opts.loadError, () => {
+        loadErrorToast = null;
+      }).catch((error) => {
+        loadErrorToast = null;
+        throw error;
+      });
+    }
   };
 
   const handleFile = (file) => {
