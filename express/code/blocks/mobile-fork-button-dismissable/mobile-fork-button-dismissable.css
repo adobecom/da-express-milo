@@ -7,6 +7,10 @@ main  .floating-button-wrapper.mobile-fork-button, main .mobile-fork-button {
   z-index: 8;
 }
 
+body.google-login-prompt-pending main .floating-button-wrapper:not(.mobile-fork-button) {
+  visibility: hidden;
+}
+
 main .mobile-fork-button.long-text {
   --mfb-font-size: 14px;
 }

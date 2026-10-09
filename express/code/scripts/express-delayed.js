@@ -3,6 +3,8 @@ import BlockMediator from './block-mediator.min.js';
 
 let createTag; let getMetadata;
 let getConfig; let loadStyle;
+let loadIms; let loadScript;
+
 export function getDestination() {
   const pepDestinationMeta = getMetadata('pep-destination');
   return pepDestinationMeta || BlockMediator.get('primaryCtaUrl')
@@ -63,17 +65,34 @@ async function addJapaneseSectionHeaderSizing() {
   }
 }
 
+async function loadGoogleLogin() {
+  const googleLogin = getMetadata('express-google-login')?.trim().toLowerCase();
+  const signedIn = Boolean(window.adobeIMS?.isSignedInUser());
+  const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
+  const supportedMetadata = ['mobile', 'desktop', 'on'].includes(googleLogin);
+  const viewportEligible = googleLogin === 'on'
+    || (googleLogin === 'mobile' && !desktopViewport)
+    || (googleLogin === 'desktop' && desktopViewport);
+  const shouldLoad = !signedIn && supportedMetadata && viewportEligible;
+
+  if (!shouldLoad) return;
+
+  const { default: initGoogleLogin } = await import('../libs/features/google-login.js');
+  await initGoogleLogin(loadIms, getMetadata, loadScript);
+}
+
 /**
  * Executes everything that happens a lot later, without impacting the user experience.
  */
 export default async function loadDelayed() {
   try {
     await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
-      ({ createTag, getMetadata, getConfig, loadStyle } = utils);
+      ({ createTag, getMetadata, getConfig, loadStyle, loadScript, loadIms } = utils);
     });
     addJapaneseSectionHeaderSizing();
     turnContentLinksIntoButtons();
     preloadSUSILight();
+    await loadGoogleLogin();
     return null;
   } catch (error) {
     window.lana?.log(`Express-Delayed Error: ${error?.message || error?.detail || error}`, { tags: 'express-delayed', severity: 'error' });

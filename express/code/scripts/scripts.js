@@ -526,10 +526,6 @@ async function loadPage() {
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
 
-  const googleLoginRedirect = createTag('meta', { name: 'google-login', content: 'desktop' });
-  document.head.append(googleLoginRedirect);
-  // end TODO remove metadata after we go live
-
   const config = setConfig({ ...CONFIG, miloLibs });
 
   // Legacy color.adobe.com deeplink redirect
@@ -591,6 +587,17 @@ async function loadPage() {
   });
 
   await loadArea();
+
+  // Disable Milo's loader so Express owns Google login on every viewport.
+  const miloGoogleLoginMeta = document.head.querySelector('meta[name="google-login"]')
+    || createTag('meta', { name: 'google-login' });
+  miloGoogleLoginMeta.content = 'off';
+  if (!miloGoogleLoginMeta.isConnected) document.head.append(miloGoogleLoginMeta);
+
+  const expressGoogleLoginMeta = document.head.querySelector('meta[name="express-google-login"]')
+    || createTag('meta', { name: 'express-google-login' });
+  expressGoogleLoginMeta.content = 'on';
+  if (!expressGoogleLoginMeta.isConnected) document.head.append(expressGoogleLoginMeta);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
