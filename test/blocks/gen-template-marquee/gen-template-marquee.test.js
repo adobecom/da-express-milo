@@ -52,10 +52,11 @@ function addMetadata(metadata) {
   });
 }
 
-async function prepareBlock(metadata = {}) {
+async function prepareBlock(metadata = {}, templateSource = '') {
   addMetadata(metadata);
   document.body.innerHTML = fixture;
   const block = document.querySelector('.gen-template-marquee');
+  if (templateSource) block.children[2].firstElementChild.textContent = templateSource;
   await decorate(block);
   return block;
 }
@@ -134,6 +135,16 @@ describe('gen-template-marquee', () => {
     expect(block.querySelectorAll('.gen-template-card img[alt=""]')).to.have.length(14);
     expect(block.querySelectorAll('.gen-template-card-square')).to.have.length(7);
     expect(block.querySelectorAll('.gen-template-card-portrait')).to.have.length(7);
+  });
+
+  it('loads templates from an authored collection ID', async () => {
+    const collectionId = 'urn:aaid:sc:VA6C2:custom-template-collection';
+    const block = await prepareBlock({}, collectionId);
+    const requestUrl = new URL(fetchedUrl);
+
+    expect(requestUrl.searchParams.get('collectionId')).to.equal(collectionId);
+    expect(requestUrl.searchParams.get('limit')).to.equal('23');
+    expect(block.querySelectorAll('.gen-template-card')).to.have.length(14);
   });
 
   it('keeps an empty submission on the page and focuses the prompt', async () => {
