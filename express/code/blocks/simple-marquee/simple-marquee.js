@@ -85,7 +85,6 @@ export default async function init(block) {
     background.setAttribute('aria-hidden', 'true');
     background.querySelectorAll('img').forEach((img) => {
       img.alt = '';
-      img.loading = 'lazy';
       img.decoding = 'async';
     });
   }

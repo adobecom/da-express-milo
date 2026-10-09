@@ -143,6 +143,12 @@ main .section .simple-marquee .headline :is(h1, h2, h3, h4, h5, h6) {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
 }
 
+.simple-marquee .headline a.secondaryCTA:any-link:focus {
+  background-color: color-mix(in srgb, var(--color-black) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-black) 12%, transparent);
+  color: color-mix(in srgb, var(--color-black) 93%, transparent);
+}
+
 .simple-marquee.dark .headline a.secondaryCTA:any-link {
   background-color: transparent;
   border-color: color-mix(in srgb, var(--color-white) 22%, transparent);
@@ -180,6 +186,12 @@ main .section .simple-marquee .headline :is(h1, h2, h3, h4, h5, h6) {
   background: transparent;
   color: inherit;
   text-decoration-thickness: 2px;
+}
+
+.simple-marquee.dark.secondary-cta-link .headline a.secondaryCTA:any-link:focus {
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
 }
 
 .simple-marquee.left-aligned,

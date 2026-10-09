@@ -57,7 +57,7 @@ describe('Simple Marquee', () => {
 
     expect(background.getAttribute('aria-hidden')).to.equal('true');
     expect(image.alt).to.equal('');
-    expect(image.loading).to.equal('lazy');
+    expect(image.loading).to.equal('eager');
     expect(background.classList.contains('headline')).to.be.false;
   });
 
