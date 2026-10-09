@@ -21,6 +21,10 @@
   --susi-grey: #e6e6e6;
 }
 
+.susi-light.color .hero-animation-overlay::before {
+  content: none;
+}
+
 .susi-layout {
   display: flex;
   width: 100%;
@@ -226,7 +230,7 @@
     padding-inline: var(--spacing-300);
   }
 
-  .susi-layout .title.desktop-only {
+  .susi-light.color .title.desktop-only {
     display: none;
   }
 }
@@ -301,7 +305,7 @@
     width: var(--susi-image-modal-width);
   }
 
-  .susi-layout .title.mobile-only {
+  .susi-light.color .title.mobile-only {
     display: none;
   }
 }

@@ -595,7 +595,7 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
 
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
-  const mobileTitle = rows[3]?.textContent?.trim();
+  const mobileTitle = isColor ? rows[3]?.textContent?.trim() : undefined;
   const isDesktopViewport = window.matchMedia('(min-width: 1200px)').matches;
   const media = (isColor && isDesktopViewport) ? buildSusiMedia(rows[4]) : null;
   const popup = el.classList.contains('popup') || false;
