@@ -24,7 +24,7 @@ async function showLoadError(message) {
   showExpressToast({
     message: message || IMAGE_UPLOAD_DEFAULTS.loadError,
     variant: 'negative',
-    timeout: 3000,
+    timeout: 0,
   });
 }
 
@@ -33,7 +33,8 @@ async function showLoadError(message) {
  *
  * @param {object} options
  * @param {object} [options.strings] - Localized strings (image-upload placeholder bundle).
- *   When provided, supplies defaults for uploadButtonText/dragDropText/fileHintText/loadingText/ariaLabel/loadError.
+ *   Supplies defaults for uploadButtonText, dragDropText, fileHintText, loadingText,
+ *   ariaLabel, and loadError.
  *   Per-key options on `options` still override `strings`.
  * @param {string} [options.uploadButtonText] - Authorable button label
  * @param {string} [options.dragDropText] - Drag hint text
@@ -42,6 +43,8 @@ async function showLoadError(message) {
  * @param {string} [options.ariaLabel] - Accessible name for the dropzone
  * @param {boolean} [options.enabled=true] - Whether the dropzone is interactive
  * @param {function(HTMLImageElement, string): void} [options.onImageReady] - Image ready callback
+ * @param {function(): void} [options.onImageError] - Called after loading fails,
+ *   before showing an error toast that remains visible until dismissed.
  * @returns {{container: HTMLElement, handleUrl: function, handleFile: function,
  *   input: HTMLInputElement, setLoading: function}}
  */
@@ -141,6 +144,12 @@ export function createUploadDropzone(options = {}) {
     }, 1000);
   };
 
+  const handleLoadError = () => {
+    setLoading(false);
+    opts.onImageError?.();
+    showLoadError(opts.loadError);
+  };
+
   const handleFile = (file) => {
     if (!isImageFile(file)) return;
     setLoading(true);
@@ -148,16 +157,10 @@ export function createUploadDropzone(options = {}) {
     reader.onload = () => {
       const image = new Image();
       image.onload = () => processImage(image, image.src);
-      image.onerror = () => {
-        setLoading(false);
-        showLoadError(opts.loadError);
-      };
+      image.onerror = handleLoadError;
       image.src = reader.result;
     };
-    reader.onerror = () => {
-      setLoading(false);
-      showLoadError(opts.loadError);
-    };
+    reader.onerror = handleLoadError;
     reader.readAsDataURL(file);
   };
 
@@ -167,10 +170,7 @@ export function createUploadDropzone(options = {}) {
     const image = new Image();
     image.crossOrigin = 'anonymous';
     image.onload = () => processImage(image, url);
-    image.onerror = () => {
-      setLoading(false);
-      showLoadError(opts.loadError);
-    };
+    image.onerror = handleLoadError;
     image.src = url;
   };
 
