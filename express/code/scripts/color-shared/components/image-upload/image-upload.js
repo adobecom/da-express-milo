@@ -24,7 +24,7 @@ async function showLoadError(message) {
   showExpressToast({
     message: message || IMAGE_UPLOAD_DEFAULTS.loadError,
     variant: 'negative',
-    timeout: 0,
+    timeout: 3000,
   });
 }
 
@@ -44,7 +44,7 @@ async function showLoadError(message) {
  * @param {boolean} [options.enabled=true] - Whether the dropzone is interactive
  * @param {function(HTMLImageElement, string): void} [options.onImageReady] - Image ready callback
  * @param {function(): void} [options.onImageError] - Called after loading fails,
- *   before showing an error toast that remains visible until dismissed.
+ *   before showing an error toast.
  * @returns {{container: HTMLElement, handleUrl: function, handleFile: function,
  *   input: HTMLInputElement, setLoading: function}}
  */

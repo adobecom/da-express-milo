@@ -124,7 +124,24 @@ describe('Color Extract — failed image uploads', function failedImageUploads()
     await expectUploadError(block);
   });
 
-  it('keeps the error toast visible until the user closes it', async () => {
+  it('dismisses the error toast after three seconds without leaving an overlay', async () => {
+    const block = await mount();
+    const clock = sinon.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout'],
+      shouldClearNativeTimers: true,
+    });
+    selectFile(block);
+    const toast = await expectUploadError(block);
+    await clock.tickAsync(2999);
+    expect(toast.isConnected).to.be.true;
+    await clock.tickAsync(1);
+    expect(toast.isConnected).to.be.false;
+    expect(block.classList.contains('is-loading')).to.be.false;
+    expect(document.querySelector('.color-extract-loading-overlay').classList.contains('is-loading')).to.be.false;
+    clock.restore();
+  });
+
+  it('allows the user to close the error toast before the timeout', async () => {
     const block = await mount();
     const clock = sinon.useFakeTimers({
       toFake: ['setTimeout', 'clearTimeout'],
@@ -134,7 +151,7 @@ describe('Color Extract — failed image uploads', function failedImageUploads()
     await waitFor(() => !!document.querySelector('sp-toast'), 5000);
     const toast = document.querySelector('sp-toast');
     await toast.updateComplete;
-    await clock.tickAsync(5000);
+    await clock.tickAsync(1000);
     expect(toast.isConnected).to.be.true;
     const closeButton = toast.shadowRoot.querySelector('sp-close-button');
     expect(closeButton).to.exist;
