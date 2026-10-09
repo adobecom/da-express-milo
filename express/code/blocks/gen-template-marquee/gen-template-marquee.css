@@ -368,7 +368,7 @@ main .section .gen-template-suggestions-label {
   .gen-template-marquee {
     /* Exact desktop spacing from Figma frame 363:71100. */
     --gen-template-padding-top: var(--spacing-800);
-    --gen-template-gallery-top: 368px;
+    --gen-template-gallery-top: 358px;
     --gen-template-heading-line-height: 56px;
   }
 
