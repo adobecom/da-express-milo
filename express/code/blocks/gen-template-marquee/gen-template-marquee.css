@@ -60,8 +60,7 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
 }
 
 .gen-template-marquee .gen-template-logo-heading :is(h1, h2, h3, h4, h5, h6) {
-  margin: 0;
-  font-family: var(--s2a-font-family-heading);
+  margin: 0; 
   font-size: var(--heading-font-size-l);
   font-weight: var(--heading-font-weight-extra);
   line-height: var(--gen-template-heading-line-height);
