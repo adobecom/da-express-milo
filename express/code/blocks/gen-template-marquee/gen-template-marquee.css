@@ -6,7 +6,7 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
 .gen-template-marquee {
   /* Exact component dimensions from Figma frame 363:71646. */
   --gen-template-marquee-height: 1506px;
-  --gen-template-gallery-top: 445px;
+  --gen-template-gallery-top: 454px;
   --gen-template-card-width: 250px;
   --gen-template-column-gap: var(--spacing-600);
   --gen-template-card-gap: 52px;
@@ -173,7 +173,7 @@ main .section .gen-template-text > p {
 .gen-template-suggestions {
   align-items: center;
   gap: var(--spacing-200);
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 main .section .gen-template-suggestions-label {
@@ -310,7 +310,7 @@ main .section .gen-template-suggestions-label {
   .gen-template-marquee {
     /* Exact tablet dimensions from Figma frame 363:71373. */
     --gen-template-marquee-height: 1732px;
-    --gen-template-gallery-top: 414px;
+    --gen-template-gallery-top: 494px;
     --gen-template-card-width: 291px;
     --gen-template-column-gap: 70px;
     --gen-template-card-gap: 100px;
@@ -351,10 +351,7 @@ main .section .gen-template-suggestions-label {
   .gen-template-column:nth-child(5) {
     translate: 0 -176px;
   }
-
-  .gen-template-column:nth-child(2) {
-    translate: 0 -105px;
-  }
+ 
 
   .gen-template-column:nth-child(3) {
     padding-top: 105px;
@@ -365,7 +362,7 @@ main .section .gen-template-suggestions-label {
   .gen-template-marquee {
     /* Exact desktop dimensions from Figma frame 363:71100. */
     --gen-template-marquee-height: 1842px;
-    --gen-template-gallery-top: 308px;
+    --gen-template-gallery-top: 348px;
     --gen-template-column-gap: 97px;
     --gen-template-heading-line-height: 56px;
     padding-top: var(--spacing-800);
@@ -389,7 +386,7 @@ main .section .gen-template-suggestions-label {
 
   .gen-template-column:nth-child(2),
   .gen-template-column:nth-child(4) {
-    translate: 0 176px;
+    translate: 0 175px;
   }
 
   .gen-template-column:nth-child(3) {
@@ -400,8 +397,8 @@ main .section .gen-template-suggestions-label {
 @media (min-width: 1680px) {
   .gen-template-marquee {
     /* Exact widescreen dimensions from Figma frame 363:70836. */
-    --gen-template-marquee-height: 1899px;
-    --gen-template-gallery-top: 304px;
+    --gen-template-marquee-height: 2000px;
+    --gen-template-gallery-top: 344px;
     --gen-template-card-width: 308px;
     --gen-template-column-gap: 95px;
   }
