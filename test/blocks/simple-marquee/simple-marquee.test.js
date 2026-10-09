@@ -80,9 +80,16 @@ describe('Simple Marquee', () => {
     expect(logo.classList.contains('cobrand-logo')).to.be.true;
   });
 
-  it('marks the primary CTA as premium when authored with the premium variant', async () => {
+  it('uses the white premium crown for the premium primary CTA', async () => {
     const block = await render('premium-cta');
-    expect(block.querySelector('.primaryCTA').classList.contains('gradient')).to.be.true;
+    const primary = block.querySelector('.primaryCTA');
+    const crown = primary.querySelector('.icon-premium-crown-white');
+
+    expect(primary.classList.contains('gradient')).to.be.true;
+    expect(crown).to.exist;
+    expect(crown.getAttribute('src')).to.equal('/express/code/icons/premium-crown-white.svg');
+    expect(crown.getAttribute('alt')).to.equal('');
+    expect(primary.querySelector('.icon-ax-blank')).to.not.exist;
   });
 
   it('preserves alignment and secondary-link variants for CSS treatment', async () => {

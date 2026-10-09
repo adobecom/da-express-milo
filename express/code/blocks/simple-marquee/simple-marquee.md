@@ -23,7 +23,7 @@ Variants may be combined:
 - `right-aligned` / `end-aligned` — logically end-aligns the logo, content, and CTAs for localized layouts.
 - `dark` — uses light text, the white Adobe Express logo, and the white outlined secondary CTA.
 - `secondary-cta-link` — renders the secondary CTA as an underlined text link.
-- `premium-cta` — applies the shared premium gradient and interaction states to the primary CTA.
+- `premium-cta` — applies the shared premium gradient, interaction states, and `premium-crown-white.svg` icon to the primary CTA.
 - `keep-cta-mobile` — keeps a CTA visible on mobile when the shared floating-CTA behavior would otherwise hide a duplicate link.
 
 A single authored link naturally renders the single-CTA variant.

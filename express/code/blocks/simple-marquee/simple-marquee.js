@@ -19,14 +19,24 @@ function getBrandingLogo(block) {
   return logo;
 }
 
-function decorateCtaIcon(cta) {
-  if (cta.querySelector('.icon')) return;
-  const icon = cta.parentElement?.querySelector(':scope > .icon');
-  const iconName = iconRegex.exec(icon?.className)?.[1];
-  if (!icon || !iconName) return;
+function decorateCtaIcon(cta, iconNameOverride) {
+  const nestedIcon = cta.querySelector('.icon');
+  if (nestedIcon && !iconNameOverride) return;
+  if (iconNameOverride) nestedIcon?.remove();
+  const authoredIcon = cta.parentElement?.querySelector(':scope > .icon');
+  const iconName = iconNameOverride || iconRegex.exec(authoredIcon?.className)?.[1];
+  if (!iconName) return;
 
-  if (!icon.querySelector('svg, img')) icon.append(getIconElementDeprecated(iconName));
+  let icon = authoredIcon;
+  if (iconNameOverride) {
+    authoredIcon?.remove();
+    icon = getIconElementDeprecated(iconName);
+  } else if (!icon.querySelector('svg, img')) {
+    icon.append(getIconElementDeprecated(iconName));
+  }
   icon.setAttribute('aria-hidden', 'true');
+  if (icon.tagName === 'IMG') icon.alt = '';
+
   const ctaText = cta.textContent.trim();
   cta.textContent = '';
   cta.title ||= ctaText;
@@ -52,8 +62,9 @@ async function decorateHeadline(block, headline) {
     cta.classList.add('button', 'button-l');
     cta.classList.toggle('primaryCTA', index === 0);
     cta.classList.toggle('secondaryCTA', index > 0);
-    if (index === 0 && block.classList.contains('premium-cta')) cta.classList.add('gradient');
-    decorateCtaIcon(cta);
+    const isPremiumPrimary = index === 0 && block.classList.contains('premium-cta');
+    if (isPremiumPrimary) cta.classList.add('gradient');
+    decorateCtaIcon(cta, isPremiumPrimary ? 'premium-crown-white' : null);
     if (!cta.getAttribute('aria-label') && heading) {
       cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
     }
