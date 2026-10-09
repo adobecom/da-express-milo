@@ -10,6 +10,7 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
   --gen-template-card-width: 250px;
   --gen-template-column-gap: var(--spacing-600);
   --gen-template-card-gap: 52px;
+  --gen-template-gallery-bottom-padding: 60px;
   --gen-template-heading-line-height: 32px;
   --gen-template-body-subtle: rgb(0 0 0 / 64%);
   position: relative;
@@ -19,7 +20,7 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
   justify-items: center;
   box-sizing: border-box;
   overflow: clip;
-  padding: var(--gen-template-padding-top) var(--spacing-300) var(--spacing-600);
+  padding: var(--gen-template-padding-top) var(--spacing-300) var(--gen-template-gallery-bottom-padding);
   background: var(--color-white);
   color: var(--Alias-content-typography-Heading);
 }
@@ -313,7 +314,7 @@ main .section .gen-template-suggestions-label {
     --gen-template-padding-top: var(--spacing-700);
     --gen-template-gallery-top: 318px;
     --gen-template-card-width: 291px;
-    --gen-template-column-gap: 70px;
+    --gen-template-column-gap: 69px;
     --gen-template-card-gap: 100px;
     padding-inline: var(--spacing-500);
   }
@@ -368,7 +369,6 @@ main .section .gen-template-suggestions-label {
     /* Exact desktop spacing from Figma frame 363:71100. */
     --gen-template-padding-top: var(--spacing-800);
     --gen-template-gallery-top: 348px;
-    --gen-template-column-gap: 97px;
     --gen-template-heading-line-height: 56px;
   }
 
@@ -404,6 +404,5 @@ main .section .gen-template-suggestions-label {
     /* Exact widescreen spacing from Figma frame 363:70836. */
     --gen-template-gallery-top: 344px;
     --gen-template-card-width: 308px;
-    --gen-template-column-gap: 95px;
   }
 }
