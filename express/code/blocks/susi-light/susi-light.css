@@ -223,7 +223,7 @@
 }
 
 @media (max-width: 1199px) {
-  .susi-light.color .title {
+  .susi-light.color.has-media .title {
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
