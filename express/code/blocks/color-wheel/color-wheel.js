@@ -131,6 +131,7 @@ async function loadPlaceholders() {
     'contrast-checker', 'color-blindness-simulator', 'no-image-try-ours', 'use-this-image',
     'extracting-colors', 'color-wheel-keyboard-hint', 'color-wheel-harmony-aria',
     'color-wheel-aria-with-hint', 'color-wheel-marker-aria', 'minimize',
+    'new-random-palette-generated',
   ];
   const values = await replaceKeyArray(KEYS, getConfig());
   const v = (i, fallback) => {
@@ -168,6 +169,7 @@ async function loadPlaceholders() {
     harmonyAriaTemplate: v(24, '{harmony} color harmony'),
     wheelAriaWithHint: v(25, 'Color Wheel - Press Enter to access color handles'),
     markerAriaTemplate: v(26, '{hex}, use arrow keys to move'),
+    newRandomPaletteGenerated: v(28, 'New random palette generated'),
     baseColorStrings,
     colorEditStrings,
     imageUploadStrings,
@@ -234,6 +236,7 @@ async function buildDefaultActionMenuConfig(strings) {
     id: ACTION_MENU_ID,
     activeId: 'palette',
     daaLh: 'color-wheel',
+    randomPaletteAnnouncement: strings.newRandomPaletteGenerated,
     navLinks: [
       { id: 'palette', label: strings.createPalette, href: `${locale.contentRoot}/create/color-wheel` },
       { id: 'contrast', label: strings.contrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
