@@ -8,7 +8,6 @@ describe('Google login', () => {
   let loadIms;
   let loadScript;
   let getMetadata;
-  let getPrimaryDestination;
   let originalUserAgent;
 
   beforeEach(() => {
@@ -19,7 +18,6 @@ describe('Google login', () => {
     loadIms = sinon.stub().resolves();
     loadScript = sinon.stub().resolves();
     getMetadata = sinon.stub().returns('');
-    getPrimaryDestination = sinon.stub().returns(undefined);
     window.google = { accounts: { id: { initialize, prompt } } };
     window.adobeIMS = {
       isSignedInUser: sinon.stub().returns(false),
@@ -48,7 +46,7 @@ describe('Google login', () => {
   it('does not load Google for a signed-in user', async () => {
     window.adobeIMS.isSignedInUser.returns(true);
 
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
 
     expect(loadIms.calledOnce).to.be.true;
     expect(loadScript.notCalled).to.be.true;
@@ -61,7 +59,7 @@ describe('Google login', () => {
       configurable: true,
     });
 
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
 
     expect(loadIms.notCalled).to.be.true;
     expect(loadScript.notCalled).to.be.true;
@@ -73,7 +71,7 @@ describe('Google login', () => {
   it('initializes One Tap in the profile container', async () => {
     getMetadata.withArgs('google-yolo-zero-tap').returns('on');
 
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
 
     expect(loadScript.calledOnceWithExactly('https://accounts.google.com/gsi/client')).to.be.true;
     expect(document.querySelector('.feds-profile > #feds-googleLogin')).to.exist;
@@ -97,7 +95,7 @@ describe('Google login', () => {
       ctaHiddenWhenPrompted = document.body.classList.contains('google-login-prompt-pending');
     });
 
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
 
     expect(initialize.calledOnce).to.be.true;
     expect(prompt.notCalled).to.be.true;
@@ -123,20 +121,19 @@ describe('Google login', () => {
   it('uses default prompt placement when the profile container is absent', async () => {
     document.body.innerHTML = '';
 
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
 
     expect(initialize.firstCall.args[0]).not.to.have.property('prompt_parent_id');
   });
 
-  it('uses the page primary CTA when redirect metadata is absent', async () => {
-    getPrimaryDestination.resolves('https://new.express.adobe.com/');
+  it('uses the current page when redirect metadata is absent', async () => {
+    window.adobeIMS.socialHeadlessSignIn.rejects(new Error('new account'));
     getMetadata.withArgs('google-login-accepted-tou-list').returns('  express-tou  ');
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
     const { callback } = initialize.firstCall.args[0];
 
     await callback({ credential: 'google-token' });
 
-    expect(getPrimaryDestination.calledOnce).to.be.true;
     expect(window.adobeIMS.socialHeadlessSignIn.calledOnceWithExactly({
       provider_id: 'google',
       idp_token: 'google-token',
@@ -144,41 +141,28 @@ describe('Google login', () => {
       scope: 'adobe-scope',
       accepted_tou_list: 'express-tou',
     })).to.be.true;
+    expect(window.adobeIMS.signInWithSocialProvider.calledOnceWithExactly('google', {
+      redirect_uri: window.location.href,
+    })).to.be.true;
   });
 
   it('uses authored redirect metadata for a new account', async () => {
     window.adobeIMS.socialHeadlessSignIn.rejects(new Error('new account'));
-    getPrimaryDestination.resolves('https://new.express.adobe.com/');
     getMetadata.withArgs('google-login-redirect').returns('https://www.adobe.com/express/');
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
     const { callback } = initialize.firstCall.args[0];
 
     await callback({ credential: 'google-token' });
 
-    expect(getPrimaryDestination.notCalled).to.be.true;
     expect(window.adobeIMS.signInWithSocialProvider.calledOnceWithExactly('google', {
       redirect_uri: 'https://www.adobe.com/express/',
     })).to.be.true;
   });
 
-  it('falls back to the primary CTA and logs malformed redirect metadata', async () => {
+  it('falls back to the current page and logs malformed redirect metadata', async () => {
     window.adobeIMS.socialHeadlessSignIn.rejects(new Error('new account'));
-    getPrimaryDestination.resolves('https://new.express.adobe.com/');
     getMetadata.withArgs('google-login-redirect').returns('not a URL');
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
-    const { callback } = initialize.firstCall.args[0];
-
-    await callback({ credential: 'google-token' });
-
-    expect(window.adobeIMS.signInWithSocialProvider.calledOnceWithExactly('google', {
-      redirect_uri: 'https://new.express.adobe.com/',
-    })).to.be.true;
-    expect(window.lana.log.calledOnce).to.be.true;
-  });
-
-  it('falls back to the current page when no redirect destination is available', async () => {
-    window.adobeIMS.socialHeadlessSignIn.rejects(new Error('new account'));
-    await initGoogleLogin(loadIms, getMetadata, loadScript, getPrimaryDestination);
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
     const { callback } = initialize.firstCall.args[0];
 
     await callback({ credential: 'google-token' });
@@ -186,5 +170,6 @@ describe('Google login', () => {
     expect(window.adobeIMS.signInWithSocialProvider.calledOnceWithExactly('google', {
       redirect_uri: window.location.href,
     })).to.be.true;
+    expect(window.lana.log.calledOnce).to.be.true;
   });
 });

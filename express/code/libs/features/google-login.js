@@ -8,7 +8,7 @@ const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
 const REGULAR_CTA_PENDING_CLASS = 'google-login-prompt-pending';
 const REGULAR_CTA_SUPPRESSION_MS = 1000;
 
-const resolveDestination = async (getMetadata, getPrimaryDestination) => {
+const resolveDestination = (getMetadata) => {
   const redirect = getMetadata('google-login-redirect')?.trim();
   if (redirect) {
     try {
@@ -18,17 +18,12 @@ const resolveDestination = async (getMetadata, getPrimaryDestination) => {
     }
   }
 
-  try {
-    return await getPrimaryDestination?.() || window.location.href;
-  } catch (error) {
-    window.lana?.log(`Google login primary CTA lookup failed: ${error?.message || error}`, { tags: 'google-login', severity: 'error' });
-    return window.location.href;
-  }
+  return window.location.href;
 };
 
-const onToken = async (getMetadata, getPrimaryDestination, data) => {
+const onToken = async (getMetadata, data) => {
   const acceptedTouList = getMetadata('google-login-accepted-tou-list')?.trim();
-  const destination = await resolveDestination(getMetadata, getPrimaryDestination);
+  const destination = resolveDestination(getMetadata);
 
   try {
     await window.adobeIMS.socialHeadlessSignIn({
@@ -62,12 +57,7 @@ const promptGoogleLogin = (hideRegularCta = false) => {
   }
 };
 
-export default async function initGoogleLogin(
-  loadIms,
-  getMetadata,
-  loadScript,
-  getPrimaryDestination,
-) {
+export default async function initGoogleLogin(loadIms, getMetadata, loadScript) {
   const os = getMobileOperatingSystem();
   if (os === 'iOS') return;
   try {
@@ -89,7 +79,7 @@ export default async function initGoogleLogin(
   const autoSelect = getMetadata('google-yolo-zero-tap')?.toLowerCase() === 'on';
   window.google?.accounts?.id?.initialize({
     client_id: GOOGLE_ID,
-    callback: (data) => onToken(getMetadata, getPrimaryDestination, data),
+    callback: (data) => onToken(getMetadata, data),
     ...(placeholder && { prompt_parent_id: PLACEHOLDER }),
     cancel_on_tap_outside: false,
     itp_support: true,

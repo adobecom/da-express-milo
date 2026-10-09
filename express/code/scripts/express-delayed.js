@@ -78,7 +78,7 @@ async function loadGoogleLogin() {
   if (!shouldLoad) return;
 
   const { default: initGoogleLogin } = await import('../libs/features/google-login.js');
-  await initGoogleLogin(loadIms, getMetadata, loadScript, getDestination);
+  await initGoogleLogin(loadIms, getMetadata, loadScript);
 }
 
 /**
