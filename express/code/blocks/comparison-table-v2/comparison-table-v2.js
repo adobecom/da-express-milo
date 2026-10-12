@@ -710,8 +710,9 @@ function synchronizeIconWrapperTextHeights(comparisonBlock) {
  * Setup event listeners and observers for the comparison table
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  * @param {Function} updateTabindexOnResize - The tabindex update handler
+ * @param {Object} stickyControls - The sticky behavior lifecycle controls
  */
-function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
+function setupEventListeners(comparisonBlock, updateTabindexOnResize, stickyControls) {
   const handleResize = () => {
     updateTabindexOnResize();
     synchronizePlanCellHeights(comparisonBlock);
@@ -727,6 +728,8 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
       resizeFrame = null;
       if (!comparisonBlock.isConnected) {
         resizeObserver.disconnect();
+        stickyControls?.destroy?.();
+        window.removeEventListener('resize', handleResize);
         return;
       }
       synchronizePlanCellHeights(comparisonBlock);
@@ -796,7 +799,7 @@ export default async function decorate(comparisonBlock) {
 
     const updateTabindexOnResize = createTabindexUpdateHandler(comparisonBlock, colTitles);
 
-    setupEventListeners(comparisonBlock, updateTabindexOnResize);
+    setupEventListeners(comparisonBlock, updateTabindexOnResize, stickyControls);
     document.addEventListener('content-toggle:activated', (e) => {
       const panel = e?.detail?.panel;
       if (panel && panel.contains(comparisonBlock)) {

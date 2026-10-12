@@ -403,8 +403,9 @@ export default async function init(el) {
 
   if (el.classList.contains('sticky')) {
     const scrollHandler = () => {
-      if (deviceBySize === 'MOBILE') {
+      if (defineDeviceByScreenSize() === 'MOBILE') {
         rows[0].style.removeProperty('top');
+        rows[0].classList.remove('stuck');
         return;
       }
       if (el.closest('div.tabpanel')?.getAttribute('hidden')) {
