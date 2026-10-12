@@ -955,6 +955,7 @@ function closeDrawer(toolBar) {
   const drawerBackground = toolBar.querySelector('.drawer-background');
   const drawer = toolBar.querySelector('.filter-drawer-mobile');
   const applyButton = toolBar.querySelector('.apply-filter-button-wrapper');
+  const toolbarWrapper = toolBar.closest('.toolbar-wrapper');
 
   drawer.classList.add('retracted');
   drawerBackground.classList.add('transparent');
@@ -964,6 +965,7 @@ function closeDrawer(toolBar) {
     drawer.classList.add('hidden');
     drawerBackground.classList.add('hidden');
     applyButton.classList.add('hidden');
+    toolbarWrapper?.classList.remove('filter-drawer-open');
   }, 500);
 }
 
@@ -1021,6 +1023,7 @@ function initDrawer(block, props, toolBar) {
   const drawer = toolBar.querySelector('.filter-drawer-mobile');
   const closeDrawerBtn = toolBar.querySelector('.close-drawer');
   const applyButton = toolBar.querySelector('.apply-filter-button-wrapper');
+  const toolbarWrapper = toolBar.closest('.toolbar-wrapper');
 
   const functionWrappers = drawer.querySelectorAll('.function-wrapper');
 
@@ -1030,6 +1033,7 @@ function initDrawer(block, props, toolBar) {
   }, { once: true });
   filterButton.addEventListener('click', () => {
     currentFilters = { ...props.filters };
+    toolbarWrapper?.classList.add('filter-drawer-open');
     drawer.classList.remove('hidden');
     drawerBackground.classList.remove('hidden');
     applyButton.classList.remove('hidden');

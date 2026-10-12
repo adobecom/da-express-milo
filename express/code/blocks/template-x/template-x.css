@@ -2628,6 +2628,10 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
 
 @media (max-width: 600px) {
   .template-x .toolbar-wrapper {
+    z-index: 9;
+  }
+
+  .template-x .toolbar-wrapper.filter-drawer-open {
     z-index: 11;
   }
   .template-x-wrapper.horizontal {
