@@ -330,10 +330,17 @@ color-wheel-express {
 
 .color-wheel-harmony-title-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-100);
+  margin-bottom: var(--spacing-200);
+}
+
+.color-wheel-harmony-title-text {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-50);
-  margin-bottom: 0.75rem;
+  min-width: 0;
 }
 
 .color-wheel-harmony-title-static {
@@ -347,6 +354,29 @@ color-wheel-express {
   color: var(--Alias-content-typography-Body);
   font-size: var(--Global-Typography-Size-Label-Label-L);
   line-height: var(--Global-Typography-Line-height-Label-Label-L);
+}
+.color-wheel-harmony-learn-more {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  color: var(--Alias-content-typography-Heading);
+  background: transparent;
+  font: inherit;
+  font-size: var(--ax-body-xs-size);
+  font-weight: 700;
+  line-height: var(--ax-body-xs-lh);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.color-wheel-harmony-learn-more:hover {
+  color: var(--Alias-content-typography-Heading);
+}
+
+.color-wheel-harmony-learn-more:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
 }
 
 .color-wheel-sr-only {
@@ -422,6 +452,236 @@ color-wheel-express {
   height: 46px;
   border-radius: 4px;
   pointer-events: none;
+}
+.ax-color-modal-container:has(.color-harmony-modal) {
+  background: var(--color-white);
+}
+
+.ax-color-modal-container:has(.color-harmony-modal) .ax-color-modal-content {
+  padding: 0;
+  overflow: hidden;
+}
+
+.color-harmony-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  max-height: calc(95vh - var(--spacing-300));
+  background: var(--color-white);
+  color: var(--color-default-font);
+}
+
+.color-harmony-modal-header {
+  flex: 0 0 auto;
+  padding: var(--spacing-400) var(--spacing-400) var(--spacing-300);
+}
+
+.color-harmony-modal-title {
+  margin: 0;
+  color: var(--color-gray-900);
+  font-size: 24px;
+  font-weight: var(--ax-heading-weight);
+  line-height: 28px;
+}
+
+.color-harmony-modal-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: max-content;
+  align-content: start;
+  flex: 1 1 auto;
+  gap: var(--spacing-200);
+  min-height: 0;
+  padding: 0 var(--spacing-400) var(--spacing-400);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.color-harmony-card {
+  display: flex;
+  gap: var(--spacing-200);
+  align-items: flex-start;
+  min-width: 0;
+  padding: var(--spacing-200);
+  overflow: hidden;
+  border: 1px solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--color-white);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.color-harmony-card[aria-checked='true'] {
+  border-color: var(--S2-Buttons-Accent-Color-Default);
+}
+
+.color-harmony-card:hover {
+  border-color: var(--color-gray-700);
+}
+
+.color-harmony-card[aria-checked='true']:hover {
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
+}
+
+.color-harmony-card:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+.color-harmony-card-image {
+  display: block;
+  flex: 0 0 120px;
+  width: 120px;
+  height: 120px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  object-fit: cover;
+}
+
+.color-harmony-card-content,
+.color-harmony-card-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.color-harmony-card-content {
+  gap: var(--spacing-200);
+}
+
+.color-harmony-card-text {
+  gap: var(--spacing-100);
+}
+
+.color-harmony-card-title {
+  color: var(--color-default-font);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-heading-weight);
+  line-height: 20px;
+}
+
+.color-harmony-card-description {
+  color: var(--color-dark-gray);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight);
+  line-height: 1.3;
+}
+
+.color-harmony-card-palette {
+  display: flex;
+  flex: 0 0 auto;
+  width: 124px;
+  height: 24px;
+  overflow: hidden;
+  border: 1px solid rgb(31 31 31 / 20%);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.color-harmony-card-palette-swatch {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.color-harmony-modal-footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-300);
+  padding: var(--spacing-300) var(--spacing-400) var(--spacing-400);
+  border-top: 1px solid var(--color-gray-300-variant);
+  background: var(--color-white);
+}
+
+.color-harmony-modal-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  min-width: 0;
+}
+
+.color-harmony-modal-summary-image {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.color-harmony-modal-summary-name {
+  overflow: hidden;
+  color: var(--color-gray-900);
+  font-size: var(--ax-body-s-size);
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-harmony-modal-summary-palette {
+  display: none;
+}
+
+.color-harmony-modal-confirm {
+  min-width: 90px;
+  padding: 10px var(--spacing-400);
+  border: 1px solid transparent;
+  border-radius: 24px;
+  background: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
+  font: inherit;
+  font-size: 18px;
+  font-weight: var(--ax-heading-weight);
+  line-height: 22px;
+  cursor: pointer;
+}
+
+.color-harmony-modal-confirm:hover {
+  background: var(--S2-Buttons-Accent-Color-Hover);
+}
+
+.color-harmony-modal-confirm:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+@media (min-width: 600px) {
+  .ax-color-modal-container:has(.color-harmony-modal) {
+    width: min(898px, calc(100vw - 2 * var(--spacing-500)));
+    max-width: 898px;
+  }
+
+  .color-harmony-modal {
+    max-height: calc(100vh - 2 * var(--spacing-500));
+  }
+
+  .color-harmony-modal-header {
+    padding: var(--spacing-500) var(--spacing-500) var(--spacing-400);
+  }
+
+  .color-harmony-modal-cards {
+    padding: 0 var(--spacing-500) var(--spacing-400);
+  }
+
+  .color-harmony-modal-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-400) var(--spacing-500);
+  }
+
+  .color-harmony-modal-summary-palette {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) {
+  .color-harmony-modal-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .color-wheel .icon.simple-carousel-arrow-icon {

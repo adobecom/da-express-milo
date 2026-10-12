@@ -130,7 +130,12 @@ async function loadPlaceholders() {
     'color-harmonies', 'undo', 'redo', 'generate-random', 'maximize', 'create-palette',
     'contrast-checker', 'color-blindness-simulator', 'no-image-try-ours', 'use-this-image',
     'extracting-colors', 'color-wheel-keyboard-hint', 'color-wheel-harmony-aria',
-    'color-wheel-aria-with-hint', 'color-wheel-marker-aria', 'minimize',
+    'color-wheel-aria-with-hint', 'color-wheel-marker-aria', 'minimize', 'learn-more',
+    'learn-about-color-harmonies', 'confirm', 'custom-harmony-description',
+    'analogous-harmony-description', 'complementary-harmony-description',
+    'split-complementary-harmony-description', 'triad-harmony-description',
+    'square-harmony-description', 'compound-harmony-description', 'shades-harmony-description',
+    'monochromatic-harmony-description',
   ];
   const values = await replaceKeyArray(KEYS, getConfig());
   const v = (i, fallback) => {
@@ -168,6 +173,20 @@ async function loadPlaceholders() {
     harmonyAriaTemplate: v(24, '{harmony} color harmony'),
     wheelAriaWithHint: v(25, 'Color Wheel - Press Enter to access color handles'),
     markerAriaTemplate: v(26, '{hex}, use arrow keys to move'),
+    learnMore: v(28, 'Learn More'),
+    harmonyModalTitle: v(29, 'Learn about color harmonies'),
+    confirmHarmony: v(30, 'Confirm'),
+    harmonyDescriptions: {
+      CUSTOM: v(31, 'Randomly selects a color combination scheme.'),
+      ANALOGOUS: v(32, 'Uses colors that sit next to each other on the color wheel, creating a harmonious and natural look.'),
+      COMPLEMENTARY: v(33, 'Uses colors opposite each other on the color wheel to create bold contrast and energy.'),
+      SPLIT_COMPLEMENTARY: v(34, 'Uses a base color and two neighbors of its opposite for contrast with less tension.'),
+      TRIAD: v(35, 'Uses one dominant color, with two other evenly spaced colors serving as accents.'),
+      SQUARE: v(36, 'Uses four evenly spaced colors on the wheel for a bold and dynamic palette.'),
+      COMPOUND: v(37, 'Combines one base color with two adjacent to its complement for balanced contrast and richness.'),
+      SHADES: v(38, 'Uses lighter and darker variations of one hue for a cohesive palette.'),
+      MONOCHROMATIC: v(39, 'Uses one hue in varying tones for a cohesive look.'),
+    },
     baseColorStrings,
     colorEditStrings,
     imageUploadStrings,
@@ -206,15 +225,33 @@ const COLOR_WHEEL_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="
 `;
 const HARMONY_THUMB_BASE = '/express/code/blocks/color-wheel/harmony-thumbnails';
 const HARMONY_RULES = [
-  { value: 'CUSTOM', label: 'Custom', thumb: 'custom.png' },
-  { value: 'ANALOGOUS', label: 'Analogous', thumb: 'analogous.png' },
-  { value: 'COMPLEMENTARY', label: 'Complementary', thumb: 'complementary.png' },
-  { value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary', thumb: 'split-complementary.png' },
-  { value: 'TRIAD', label: 'Triad', thumb: 'triad.png' },
-  { value: 'SQUARE', label: 'Square', thumb: 'square.png' },
-  { value: 'COMPOUND', label: 'Compound', thumb: 'compound.png' },
-  { value: 'SHADES', label: 'Shades', thumb: 'shades.png' },
-  { value: 'MONOCHROMATIC', label: 'Monochromatic', thumb: 'monochromatic.png' },
+  {
+    value: 'CUSTOM', label: 'Custom', thumb: 'custom.png', previewColors: ['#1900AB', '#6BB1FF', '#FF7500', '#FFFDEB', '#0076FF'],
+  },
+  {
+    value: 'ANALOGOUS', label: 'Analogous', thumb: 'analogous.png', previewColors: ['#1900AB', '#DB8B69', '#FFA000', '#FF1F02', '#FFBE00'],
+  },
+  {
+    value: 'COMPLEMENTARY', label: 'Complementary', thumb: 'complementary.png', previewColors: ['#1900AB', '#00D2FF', '#C07330', '#3A96AB', '#805F41'],
+  },
+  {
+    value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary', thumb: 'split-complementary.png', previewColors: ['#1900AB', '#0082FF', '#03FFDA', '#805F41', '#406080'],
+  },
+  {
+    value: 'TRIAD', label: 'Triad', thumb: 'triad.png', previewColors: ['#1900AB', '#3C00FF', '#00FF0E', '#AA6E39', '#4F4080'],
+  },
+  {
+    value: 'SQUARE', label: 'Square', thumb: 'square.png', previewColors: ['#1900AB', '#C700FF', '#00D2FF', '#A0FF00', '#AA6E39'],
+  },
+  {
+    value: 'COMPOUND', label: 'Compound', thumb: 'compound.png', previewColors: ['#1900AB', '#FF2D00', '#004CFF', '#00D2FF', '#AA6E39'],
+  },
+  {
+    value: 'SHADES', label: 'Shades', thumb: 'shades.png', previewColors: ['#1900AB', '#F67300', '#D46300', '#B35300', '#914300'],
+  },
+  {
+    value: 'MONOCHROMATIC', label: 'Monochromatic', thumb: 'monochromatic.png', previewColors: ['#1900AB', '#D57623', '#AA6E39', '#805E40', '#554639'],
+  },
 ];
 const HARMONY_ALLOWED_FOR_TWO = new Set([
   'CUSTOM', 'MONOCHROMATIC', 'COMPLEMENTARY', 'SHADES',
@@ -261,6 +298,7 @@ let historyCleanup = null;
 let mobileActionMenu = null;
 let responsiveCleanup = null;
 
+let harmonyModalManager = null;
 function swatchHexListFromState(state) {
   const swatches = state?.swatches || [];
   if (!swatches.length) return ['#FF0000'];
@@ -294,18 +332,31 @@ async function buildHarmonySelector(controller, strings = {}) {
     const rule = HARMONY_RULES.find((r) => r.value === value);
     return strings.harmonyLabels?.[value] || rule?.label || value;
   }
+  function getHarmonyDescription(value) {
+    const rule = HARMONY_RULES.find((item) => item.value === value);
+    return strings.harmonyDescriptions?.[value] || rule?.description || '';
+  }
+
   const currentName = createTag('span', {
     class: 'color-wheel-harmony-current-name',
     id: currentNameId,
     'aria-live': 'polite',
     'aria-atomic': 'true',
   });
+  const titleText = createTag('span', { class: 'color-wheel-harmony-title-text' });
+  const learnMoreButton = createTag('button', {
+    type: 'button',
+    class: 'color-wheel-harmony-learn-more',
+  });
+  learnMoreButton.textContent = strings.learnMore || 'Learn More';
+  decorateAnalyticsAttributes(learnMoreButton, { linkLabel: 'Learn More color harmonies' });
   const kbdHint = createTag('span', {
     id: `${uid}-kbd-hint`,
     class: 'color-wheel-sr-only',
   });
   kbdHint.textContent = strings.keyboardHint;
-  titleRow.append(titleStatic, currentName);
+  titleText.append(titleStatic, currentName);
+  titleRow.append(titleText, learnMoreButton);
   section.appendChild(titleRow);
 
   const carouselHost = createTag('div', { class: 'color-wheel-harmony-carousel-host' });
@@ -335,6 +386,46 @@ async function buildHarmonySelector(controller, strings = {}) {
       btn?.focus();
     }
   }
+  async function openHarmonyModal() {
+    const [modalModule, contentModule] = await Promise.all([
+      import('../../scripts/color-shared/modal/createModalManager.js'),
+      import('./createHarmonyModal.js'),
+    ]);
+    harmonyModalManager ||= modalModule.createModalManager();
+    const rules = harmonyRulesForSwatchCount(countThemeSwatches(controller.getState()))
+      .map((rule) => ({
+        ...rule,
+        label: getHarmonyLabel(rule.value),
+        description: getHarmonyDescription(rule.value),
+        imageSrc: `${HARMONY_THUMB_BASE}/${rule.thumb}`,
+      }));
+    const contentView = contentModule.default({
+      rules,
+      selectedValue: controller.getState().harmonyRule || 'CUSTOM',
+      strings: {
+        title: strings.harmonyModalTitle,
+        confirm: strings.confirmHarmony,
+      },
+      onConfirm: (value) => {
+        selectHarmony(value);
+        harmonyModalManager.close();
+      },
+    });
+    await harmonyModalManager.open({
+      title: strings.harmonyModalTitle,
+      showTitle: false,
+      content: contentView.element,
+      initialFocusSelector: (body) => body.querySelector('.color-harmony-card[aria-checked="true"]'),
+    });
+  }
+
+  learnMoreButton.addEventListener('click', () => {
+    openHarmonyModal().catch((error) => {
+      window.lana?.log(`Color harmony modal error: ${error.message}`, {
+        tags: 'color-wheel,harmony-modal',
+      });
+    });
+  });
 
   async function mountHarmonyCarousel(rules) {
     mountGeneration += 1;
@@ -832,6 +923,8 @@ function cleanup() {
   sidebarTransitionCleanup?.();
   sidebarTransitionCleanup = null;
   sidebarNaturalWidth = 0;
+  harmonyModalManager?.destroy();
+  harmonyModalManager = null;
   historyCleanup?.();
   historyCleanup = null;
 }
