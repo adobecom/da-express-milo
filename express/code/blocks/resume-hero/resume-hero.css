@@ -77,7 +77,7 @@ main .section .resume-hero p {
 
 .resume-hero .heading {
   color: var(--color-gray-900);
-  font-family: var(--s2a-font-family-heading);
+  font-family: var(--heading-font-family);
   font-size: var(--s2a-typography-font-size-heading-4);
   font-weight: var(--heading-font-weight-extra);
   letter-spacing: var(--s2a-typography-letter-spacing-heading-4);
@@ -149,7 +149,7 @@ main .section .resume-hero p {
 
 .resume-hero .resume-hero-create > :is(h1, h2, h3, h4, h5, h6, p):not(.action-area):not(.resume-hero-create-media) {
   color: var(--s2a-color-content-default);
-  font-family: var(--s2a-font-family-heading);
+  font-family: var(--heading-font-family);
   font-size: var(--s2a-typography-font-size-heading-6);
   font-style: normal;
   font-weight: 900;
@@ -372,7 +372,7 @@ main .section .resume-hero p {
 
 .resume-hero .verb-dropzone-heading {
   color: var(--c1-text-text);
-  font-family: var(--s2a-font-family-heading);
+  font-family: var(--heading-font-family);
   font-size: var(--s2a-typography-font-size-heading-5);
   font-style: normal;
   font-weight: 900;

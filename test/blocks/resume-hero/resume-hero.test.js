@@ -9,6 +9,17 @@ import sinon from 'sinon';
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
 window.isTestEnv = true;
 
+const s2aTokens = document.createElement('link');
+s2aTokens.rel = 'stylesheet';
+s2aTokens.href = '/test/blocks/resume-hero/mocks/s2a-tokens.css';
+s2aTokens.dataset.s2aTokens = 'true';
+const s2aTokensLoaded = new Promise((resolve, reject) => {
+  s2aTokens.addEventListener('load', resolve, { once: true });
+  s2aTokens.addEventListener('error', reject, { once: true });
+});
+document.head.append(s2aTokens);
+await s2aTokensLoaded;
+
 const [{ getLibs }] = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
   import('../../../express/code/scripts/scripts.js'),
