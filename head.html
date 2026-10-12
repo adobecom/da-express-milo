@@ -55,18 +55,24 @@
         
         const urlElements = xmlDoc.querySelectorAll('url');
         let currentUrlElement = null;
-   
-        const isLocalRoot = `${sitemapOrigin}/${localeMatch}/` === `${sitemapOrigin}${pathname}`;
-        const rootPage = isLocalRoot ? `${sitemapOrigin}/${localeMatch}/` : `${sitemapOrigin}/`; 
-        const currentPageUrl = pathname !== '/' && pathname !== `/${localeMatch}/` ? `${sitemapOrigin}${pathname}` : `${rootPage}`;
+        let normalizedMatch = null;
+        const normalizePath = (path) => path.replace(/\/$/, '').replace(/\.html$/, '');
+        const targetPath = normalizePath(pathname);
 
         for (const urlElement of urlElements) {
           const loc = urlElement.querySelector('loc')?.textContent;
-          if (loc === currentPageUrl || loc === currentPageUrl.replace(/\/$/, '')) {
+          if (!loc || !loc.startsWith(sitemapOrigin)) continue;
+          const locPath = loc.slice(sitemapOrigin.length) || '/';
+          if (!locPath.startsWith('/')) continue;
+          if (locPath === pathname) {
             currentUrlElement = urlElement;
             break;
           }
+          if (!normalizedMatch && normalizePath(locPath) === targetPath) {
+            normalizedMatch = urlElement;
+          }
         }
+        currentUrlElement = currentUrlElement || normalizedMatch;
         
         if (!currentUrlElement) {
           console.warn('Current page not found in sitemap');
