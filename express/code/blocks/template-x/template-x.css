@@ -175,6 +175,10 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   justify-content: center;
 }
 
+.template-x.fullwidth > .template-x-inner-wrapper {
+  isolation: isolate;
+}
+
 .template-x.horizontal .template-x-inner-wrapper {
   margin-top: 0;
   transition: opacity 0.2s;
