@@ -1,20 +1,23 @@
 /* Wrapper injected by color-headline.js when the extract variant is present.
    Matches the Figma Content-container spec: 640px centered flex column. */
-.color-extract-marquee-wrapper {
+.color-extract-marquee-wrapper,
+.color-image-contrast-marquee-wrapper {
   display: flex;
   width: min(640px, 100%);
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-500, 32px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  gap: var(--spacing-500);
   margin: 0 auto;
 }
 
-.color-extract-marquee-wrapper > * {
+.color-extract-marquee-wrapper > *,
+.color-image-contrast-marquee-wrapper > * {
   width: 100%;
 }
 
 @media (min-width: 600px) and (max-width: 1199px) {
-  .color-extract-marquee-wrapper {
+  .color-extract-marquee-wrapper,
+  .color-image-contrast-marquee-wrapper {
     width: min(835px, 100%);
   }
 }
@@ -37,7 +40,8 @@
   margin-bottom: 0;
 }
 
-body:has(.color-extract.has-image) .color-headline.extract {
+body:has(.color-extract.has-image) .color-headline.extract:not(.color-image-contrast),
+.color-headline.color-image-contrast[hidden] {
   display: none;
 }
 

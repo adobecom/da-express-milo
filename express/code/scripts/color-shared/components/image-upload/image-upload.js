@@ -33,7 +33,8 @@ async function showLoadError(message) {
  *
  * @param {object} options
  * @param {object} [options.strings] - Localized strings (image-upload placeholder bundle).
- *   When provided, supplies defaults for uploadButtonText/dragDropText/fileHintText/loadingText/ariaLabel/loadError.
+ *   Supplies defaults for uploadButtonText/dragDropText/fileHintText/loadingText/
+ *   ariaLabel/loadError.
  *   Per-key options on `options` still override `strings`.
  * @param {string} [options.uploadButtonText] - Authorable button label
  * @param {string} [options.dragDropText] - Drag hint text
@@ -41,6 +42,8 @@ async function showLoadError(message) {
  * @param {string} [options.loadingText] - Loading overlay text
  * @param {string} [options.ariaLabel] - Accessible name for the dropzone
  * @param {boolean} [options.enabled=true] - Whether the dropzone is interactive
+ * @param {function(File): void} [options.onFileSelected] - Opt-in original-file handler.
+ *   Owns validation, decoding, and loading/error UI instead of the legacy decoder.
  * @param {function(HTMLImageElement, string): void} [options.onImageReady] - Image ready callback
  * @returns {{container: HTMLElement, handleUrl: function, handleFile: function,
  *   input: HTMLInputElement, setLoading: function}}
@@ -142,6 +145,10 @@ export function createUploadDropzone(options = {}) {
   };
 
   const handleFile = (file) => {
+    if (typeof opts.onFileSelected === 'function') {
+      opts.onFileSelected(file);
+      return;
+    }
     if (!isImageFile(file)) return;
     setLoading(true);
     const reader = new FileReader();

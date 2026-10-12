@@ -6,13 +6,14 @@ import {
 import parseBlockConfig from './helpers/parseConfig.js';
 import createHistoryManager from './helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
+import attachImageDragHandlers from '../../scripts/color-shared/components/image-upload/attachImageDragHandlers.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import { decorateAnalyticsAttributes, createColorPaletteParamApi, PARAM_NAME, isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 import loadColorExtractPlaceholders, { DEFAULT_PLACEHOLDERS as COLOR_EXTRACT_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
 import loadImageUploadPlaceholders, { DEFAULT_PLACEHOLDERS as IMAGE_UPLOAD_DEFAULTS } from '../../scripts/color-shared/i18n/loadImageUploadPlaceholders.js';
 import loadColorSwatchRailPlaceholders, { DEFAULT_PLACEHOLDERS as COLOR_SWATCH_RAIL_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import {
-  isFileDrag, preventDefaults, drawImageToCanvas,
+  isFileDrag, drawImageToCanvas,
   samplePalette, syncMarkersToImage,
 } from '../../scripts/color-shared/utils/imageExtractUtils.js';
 import buildSuggestedImages from '../../scripts/color-shared/components/image-extract/buildSuggestedImages.js';
@@ -351,120 +352,6 @@ function buildLandingStage(imageRow, strings = COLOR_EXTRACT_DEFAULTS) {
   const content = createTag('div', { class: 'color-extract-landing-content' });
   stage.append(bgWrapper, content, fade);
   return { stage, content };
-}
-
-/* ---------- Shared drag wiring ---------- */
-
-function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) {
-  const ac = new AbortController();
-  const { signal } = ac;
-  const clearDrag = () => {
-    block.classList.remove('is-dragging');
-  };
-  const isBlockInViewport = () => {
-    const rect = block.getBoundingClientRect();
-    return rect.bottom > 0 && rect.top < window.innerHeight;
-  };
-  // On macOS Chrome, dataTransfer.types is empty during dragleave for cross-monitor
-  // external file drags, so isFileDrag() returns false and the overlay gets stuck.
-  // Debounce clearDrag on null-relatedTarget dragleave: cancel if dragover fires within
-  // 200ms (drag still in browser); otherwise clear. Shadow DOM crossings also fire
-  // dragleave with null relatedTarget — the follow-up dragover cancels those.
-  let clearDragTimer = null;
-  const cancelClear = () => {
-    if (clearDragTimer !== null) {
-      clearTimeout(clearDragTimer);
-      clearDragTimer = null;
-    }
-  };
-  const scheduleClear = () => {
-    cancelClear();
-    clearDragTimer = setTimeout(() => {
-      clearDragTimer = null;
-      clearDrag();
-    }, 200);
-  };
-
-  // Hoist before event listeners so the capture drop handler can reference it
-  const dropzoneEl = dropzone.container?.querySelector('.image-upload-dropzone');
-
-  // Suppress drag-and-drop while the OS file picker is open. input.click() triggers
-  // a click event on the input; window.focus fires when the picker is dismissed.
-  let isPickerOpen = false;
-  dropzone.input?.addEventListener('click', () => { isPickerOpen = true; }, { signal });
-  dropzone.input?.addEventListener('change', () => { isPickerOpen = false; }, { signal });
-  window.addEventListener('focus', () => { isPickerOpen = false; }, { signal });
-
-  window.addEventListener('dragenter', (e) => {
-    if (isPickerOpen) return;
-    cancelClear();
-    if (isBlockInViewport() && isFileDrag(e)) {
-      preventDefaults(e);
-      block.classList.add('is-dragging');
-    }
-  }, { signal });
-  window.addEventListener('dragover', (e) => {
-    cancelClear();
-    if (isBlockInViewport() && isFileDrag(e)) {
-      preventDefaults(e);
-    }
-  }, { signal });
-  window.addEventListener('dragleave', (e) => {
-    preventDefaults(e);
-    if (!e.relatedTarget) scheduleClear();
-  }, { signal });
-  window.addEventListener('dragend', (e) => {
-    preventDefaults(e);
-    cancelClear();
-    clearDrag();
-  }, { signal });
-  // Use capture phase so Spectrum web components calling stopPropagation on 'drop'
-  // in the edit stage cannot block this handler. Capture fires top-down before any
-  // element's bubble handler. We must NOT call stopPropagation here — the event must
-  // continue down so the dropzone's own handler can process the file. When the drop
-  // landed on the dropzone itself we skip handleFile to avoid double-processing.
-  window.addEventListener('drop', (e) => {
-    cancelClear();
-    if (isPickerOpen || !isBlockInViewport() || !isFileDrag(e)) {
-      clearDrag();
-      return;
-    }
-    e.preventDefault(); // allow drop — no stopPropagation, event must reach the target
-    const onDropzone = !!dropzoneEl && (e.target === dropzoneEl || dropzoneEl.contains(e.target));
-    if (!onDropzone) dropzone.handleFile(e.dataTransfer.files[0]);
-    setTimeout(clearDrag, 200);
-  }, { capture: true, signal });
-  window.addEventListener('blur', () => {
-    cancelClear();
-    clearDrag();
-  }, { signal });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      cancelClear();
-      clearDrag();
-    }
-  }, { signal });
-  // Sync is-dragging and is-loading from block to body-level overlays
-  const syncObserver = new MutationObserver(() => {
-    if (dragOverlay) dragOverlay.classList.toggle('is-dragging', block.classList.contains('is-dragging'));
-    if (loadingOverlay) loadingOverlay.classList.toggle('is-loading', block.classList.contains('is-loading'));
-  });
-  syncObserver.observe(block, { attributes: true, attributeFilter: ['class'] });
-  const detach = () => {
-    ac.abort();
-    cancelClear();
-    if (dragOverlay) dragOverlay.remove();
-    if (loadingOverlay) loadingOverlay.remove();
-    syncObserver.disconnect();
-  };
-  const observer = new MutationObserver(() => {
-    if (!block.isConnected) {
-      detach();
-      observer.disconnect();
-    }
-  });
-  observer.observe(block.parentElement || document.body, { childList: true });
-  return detach;
 }
 
 /* ---------- Palette variant ---------- */
@@ -824,7 +711,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
   block.replaceChildren(innerContainer);
 
   if (resolvedConfig.enableImageUpload) {
-    attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
+    attachImageDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
   }
 
   if (new URLSearchParams(window.location.search).has(PARAM_NAME)) {
@@ -1308,7 +1195,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   block.replaceChildren(innerContainer);
 
   if (resolvedConfig.enableImageUpload) {
-    attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
+    attachImageDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
   }
 
   if (new URLSearchParams(window.location.search).has(PARAM_NAME)) {

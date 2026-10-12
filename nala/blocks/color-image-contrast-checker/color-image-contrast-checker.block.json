@@ -1,0 +1,32 @@
+{
+  "block": "color-image-contrast-checker",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-image-contrast-checker-desktop",
+      "selector": "div.color-image-contrast-checker",
+      "path": "/drafts/nate/image-contrast-checker",
+      "viewport": { "width": 1440, "height": 1000 },
+      "data": { "semantic": { "texts": [], "media": [], "interactives": [] } },
+      "tags": ["@color-image-contrast-checker", "@desktop", "@express"]
+    },
+    {
+      "tcid": "1",
+      "name": "@color-image-contrast-checker-tablet",
+      "selector": "div.color-image-contrast-checker",
+      "path": "/drafts/nate/image-contrast-checker",
+      "viewport": { "width": 768, "height": 1000 },
+      "data": { "semantic": { "texts": [], "media": [], "interactives": [] } },
+      "tags": ["@color-image-contrast-checker", "@tablet", "@express"]
+    },
+    {
+      "tcid": "2",
+      "name": "@color-image-contrast-checker-mobile",
+      "selector": "div.color-image-contrast-checker",
+      "path": "/drafts/nate/image-contrast-checker",
+      "viewport": { "width": 375, "height": 812 },
+      "data": { "semantic": { "texts": [], "media": [], "interactives": [] } },
+      "tags": ["@color-image-contrast-checker", "@mobile", "@express"]
+    }
+  ]
+}
