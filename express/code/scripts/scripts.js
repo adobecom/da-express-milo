@@ -29,6 +29,7 @@ const STYLES = [];
 const LIBS = '/libs';
 const miloLibs = setLibs(LIBS);
 let jarvisImmediatelyVisible = false;
+let stopFixedTopOffsetTracking;
 const jarvisVisibleMeta = getMetadata('jarvis-immediately-visible')?.toLowerCase();
 const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
@@ -592,7 +593,8 @@ async function loadPage() {
   });
 
   await loadArea();
-  await trackFixedTopOffset(config);
+  stopFixedTopOffsetTracking?.();
+  stopFixedTopOffsetTracking = await trackFixedTopOffset(config);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));

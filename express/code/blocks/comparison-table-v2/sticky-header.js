@@ -1,4 +1,8 @@
-import { getFixedTopOffset, getIconElementDeprecated } from '../../scripts/utils.js';
+import {
+  FIXED_TOP_OFFSET_CHANGE_EVENT,
+  getFixedTopOffset,
+  getIconElementDeprecated,
+} from '../../scripts/utils.js';
 import { ComparisonTableState } from './comparison-table-state.js';
 
 const BREAKPOINTS = {
@@ -370,7 +374,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     const contentBottom = getContentBottom(comparisonBlock);
     const isPastHeader = headerTop < stickyTriggerOffset;
     const headerOffset = stickyHeight || stickyHeader.offsetHeight;
-    const isContentVisible = contentBottom > headerOffset;
+    const isContentVisible = contentBottom > stickyTriggerOffset + headerOffset;
 
     if (!isPastHeader) {
       if (!isStickyReleaseSuspended()) {
@@ -399,7 +403,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   };
 
   let scrollTicking = false;
-  window.addEventListener('scroll', () => {
+  const handleScroll = () => {
     if (!scrollTicking) {
       requestAnimationFrame(() => {
         updateStickyState();
@@ -407,7 +411,9 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
       });
       scrollTicking = true;
     }
-  }, { passive: true });
+  };
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, updateStickyState);
 
   const headerObserver = new IntersectionObserver(
     (entries) => {
@@ -429,9 +435,10 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   );
   headerObserver.observe(headerSentinel);
 
+  let mutationObserver;
   const parentSection = getParentSection();
   if (parentSection) {
-    const mutationObserver = new MutationObserver(() => {
+    mutationObserver = new MutationObserver(() => {
       if (isSectionHidden() && isSticky) {
         removeStickyState();
       }
@@ -460,6 +467,14 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   return {
     suspendStickyRelease,
     resumeStickyRelease,
+    destroy: () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, updateStickyState);
+      headerObserver.disconnect();
+      mutationObserver?.disconnect();
+      headerSentinel.remove();
+      placeholder.remove();
+    },
   };
 }
 

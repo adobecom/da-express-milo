@@ -9,9 +9,11 @@ import {
   convertToInlineSVG,
   getContentRoot,
   decorateButtonsDeprecated,
+  FIXED_TOP_OFFSET_CHANGE_EVENT,
   getFixedTopOffset,
   measureFixedTopOffset,
   usesC2Gnav,
+  trackFixedTopOffset,
 } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
@@ -115,6 +117,41 @@ describe('Fixed navigation stack offset', () => {
     };
 
     expect(await measureFixedTopOffset(config)).to.equal(88);
+  });
+
+  it('publishes runtime stack changes and stops cleanly', async () => {
+    setMetadata('gnav-foundation', 'c2');
+    let height = 88;
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.resolve({
+          getGnavHeight: () => height,
+        }),
+      },
+    };
+    const listener = sinon.spy();
+    window.addEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, listener);
+
+    const stop = await trackFixedTopOffset(config);
+    expect(getFixedTopOffset()).to.equal(88);
+    expect(listener.calledOnce).to.be.true;
+
+    height = 104;
+    window.dispatchEvent(new Event('resize'));
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    expect(getFixedTopOffset()).to.equal(104);
+    expect(listener.callCount).to.equal(2);
+
+    stop();
+    height = 120;
+    window.dispatchEvent(new Event('resize'));
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    expect(getFixedTopOffset()).to.equal(104);
+    window.removeEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, listener);
   });
 
   it('reads the shared runtime offset for block consumers', () => {

@@ -49,6 +49,7 @@ export function getCachedMetadata(name) {
 }
 
 export const FIXED_TOP_OFFSET_PROPERTY = '--express-fixed-top-height';
+export const FIXED_TOP_OFFSET_CHANGE_EVENT = 'express:fixed-top-offset-change';
 
 export function usesC2Gnav(doc = document) {
   return ['foundation', 'gnav-foundation']
@@ -88,10 +89,18 @@ export async function measureFixedTopOffset(config, doc = document) {
 export async function trackFixedTopOffset(config, doc = document) {
   const root = doc.documentElement;
   let animationFrame;
+  let stopped = false;
 
   const update = async () => {
+    const previousHeight = getFixedTopOffset(doc);
     const height = await measureFixedTopOffset(config, doc);
+    if (stopped) return;
     root.style.setProperty(FIXED_TOP_OFFSET_PROPERTY, `${height}px`);
+    if (height !== previousHeight) {
+      window.dispatchEvent(new CustomEvent(FIXED_TOP_OFFSET_CHANGE_EVENT, {
+        detail: { height },
+      }));
+    }
   };
   const scheduleUpdate = () => {
     window.cancelAnimationFrame(animationFrame);
@@ -103,12 +112,18 @@ export async function trackFixedTopOffset(config, doc = document) {
   const resizeObserver = typeof ResizeObserver === 'undefined'
     ? null
     : new ResizeObserver(scheduleUpdate);
-  doc.querySelectorAll('header.global-navigation, header, .feds-localnav')
-    .forEach((element) => resizeObserver?.observe(element));
+  doc.querySelectorAll(`
+    header.global-navigation,
+    header,
+    .feds-localnav,
+    .feds-promo-aside-wrapper,
+    .feds-breadcrumbs-wrapper
+  `).forEach((element) => resizeObserver?.observe(element));
   window.addEventListener('resize', scheduleUpdate);
   window.addEventListener('feds:compactchange', scheduleUpdate);
 
   return () => {
+    stopped = true;
     window.cancelAnimationFrame(animationFrame);
     resizeObserver?.disconnect();
     window.removeEventListener('resize', scheduleUpdate);

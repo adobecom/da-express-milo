@@ -1,4 +1,11 @@
-import { getLibs, getFixedTopOffset, fixIcons, readBlockConfig, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import {
+  FIXED_TOP_OFFSET_CHANGE_EVENT,
+  getLibs,
+  getFixedTopOffset,
+  fixIcons,
+  readBlockConfig,
+  addTempWrapperDeprecated,
+} from '../../scripts/utils.js';
 import { sendEventToAnalytics, textToName } from '../../scripts/instrument.js';
 
 let createTag;
@@ -103,11 +110,10 @@ function syncWithStoredIntent(block) {
 
 function initStickyBehavior(block, props) {
   const toggleBar = block.querySelector('div:nth-of-type(2)');
-  const gNav = document.querySelector('header.global-navigation');
-  const topValue = gNav ? getFixedTopOffset() : 0;
-
   if (toggleBar) {
-    document.addEventListener('scroll', () => {
+    const updateStickyState = () => {
+      const gNav = document.querySelector('header.global-navigation');
+      const topValue = gNav ? getFixedTopOffset() : 0;
       const blockRect = block.getBoundingClientRect();
       const sectionRect = props.activeSection && props.activeSection.getBoundingClientRect();
 
@@ -117,12 +123,15 @@ function initStickyBehavior(block, props) {
         block.classList.remove('hidden');
         block.classList.add('sticking');
         if (gNav) block.classList.add('bumped-by-gnav');
-      } else if (blockRect.top >= topValue) {
+      } else {
         block.classList.remove('sticking');
         block.classList.remove('hidden');
         block.classList.remove('bumped-by-gnav');
       }
-    }, { passive: true });
+    };
+
+    document.addEventListener('scroll', updateStickyState, { passive: true });
+    window.addEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, updateStickyState);
   }
 }
 

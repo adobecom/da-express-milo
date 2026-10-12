@@ -609,6 +609,11 @@ describe('Sticky Header', () => {
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
       expect(placeholder.style.display).to.equal('none');
+
+      document.documentElement.style.setProperty('--express-fixed-top-height', '130px');
+      window.dispatchEvent(new CustomEvent('express:fixed-top-offset-change'));
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(placeholder.style.display).to.equal('flex');
     });
 
     it('should close dropdown when becoming sticky', () => {
@@ -673,6 +678,7 @@ describe('Sticky Header', () => {
       const stickyHeader = document.createElement('div');
       stickyHeader.classList.add('sticky-header');
       Object.defineProperty(stickyHeader, 'offsetHeight', { value: 100, configurable: true });
+      document.documentElement.style.setProperty('--express-fixed-top-height', '90px');
 
       const comparisonBlock = document.createElement('div');
       comparisonBlock.classList.add('comparison-table-v2');
@@ -695,7 +701,7 @@ describe('Sticky Header', () => {
 
       // Mock getBoundingClientRect - header sentinel above viewport
       headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -50 });
-      // Mock content bottom below sticky header height (visible)
+      // Content remains below the fixed stack plus sticky header.
       tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 200 });
 
       // Trigger scroll to apply sticky state
@@ -706,8 +712,8 @@ describe('Sticky Header', () => {
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
       expect(placeholder.style.display).to.equal('flex');
 
-      // Now mock content bottom above header height (not visible)
-      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 50 });
+      // Content has moved behind the combined fixed-stack and sticky-header boundary.
+      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 150 });
 
       // Trigger scroll
       window.dispatchEvent(new Event('scroll'));
