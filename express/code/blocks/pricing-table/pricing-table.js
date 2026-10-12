@@ -423,7 +423,9 @@ export default async function init(el) {
       }
     };
     const debouncedScrollHandler = debounce(scrollHandler, 16);
+    const resizeStickyHandler = debounce(scrollHandler, 100);
     window.addEventListener('scroll', debouncedScrollHandler, { passive: true });
+    window.addEventListener('resize', resizeStickyHandler);
     window.addEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, scrollHandler);
   }
 }
