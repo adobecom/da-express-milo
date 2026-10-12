@@ -1,4 +1,4 @@
-import { getLibs, fixIcons, readBlockConfig, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import { getLibs, getFixedTopOffset, fixIcons, readBlockConfig, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { sendEventToAnalytics, textToName } from '../../scripts/instrument.js';
 
 let createTag;
@@ -104,7 +104,7 @@ function syncWithStoredIntent(block) {
 function initStickyBehavior(block, props) {
   const toggleBar = block.querySelector('div:nth-of-type(2)');
   const gNav = document.querySelector('header.global-navigation');
-  const topValue = gNav ? 20 : -45;
+  const topValue = gNav ? getFixedTopOffset() : 0;
 
   if (toggleBar) {
     document.addEventListener('scroll', () => {

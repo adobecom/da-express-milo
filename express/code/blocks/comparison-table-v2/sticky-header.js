@@ -1,4 +1,4 @@
-import { getIconElementDeprecated } from '../../scripts/utils.js';
+import { getFixedTopOffset, getIconElementDeprecated } from '../../scripts/utils.js';
 import { ComparisonTableState } from './comparison-table-state.js';
 
 const BREAKPOINTS = {
@@ -286,15 +286,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let stickyHeight = 0;
   let releaseSuspensionCount = 0;
 
-  const getCSSNumericValue = (property) => {
-    const value = window.getComputedStyle(comparisonBlock).getPropertyValue(property);
-    return Number.parseFloat(value) || 0;
-  };
-
-  const getStickyTriggerOffset = () => {
-    if (!window.matchMedia(BREAKPOINTS.DESKTOP).matches) return 0;
-    return getCSSNumericValue('--gnav-offset-height');
-  };
+  const getStickyTriggerOffset = () => getFixedTopOffset();
 
   const headerSentinel = document.createElement('div');
   headerSentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;pointer-events:none';
@@ -331,9 +323,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
     convertHeadingsToDivs(stickyHeader);
     stickyHeader.setAttribute('aria-hidden', 'true');
-    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
-      stickyHeader.classList.add('gnav-offset');
-    }
+    stickyHeader.classList.add('gnav-offset');
     isRetracted = false;
     isSticky = true;
   };
@@ -360,9 +350,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     if (!isSticky || !isRetracted) return;
     placeholder.style.display = 'flex';
     placeholder.style.height = `${stickyHeight}px`;
-    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
-      stickyHeader.classList.add('gnav-offset');
-    }
+    stickyHeader.classList.add('gnav-offset');
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
   };

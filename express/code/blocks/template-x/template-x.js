@@ -1490,13 +1490,7 @@ async function decorateToolbar(block, props) {
   }
 
   block.prepend(tBarWrapper);
-  try {
-    const { getGnavHeight } = await import(`${getLibs()}/blocks/global-navigation/utilities/utilities.js`);
-    const gnavHeight = getGnavHeight();
-    tBarWrapper.style.top = `${gnavHeight}px`;
-  } catch (error) {
-    window.lana?.log(`Error getting gnav height: ${error?.message || error?.detail || error}`, { tags: 'template-x', severity: 'error' });
-  }
+  tBarWrapper.style.top = 'var(--express-fixed-top-height)';
 
   tBarWrapper.append(tBar);
   tBar.append(contentWrapper, functionsWrapper);

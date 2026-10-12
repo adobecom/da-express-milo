@@ -19,6 +19,7 @@ import {
   getRedirectUri,
   getIconElementDeprecated,
   getContentRoot,
+  trackFixedTopOffset,
 } from './utils.js';
 
 // Add project-wide style path here.
@@ -591,6 +592,7 @@ async function loadPage() {
   });
 
   await loadArea();
+  await trackFixedTopOffset(config);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));

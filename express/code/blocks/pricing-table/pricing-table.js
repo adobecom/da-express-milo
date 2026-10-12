@@ -1,4 +1,4 @@
-import { getLibs, yieldToMain, fixIcons, decorateButtonsDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import { getLibs, getFixedTopOffset, yieldToMain, fixIcons, decorateButtonsDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { debounce } from '../../scripts/utils/hofs.js';
 import { splitAndAddVariantsWithDash } from '../../scripts/utils/decorate.js';
 import { formatDynamicCartLink } from '../../scripts/utils/pricing.js';
@@ -399,8 +399,7 @@ export default async function init(el) {
       if (el.closest('div.tabpanel')?.getAttribute('hidden')) {
         return;
       }
-      const gnav = document.querySelector('header');
-      const gnavHeight = gnav.offsetHeight;
+      const gnavHeight = getFixedTopOffset();
       const { top } = rows[0].getBoundingClientRect();
       if (top <= gnavHeight && !rows[0].classList.contains('stuck')) {
         rows[0].style.top = `${gnavHeight}px`;

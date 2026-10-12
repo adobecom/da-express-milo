@@ -9,6 +9,9 @@ import {
   convertToInlineSVG,
   getContentRoot,
   decorateButtonsDeprecated,
+  getFixedTopOffset,
+  measureFixedTopOffset,
+  usesC2Gnav,
 } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
@@ -60,6 +63,63 @@ describe('Libs', () => {
     };
     const libs = setLibs('/libs', location);
     expect(libs).to.equal('/libs');
+  });
+});
+
+describe('Fixed navigation stack offset', () => {
+  const setMetadata = (name, content) => {
+    const meta = document.createElement('meta');
+    meta.name = name;
+    meta.content = content;
+    document.head.append(meta);
+  };
+
+  afterEach(() => {
+    document.querySelectorAll('meta[name="foundation"], meta[name="gnav-foundation"]')
+      .forEach((meta) => meta.remove());
+    document.documentElement.style.removeProperty('--express-fixed-top-height');
+  });
+
+  it('detects the C2 gnav override on a C1 page', () => {
+    setMetadata('gnav-foundation', 'C2');
+    expect(usesC2Gnav()).to.be.true;
+  });
+
+  it('uses the active C2 desktop nav-only stack height', async () => {
+    setMetadata('foundation', 'c2');
+    const nav = document.createElement('div');
+    Object.defineProperty(nav, 'offsetHeight', { value: 64 });
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.resolve({
+          getGnavHeight: () => nav.offsetHeight,
+        }),
+      },
+    };
+
+    expect(await measureFixedTopOffset(config)).to.equal(64);
+  });
+
+  it('uses the active C2 nav-plus-breadcrumb stack height', async () => {
+    setMetadata('gnav-foundation', 'c2');
+    const nav = document.createElement('div');
+    const breadcrumbs = document.createElement('div');
+    Object.defineProperty(nav, 'offsetHeight', { value: 56 });
+    Object.defineProperty(breadcrumbs, 'offsetHeight', { value: 32 });
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.resolve({
+          getGnavHeight: () => nav.offsetHeight + breadcrumbs.offsetHeight,
+        }),
+      },
+    };
+
+    expect(await measureFixedTopOffset(config)).to.equal(88);
+  });
+
+  it('reads the shared runtime offset for block consumers', () => {
+    document.documentElement.style.setProperty('--express-fixed-top-height', '96px');
+    expect(getFixedTopOffset()).to.equal(96);
   });
 });
 

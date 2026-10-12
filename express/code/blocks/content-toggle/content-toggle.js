@@ -1,4 +1,4 @@
-import { getLibs, readBlockConfig, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import { getLibs, getFixedTopOffset, readBlockConfig, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { trackButtonClick } from '../../scripts/instrument.js';
 
 let createTag;
@@ -84,7 +84,7 @@ function initButton($block, $sections, index) {
     $buttons[index].addEventListener('click', () => {
       const $activeButton = $block.querySelector('button.active');
       const blockPosition = $block.getBoundingClientRect().top;
-      const offsetPosition = blockPosition + window.scrollY - 80;
+      const offsetPosition = blockPosition + window.scrollY - getFixedTopOffset();
 
       if ($activeButton !== $buttons[index]) {
         setActiveButton(index);

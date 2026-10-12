@@ -1,4 +1,4 @@
-import { readBlockConfig, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import { readBlockConfig, addTempWrapperDeprecated, getFixedTopOffset } from '../../scripts/utils.js';
 import createCarousel from '../../scripts/widgets/carousel.js';
 
 function getTabIndexFromURL() {
@@ -82,7 +82,7 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
       });
       // After layout settles, only scroll if the block has drifted from intended position
       requestAnimationFrame(() => {
-        const newTop = block.getBoundingClientRect().top + window.scrollY - 80;
+        const newTop = block.getBoundingClientRect().top + window.scrollY - getFixedTopOffset();
         const delta = Math.abs(window.scrollY - newTop);
         if (delta > 2) {
           window.scrollTo({

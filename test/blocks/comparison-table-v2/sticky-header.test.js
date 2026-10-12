@@ -72,6 +72,7 @@ describe('Sticky Header', () => {
 
   afterEach(() => {
     document.body.innerHTML = '';
+    document.documentElement.style.removeProperty('--express-fixed-top-height');
     clock.restore();
     sinon.restore();
   });
@@ -550,7 +551,7 @@ describe('Sticky Header', () => {
 
       const comparisonBlock = document.createElement('div');
       comparisonBlock.classList.add('comparison-table-v2');
-      comparisonBlock.style.setProperty('--gnav-offset-height', '90px');
+      document.documentElement.style.setProperty('--express-fixed-top-height', '90px');
 
       const tableContainer = document.createElement('div');
       tableContainer.classList.add('table-container');
@@ -584,7 +585,7 @@ describe('Sticky Header', () => {
 
       const comparisonBlock = document.createElement('div');
       comparisonBlock.classList.add('comparison-table-v2');
-      comparisonBlock.style.setProperty('--gnav-offset-height', '90px');
+      document.documentElement.style.setProperty('--express-fixed-top-height', '90px');
 
       const tableContainer = document.createElement('div');
       tableContainer.classList.add('table-container');
