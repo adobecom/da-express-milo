@@ -82,6 +82,7 @@ export class ColorWheelExpress extends ColorWheel {
     this.isMarkerUp = true;
     this._dragIndex = -1;
     this._kbFocusIndex = -1;
+    this._resizeFrame = null;
     this.markerAriaTemplate = '{hex}, use arrow keys to move';
   }
 
@@ -99,7 +100,14 @@ export class ColorWheelExpress extends ColorWheel {
     // bare getContext('2d') returns the same CPU-friendly context.
     this.canvas?.getContext('2d', { willReadFrequently: true });
 
-    this._resizeObserver = new ResizeObserver(() => this.updateRadius());
+    // Rendering changes the observed container's height; defer writes until the next frame.
+    this._resizeObserver = new ResizeObserver(() => {
+      if (this._resizeFrame !== null) return;
+      this._resizeFrame = requestAnimationFrame(() => {
+        this._resizeFrame = null;
+        this.updateRadius();
+      });
+    });
     this._resizeObserver.observe(this.container);
 
     this.addEventListener('keydown', (e) => {
@@ -118,6 +126,10 @@ export class ColorWheelExpress extends ColorWheel {
 
   disconnectedCallback() {
     this._resizeObserver?.disconnect();
+    if (this._resizeFrame !== null) {
+      cancelAnimationFrame(this._resizeFrame);
+      this._resizeFrame = null;
+    }
     if (this._controllerUnsubscribe) {
       this._controllerUnsubscribe();
       this._controllerUnsubscribe = null;
@@ -141,6 +153,12 @@ export class ColorWheelExpress extends ColorWheel {
     this._dragSpokeRef = null;
     this._dragHarmonyRefs = null;
     super.disconnectedCallback();
+  }
+
+  updateRadius() {
+    const width = this.container?.offsetWidth;
+    if (!width || width / 2 === this.wheelRadius) return;
+    super.updateRadius();
   }
 
   updated(changedProperties) {

@@ -171,6 +171,16 @@ describe('Columns', () => {
     expect(button.classList.contains('dark')).to.be.true;
   });
 
+  it('Supports a Milo-authored black fill button', async () => {
+    document.body.innerHTML = '<div class="ax-columns"><div><div><p><strong><a href="https://www.adobe.com/#_button-fill">CTA</a></strong></p></div></div></div>';
+    const columns = document.querySelector('.ax-columns');
+    await decorate(columns);
+
+    const button = columns.querySelector('a.button.fill');
+    expect(button).to.exist;
+    expect(button.href).to.equal('https://www.adobe.com/');
+  });
+
   it('Should decorate two buttons in a row', async () => {
     document.body.innerHTML = fullsizeTwoButtons;
     const columns = document.querySelector('.ax-columns');

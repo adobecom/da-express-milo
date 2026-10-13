@@ -38,6 +38,7 @@ const TOOLBAR_I18N_MAP = {
   deleteTheme: 'color-toolbar-delete-theme',
   deleteThemeAria: 'color-toolbar-delete-theme-aria',
   saving: 'color-toolbar-saving',
+  downloadAsFormat: 'download-as-format',
 };
 
 const DRAWER_I18N_MAP = {

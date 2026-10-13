@@ -6,7 +6,13 @@ const [{ getLibs }] = await Promise.all([
 ]);
 await import(`${getLibs()}/utils/utils.js`).then((mod) => mod.setConfig({}));
 
-const { default: loadFontGeneratorPlaceholders, DEFAULT_PLACEHOLDERS } = await import('../../../express/code/blocks/font-generator/placeholders.js');
+const {
+  default: loadFontGeneratorPlaceholders,
+  DEFAULT_PLACEHOLDERS,
+  loadFontLabels,
+  getCategoryCountKey,
+  getFontNameKey,
+} = await import('../../../express/code/blocks/font-generator/placeholders.js');
 
 // Every UI string the toolbar / card grid / input rely on. filters.js and
 // panel.js own their own fg-* keys, so those are intentionally not here.
@@ -52,6 +58,35 @@ describe('font-generator/placeholders', () => {
     it('falls back to the default number when nothing is authored', async () => {
       const strings = await loadFontGeneratorPlaceholders();
       expect(strings.maxLength).to.equal(2000);
+    });
+  });
+
+  describe('loadFontLabels', () => {
+    const FONTS = [
+      { id: 'light-text-bubble', styleName: 'Light text bubble', category: 'Cool' },
+      { id: 'bandaid', styleName: 'Bandaid', category: 'Glitch' },
+      { id: 'dark-text-bubble', styleName: 'Dark text bubble', category: 'Cool' },
+    ];
+
+    it('keys count phrases per category and font names by id', () => {
+      expect(getCategoryCountKey('Cool')).to.equal('font-generator-cool-font-count');
+      expect(getCategoryCountKey('Glitch')).to.equal('font-generator-glitch-font-count');
+      expect(getCategoryCountKey('Symbol')).to.equal('font-generator-symbol-font-count');
+      expect(getFontNameKey('light-text-bubble')).to.equal('font-generator-light-text-bubble');
+    });
+
+    it('falls back to the catalog font names and omits unauthored count phrases', async () => {
+      const { categoryCountLabels, fontNames } = await loadFontLabels(FONTS);
+      expect(categoryCountLabels).to.deep.equal({});
+      expect(fontNames).to.deep.equal({
+        'light-text-bubble': 'Light text bubble',
+        bandaid: 'Bandaid',
+        'dark-text-bubble': 'Dark text bubble',
+      });
+    });
+
+    it('returns empty maps for an empty catalog', async () => {
+      expect(await loadFontLabels()).to.deep.equal({ categoryCountLabels: {}, fontNames: {} });
     });
   });
 });
