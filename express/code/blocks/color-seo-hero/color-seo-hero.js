@@ -429,6 +429,23 @@ async function buildRuleDropdown(context) {
   return picker.element;
 }
 
+function checkActionsRowWrap(row, dropdownGroup, actionsGroup) {
+  if (row.clientWidth === 0) return;
+  row.classList.remove('is-stacked');
+  const a = dropdownGroup.getBoundingClientRect();
+  const b = actionsGroup.getBoundingClientRect();
+  const sameLine = a.top < b.bottom && b.top < a.bottom;
+  row.classList.toggle('is-stacked', !sameLine);
+}
+
+function watchActionsRowWrap(row, dropdownGroup, actionsGroup) {
+  const target = row.parentElement || row;
+  const recheck = () => checkActionsRowWrap(row, dropdownGroup, actionsGroup);
+  const observer = new ResizeObserver(recheck);
+  observer.observe(target);
+  return recheck;
+}
+
 async function buildPreview(context) {
   const { strings } = context;
 
@@ -460,6 +477,9 @@ async function buildPreview(context) {
 
   const actionsRow = createTag('div', { class: 'color-seo-hero-actions-row' });
   actionsRow.append(dropdownGroup, actionsGroup);
+  const recheckActionsRowWrap = watchActionsRowWrap(actionsRow, dropdownGroup, actionsGroup);
+  context.rulePicker?.waitForReady?.().catch(() => {}).finally(recheckActionsRowWrap);
+  document.fonts?.ready?.then(recheckActionsRowWrap);
 
   preview.append(canvas, stripHost, actionsRow);
   return preview;
