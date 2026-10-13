@@ -181,7 +181,7 @@ main .section .gen-template-text > p {
 
 .gen-template-suggestion:hover {
    border-radius: 6px;
-border: 1px solid var(--s2a-color-border-subtle);
+ 
 background: var(--s2a-color-control-button-background-solid-hover, #DADADA);
 }
 
