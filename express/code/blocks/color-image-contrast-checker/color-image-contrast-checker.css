@@ -278,7 +278,7 @@
   color: var(--color-white);
   border-radius: var(--spacing-400);
   font: inherit;
-  font-weight: var(--heading-font-weight-extra);
+  font-weight: var(--ax-body-weight-bold);
 }
 
 .color-image-contrast-checker .icc-save .icon {

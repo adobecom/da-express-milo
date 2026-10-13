@@ -751,6 +751,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       expect(block.querySelector('.icc-frame img').src).to.equal(original);
     }
     const fit = block.querySelector('[data-action="fit"]');
+    const saveLabel = block.querySelector('.icc-save > span:not(.icon)');
+    expect(getComputedStyle(saveLabel).fontWeight).to.equal('700');
     const fill = block.querySelector('[data-action="fill"]');
     fit.focus();
     fit.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
@@ -912,6 +914,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         const surface = panel.querySelector('.icc-comparison-row');
         expect(getComputedStyle(surface).borderRadius).to.equal('16px');
         expect(getComputedStyle(panel.querySelector('.icc-workspace')).boxShadow).to.equal('none');
+        expect(getComputedStyle(panel.querySelector('.icc-save > span:not(.icon)')).fontWeight)
+          .to.equal('700');
         if (width < 700) {
           const mini = panel.querySelector('.icc-legend-mini').getBoundingClientRect();
           expect(mini.top).to.be.closeTo(surface.getBoundingClientRect().bottom + 16, 0.1);
