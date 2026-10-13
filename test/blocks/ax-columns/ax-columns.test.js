@@ -16,10 +16,10 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 const { default: decorate } = await import('../../../express/code/blocks/ax-columns/ax-columns.js');
 
 // eslint-disable-next-line max-len
-const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons, injectLogo] = await Promise.all(
+const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, picture, video, marquee, fullsizeTwoButtons, injectLogo] = await Promise.all(
   [readFile({ path: './mocks/button-light.html' }), readFile({ path: './mocks/color.html' }), readFile({ path: './mocks/fullsize.html' }), readFile({ path: './mocks/highlight.html' }),
     readFile({ path: './mocks/icon.html' }), readFile({ path: './mocks/icon-with-sibling.html' }), readFile({ path: './mocks/icon-list.html' }), readFile({ path: './mocks/not-highlight.html' }), readFile({ path: './mocks/numbered-30.html' }),
-    readFile({ path: './mocks/offer.html' }), readFile({ path: './mocks/offer-icon.html' }), readFile({ path: './mocks/picture.html' }), readFile({ path: './mocks/video.html' }),
+    readFile({ path: './mocks/picture.html' }), readFile({ path: './mocks/video.html' }),
     readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' }),
     readFile({ path: './mocks/inject-logo.html' })],
 );
@@ -48,15 +48,6 @@ describe('Columns', () => {
     expect(columnNumber.textContent).to.be.equal('01/30 —');
   });
 
-  it('Should render an offer column & have only 1 row', async () => {
-    document.body.innerHTML = offer;
-    const columns = document.querySelector('.ax-columns');
-    await decorate(columns);
-
-    const rows = Array.from(columns.children);
-    expect(rows.length).to.be.equal(1);
-  });
-
   it('Should transform primary color to bg color and secondary color to fill', async () => {
     document.body.innerHTML = color;
     const columns = document.querySelector('.ax-columns');
@@ -65,17 +56,6 @@ describe('Columns', () => {
     const imgWrapper = columns.querySelector('.img-wrapper');
     expect(imgWrapper.style.backgroundColor).to.be.equal('rgb(255, 87, 51)');
     expect(imgWrapper.style.fill).to.be.equal('rgb(52, 210, 228)');
-  });
-
-  it('Should render an offer column and decorate icons', async () => {
-    document.body.innerHTML = offerIcon;
-    const columns = document.querySelector('.ax-columns');
-    await decorate(columns);
-
-    const title = columns.querySelector('h1');
-    const titleIcon = columns.querySelector('.columns-offer-icon');
-    expect(title).to.exist;
-    expect(titleIcon).to.exist;
   });
 
   it('Should render a column and decorate icons', async () => {

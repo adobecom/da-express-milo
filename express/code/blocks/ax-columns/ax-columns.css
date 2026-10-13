@@ -98,7 +98,6 @@ main .section .ax-columns.enterprise .column h2 {
   padding-top: var(--spacing-900);
 }
 
-
 .section .ax-columns.enterprise {
   padding-left: var(--spacing-900);
   padding-right: var(--spacing-900);
@@ -130,7 +129,6 @@ main .section .ax-columns.enterprise .column h2 {
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.has-ribbon-banner:first-child {
   padding-top: 0;
 }
-
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:empty:first-child {
@@ -431,7 +429,6 @@ main .section .ax-columns.enterprise .column h2 {
   padding: var(--spacing-600) 0;
 }
 
-
 .section .ax-columns.marquee>div {
   gap: var(--spacing-500);
   padding: 0;
@@ -457,7 +454,6 @@ main .section .ax-columns.enterprise .column h2 {
   font-size: var(--heading-font-size-l);
   line-height: 1.11;
 }
-
 
 .section:has(.ax-columns).steps-container div .steps div.step-description h3,
 .section:has(.ax-columns).steps-container div .steps div.step-description h4,
@@ -652,7 +648,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   height: 100%;
 }
 
-
 .ax-columns.highlight .columns-video:hover .column-picture .column-video-overlay {
   background-image: linear-gradient(#ffffff00, #90909025, #000000a0);
 }
@@ -679,7 +674,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 .section:has(.ax-columns.highlight) h2 {
   font-size: var(--heading-font-size-xl);
 }
-
 
 .ax-columns.highlight .column:not(.column-picture):not(.hero-animation-overlay) {
   padding: var(--spacing-350) var(--spacing-300);
@@ -724,51 +718,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--body-font-size-s);
 }
 
-.ax-columns.offer .column {
-  width: 278px;
-}
-
-.ax-columns.offer .column:not(:first-child) {
-  padding-top: var(--spacing-600);
-}
-
-.ax-columns.offer>div p.button-container,
-.ax-columns.offer>div a.con-button {
-  margin-bottom: var(--spacing-600);
-}
-
 /* sub title */
-.ax-columns.offer h3:not(:first-of-type) {
-  font-size: var(--body-font-size-xl);
-  font-weight: 600;
-  line-height: var(--body-line-height);
-  margin: var(--spacing-900) 0 0;
-}
-
-.ax-columns.offer .columns-offer-icon .icon {
-  margin-right: 0;
-  float: unset;
-  width: 26px;
-}
-
-.ax-columns.offer .column .columns-iconlist,
-.ax-columns.offer .column .columns-iconlist .columns-iconlist-icon>div {
-  width: 100%;
-}
-
-.ax-columns.offer .column .columns-iconlist .columns-iconlist-icon .icon {
-  width: 44px;
-  height: 44px;
-}
-
-.ax-columns.offer .column .columns-iconlist .columns-iconlist-description {
-  flex: 1;
-}
-
-
-.ax-columns.offer .column .columns-iconlist .columns-iconlist-description p {
-  font-size: var(--body-font-size-m);
-}
 
 .ax-columns .column {
   padding-left: var(--spacing-500);
@@ -942,7 +892,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   padding-bottom: 4px;
 }
 
-
 .ax-columns.center.button-container.free-plan-container.stacked .free-plan-widget {
   padding-left: var(--spacing-400);
 }
@@ -969,11 +918,9 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   line-height: var(--body-font-size-m);
 }
 
-
 .ax-columns.fullsize.top .column .columns-iconlist .columns-iconlist-icon img.icon {
   margin-right: var(--spacing-100);
 }
-
 
 .ax-columns.fullsize.top .column .columns-iconlist .columns-iconlist-description {
   margin-left: var(--spacing-100);
@@ -1039,17 +986,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-left: 20px;
     padding-right: 20px;
     word-break: auto-phrase;
-  }
-
-  .section .ax-columns.minimum-padding {
-    padding-left: var(--spacing-300);
-    padding-right: var(--spacing-300);
-    text-align: left;
-    max-width: unset;
-  }
-
-  .section .ax-columns.ax-columns.minimum-padding .column {
-    padding: 0;
   }
 }
 
@@ -1152,7 +1088,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     margin: 0
   }
 
-
   .ax-columns:not(.marquee) .column:first-child:not(.column-picture):not(.hero-animation-overlay):not(.text) {
     padding-right: var(--spacing-300);
   }
@@ -1160,7 +1095,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .ax-columns .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay):not(.text) {
     padding-left: var(--spacing-300);
   }
-
 
   .ax-columns.highlight .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay) {
     padding-left: var(--spacing-500);
@@ -1244,8 +1178,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-top: 0;
   }
 
-  .section .ax-columns.top>div,
-  .section .ax-columns.offer>div {
+  .section .ax-columns.top>div {
     align-items: flex-start;
   }
 
@@ -1260,10 +1193,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .section .ax-columns.extra-wide {
     max-width: 830px;
-  }
-
-  .section .ax-columns.narrow {
-    max-width: 850px;
   }
 
   .section .ax-columns>div {
@@ -1303,20 +1232,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     position: absolute;
     top: 0;
     object-fit: cover;
-  }
-
-  .ax-columns.offer>div {
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .ax-columns.offer .column {
-    width: 600px;
-    margin: 0 auto;
-  }
-
-  .ax-columns.offer>div:first-child {
-    padding-bottom: 0;
   }
 
   .columns-video .column-picture {
@@ -1373,7 +1288,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     border-radius: 24px;
     display: inline-block;
   }
-
 
   .ax-columns.marquee .button-container.free-plan-container .free-plan-widget {
     background-color: transparent;
@@ -1591,22 +1505,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.fullsize+h2 {
     margin-top: 0;
-  }
-
-  .ax-columns.offer>div {
-    width: 1100px;
-    margin: 0 auto;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
-  .ax-columns.offer .column {
-    width: 490px;
-    padding: var(--spacing-600) 0;
-  }
-
-  .ax-columns.offer .column:not(:first-child) {
-    padding-top: 0;
   }
 
   .ax-columns.color .column.text {
