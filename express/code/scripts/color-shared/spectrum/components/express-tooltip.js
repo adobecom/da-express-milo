@@ -46,7 +46,7 @@ export async function createExpressTooltip(config) {
 
   await loadTooltip();
   await loadOverrideStyles('tooltip', STYLES_PATH);
-  await waitForComponents(['sp-tooltip']);
+  await waitForComponents(['sp-tooltip', 'sp-overlay']);
 
   const isTouchDevice = window.matchMedia?.('(hover: none)')?.matches ?? false;
 
@@ -75,6 +75,17 @@ export async function createExpressTooltip(config) {
     height: '0',
     overflow: 'hidden',
   });
+
+  document.body.appendChild(theme);
+  await tooltip.updateComplete;
+  const overlay = tooltip.shadowRoot?.querySelector('sp-overlay');
+  if (!overlay) {
+    theme.remove();
+    throw new Error('Unable to initialize Spectrum tooltip overlay');
+  }
+  // The wrapper owns hover/focus timing; Spectrum only positions the overlay.
+  overlay.triggerInteraction = undefined;
+  overlay.triggerElement = targetEl;
 
   const ariaLink = disableAria ? null : ariaDescribedBy(targetEl, tooltip);
 
@@ -105,13 +116,21 @@ export async function createExpressTooltip(config) {
   // overlaps the menu it just launched.
   const popoverOpen = () => targetEl.getAttribute('aria-expanded') === 'true';
 
+  function open() {
+    // Spectrum re-infers its trigger when the theme is reparented.
+    overlay.triggerElement = targetEl;
+    tooltip.setAttribute('open', '');
+    visible = true;
+    // A quick reopen can retain coordinates from the previous closing transition.
+    overlay.placementController.resetOverlayPosition();
+  }
+
   function show() {
     if (popoverOpen()) return;
     clearTimeout(showTimer);
     showTimer = setTimeout(() => {
       if (popoverOpen()) return;
-      tooltip.setAttribute('open', '');
-      visible = true;
+      open();
     }, delay);
   }
 
@@ -128,8 +147,7 @@ export async function createExpressTooltip(config) {
         return;
       }
       clearGuard();
-      tooltip.setAttribute('open', '');
-      visible = true;
+      open();
 
       // Spectrum's self-managed sp-overlay responds to the iOS-synthesized
       // pointerleave/focus events that trail a tap and removes `open` before
@@ -182,13 +200,6 @@ export async function createExpressTooltip(config) {
   targetEl.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && visible) hide();
   }, { signal });
-
-  document.body.appendChild(theme);
-  await (tooltip.updateComplete ?? Promise.resolve());
-  const overlay = tooltip.shadowRoot?.querySelector?.('sp-overlay');
-  if (overlay && typeof overlay.triggerElement !== 'undefined') {
-    overlay.triggerElement = targetEl;
-  }
 
   return {
     element: theme,

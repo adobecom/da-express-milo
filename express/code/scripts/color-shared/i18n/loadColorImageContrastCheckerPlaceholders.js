@@ -7,8 +7,8 @@ import {
 
 const PROPERTIES = [
   'landingAria', 'analyzingImage', 'dropOverlayText', 'noImageTryOurs', 'useThisImage',
-  'toolbarAria', 'colorSpace', 'colorSpaceHelp', 'srgb', 'p3', 'replaceImage', 'savePng',
-  'expand', 'minimize', 'fit', 'fill', 'comparison', 'original', 'analysis', 'dimensions',
+  'toolbarAria', 'colorSpace', 'colorSpaceHelp', 'srgb', 'p3', 'adobeRgb', 'replaceImage', 'savePng',
+  'expand', 'minimize', 'fit', 'fill', 'comparison', 'original', 'analysis',
   'legend', 'largeText', 'largeTextHelp', 'smallText', 'smallTextHelp', 'green', 'passes',
   'greenLarge', 'greenSmall', 'blue', 'partial', 'blueLarge', 'blueSmall', 'dark', 'fails',
   'darkDescription', 'darkSize', 'unsupportedFile', 'fileTooLarge', 'imageTooLarge',
@@ -20,8 +20,8 @@ export const PLACEHOLDER_KEY_MAP = Object.freeze(Object.fromEntries(PROPERTIES.m
 ])));
 
 export function validatePlaceholders(strings) {
-  const missing = PROPERTIES.filter((property) => typeof strings[property] !== 'string'
-    || !strings[property].trim());
+  const missing = PROPERTIES.filter((property) => (property !== 'adobeRgb' || property in strings)
+    && (typeof strings[property] !== 'string' || !strings[property].trim()));
   if (missing.length) {
     throw new Error(`Missing image contrast placeholders: ${missing.map((key) => PLACEHOLDER_KEY_MAP[key]).join(', ')}`);
   }

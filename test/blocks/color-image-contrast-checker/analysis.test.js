@@ -32,6 +32,21 @@ describe('Image contrast analysis', () => {
     expect(() => luminance(rgb, 'unsupported')).to.throw('unsupportedProfile');
   });
 
+  it('uses Adobe RGB D65 primaries and its pure 563/256 gamma, not the sRGB curve', () => {
+    expect(LUMINANCE['adobe-rgb']).to.deep.equal([
+      591459 / 1989134, 6239551 / 9945670, 374412 / 4972835,
+    ]);
+    [[255, 0, 0], [0, 255, 0], [0, 0, 255]].forEach((rgb, index) => {
+      expect(luminance(rgb, 'adobe-rgb')).to.be.closeTo([0.297344975250536, 0.627363566255466, 0.075291458493998][index], 1e-14);
+    });
+    for (const value of [0, 0.01, 0.03928, 0.04, 0.5, 1]) {
+      expect(linearize(value, 'adobe-rgb')).to.equal(value ** (563 / 256));
+    }
+    expect(linearize(0.04, 'adobe-rgb')).not.to.equal(linearize(0.04));
+    expect(classify(contrast(luminance([182, 0, 0], 'srgb'), 0))).to.deep.equal([0, 0, 0]);
+    expect(classify(contrast(luminance([182, 0, 0], 'adobe-rgb'), 0))).to.deep.equal([0, 128, 242]);
+  });
+
   it('matches a CPU backward-neighborhood reference at every pixel, including edges', () => {
     const width = 3;
     const height = 3;
@@ -43,7 +58,7 @@ describe('Image contrast analysis', () => {
     const canvas = document.createElement('canvas');
     const renderer = createRenderer(canvas);
     const gl = canvas.getContext('webgl');
-    ['srgb', 'display-p3'].forEach((space) => {
+    ['srgb', 'display-p3', 'adobe-rgb', 'srgb'].forEach((space) => {
       renderer.render({ width, height, pixels }, space);
       const actual = new Uint8Array(width * height * 4);
       gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, actual);
@@ -70,6 +85,32 @@ describe('Image contrast analysis', () => {
     expect(canvas.width).to.equal(width);
     expect(canvas.height).to.equal(height);
     renderer.destroy();
+  });
+
+  it('changes native GPU classifications with both Adobe RGB weights and gamma', () => {
+    const canvas = document.createElement('canvas');
+    const renderer = createRenderer(canvas);
+    const gl = canvas.getContext('webgl');
+    const source = {
+      width: 3,
+      height: 1,
+      pixels: new Uint8Array([0, 0, 0, 255, 116, 116, 116, 255, 182, 0, 0, 255]),
+    };
+    const expected = {
+      srgb: [0, 0, 0, 255, 0, 128, 242, 255, 0, 0, 0, 255],
+      'display-p3': [0, 0, 0, 255, 0, 128, 242, 255, 0, 128, 242, 255],
+      'adobe-rgb': [0, 0, 0, 255, 0, 255, 0, 255, 0, 128, 242, 255],
+    };
+    try {
+      for (const space of ['srgb', 'display-p3', 'adobe-rgb', 'srgb']) {
+        renderer.render(source, space);
+        const actual = new Uint8Array(12);
+        gl.readPixels(0, 0, 3, 1, gl.RGBA, gl.UNSIGNED_BYTE, actual);
+        expect([...actual]).to.deep.equal(expected[space]);
+      }
+    } finally {
+      renderer.destroy();
+    }
   });
 
   it('rejects missing WebGL, excessive dimensions and invalid pixel buffers', () => {

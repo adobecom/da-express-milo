@@ -1,17 +1,19 @@
-import { validateDimensions } from './image.js';
+import { ADOBE_RGB_GAMMA, validateDimensions } from './image.js';
 
 export const LUMINANCE = Object.freeze({
   srgb: [0.2126, 0.7152, 0.0722],
   'display-p3': [0.2289745641, 0.6917385218, 0.0792869141],
+  'adobe-rgb': [591459 / 1989134, 6239551 / 9945670, 374412 / 4972835],
 });
 
-export function linearize(channel) {
+export function linearize(channel, colorSpace = 'srgb') {
+  if (colorSpace === 'adobe-rgb') return channel ** ADOBE_RGB_GAMMA;
   return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
 }
 
 export function luminance(rgb, colorSpace) {
   if (!LUMINANCE[colorSpace]) throw new Error('unsupportedProfile');
-  const values = rgb.slice(0, 3).map((channel) => linearize(channel / 255));
+  const values = rgb.slice(0, 3).map((channel) => linearize(channel / 255, colorSpace));
   return values.reduce((sum, value, index) => sum + value * LUMINANCE[colorSpace][index], 0);
 }
 
@@ -37,8 +39,10 @@ precision highp float;
 uniform sampler2D image;
 uniform vec2 dimensions;
 uniform vec3 weights;
+uniform float exponent;
 varying vec2 uv;
 float linear(float value) {
+  if (exponent > 0.0) return pow(value, exponent);
   return value <= 0.03928 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4);
 }
 float brightness(vec2 point) {
@@ -133,6 +137,10 @@ export default function createRenderer(canvas) {
       gl.uniform1i(gl.getUniformLocation(program, 'image'), 0);
       gl.uniform2f(gl.getUniformLocation(program, 'dimensions'), source.width, source.height);
       gl.uniform3fv(gl.getUniformLocation(program, 'weights'), LUMINANCE[colorSpace]);
+      gl.uniform1f(
+        gl.getUniformLocation(program, 'exponent'),
+        colorSpace === 'adobe-rgb' ? ADOBE_RGB_GAMMA : 0,
+      );
       gl.viewport(0, 0, source.width, source.height);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       if (gl.getError() !== gl.NO_ERROR) throw new Error('analysisError');

@@ -4,35 +4,9 @@ import sinon from 'sinon';
 import {
   decodeImage, identifyICC, inspectImage, MAX_FILE_BYTES, validateDimensions,
 } from '../../../express/code/blocks/color-image-contrast-checker/image.js';
-
-function profile(space) {
-  const bytes = new Uint8Array(228);
-  const view = new DataView(bytes.buffer);
-  const write = (offset, text) => [...text].forEach((char, i) => {
-    bytes[offset + i] = char.charCodeAt(0);
-  });
-  view.setUint32(0, bytes.length);
-  write(16, 'RGB ');
-  write(20, 'XYZ ');
-  write(36, 'acsp');
-  view.setUint32(128, 3);
-  const values = space === 'srgb'
-    ? [[0.436075, 0.222505, 0.013932], [0.385065, 0.716879, 0.097105],
-      [0.14308, 0.060617, 0.714173]]
-    : [[0.515102, 0.241182, -0.001049], [0.291965, 0.692236, 0.041882],
-      [0.157153, 0.066581, 0.784378]];
-  ['rXYZ', 'gXYZ', 'bXYZ'].forEach((tag, index) => {
-    const offset = 168 + index * 20;
-    write(132 + index * 12, tag);
-    view.setUint32(136 + index * 12, offset);
-    view.setUint32(140 + index * 12, 20);
-    write(offset, 'XYZ ');
-    values[index].forEach((value, channel) => {
-      view.setInt32(offset + 8 + channel * 4, Math.round(value * 65536));
-    });
-  });
-  return bytes;
-}
+import {
+  compressedICC, metadataPNG, pngChunk, profile, taggedImage,
+} from './mocks/image-fixtures.js';
 
 async function expectError(promise, message) {
   let failure;
@@ -42,41 +16,6 @@ async function expectError(promise, message) {
     failure = error;
   }
   expect(failure?.message).to.equal(message);
-}
-
-function pngChunk(tag, data) {
-  const bytes = new Uint8Array(data.length + 12);
-  new DataView(bytes.buffer).setUint32(0, data.length);
-  [...tag].forEach((char, index) => { bytes[index + 4] = char.charCodeAt(0); });
-  bytes.set(data, 8);
-  return bytes;
-}
-
-function metadataPNG(chunks) {
-  const header = new Uint8Array(13);
-  const view = new DataView(header.buffer);
-  view.setUint32(0, 11);
-  view.setUint32(4, 7);
-  const pieces = [
-    new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
-    pngChunk('IHDR', header), ...chunks, pngChunk('IEND', new Uint8Array()),
-  ];
-  const bytes = new Uint8Array(pieces.reduce((sum, piece) => sum + piece.length, 0));
-  let offset = 0;
-  pieces.forEach((piece) => {
-    bytes.set(piece, offset);
-    offset += piece.length;
-  });
-  return bytes;
-}
-
-async function compressedICC(icc) {
-  const stream = new Blob([icc]).stream().pipeThrough(new CompressionStream('deflate'));
-  const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
-  const bytes = new Uint8Array(compressed.length + 3);
-  bytes[0] = 112;
-  bytes.set(compressed, 3);
-  return pngChunk('iCCP', bytes);
 }
 
 describe('Image contrast input', () => {
@@ -89,6 +28,101 @@ describe('Image contrast input', () => {
     expect(() => identifyICC(wrong)).to.throw('unsupportedProfile');
     new DataView(wrong.buffer).setUint32(128, 100000);
     expect(() => identifyICC(wrong)).to.throw('unsupportedProfile');
+  });
+
+  it('recognizes Adobe RGB only with equivalent gamma curves on all three channels', () => {
+    expect(identifyICC(profile('adobe-rgb'))).to.equal('adobe-rgb');
+    expect(identifyICC(profile('adobe-rgb', { curveType: 'para' }))).to.equal('adobe-rgb');
+    expect(() => identifyICC(profile('adobe-rgb', { gamma: 2.4 }))).to.throw('unsupportedProfile');
+    expect(() => identifyICC(profile('adobe-rgb', { curveType: 'para', gamma: 2.2 })))
+      .to.throw('unsupportedProfile');
+    const missing = profile('adobe-rgb');
+    missing[132 + 4 * 12] = 120;
+    expect(() => identifyICC(missing)).to.throw('unsupportedProfile');
+    const wrongGreen = profile('adobe-rgb');
+    const greenView = new DataView(wrongGreen.buffer);
+    greenView.setUint16(greenView.getUint32(136 + 5 * 12) + 12, 564);
+    expect(() => identifyICC(wrongGreen)).to.throw('unsupportedProfile');
+    const table = profile('adobe-rgb');
+    const tableView = new DataView(table.buffer);
+    tableView.setUint32(tableView.getUint32(136 + 4 * 12) + 8, 2);
+    expect(() => identifyICC(table)).to.throw('unsupportedProfile');
+    const lut = profile('adobe-rgb');
+    lut.set(new TextEncoder().encode('A2B0'), 132 + 3 * 12);
+    expect(() => identifyICC(lut)).to.throw('unsupportedProfile');
+    const invalid = profile('adobe-rgb', { curveType: 'para' });
+    const view = new DataView(invalid.buffer);
+    view.setUint16(view.getUint32(136 + 4 * 12) + 8, 1);
+    expect(() => identifyICC(invalid)).to.throw('unsupportedProfile');
+    view.setUint32(136 + 4 * 12, invalid.length - 1);
+    expect(() => identifyICC(invalid)).to.throw('unsupportedProfile');
+  });
+
+  for (const type of ['image/png', 'image/jpeg', 'image/webp']) {
+    it(`preserves encoded Adobe RGB channels and both owned URLs for ${type}`, async () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 19;
+      canvas.height = 7;
+      const context = canvas.getContext('2d');
+      context.fillStyle = 'rgb(160, 110, 40)';
+      context.fillRect(0, 0, 19, 7);
+      context.fillStyle = 'rgba(40, 120, 170, 0.75)';
+      context.clearRect(10, 0, 9, 7);
+      context.fillRect(10, 0, 9, 7);
+      const blob = await new Promise((resolve) => { canvas.toBlob(resolve, type); });
+      const baseline = await decodeImage(new File([blob], 'untagged', { type }));
+      const file = new File([await taggedImage(blob)], 'adobe-rgb', { type });
+      const create = sinon.spy(URL, 'createObjectURL');
+      const revoke = sinon.spy(URL, 'revokeObjectURL');
+      let input;
+      try {
+        input = await decodeImage(file);
+        expect(input.colorSpace).to.equal('adobe-rgb');
+        expect([input.width, input.height]).to.deep.equal([19, 7]);
+        expect([...input.pixels]).to.deep.equal([...baseline.pixels]);
+        expect(create.callCount).to.equal(2);
+        expect(create.firstCall.args[0]).to.equal(file);
+        expect(input.url).to.equal(create.firstCall.returnValue);
+        expect(input.image.src).to.equal(create.secondCall.returnValue);
+        const neutral = new Uint8Array(await create.secondCall.args[0].arrayBuffer());
+        expect((await inspectImage(neutral, type)).colorSpace).to.equal('srgb');
+        const original = new Image();
+        original.src = input.url;
+        await original.decode();
+        context.clearRect(0, 0, 19, 7);
+        context.drawImage(original, 0, 0);
+        expect([...context.getImageData(0, 0, 19, 7).data]).not.to.deep.equal([...input.pixels]);
+        input.destroy();
+        expect(revoke.args.map(([url]) => url))
+          .to.deep.equal([create.firstCall.returnValue, create.secondCall.returnValue]);
+      } finally {
+        create.restore();
+        revoke.restore();
+        input?.destroy();
+        baseline.destroy();
+      }
+    });
+  }
+
+  it('releases both Adobe RGB URLs when native decoding fails', async () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 2;
+    canvas.height = 1;
+    const blob = await new Promise((resolve) => { canvas.toBlob(resolve, 'image/png'); });
+    const file = new File([await taggedImage(blob)], 'bad-decode.png', { type: 'image/png' });
+    const decode = sinon.stub(HTMLImageElement.prototype, 'decode').rejects(new Error('decodeFailure'));
+    const create = sinon.spy(URL, 'createObjectURL');
+    const revoke = sinon.spy(URL, 'revokeObjectURL');
+    try {
+      await expectError(decodeImage(file), 'decodeFailure');
+      expect(create.callCount).to.equal(2);
+      expect(revoke.args.map(([url]) => url))
+        .to.deep.equal([create.firstCall.returnValue, create.secondCall.returnValue]);
+    } finally {
+      decode.restore();
+      create.restore();
+      revoke.restore();
+    }
   });
 
   it('enforces file and pixel limits before decoding', async () => {
@@ -160,9 +194,12 @@ describe('Image contrast input', () => {
 
   it('reads PNG profiles and rejects conflicting or duplicate declarations', async () => {
     const srgb = await compressedICC(profile('srgb'));
+    const adobe = await compressedICC(profile('adobe-rgb'));
     const p3 = pngChunk('cICP', new Uint8Array([12, 13, 0, 1]));
     expect((await inspectImage(metadataPNG([srgb]), 'image/png')).colorSpace).to.equal('srgb');
     expect((await inspectImage(metadataPNG([p3]), 'image/png')).colorSpace).to.equal('display-p3');
+    expect((await inspectImage(metadataPNG([adobe]), 'image/png')).colorSpace).to.equal('adobe-rgb');
+    await expectError(inspectImage(metadataPNG([adobe, p3]), 'image/png'), 'unsupportedProfile');
     await expectError(inspectImage(metadataPNG([srgb, p3]), 'image/png'), 'unsupportedProfile');
     await expectError(inspectImage(metadataPNG([srgb, srgb]), 'image/png'), 'unsupportedProfile');
     const invalid = pngChunk('cICP', new Uint8Array([12, 16, 0, 1]));

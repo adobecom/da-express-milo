@@ -1,5 +1,6 @@
 export const MAX_FILE_BYTES = 40 * 1024 * 1024;
 export const MAX_PIXELS = 16000000;
+export const ADOBE_RGB_GAMMA = 563 / 256;
 const PROFILE_LIMIT = 4 * 1024 * 1024;
 const TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 const text = (bytes, start, length) => (
@@ -24,33 +25,60 @@ export function identifyICC(bytes) {
   if (declaredSize < 132 || declaredSize > bytes.length) throw new Error('unsupportedProfile');
   const count = uint32(bytes, 128);
   if (132 + count * 12 > declaredSize) throw new Error('unsupportedProfile');
-  const primaries = [];
-  ['rXYZ', 'gXYZ', 'bXYZ'].forEach((tag) => {
+  const readTag = (tag, minimumSize) => {
     for (let i = 0; i < count; i += 1) {
       const entry = 132 + i * 12;
       if (text(bytes, entry, 4) === tag) {
         const offset = uint32(bytes, entry + 4);
         const size = uint32(bytes, entry + 8);
-        if (size < 20 || offset + size > declaredSize || text(bytes, offset, 4) !== 'XYZ ') {
+        if (size < minimumSize || offset + size > declaredSize) {
           throw new Error('unsupportedProfile');
         }
-        const view = new DataView(bytes.buffer, bytes.byteOffset + offset, size);
-        primaries.push([8, 12, 16].map((index) => view.getInt32(index) / 65536));
-        break;
+        return bytes.subarray(offset, offset + size);
       }
     }
+    throw new Error('unsupportedProfile');
+  };
+  const primaries = ['rXYZ', 'gXYZ', 'bXYZ'].map((tag) => {
+    const data = readTag(tag, 20);
+    if (text(data, 0, 4) !== 'XYZ ') throw new Error('unsupportedProfile');
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    return [8, 12, 16].map((index) => view.getInt32(index) / 65536);
   });
   const matrices = {
     srgb: [[0.436075, 0.222505, 0.013932], [0.385065, 0.716879, 0.097105],
       [0.14308, 0.060617, 0.714173]],
     'display-p3': [[0.515102, 0.241182, -0.001049], [0.291965, 0.692236, 0.041882],
       [0.157153, 0.066581, 0.784378]],
+    'adobe-rgb': [[0.609775042, 0.311124612, 0.019470596],
+      [0.205300003, 0.625653231, 0.060879086], [0.149220632, 0.063222157, 0.744754920]],
   };
   const match = Object.entries(matrices).find(([, matrix]) => primaries.length === 3
     && primaries.every((primary, index) => primary.every(
       (value, channel) => Math.abs(value - matrix[index][channel]) < 0.003,
     )));
   if (!match) throw new Error('unsupportedProfile');
+  if (match[0] === 'adobe-rgb') {
+    for (let i = 0; i < count; i += 1) {
+      if (/^(?:A2B|B2A|D2B|B2D)[0-3]$/.test(text(bytes, 132 + i * 12, 4))) {
+        throw new Error('unsupportedProfile');
+      }
+    }
+    ['rTRC', 'gTRC', 'bTRC'].forEach((tag) => {
+      const data = readTag(tag, 14);
+      const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+      let gamma;
+      if (text(data, 0, 4) === 'curv' && uint32(data, 8) === 1) {
+        gamma = view.getUint16(12) / 256;
+      } else if (text(data, 0, 4) === 'para' && data.length >= 16
+        && view.getUint16(8) === 0) {
+        gamma = view.getInt32(12) / 65536;
+      }
+      if (gamma === undefined || Math.abs(gamma - ADOBE_RGB_GAMMA) > 1 / 65536) {
+        throw new Error('unsupportedProfile');
+      }
+    });
+  }
   return match[0];
 }
 
@@ -196,6 +224,61 @@ export async function inspectImage(bytes, type) {
   return { colorSpace: space, width: dimensions[0], height: dimensions[1] };
 }
 
+function unmanagedBlob(bytes, type) {
+  const parts = [];
+  if (type === 'image/png') {
+    parts.push(bytes.subarray(0, 8));
+    for (let offset = 8; offset + 12 <= bytes.length;) {
+      const end = offset + 12 + uint32(bytes, offset);
+      const tag = text(bytes, offset + 4, 4);
+      if (!['iCCP', 'cICP', 'sRGB', 'gAMA', 'cHRM'].includes(tag)) {
+        parts.push(bytes.subarray(offset, end));
+      }
+      offset = end;
+    }
+  } else if (type === 'image/jpeg') {
+    parts.push(bytes.subarray(0, 2));
+    for (let offset = 2; offset < bytes.length;) {
+      const start = offset;
+      while (bytes[offset] === 255) offset += 1;
+      const marker = bytes[offset];
+      offset += 1;
+      if (marker === 218 || marker === 217) {
+        parts.push(bytes.subarray(start));
+        break;
+      }
+      if (marker === 1 || (marker >= 208 && marker <= 215)) {
+        parts.push(bytes.subarray(start, offset));
+      } else {
+        const length = bytes[offset] * 256 + bytes[offset + 1];
+        if (marker !== 226 || text(bytes, offset + 2, 12) !== 'ICC_PROFILE\0') {
+          parts.push(bytes.subarray(start, offset + length));
+        }
+        offset += length;
+      }
+    }
+  } else {
+    const header = bytes.slice(0, 12);
+    parts.push(header);
+    for (let offset = 12; offset + 8 <= bytes.length;) {
+      const length = uint32(bytes, offset + 4, true);
+      const end = offset + 8 + length + (length % 2);
+      const tag = text(bytes, offset, 4);
+      if (tag === 'VP8X') {
+        const chunk = bytes.slice(offset, end);
+        if (Math.floor(chunk[8] / 32) % 2) chunk[8] -= 32;
+        parts.push(chunk);
+      } else if (tag !== 'ICCP') {
+        parts.push(bytes.subarray(offset, end));
+      }
+      offset = end;
+    }
+    const size = parts.reduce((sum, part) => sum + part.length, 0);
+    new DataView(header.buffer).setUint32(4, size - 8, true);
+  }
+  return new Blob(parts, { type });
+}
+
 export async function decodeImage(file, textureLimit = Infinity) {
   const type = file?.type?.split(';')[0].trim().toLowerCase();
   if (!file || !TYPES.includes(type)) throw new Error('unsupportedFile');
@@ -204,21 +287,29 @@ export async function decodeImage(file, textureLimit = Infinity) {
   const { colorSpace, width, height } = await inspectImage(bytes, type);
   validateDimensions(width, height, textureLimit);
   const url = URL.createObjectURL(file);
+  const urls = [url];
   try {
+    const canvasSpace = colorSpace === 'adobe-rgb' ? 'srgb' : colorSpace;
+    if (colorSpace === 'adobe-rgb') {
+      // Decode unchanged encoded channels; keep the profiled original for display.
+      urls.push(URL.createObjectURL(unmanagedBlob(bytes, type)));
+    }
     const image = new Image();
-    image.src = url;
+    image.src = urls.at(-1);
     await image.decode();
     validateDimensions(image.naturalWidth, image.naturalHeight, textureLimit);
     const canvas = document.createElement('canvas');
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
-    const context = canvas.getContext('2d', { colorSpace, willReadFrequently: true });
+    const context = canvas.getContext('2d', { colorSpace: canvasSpace, willReadFrequently: true });
     if (!context || (colorSpace === 'display-p3'
       && context.getContextAttributes()?.colorSpace !== colorSpace)) {
       throw new Error('p3Unavailable');
     }
     context.drawImage(image, 0, 0);
-    const data = context.getImageData(0, 0, canvas.width, canvas.height, { colorSpace });
+    const data = context.getImageData(0, 0, canvas.width, canvas.height, {
+      colorSpace: canvasSpace,
+    });
     if (colorSpace === 'display-p3' && data.colorSpace !== colorSpace) {
       throw new Error('p3Unavailable');
     }
@@ -229,10 +320,10 @@ export async function decodeImage(file, textureLimit = Infinity) {
       width: canvas.width,
       height: canvas.height,
       pixels: data.data,
-      destroy: () => URL.revokeObjectURL(url),
+      destroy: () => urls.forEach((ownedUrl) => URL.revokeObjectURL(ownedUrl)),
     };
   } catch (error) {
-    URL.revokeObjectURL(url);
+    urls.forEach((ownedUrl) => URL.revokeObjectURL(ownedUrl));
     throw error;
   }
 }

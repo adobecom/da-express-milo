@@ -36,7 +36,7 @@ function button(value, action, iconName) {
   });
   if (action) element.dataset.action = action;
   if (iconName) {
-    const asset = ['replace', 'expand', 'fit', 'fill'].includes(iconName)
+    const asset = ['replace', 'expand', 'minimize', 'fit', 'fill'].includes(iconName)
       ? new URL(`./icons.svg#${iconName}`, import.meta.url).href : undefined;
     const icon = getIconElementDeprecated(iconName, 20, undefined, undefined, asset);
     icon.setAttribute('aria-hidden', 'true');
@@ -66,13 +66,16 @@ function createView(content, strings, id) {
   const left = createTag('div', { class: 'icc-controls-left' });
   const right = createTag('div', { class: 'icc-controls-right' });
   const color = createTag('div', { class: 'icc-color' });
-  const colorHelp = help(strings.colorSpace, strings.colorSpaceHelp);
-  colorHelp.id = `${id}-color`;
+  const colorHelp = label('span', 'icc-help', strings.colorSpace, {
+    id: `${id}-color`, tabindex: '0',
+  });
+  tips.push({ target: colorHelp, content: strings.colorSpaceHelp });
   const select = createTag('select', { 'aria-labelledby': colorHelp.id });
   select.append(
     label('option', '', strings.srgb, { value: 'srgb' }),
     label('option', '', strings.p3, { value: 'display-p3' }),
   );
+  if (strings.adobeRgb) select.append(label('option', '', strings.adobeRgb, { value: 'adobe-rgb' }));
   color.append(colorHelp, select);
   const replace = button(strings.replaceImage, 'replace', 'replace');
   const save = button(strings.savePng, 'save', 'S2_Icon_Download_20_N');
@@ -80,6 +83,7 @@ function createView(content, strings, id) {
   save.append(label('span', '', strings.savePng));
   save.disabled = true;
   const expand = button(strings.expand, 'expand', 'expand');
+  const minimizeIcon = button(strings.minimize, null, 'minimize').firstElementChild;
   tips.push(
     { target: replace, content: strings.replaceImage },
     { target: expand, content: strings.expand },
@@ -107,9 +111,8 @@ function createView(content, strings, id) {
   originalFrame.append(original);
   comparison.append(analysisFrame, originalFrame);
   comparisonRow.append(zoom, comparison);
-  const dimensions = label('p', 'icc-dimensions', '', { 'aria-live': 'polite' });
   const footer = createTag('div', { class: 'icc-footer' });
-  workspace.append(controls, comparisonRow, dimensions, footer);
+  workspace.append(controls, comparisonRow, footer);
   main.append(copy, workspace);
 
   const aside = createTag('aside', { class: 'icc-legend', 'aria-label': strings.legend });
@@ -180,11 +183,13 @@ function createView(content, strings, id) {
     replace,
     save,
     expand,
+    expandIcon: expand.firstElementChild,
+    minimizeIcon,
+    comparisonRow,
     comparison,
     zoom,
     fit,
     fill,
-    dimensions,
     footer,
     canvas,
     original,
@@ -210,6 +215,7 @@ export default async function decorate(block) {
   let loadingOverlay;
   let detachDrag;
   let resizeObserver;
+  let resizeFrame;
   let request;
   let generation = 0;
   // Image transactions remain independent of color-space and export generations.
@@ -230,7 +236,7 @@ export default async function decorate(block) {
   const tooltips = [];
   const tooltipTargets = new Map();
   const downloads = new Map();
-  const media = window.matchMedia('(min-width: 900px)');
+  const media = window.matchMedia('(min-width: 700px)');
   let uploadStrings = IMAGE_UPLOAD_DEFAULTS;
   const report = async (error, message) => {
     window.lana?.log(`Image contrast: ${error.message}`, {
@@ -261,7 +267,31 @@ export default async function decorate(block) {
   };
   const resize = () => {
     if (!source || !view) return;
-    const { clientWidth: width, clientHeight: height } = view.analysisFrame;
+    const { comparisonRow, analysisFrame, zoom } = view;
+    const surfaceStyle = getComputedStyle(comparisonRow);
+    const basePadding = parseFloat(surfaceStyle.getPropertyValue('--icc-comparison-padding-block'));
+    const extraPadding = parseFloat(surfaceStyle.paddingTop) - basePadding;
+    const frame = analysisFrame.getBoundingClientRect();
+    const toolbar = zoom.getBoundingClientRect();
+    const width = analysisFrame.clientWidth;
+    const fullHeight = analysisFrame.clientHeight + extraPadding;
+    if (!width || fullHeight <= 0) return;
+    const fullScale = (mode === 'fit' ? Math.min : Math.max)(width / source.width, fullHeight / source.height);
+    const imageLeft = frame.left + Math.max(0, (width - source.width * fullScale) / 2);
+    const imageTop = frame.top - extraPadding
+      + Math.max(0, (fullHeight - source.height * fullScale) / 2);
+    const overlaps = imageLeft < toolbar.right
+      && imageLeft + Math.min(width, source.width * fullScale) > toolbar.left
+      && imageTop < toolbar.bottom
+      && imageTop + Math.min(fullHeight, source.height * fullScale) > toolbar.top;
+    const topInset = toolbar.bottom - comparisonRow.getBoundingClientRect().top + 8;
+    // Reserve vertical space only for a collision, without narrowing the images.
+    if (overlaps && fullHeight - (topInset - basePadding) >= view.fit.offsetHeight) {
+      comparisonRow.style.setProperty('--icc-image-top-inset', `${topInset}px`);
+    } else {
+      comparisonRow.style.removeProperty('--icc-image-top-inset');
+    }
+    const height = analysisFrame.clientHeight;
     const scale = (mode === 'fit' ? Math.min : Math.max)(width / source.width, height / source.height);
     view.panel.style.setProperty('--icc-image-width', `${source.width * scale}px`);
     view.panel.style.setProperty('--icc-image-height', `${source.height * scale}px`);
@@ -292,8 +322,6 @@ export default async function decorate(block) {
     renderer.render(source, colorSpace);
     ready = true;
     view.select.value = colorSpace;
-    view.dimensions.textContent = strings.dimensions
-      .replaceAll('{width}', source.width).replaceAll('{height}', source.height);
     view.save.disabled = block.classList.contains('is-loading');
     resize();
     if (announce) announceReady();
@@ -305,6 +333,7 @@ export default async function decorate(block) {
     syncLoadingOverlay();
     if (destroyed) return;
     tooltips.forEach((tip) => tip.hide());
+    view.expand.firstElementChild.replaceWith(view.expandIcon);
     view.expand.setAttribute('aria-label', strings.expand);
     tooltipTargets.get(view.expand)?.setContent(strings.expand);
     view.expand.focus();
@@ -339,6 +368,7 @@ export default async function decorate(block) {
     close();
     detachDrag?.();
     resizeObserver?.disconnect();
+    cancelAnimationFrame(resizeFrame);
     downloads.forEach((timer, url) => {
       clearTimeout(timer);
       URL.revokeObjectURL(url);
@@ -401,6 +431,10 @@ export default async function decorate(block) {
         if (destroyed || imageGeneration !== version) {
           candidate.destroy();
           return;
+        }
+        if (candidate.colorSpace === 'adobe-rgb' && !strings.adobeRgb) {
+          candidate.destroy();
+          throw new Error('Missing image contrast placeholders: color-image-contrast-checker-adobe-rgb');
         }
         const previous = source;
         const previousSpace = colorSpace;
@@ -501,7 +535,10 @@ export default async function decorate(block) {
     block.closest('.section').prepend(background);
     detachDrag = attachImageDragHandlers(block, dropzone, dragOverlay, loadingOverlay, destroy);
     arrange();
-    resizeObserver = new ResizeObserver(resize);
+    resizeObserver = new ResizeObserver(() => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(resize);
+    });
     resizeObserver.observe(view.analysisFrame);
     media.addEventListener('change', arrange, { signal });
     window.addEventListener('popstate', () => {
@@ -524,12 +561,13 @@ export default async function decorate(block) {
         else {
           view.dialog.append(view.panel);
           tooltips.forEach((tip) => tip.hide());
+          view.expand.firstElementChild.replaceWith(view.minimizeIcon);
           view.expand.setAttribute('aria-label', strings.minimize);
           tooltipTargets.get(view.expand)?.setContent(strings.minimize);
           view.dialog.showModal();
           syncLoadingOverlay();
           arrange();
-          view.left.querySelector('button').focus();
+          view.left.querySelector('button, [tabindex="0"]').focus();
         }
       }
       if (action === 'fit' || action === 'fill') {
@@ -628,7 +666,7 @@ export default async function decorate(block) {
       const tip = await createExpressTooltip({
         targetEl: target,
         content: description,
-        placement: 'bottom',
+        placement: 'top',
         dismissOnActivate: !target.classList.contains('icc-help'),
       });
       if (destroyed) tip.destroy();
