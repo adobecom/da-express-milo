@@ -671,6 +671,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
         });
       });
 
+      moodSelectorRef?.destroy();
       moodSelectorRef = createMoodSelector(currentMood, (mood) => {
         historySnapshot();
         currentMood = mood;

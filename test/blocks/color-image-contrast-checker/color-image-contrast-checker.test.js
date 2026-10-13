@@ -79,6 +79,11 @@ async function upload(file = null) {
   await waitFor(() => block.classList.contains('has-image') && block.getAttribute('aria-busy') === 'false');
 }
 
+function chooseSpace(space) {
+  block.querySelector('.color-dropdown-trigger').click();
+  block.querySelector(`.color-dropdown-option[data-value="${space}"]`).click();
+}
+
 describe('Color Image Contrast Checker placeholders and composition', () => {
   before(async () => {
     await Promise.all([
@@ -285,12 +290,13 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     delete window.placeholders[key];
     expect((await loadStrings()).adobeRgb).to.equal(undefined);
     await setup();
-    expect(block.querySelectorAll('select option')).to.have.length(2);
+    expect(block.querySelectorAll('.color-dropdown-option')).to.have.length(2);
+    expect(block.querySelector('[data-value="display-p3"]').textContent).to.equal('Display P3');
     block.dispatchEvent(new Event('color-image-contrast-checker:destroy'));
     authorMetadata({ [key]: 'Authored Adobe RGB label' });
     expect((await loadStrings()).adobeRgb).to.equal('Authored Adobe RGB label');
     await setup();
-    expect(block.querySelector('option[value="adobe-rgb"]').textContent)
+    expect(block.querySelector('[data-value="adobe-rgb"]').textContent)
       .to.equal('Authored Adobe RGB label');
     window.placeholders[key] = 42;
     let error;
@@ -317,7 +323,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     input.dispatchEvent(new Event('change', { bubbles: true }));
     await waitFor(() => block.getAttribute('aria-busy') === 'false');
     expect(block.querySelector('.icc-frame img').src).to.equal(original);
-    expect(block.querySelector('select').value).to.equal('srgb');
+    expect(block.querySelector('.color-dropdown-trigger').value).to.equal('srgb');
     expect(block.querySelector('[data-action="save"]').disabled).to.equal(false);
     expect(revoke.callCount).to.equal(2);
     await waitFor(() => document.querySelector('sp-toast[variant="negative"]'));
@@ -330,12 +336,12 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     const file = await imageFile();
     const revoke = sinon.spy(URL, 'revokeObjectURL');
     await upload(new File([await taggedImage(file)], 'adobe.png', { type: file.type }));
-    expect(block.querySelector('select').value).to.equal('adobe-rgb');
+    expect(block.querySelector('.color-dropdown-trigger').value).to.equal('adobe-rgb');
     expect(block.querySelector('[data-action="save"]').disabled).to.equal(false);
     expect([block.querySelector('canvas').width, block.querySelector('canvas').height])
       .to.deep.equal([13, 9]);
     await upload(file);
-    expect(block.querySelector('select').value).to.equal('srgb');
+    expect(block.querySelector('.color-dropdown-trigger').value).to.equal('srgb');
     expect(revoke.callCount).to.equal(2);
     await upload(new File([await taggedImage(file)], 'adobe.png', { type: file.type }));
     expect(revoke.callCount).to.equal(3);
@@ -377,6 +383,35 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     document.body.append(plainUpload.container);
     expect(getComputedStyle(plainUpload.container, '::before').content).to.equal('none');
     plainUpload.container.remove();
+  });
+
+  it('keeps the upload focus ring concentric with the resting corners across viewports', async () => {
+    const viewport = { width: window.innerWidth, height: window.innerHeight };
+    try {
+      await setup();
+      const container = block.querySelector('.image-upload-dropzone-container');
+      const dropzone = container.querySelector('.image-upload-dropzone');
+      for (const width of [375, 768, 1440]) {
+        await setViewport({ width, height: 1000 });
+        dropzone.blur();
+        expect(getComputedStyle(container).borderRadius).to.equal('16px');
+        expect(getComputedStyle(container, '::after').opacity).to.equal('0');
+        dropzone.focus();
+        const ring = getComputedStyle(container, '::after');
+        expect(ring.opacity).to.equal('1');
+        expect(ring.borderRadius).to.equal('20px');
+        expect(parseFloat(ring.borderRadius) + parseFloat(ring.top))
+          .to.equal(parseFloat(getComputedStyle(container).borderRadius));
+        expect(getComputedStyle(dropzone).borderRadius).to.equal('16px');
+        expect(getComputedStyle(container, '::before').borderRadius).to.equal('16px');
+      }
+      const plainUpload = createUploadDropzone();
+      document.body.append(plainUpload.container);
+      expect(getComputedStyle(plainUpload.container, '::after').borderRadius).to.equal('10px');
+      plainUpload.container.remove();
+    } finally {
+      await setViewport(viewport);
+    }
   });
 
   it('requires placeholders and rejects the earlier UI-string table contract', async () => {
@@ -669,7 +704,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     await upload(file);
     block.querySelector('[data-action="expand"]').click();
     const checker = block;
-    for (const control of [block.querySelector('[data-action="save"]'), block.querySelector('select')]) {
+    for (const control of [block.querySelector('[data-action="save"]'), block.querySelector('.color-dropdown-trigger')]) {
       control.focus();
       const input = block.querySelector('input[type="file"]');
       Object.defineProperty(input, 'files', { value: [file], configurable: true });
@@ -741,12 +776,10 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     await setup();
     await upload();
     const original = block.querySelector('.icc-frame img').src;
-    const select = block.querySelector('select');
     let detail;
     block.addEventListener('color-image-contrast-checker:ready', (event) => { detail = event.detail; });
     for (const space of ['display-p3', 'adobe-rgb', 'srgb']) {
-      select.value = space;
-      select.dispatchEvent(new Event('change'));
+      chooseSpace(space);
       expect(detail.colorSpace).to.equal(space);
       expect(block.querySelector('.icc-frame img').src).to.equal(original);
     }
@@ -770,12 +803,12 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       .filter((element) => element.tabIndex >= 0 && element.getClientRects().length)
       .map((element) => element.dataset.action || element.tagName.toLowerCase());
     expect(controls().slice(0, 7)).to.deep.equal([
-      'span', 'select', 'replace', 'save', 'expand', 'fit', 'div',
+      'span', 'button', 'replace', 'save', 'expand', 'fit', 'div',
     ]);
     await setViewport({ width: 375, height: 800 });
     await waitFor(() => controls()[0] === 'replace');
     expect(controls().slice(0, 7)).to.deep.equal([
-      'replace', 'expand', 'span', 'select', 'fit', 'div', 'save',
+      'replace', 'expand', 'span', 'button', 'fit', 'div', 'save',
     ]);
     block.querySelector('[data-action="expand"]').click();
     const dialog = block.querySelector('dialog');
@@ -786,7 +819,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(dialog.querySelector('.icc-legend-mini').querySelectorAll('button,[tabindex]'))
       .to.have.length(0);
     expect(controls()).to.deep.equal([
-      'replace', 'expand', 'span', 'select', 'fit', 'div', 'save',
+      'replace', 'expand', 'span', 'button', 'fit', 'div', 'save',
     ]);
     dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
     expect(dialog.open).to.equal(false);
@@ -799,7 +832,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     await setup();
     await upload();
     const text = block.querySelector('.icc-color .icc-help');
-    const select = block.querySelector('select');
+    const select = block.querySelector('.color-dropdown-trigger');
     expect(text.tagName).to.equal('SPAN');
     expect(text.matches('button, [role="button"]')).to.equal(false);
     expect(text.classList.contains('color-action-button')).to.equal(false);
@@ -814,6 +847,64 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(block.querySelector('dialog .icc-color .icc-help')).to.equal(text);
     expect(select.getAttribute('aria-labelledby')).to.equal(text.id);
     block.querySelector('dialog').dispatchEvent(new Event('cancel', { cancelable: true }));
+  });
+
+  it('closes the dropdown before the expanded dialog on Escape and preserves keyboard selection', async () => {
+    await setup();
+    await upload();
+    block.querySelector('[data-action="expand"]').click();
+    const dialog = block.querySelector('dialog');
+    const trigger = block.querySelector('.color-dropdown-trigger');
+    const menu = block.querySelector('.color-dropdown-popover');
+    const options = [...menu.querySelectorAll('[role="option"]')];
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(menu.hidden).to.equal(false);
+    expect(document.activeElement).to.equal(options[0]);
+    options[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+    expect(document.activeElement).to.equal(options.at(-1));
+    options.at(-1).dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Escape', bubbles: true, cancelable: true,
+    }));
+    expect(menu.hidden).to.equal(true);
+    expect(dialog.open).to.equal(true);
+    expect(document.activeElement).to.equal(trigger);
+    chooseSpace('display-p3');
+    expect(trigger.value).to.equal('display-p3');
+    expect(document.activeElement).to.equal(trigger);
+    trigger.click();
+    const selected = menu.querySelector('[aria-selected="true"]');
+    expect(document.activeElement).to.equal(selected);
+    selected.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    expect(menu.hidden).to.equal(true);
+    expect(document.activeElement).to.equal(trigger);
+    dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
+    expect(dialog.open).to.equal(false);
+    expect(trigger.value).to.equal('display-p3');
+  });
+
+  it('closes and disables an open dropdown during modal replacement and releases it on teardown', async () => {
+    await setup();
+    await upload();
+    block.querySelector('[data-action="expand"]').click();
+    const trigger = block.querySelector('.color-dropdown-trigger');
+    const menu = block.querySelector('.color-dropdown-popover');
+    trigger.click();
+    const selected = menu.querySelector('[aria-selected="true"]');
+    expect(document.activeElement).to.equal(selected);
+    const input = block.querySelector('input[type="file"]');
+    Object.defineProperty(input, 'files', { value: [await imageFile()], configurable: true });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(trigger.disabled).to.equal(true);
+    expect(menu.hidden).to.equal(true);
+    expect(document.activeElement).to.equal(block.querySelector('.icc-comparison'));
+    expect([...menu.children].every((option) => option.disabled)).to.equal(true);
+    await waitFor(() => block.getAttribute('aria-busy') === 'false');
+    expect(trigger.disabled).to.equal(false);
+    trigger.click();
+    block.dispatchEvent(new Event('color-image-contrast-checker:destroy'));
+    trigger.click();
+    expect(menu.hidden).to.equal(true);
+    expect(document.querySelector('dialog[open]')).not.to.exist;
   });
 
   it('matches the continuous surface and floating view controls across responsive boundaries', async () => {
@@ -1216,10 +1307,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       return createUrl(blob);
     });
     const click = sinon.stub(HTMLAnchorElement.prototype, 'click');
-    const select = block.querySelector('select');
     for (const space of ['srgb', 'display-p3', 'adobe-rgb']) {
-      select.value = space;
-      select.dispatchEvent(new Event('change'));
+      chooseSpace(space);
       const expectedCalls = click.callCount + 1;
       block.querySelector('[data-action="save"]').click();
       await waitFor(() => click.callCount === expectedCalls);
@@ -1265,9 +1354,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     const pending = sinon.stub(canvas, 'toBlob').callsFake((callback) => { finish = callback; });
     const click = sinon.stub(HTMLAnchorElement.prototype, 'click');
     block.querySelector('[data-action="save"]').click();
-    const select = block.querySelector('select');
-    select.value = 'adobe-rgb';
-    select.dispatchEvent(new Event('change'));
+    chooseSpace('adobe-rgb');
     pending.restore();
     finish(new Blob(['stale output'], { type: 'image/png' }));
     await new Promise((resolve) => { setTimeout(resolve, 0); });
@@ -1570,9 +1657,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     fetchSample.onCall(1).resolves(new Response(original));
     samples[0].click();
     samples[1].click();
-    const select = block.querySelector('select');
-    select.value = 'srgb';
-    select.dispatchEvent(new Event('change'));
+    // Busy dropdown options must not interrupt the active sample transaction.
+    chooseSpace('display-p3');
     await waitFor(() => block.getAttribute('aria-busy') === 'false');
     expect(samples.map((sample) => sample.getAttribute('aria-pressed')))
       .to.deep.equal(['false', 'true']);
@@ -1692,7 +1778,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         checker.style.setProperty('--ax-body-xs-size', '14px');
       });
       await upload();
-      const select = block.querySelector('select');
+      const select = block.querySelector('.color-dropdown-trigger');
       for (const [viewportWidth, expectedWidth] of [[375, 224], [768, 208], [1440, 208]]) {
         await setViewport({ width: viewportWidth, height: 900 });
         expect(select.getBoundingClientRect().width).to.equal(expectedWidth);

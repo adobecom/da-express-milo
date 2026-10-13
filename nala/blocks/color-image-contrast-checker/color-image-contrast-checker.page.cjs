@@ -20,6 +20,11 @@ class ColorImageContrastCheckerBlock {
     await this.block.locator('[data-action="save"]:enabled').waitFor();
   }
 
+  async chooseColorSpace(space) {
+    await this.block.locator('.color-dropdown-trigger').click();
+    await this.block.locator(`.color-dropdown-option[data-value="${space}"]`).click();
+  }
+
   async focusOrder() {
     return this.panel.evaluate((panel) => [...panel.querySelectorAll(
       'button,select,[tabindex="0"]',

@@ -193,7 +193,7 @@ existing fallback behavior.
 | color-image-contrast-checker-color-space | Color space |
 | color-image-contrast-checker-color-space-help | Supports sRGB, Display P3 and Adobe RGB (1998). Changing color space recalculates contrast with that space's transfer curve and luminance weights; it does not convert the image. |
 | color-image-contrast-checker-srgb | sRGB |
-| color-image-contrast-checker-p3 | P3 |
+| color-image-contrast-checker-p3 | Display P3 |
 | color-image-contrast-checker-adobe-rgb | Adobe RGB (1998) |
 | color-image-contrast-checker-replace-image | Upload a new image |
 | color-image-contrast-checker-save-png | Save PNG |
@@ -287,6 +287,14 @@ on hover and keyboard focus, and the same text supplies the selector's accessibl
 name. Tooltips appear above their own controls, flipping at viewport edges when
 needed, and retain their anchors when the comparison moves into or out of the
 expanded dialog.
+
+Color space and Color Extract's mood selector use the same shared dropdown
+component and stylesheet. Both have the same gray trigger, rotating chevron,
+popover, selected checkmark, hover and focus styling. Opening focuses the selected
+option; arrows wrap, Home/End jump, and choosing an option returns focus to the
+trigger. Tab closes the menu and continues from the trigger. Escape closes an
+open dropdown before dismissing a tooltip or the expanded comparison. Loading
+closes and disables the dropdown without allowing stale selections.
 
 The results use one continuous `#F3F3F3` comparison surface with an inset floating
 view toolbar. The white image card has the three Figma shadow layers; the

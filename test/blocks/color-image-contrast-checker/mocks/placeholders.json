@@ -8,7 +8,7 @@
   "color-image-contrast-checker-color-space": "Color space",
   "color-image-contrast-checker-color-space-help": "Supports sRGB, Display P3 and Adobe RGB (1998). Changing color space recalculates contrast with that space's transfer curve and luminance weights; it does not convert the image.",
   "color-image-contrast-checker-srgb": "sRGB",
-  "color-image-contrast-checker-p3": "P3",
+  "color-image-contrast-checker-p3": "Display P3",
   "color-image-contrast-checker-adobe-rgb": "Adobe RGB (1998)",
   "color-image-contrast-checker-replace-image": "Upload a new image",
   "color-image-contrast-checker-save-png": "Save PNG",

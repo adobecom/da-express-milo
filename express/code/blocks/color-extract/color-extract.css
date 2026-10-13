@@ -1,3 +1,5 @@
+@import url('../../scripts/color-shared/components/dropdown/dropdown.css');
+
 .color-extract *,
 .color-extract *::before,
 .color-extract *::after {
@@ -572,134 +574,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   line-height: 18px;
 }
 
-.color-extract .color-extract-mood-dropdown {
-  position: relative;
-  width: 100%;
-  max-width: none;
-}
-
 .color-extract .color-extract-mood-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  width: 100%;
   min-width: 200px;
-  height: 32px;
-  padding: 0 11px 0 12px;
-  background: var(--color-extract-gray-300);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--color-extract-text);
-  line-height: 18px;
-  transition: background-color 0.15s ease;
-}
-
-.color-extract .color-extract-mood-trigger:hover {
-  background: var(--color-extract-gray-350);
-}
-
-.color-extract .color-extract-mood-trigger:focus-visible {
-  outline: 2px solid var(--color-extract-focus);
-  outline-offset: 1px;
-}
-
-.color-extract .color-extract-mood-trigger-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: left;
-}
-
-.color-extract .color-extract-mood-chevron {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  color: var(--color-extract-text);
-  transition: transform 0.15s ease;
-}
-
-.color-extract .color-extract-mood-dropdown.is-open .color-extract-mood-chevron {
-  transform: rotate(180deg);
-}
-
-.color-extract .color-extract-mood-popover {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  min-width: 100%;
-  background: var(--color-extract-bg);
-  border-radius: 8px;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    0 0 2px rgba(0, 0, 0, 0.12);
-  padding: 4px 0;
-  z-index: 30;
-}
-
-.color-extract .color-extract-mood-popover[hidden] {
-  display: none;
-}
-
-.color-extract .color-extract-mood-option {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: var(--spacing-100);
-  width: 100%;
-  padding: 8px 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--color-extract-text);
-  text-align: left;
-  transition: background-color 0.1s ease;
-  box-sizing: border-box;
-}
-
-.color-extract .color-extract-mood-option:hover {
-  background: var(--color-extract-gray-hover);
-}
-
-.color-extract .color-extract-mood-option-check {
-  width: 10px;
-  height: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--color-extract-accent);
-  opacity: 0;
-}
-
-.color-extract .color-extract-mood-option-check svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.color-extract .color-extract-mood-option.is-selected {
-  font-weight: 400;
-}
-
-.color-extract .color-extract-mood-option.is-selected .color-extract-mood-option-check {
-  opacity: 1;
-}
-
-.color-extract .color-extract-mood-option:focus-visible {
-  outline: 2px solid var(--color-extract-focus);
-  outline-offset: -2px;
 }
 
 /* ---- Toolbar divider ---- */
@@ -740,7 +616,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   justify-content: center;
   outline: none;
   transition: width 0.2s ease, height 0.2s ease;
-  background: var(--marker-color, transparent); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  color: var(--color-black);
+  background: var(--marker-color);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 17px rgba(0, 0, 0, 0.16);
   /* Center on percentage point — size-independent, works at every breakpoint */
   transform: translate(-50%, -50%);
@@ -778,7 +655,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   width: 8px;
   height: 8px;
   border-radius: 2px;
-  background: var(--marker-color, #000); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  color: var(--marker-color);
+  background: currentcolor;
   border: 0.5px solid #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   pointer-events: none;

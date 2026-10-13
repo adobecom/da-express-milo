@@ -26,7 +26,7 @@ describe('createMoodSelector', () => {
   });
 
   afterEach(() => {
-    document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    selector.destroy();
     container.remove();
     sinon.restore();
   });

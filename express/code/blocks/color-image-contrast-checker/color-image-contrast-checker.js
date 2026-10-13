@@ -10,6 +10,7 @@ import { getPictureSource } from '../../scripts/color-shared/utils/imageExtractU
 import parseContent from './content.js';
 import { decodeImage } from './image.js';
 import createRenderer from './analysis.js';
+import createDropdown from '../../scripts/color-shared/components/dropdown/dropdown.js';
 
 const instances = new WeakMap();
 let nextId = 0;
@@ -46,7 +47,7 @@ function button(value, action, iconName) {
   return element;
 }
 
-function createView(content, strings, id) {
+function createView(content, strings, id, onColorChange) {
   const tips = [];
   const help = (value, explanation) => {
     const trigger = button(value);
@@ -70,13 +71,15 @@ function createView(content, strings, id) {
     id: `${id}-color`, tabindex: '0',
   });
   tips.push({ target: colorHelp, content: strings.colorSpaceHelp });
-  const select = createTag('select', { 'aria-labelledby': colorHelp.id });
-  select.append(
-    label('option', '', strings.srgb, { value: 'srgb' }),
-    label('option', '', strings.p3, { value: 'display-p3' }),
-  );
-  if (strings.adobeRgb) select.append(label('option', '', strings.adobeRgb, { value: 'adobe-rgb' }));
-  color.append(colorHelp, select);
+  const items = [
+    { value: 'srgb', label: strings.srgb },
+    { value: 'display-p3', label: strings.p3 },
+  ];
+  if (strings.adobeRgb) items.push({ value: 'adobe-rgb', label: strings.adobeRgb });
+  const selector = createDropdown({
+    items, value: 'srgb', labelledBy: colorHelp.id, onChange: onColorChange,
+  });
+  color.append(colorHelp, selector.element);
   const replace = button(strings.replaceImage, 'replace', 'replace');
   const save = button(strings.savePng, 'save', 'S2_Icon_Download_20_N');
   save.classList.add('icc-save');
@@ -179,7 +182,7 @@ function createView(content, strings, id) {
     left,
     right,
     color,
-    select,
+    selector,
     replace,
     save,
     expand,
@@ -258,11 +261,12 @@ export default async function decorate(block) {
     syncLoadingOverlay();
     if (view) {
       if (value && view.dialog.open
-        && [view.save, view.select].includes(document.activeElement)) {
+        && (document.activeElement === view.save
+          || view.selector.element.contains(document.activeElement))) {
         view.comparison.focus({ preventScroll: true });
       }
       view.save.disabled = value || !ready;
-      view.select.disabled = value;
+      view.selector.setDisabled(value);
     }
   };
   const resize = () => {
@@ -321,13 +325,14 @@ export default async function decorate(block) {
     view.save.disabled = true;
     renderer.render(source, colorSpace);
     ready = true;
-    view.select.value = colorSpace;
+    view.selector.setValue(colorSpace);
     view.save.disabled = block.classList.contains('is-loading');
     resize();
     if (announce) announceReady();
   };
   const close = () => {
     if (!view?.dialog.open) return;
+    view.selector.close();
     view.dialog.close();
     block.append(view.panel);
     syncLoadingOverlay();
@@ -340,6 +345,7 @@ export default async function decorate(block) {
     arrange();
   };
   const landing = () => {
+    view?.selector.close();
     generation += 1;
     imageGeneration += 1;
     request?.abort();
@@ -364,6 +370,7 @@ export default async function decorate(block) {
     selectSample();
     sampleButtons.length = 0;
     lifecycle.abort();
+    view?.selector.destroy();
     tooltips.forEach((tip) => tip.destroy());
     close();
     detachDrag?.();
@@ -406,7 +413,15 @@ export default async function decorate(block) {
       '../../scripts/color-shared/action-menu.css',
     ].map((path) => loadStyle(new URL(path, import.meta.url).href)));
     if (destroyed) return;
-    view = createView(content, strings, id);
+    view = createView(content, strings, id, async (value) => {
+      generation += 1;
+      colorSpace = value;
+      try {
+        analyze();
+      } catch (error) {
+        await report(error, strings.analysisError);
+      }
+    });
     const upload = createTag('div', { class: 'icc-upload', role: 'region', 'aria-label': strings.landingAria });
     background = createTag('div', {
       class: 'color-image-contrast-checker-background', 'aria-hidden': 'true',
@@ -544,21 +559,13 @@ export default async function decorate(block) {
     window.addEventListener('popstate', () => {
       if (window.history.state?.[HISTORY_KEY] !== id) landing();
     }, { signal });
-    view.select.addEventListener('change', async () => {
-      generation += 1;
-      colorSpace = view.select.value;
-      try {
-        analyze();
-      } catch (error) {
-        await report(error, strings.analysisError);
-      }
-    }, { signal });
     view.panel.addEventListener('click', async (event) => {
       const action = event.target.closest('[data-action]')?.dataset.action;
       if (action === 'replace') dropzone.input.click();
       if (action === 'expand') {
         if (view.dialog.open) close();
         else {
+          view.selector.close();
           view.dialog.append(view.panel);
           tooltips.forEach((tip) => tip.hide());
           view.expand.firstElementChild.replaceWith(view.minimizeIcon);
@@ -622,6 +629,12 @@ export default async function decorate(block) {
     }, { signal });
     view.dialog.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
+        if (view.selector.isOpen) {
+          event.preventDefault();
+          event.stopPropagation();
+          view.selector.close(true);
+          return;
+        }
         const open = tooltips.filter((tip) => tip.element.querySelector('sp-tooltip[open]'));
         if (open.length) {
           event.preventDefault();
@@ -630,6 +643,7 @@ export default async function decorate(block) {
         }
       }
       if (event.key === 'Tab') {
+        if (view.selector.isOpen) view.selector.close(true);
         const controls = [...view.panel.querySelectorAll('button, select, [tabindex="0"]')]
           .filter((control) => !control.disabled && control.tabIndex >= 0
             && control.getClientRects().length);

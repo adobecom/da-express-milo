@@ -1,3 +1,5 @@
+@import url('../../scripts/color-shared/components/dropdown/dropdown.css');
+
 .color-image-contrast-checker {
   color: var(--color-gray-950);
   font-family: var(--body-font-family);
@@ -37,6 +39,10 @@
     align-items: center;
     min-block-size: 800px;
   }
+}
+
+.color-image-contrast-checker .image-upload-dropzone-container::after {
+  border-radius: calc(var(--Radius-corner-radius-200) + var(--spacing-75));
 }
 
 .color-image-contrast-checker .image-upload-dropzone-container::before {
@@ -234,18 +240,11 @@
   font-size: var(--ax-body-xs-size);
 }
 
-.color-image-contrast-checker .icc-color select {
+.color-image-contrast-checker .icc-color .color-dropdown {
   flex: 0 1 auto;
   inline-size: 224px;
   max-inline-size: 100%;
   min-inline-size: 0;
-  block-size: 32px;
-  color: var(--color-gray-950);
-  background: var(--color-gray-100);
-  border: none;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  padding-inline: var(--spacing-100);
-  font: inherit;
 }
 
 .color-image-contrast-checker .icc-help {
@@ -673,7 +672,7 @@
     padding-inline: var(--spacing-500);
   }
 
-  .color-image-contrast-checker .icc-color select {
+  .color-image-contrast-checker .icc-color .color-dropdown {
     inline-size: 208px;
   }
 
@@ -724,7 +723,7 @@
     grid-row: 9;
   }
 
-  .color-image-contrast-checker.icc-dialog .icc-color select {
+  .color-image-contrast-checker.icc-dialog .icc-color .color-dropdown {
     inline-size: 256px;
   }
 

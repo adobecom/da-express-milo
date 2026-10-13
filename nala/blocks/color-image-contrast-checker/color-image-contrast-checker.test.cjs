@@ -136,8 +136,8 @@ test.describe('ColorImageContrastCheckerBlock Test Suite', () => {
       const block = new ColorImageContrastCheckerBlock(page, feature.selector);
       const desktop = feature.viewport.width >= 700;
       const sequence = desktop
-        ? ['span', 'select', 'replace', 'save', 'expand', 'fit', 'div']
-        : ['replace', 'expand', 'span', 'select', 'fit', 'div', 'save'];
+        ? ['span', 'button', 'replace', 'save', 'expand', 'fit', 'div']
+        : ['replace', 'expand', 'span', 'button', 'fit', 'div', 'save'];
       await page.setViewportSize(feature.viewport);
       await test.step('step-1: Navigate and verify authored composition', async () => {
         await page.goto(`${baseURL}${feature.path}`);
@@ -192,7 +192,7 @@ test.describe('ColorImageContrastCheckerBlock Test Suite', () => {
         await expect(block.panel).toBeVisible();
         expect(await block.block.locator('.icc-color .icc-help')
           .evaluate((text) => text.tagName)).toBe('SPAN');
-        await expect(block.block.locator('.icc-color button, .icc-color [role="button"]'))
+        await expect(block.block.locator('.icc-color .icc-help:is(button, [role="button"])'))
           .toHaveCount(0);
         await checkVisualLayout(block, feature.viewport.width);
         await checkToolbarClearance(block);
@@ -252,9 +252,9 @@ test.describe('ColorImageContrastCheckerBlock Test Suite', () => {
           .toHaveCSS('background-color', 'rgb(0, 0, 0)');
         await page.mouse.move(0, 0);
         const dimensions = await block.canvas.evaluate((canvas) => [canvas.width, canvas.height]);
-        await expect(block.block.locator('option[value="adobe-rgb"]')).toHaveText('Adobe RGB (1998)');
+        await expect(block.block.locator('[data-value="adobe-rgb"]')).toHaveText('Adobe RGB (1998)');
         for (const space of ['srgb', 'display-p3', 'adobe-rgb']) {
-          await block.block.locator('select').selectOption(space);
+          await block.chooseColorSpace(space);
           const downloadEvent = page.waitForEvent('download');
           await block.save.click();
           const download = await downloadEvent;
@@ -323,7 +323,33 @@ test.describe('ColorImageContrastCheckerBlock Test Suite', () => {
         await expect(page.locator('.icc-overlay.color-extract-loading-overlay'))
           .toHaveCSS('opacity', '0');
         const colorHelp = block.block.locator('.icc-color .icc-help');
-        await block.block.locator('select').focus();
+        const colorTrigger = block.block.locator('.color-dropdown-trigger');
+        await colorTrigger.focus();
+        await page.keyboard.press('ArrowDown');
+        const colorMenu = block.block.locator('.color-dropdown-popover');
+        await expect(colorMenu).toBeVisible();
+        await expect(colorMenu.locator('[aria-selected="true"]')).toBeFocused();
+        await page.screenshot({ path: testInfo.outputPath('color-space-dropdown-open.png') });
+        await page.keyboard.press('End');
+        await expect(colorMenu.locator('[data-value="adobe-rgb"]')).toBeFocused();
+        await page.keyboard.press('Escape');
+        await expect(colorMenu).toBeHidden();
+        await expect(block.dialog).toBeVisible();
+        await expect(colorTrigger).toBeFocused();
+        await colorTrigger.click();
+        await page.keyboard.press('Tab');
+        await expect(colorMenu).toBeHidden();
+        if (desktop) await expect(block.block.locator('[data-action="replace"]')).toBeFocused();
+        else await expect(block.block.locator('[data-action="fit"]')).toBeFocused();
+        await colorTrigger.focus();
+        await page.keyboard.press('Enter');
+        await expect(colorMenu).toBeVisible();
+        await page.keyboard.press('Home');
+        await page.keyboard.press('Enter');
+        await expect(colorTrigger).toHaveAttribute('value', 'srgb');
+        await expect(colorTrigger).toBeFocused();
+        await expect(colorMenu).toBeHidden();
+        await block.block.locator('.color-dropdown-trigger').focus();
         await page.keyboard.press('Shift+Tab');
         await expect(colorHelp).toBeFocused();
         await expect(block.dialog.locator('sp-tooltip[open]').first()).toBeAttached();
@@ -371,7 +397,7 @@ test.describe('ColorImageContrastCheckerBlock Test Suite', () => {
         await test.step('Verify automatic selection and native analysis dimensions', async () => {
           await expect(block.panel).toBeVisible();
           await expect(block.block).toHaveAttribute('aria-busy', 'false');
-          await expect(block.block.locator('select')).toHaveValue('adobe-rgb');
+          await expect(block.block.locator('.color-dropdown-trigger')).toHaveAttribute('value', 'adobe-rgb');
           await expect(block.save).toBeEnabled();
         });
         const dimensions = await block.canvas.evaluate((canvas) => [canvas.width, canvas.height]);
