@@ -1,7 +1,14 @@
 import BlockMediator from '../../block-mediator.min.js';
 import { announceToScreenReader } from '../spectrum/utils/a11y.js';
 
-export function createActionMenuState(stateKey = 'action-menu', { transformPalette } = {}) {
+export function generateRandomHexCodes(num = 10) {
+  return Array.from({ length: num }, () => `#${Math.floor(Math.random() * 16777216).toString(16).padStart(6, '0')}`);
+}
+
+export function createActionMenuState(stateKey = 'action-menu', {
+  transformPalette,
+  randomPaletteAnnouncement = 'New random palette generated',
+} = {}) {
   const eventNamespace = stateKey;
 
   function emit(event, detail) {
@@ -75,11 +82,6 @@ export function createActionMenuState(stateKey = 'action-menu', { transformPalet
     setHistoryIndex(index + 1);
   }
 
-  function generateRandomHexCodes(num = 10) {
-    const hexCodes = Array.from({ length: num }, () => `#${Math.floor(Math.random() * 16777216).toString(16).padStart(6, '0')}`);
-    return hexCodes;
-  }
-
   function normalizeHex(h) {
     if (typeof h !== 'string') return h;
     return h.startsWith('#') ? h.toUpperCase() : `#${h}`.toUpperCase();
@@ -96,7 +98,7 @@ export function createActionMenuState(stateKey = 'action-menu', { transformPalet
       && finalCodes.every((h, i) => h === normalizeHex(current[i]));
     if (unchanged) return finalCodes;
     addOnePaletteToHistory(finalCodes);
-    announceToScreenReader('New random palette generated');
+    announceToScreenReader(randomPaletteAnnouncement);
     return finalCodes;
   }
 
