@@ -63,11 +63,14 @@
         let currentUrlElement = null;
         let normalizedMatch = null;
         const normalizePath = (path) => path.replace(/\/$/, '').replace(/\.html$/, '');
+        const isSitemapOrigin = (loc) => {
+          try { return new URL(loc).origin === sitemapOrigin; } catch { return false; }
+        };
         const targetPath = normalizePath(pathname);
 
         for (const urlElement of urlElements) {
           const loc = urlElement.querySelector('loc')?.textContent;
-          if (!loc || !loc.startsWith(sitemapOrigin)) continue;
+          if (!loc || !isSitemapOrigin(loc)) continue;
           const locPath = loc.slice(sitemapOrigin.length) || '/';
           if (!locPath.startsWith('/')) continue;
           if (locPath === pathname) {
