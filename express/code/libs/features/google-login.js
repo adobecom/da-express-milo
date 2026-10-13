@@ -12,7 +12,11 @@ const resolveDestination = (getMetadata) => {
   const redirect = getMetadata('google-login-redirect')?.trim();
   if (redirect) {
     try {
-      return new URL(redirect).href;
+      const url = new URL(redirect, window.location.href);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        throw new TypeError(`Unsupported redirect protocol: ${url.protocol}`);
+      }
+      return url.href;
     } catch {
       window.lana?.log(`Invalid google-login-redirect: ${redirect}`, { tags: 'google-login', severity: 'error' });
     }

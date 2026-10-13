@@ -159,9 +159,36 @@ describe('Google login', () => {
     })).to.be.true;
   });
 
+  it('resolves authored relative redirect metadata against the current page', async () => {
+    window.adobeIMS.socialHeadlessSignIn.rejects(new Error('new account'));
+    getMetadata.withArgs('google-login-redirect').returns('/express/templates/');
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
+    const { callback } = initialize.firstCall.args[0];
+
+    await callback({ credential: 'google-token' });
+
+    expect(window.adobeIMS.signInWithSocialProvider.calledOnceWithExactly('google', {
+      redirect_uri: `${window.location.origin}/express/templates/`,
+    })).to.be.true;
+  });
+
   it('falls back to the current page and logs malformed redirect metadata', async () => {
     window.adobeIMS.socialHeadlessSignIn.rejects(new Error('new account'));
-    getMetadata.withArgs('google-login-redirect').returns('not a URL');
+    getMetadata.withArgs('google-login-redirect').returns('http://[');
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
+    const { callback } = initialize.firstCall.args[0];
+
+    await callback({ credential: 'google-token' });
+
+    expect(window.adobeIMS.signInWithSocialProvider.calledOnceWithExactly('google', {
+      redirect_uri: window.location.href,
+    })).to.be.true;
+    expect(window.lana.log.calledOnce).to.be.true;
+  });
+
+  it('falls back to the current page for a non-HTTP redirect', async () => {
+    window.adobeIMS.socialHeadlessSignIn.rejects(new Error('new account'));
+    getMetadata.withArgs('google-login-redirect').returns('ftp://example.com/file');
     await initGoogleLogin(loadIms, getMetadata, loadScript);
     const { callback } = initialize.firstCall.args[0];
 
