@@ -771,8 +771,14 @@
   color: var( --c1-text-text);
 }
 
+.faqv2.expandable:not(.longform) .faqv2-wrapper,
+.faqv2.expandable:not(.longform) .faqv2-toggle {
+  border-radius: 8px;
+}
+
 .faqv2.expandable:not(.longform) .faqv2-content {
   padding-inline: var(--spacing-350) var(--spacing-500);
+  border-radius: 0 0 8px 8px;
 }
 
 .faqv2.expandable:not(.longform) .faqv2-content.open {
