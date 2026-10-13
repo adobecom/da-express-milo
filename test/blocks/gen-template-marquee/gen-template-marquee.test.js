@@ -92,6 +92,19 @@ describe('gen-template-marquee', () => {
       .to.equal('Get started with an example prompt');
   });
 
+  it('only injects the authored branding logo', async () => {
+    const blockWithoutLogo = await prepareBlock();
+    expect(blockWithoutLogo.querySelector('.gen-template-logo')).to.not.exist;
+
+    const blockWithLogo = await prepareBlock({
+      'inject-branding-logo': 'adobe-express-logo',
+    });
+    const logo = blockWithLogo.querySelector('.gen-template-logo');
+
+    expect(logo).to.exist;
+    expect(logo.src).to.contain('/express/code/icons/adobe-express-logo.svg');
+  });
+
   it('uses page metadata to override every prompt placeholder', async () => {
     const block = await prepareBlock({
       'gen-template-prompt-label': 'Your prompt',

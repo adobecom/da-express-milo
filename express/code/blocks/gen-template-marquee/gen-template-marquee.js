@@ -148,6 +148,16 @@ function buildPromptForm(suggestionsRow, strings) {
   return wrapper;
 }
 
+function getBrandingLogo() {
+  const brandingLogoName = getMetadata('inject-branding-logo')?.trim();
+  if (!brandingLogoName) return null;
+
+  const logo = getIconElementDeprecated(brandingLogoName);
+  logo.classList.add('gen-template-logo');
+  logo.setAttribute('aria-hidden', 'true');
+  return logo;
+}
+
 function buildContent(textRow, suggestionsRow, strings) {
   const content = createElement('div', 'gen-template-content');
   const text = createElement('div', 'gen-template-text');
@@ -155,12 +165,10 @@ function buildContent(textRow, suggestionsRow, strings) {
   const textCell = textRow?.firstElementChild;
   const heading = textCell?.querySelector('h1, h2, h3, h4, h5, h6');
   const body = [...(textCell?.children || [])].filter((child) => child !== heading);
-  const logo = getIconElementDeprecated('adobe-express-logo', undefined, '');
+  const logo = getBrandingLogo();
 
-  logo.classList.add('gen-template-logo');
-  logo.setAttribute('aria-hidden', 'true');
-  if (heading) logoAndHeading.append(logo, heading);
-  else logoAndHeading.append(logo);
+  if (logo) logoAndHeading.append(logo);
+  if (heading) logoAndHeading.append(heading);
   text.append(logoAndHeading, ...body);
   content.append(text, buildPromptForm(suggestionsRow, strings));
   return content;
