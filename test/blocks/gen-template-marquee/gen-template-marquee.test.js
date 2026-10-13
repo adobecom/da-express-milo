@@ -111,6 +111,22 @@ describe('gen-template-marquee', () => {
     expect(block.querySelector('.gen-template-suggestions-label').textContent).to.equal('Try an example');
   });
 
+  it('grows and shrinks the prompt to fit its lines', async () => {
+    const block = await prepareBlock();
+    const input = block.querySelector('.gen-template-prompt-input');
+    const initialHeight = parseFloat(input.style.height);
+
+    input.value = 'First line\nSecond line\nThird line\nFourth line';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    const expandedHeight = parseFloat(input.style.height);
+
+    input.value = 'One line';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+
+    expect(expandedHeight).to.be.greaterThan(initialHeight);
+    expect(parseFloat(input.style.height)).to.be.lessThan(expandedHeight);
+  });
+
   it('splits the authored comma-separated suggestion row', async () => {
     const block = await prepareBlock();
     const suggestions = block.querySelectorAll('.gen-template-suggestion');

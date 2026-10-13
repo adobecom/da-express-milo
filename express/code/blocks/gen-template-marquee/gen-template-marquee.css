@@ -10,7 +10,7 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
   --gen-template-card-width: 250px;
   --gen-template-column-gap: var(--spacing-600);
   --gen-template-card-gap: 52px;
-  --gen-template-gallery-bottom-padding: 60px;
+  --gen-template-gallery-bottom-padding: 40px;
   --gen-template-heading-line-height: 32px;
   --gen-template-body-subtle: rgb(0 0 0 / 64%);
   position: relative;
@@ -316,6 +316,7 @@ main .section .gen-template-suggestions-label {
     --gen-template-card-width: 291px;
     --gen-template-column-gap: 69px;
     --gen-template-card-gap: 100px;
+    --gen-template-gallery-bottom-padding: 64px;
     padding-inline: var(--spacing-500);
   }
 
@@ -370,6 +371,7 @@ main .section .gen-template-suggestions-label {
     --gen-template-padding-top: var(--spacing-800);
     --gen-template-gallery-top: 358px;
     --gen-template-heading-line-height: 56px;
+    --gen-template-gallery-bottom-padding: 80px;
   }
 
   .gen-template-marquee .gen-template-logo.icon {

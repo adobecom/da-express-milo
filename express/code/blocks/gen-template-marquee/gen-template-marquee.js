@@ -208,7 +208,18 @@ function buildGallery(templates) {
   return gallery;
 }
 
+function resizePrompt(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = `${textarea.scrollHeight}px`;
+}
+
 function addInteractions(block) {
+  block.addEventListener('input', (event) => {
+    const textarea = event.target.closest('.gen-template-prompt-input');
+    if (!textarea || !block.contains(textarea)) return;
+    resizePrompt(textarea);
+  });
+
   block.addEventListener('click', (event) => {
     const suggestion = event.target.closest('.gen-template-suggestion');
     if (!suggestion || !block.contains(suggestion)) return;
@@ -255,4 +266,5 @@ export default async function decorate(block) {
 
   block.replaceChildren(content, gallery);
   addInteractions(block);
+  resizePrompt(block.querySelector('.gen-template-prompt-input'));
 }
