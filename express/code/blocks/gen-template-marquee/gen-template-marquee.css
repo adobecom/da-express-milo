@@ -13,8 +13,7 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
   --gen-template-gallery-bottom-padding: 40px;
   --gen-template-heading-line-height: 32px;
   --gen-template-body-subtle: rgb(0 0 0 / 64%);
-  position: relative;
-  display: grid;
+  position: relative; 
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
   justify-items: center;
@@ -134,7 +133,7 @@ main .section .gen-template-text > p {
   opacity: 1;
 }
 
-.gen-template-prompt-input:focus-visible {
+.gen-template-prompt-field:has(.gen-template-prompt-input:focus-visible) {
   border-radius: var(--corner-radius-80);
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: var(--spacing-50);
@@ -180,6 +179,12 @@ main .section .gen-template-text > p {
   /* overflow: hidden; */
 }
 
+.gen-template-suggestion:hover {
+   border-radius: 6px;
+border: 1px solid var(--s2a-color-border-subtle);
+background: var(--s2a-color-control-button-background-solid-hover, #DADADA);
+}
+
 main .section .gen-template-suggestions-label {
   margin: 0;
   color: var(--gen-template-body-subtle);
@@ -218,19 +223,20 @@ main .section .gen-template-suggestions-label {
   padding: var(--spacing-200) var(--spacing-300);
   border: 1px solid var(--color-gray-300-variant);
   border-radius: var(--corner-radius-80);
-  background: var(--color-gray-100);
+  /* background: var(--color-gray-100); */
   color: var(--Alias-content-typography-Heading);
   cursor: pointer;
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-s);
   font-weight: var(--subheading-font-weight);
   line-height: var(--spacing-325);
-  white-space: nowrap;
+  white-space: nowrap; 
+  background: #F8F8F8;
 }
 
 .gen-template-suggestion:focus-visible {
   outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: var(--spacing-50);
+  outline-offset: 0;
 }
 
 .gen-template-gallery {
@@ -238,7 +244,7 @@ main .section .gen-template-suggestions-label {
   display: flex;
   gap: var(--gen-template-column-gap);
   width: max-content;
-  margin-top: calc(var(--gen-template-gallery-top) - var(--gen-template-padding-top));
+  margin-top: 40px;
 }
 
 .gen-template-column {
@@ -298,16 +304,6 @@ main .section .gen-template-suggestions-label {
   }
 }
 
-@keyframes gen-template-column-rise {
-  from { transform: translateY(var(--spacing-600)); }
-  to { transform: translateY(calc(-1 * var(--spacing-600))); }
-}
-
-@keyframes gen-template-column-fall {
-  from { transform: translateY(calc(-1 * var(--spacing-600))); }
-  to { transform: translateY(var(--spacing-600)); }
-}
-
 @media (min-width: 600px) {
   .gen-template-marquee {
     /* Normalize the translated edge columns into intrinsic padding offsets. */
@@ -319,6 +315,12 @@ main .section .gen-template-suggestions-label {
     --gen-template-gallery-bottom-padding: 64px;
     padding-inline: var(--spacing-500);
   }
+
+    .gen-template-gallery {
+ 
+  margin-top : 60px;
+}
+
 
   .gen-template-content {
     max-width: 666px;
@@ -353,15 +355,17 @@ main .section .gen-template-suggestions-label {
   .gen-template-column:nth-child(1),
   .gen-template-column:nth-child(5) {
     translate: none;
+    margin-top: -176px;
   }
 
   .gen-template-column:nth-child(2),
   .gen-template-column:nth-child(4) {
-    padding-top: 176px;
+    padding-top: 0px;
+    translate: none;
   }
 
   .gen-template-column:nth-child(3) {
-    padding-top: 281px;
+    padding-top: 105px
   }
 }
 
@@ -383,21 +387,6 @@ main .section .gen-template-suggestions-label {
     font-size: 56px;
     line-height: var(--gen-template-heading-line-height);
     letter-spacing: -1.68px;
-  }
-
-  .gen-template-column:nth-child(1),
-  .gen-template-column:nth-child(5) {
-    translate: none;
-  }
-
-  .gen-template-column:nth-child(2),
-  .gen-template-column:nth-child(4) {
-    padding-top: 175px;
-    translate: none;
-  }
-
-  .gen-template-column:nth-child(3) {
-    padding-top: 281px;
   }
 }
 
