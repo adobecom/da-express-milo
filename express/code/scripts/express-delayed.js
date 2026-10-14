@@ -75,7 +75,10 @@ async function loadGoogleLogin() {
     || (googleLogin === 'desktop' && desktopViewport);
   const shouldLoad = !signedIn && supportedMetadata && viewportEligible;
 
-  if (!shouldLoad) return;
+  if (!shouldLoad) {
+    document.body.classList.remove('google-login-prompt-pending');
+    return;
+  }
 
   const { default: initGoogleLogin } = await import('../libs/features/google-login.js');
   await initGoogleLogin(loadIms, getMetadata, loadScript);
@@ -95,6 +98,7 @@ export default async function loadDelayed() {
     await loadGoogleLogin();
     return null;
   } catch (error) {
+    document.body.classList.remove('google-login-prompt-pending');
     window.lana?.log(`Express-Delayed Error: ${error?.message || error?.detail || error}`, { tags: 'express-delayed', severity: 'error' });
     return null;
   }

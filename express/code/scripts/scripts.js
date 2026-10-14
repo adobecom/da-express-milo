@@ -19,6 +19,7 @@ import {
   getRedirectUri,
   getIconElementDeprecated,
   getContentRoot,
+  getMobileOperatingSystem,
 } from './utils.js';
 
 // Add project-wide style path here.
@@ -318,6 +319,9 @@ window.addEventListener('unhandledrejection', (event) => {
  */
 
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
+if (getMobileOperatingSystem() !== 'iOS') {
+  document.body.classList.add('google-login-prompt-pending');
+}
 preDecorateSections(document);
 // LCP image decoration
 const eagerLoad = (img) => {

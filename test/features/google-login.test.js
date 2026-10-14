@@ -2,6 +2,15 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import initGoogleLogin from '../../express/code/libs/features/google-login.js';
 
+const ctaStyles = document.createElement('link');
+ctaStyles.rel = 'stylesheet';
+ctaStyles.href = new URL('../../express/code/scripts/widgets/floating-cta.css', import.meta.url).href;
+await new Promise((resolve, reject) => {
+  ctaStyles.addEventListener('load', resolve, { once: true });
+  ctaStyles.addEventListener('error', reject, { once: true });
+  document.head.append(ctaStyles);
+});
+
 describe('Google login', () => {
   let initialize;
   let prompt;
@@ -9,8 +18,10 @@ describe('Google login', () => {
   let loadScript;
   let getMetadata;
   let originalUserAgent;
+  let clock;
 
   beforeEach(() => {
+    clock = sinon.useFakeTimers();
     originalUserAgent = navigator.userAgent;
     document.body.innerHTML = '<div class="feds-profile"></div>';
     initialize = sinon.stub();
@@ -27,6 +38,7 @@ describe('Google login', () => {
     window.adobeid = { client_id: 'adobe-client', scope: 'adobe-scope' };
     window.lana = { log: sinon.stub() };
     window.DISABLE_PAGE_RELOAD = true;
+    document.body.classList.remove('google-login-prompt-pending');
   });
 
   afterEach(() => {
@@ -40,17 +52,20 @@ describe('Google login', () => {
       value: originalUserAgent,
       configurable: true,
     });
+    document.body.classList.remove('google-login-prompt-pending');
     document.body.innerHTML = '';
   });
 
   it('does not load Google for a signed-in user', async () => {
     window.adobeIMS.isSignedInUser.returns(true);
+    document.body.classList.add('google-login-prompt-pending');
 
     await initGoogleLogin(loadIms, getMetadata, loadScript);
 
     expect(loadIms.calledOnce).to.be.true;
     expect(loadScript.notCalled).to.be.true;
     expect(initialize.notCalled).to.be.true;
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
   });
 
   it('does not change the iPhone experience', async () => {
@@ -59,6 +74,7 @@ describe('Google login', () => {
       configurable: true,
     });
 
+    document.body.classList.add('google-login-prompt-pending');
     await initGoogleLogin(loadIms, getMetadata, loadScript);
 
     expect(loadIms.notCalled).to.be.true;
@@ -86,19 +102,59 @@ describe('Google login', () => {
     expect(prompt.calledOnce).to.be.true;
   });
 
-  it('defers One Tap until the dismissable mobile fork resolves', async () => {
-    const clock = sinon.useFakeTimers();
-    document.body.innerHTML += '<div class="floating-button-wrapper"></div>'
-      + '<div class="mobile-fork-button mweb-mobile-fork"></div>';
-    let ctaHiddenWhenPrompted = false;
+  it('shows One Tap before every non-dismissable floating CTA', async () => {
+    document.body.insertAdjacentHTML('beforeend', `<main>
+      <div class="floating-button-wrapper"></div>
+      <div class="floating-button-wrapper mobile-fork-button"></div>
+      <div class="floating-button-wrapper mobile-fork-button-frictionless"></div>
+      <div class="floating-button-wrapper mobile-fork-button-os-split"></div>
+      <div class="floating-button-wrapper mobile-fork-button-unity"></div>
+    </main>`);
+    document.body.classList.add('google-login-prompt-pending');
+    const floatingCtas = [...document.querySelectorAll('.floating-button-wrapper')];
+    let ctasHiddenWhenPrompted = false;
     prompt.callsFake(() => {
-      ctaHiddenWhenPrompted = document.body.classList.contains('google-login-prompt-pending');
+      ctasHiddenWhenPrompted = floatingCtas
+        .every((cta) => getComputedStyle(cta).visibility === 'hidden');
+    });
+
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
+
+    expect(prompt.calledOnce).to.be.true;
+    expect(ctasHiddenWhenPrompted).to.be.true;
+    floatingCtas.forEach((cta) => {
+      expect(getComputedStyle(cta).visibility).to.equal('hidden');
+    });
+
+    clock.tick(999);
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
+
+    clock.tick(1);
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
+    floatingCtas.forEach((cta) => {
+      expect(getComputedStyle(cta).visibility).to.equal('visible');
+    });
+  });
+
+  it('defers One Tap until the dismissable mobile fork resolves', async () => {
+    document.body.insertAdjacentHTML('beforeend', `<main>
+      <div class="floating-button-wrapper"></div>
+      <div class="floating-button-wrapper mobile-fork-button mweb-mobile-fork"></div>
+    </main>`);
+    document.body.classList.add('google-login-prompt-pending');
+    const regularCta = document.querySelector('main .floating-button-wrapper:not(.mobile-fork-button)');
+    const dismissableFork = document.querySelector('.mweb-mobile-fork');
+    let regularCtaHiddenWhenPrompted = false;
+    prompt.callsFake(() => {
+      regularCtaHiddenWhenPrompted = getComputedStyle(regularCta).visibility === 'hidden';
     });
 
     await initGoogleLogin(loadIms, getMetadata, loadScript);
 
     expect(initialize.calledOnce).to.be.true;
     expect(prompt.notCalled).to.be.true;
+    expect(getComputedStyle(regularCta).visibility).to.equal('hidden');
+    expect(getComputedStyle(dismissableFork).visibility).to.equal('visible');
 
     document.dispatchEvent(new CustomEvent('mobileforkresolved', {
       detail: { action: 'continue' },
@@ -108,13 +164,24 @@ describe('Google login', () => {
     }));
 
     expect(prompt.calledOnce).to.be.true;
-    expect(ctaHiddenWhenPrompted).to.be.true;
+    expect(regularCtaHiddenWhenPrompted).to.be.true;
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
 
     clock.tick(999);
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
 
     clock.tick(1);
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
+    expect(getComputedStyle(regularCta).visibility).to.equal('visible');
+  });
+
+  it('releases floating CTAs when IMS cannot load', async () => {
+    document.body.classList.add('google-login-prompt-pending');
+    loadIms.rejects(new Error('IMS unavailable'));
+
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
+
+    expect(prompt.notCalled).to.be.true;
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
   });
 

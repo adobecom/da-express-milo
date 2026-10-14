@@ -7,6 +7,7 @@ const WRAPPER = 'feds-profile';
 const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
 const REGULAR_CTA_PENDING_CLASS = 'google-login-prompt-pending';
 const REGULAR_CTA_SUPPRESSION_MS = 1000;
+const releaseFloatingCtas = () => document.body.classList.remove(REGULAR_CTA_PENDING_CLASS);
 
 const resolveDestination = (getMetadata) => {
   const redirect = getMetadata('google-login-redirect')?.trim();
@@ -48,30 +49,38 @@ const onToken = async (getMetadata, data) => {
   window.location.assign(destination);
 };
 
-const promptGoogleLogin = (hideRegularCta = false) => {
-  if (hideRegularCta) document.body.classList.add(REGULAR_CTA_PENDING_CLASS);
+const promptGoogleLogin = () => {
+  document.body.classList.add(REGULAR_CTA_PENDING_CLASS);
   try {
     window.google?.accounts?.id?.prompt();
   } finally {
-    if (hideRegularCta) {
-      window.setTimeout(() => {
-        document.body.classList.remove(REGULAR_CTA_PENDING_CLASS);
-      }, REGULAR_CTA_SUPPRESSION_MS);
-    }
+    window.setTimeout(releaseFloatingCtas, REGULAR_CTA_SUPPRESSION_MS);
   }
 };
 
 export default async function initGoogleLogin(loadIms, getMetadata, loadScript) {
   const os = getMobileOperatingSystem();
-  if (os === 'iOS') return;
+  if (os === 'iOS') {
+    releaseFloatingCtas();
+    return;
+  }
   try {
     await loadIms();
   } catch {
+    releaseFloatingCtas();
     return;
   }
-  if (window.adobeIMS?.isSignedInUser()) return;
+  if (window.adobeIMS?.isSignedInUser()) {
+    releaseFloatingCtas();
+    return;
+  }
 
-  await loadScript(GOOGLE_SCRIPT);
+  try {
+    await loadScript(GOOGLE_SCRIPT);
+  } catch (error) {
+    releaseFloatingCtas();
+    throw error;
+  }
   const wrapper = document.querySelector(`.${WRAPPER}`);
   let placeholder;
   if (wrapper) {
@@ -92,7 +101,7 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript) 
 
   if (document.querySelector('.mobile-fork-button.mweb-mobile-fork')) {
     document.addEventListener(MOBILE_FORK_RESOLVED_EVENT, () => {
-      promptGoogleLogin(true);
+      promptGoogleLogin();
     }, { once: true });
   } else {
     promptGoogleLogin();
