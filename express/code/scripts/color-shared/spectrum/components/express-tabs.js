@@ -61,7 +61,10 @@ function getTabbableAdjacentTo(el, reverse = false) {
  * @param {'s'|'m'|'l'|'xl'} [config.size='m']
  * @param {boolean} [config.quiet=false]
  * @param {'auto'|'compact'} [config.direction='auto']
- * @param {Array<{label: string, value: string, disabled?: boolean, spIcon?: string, iconSlotHtml?: string}>} [config.tabs=[]]
+ * @param {Array<{
+ * label: string, value: string, disabled?: boolean,
+ * spIcon?: string, iconSlotHtml?: string
+ * }>} [config.tabs=[]]
  * @param {Function} [config.onSelectionChange] — ({ selected }) when tab changes
  * @param {boolean|string[]} [config.enterPanelOnTab=false] — move forward Tab from
  * selected tabs into the panel
@@ -106,11 +109,11 @@ export async function createExpressTabs(config = {}) {
       ...(disabled ? { disabled: '' } : {}),
     });
     if (spIcon?.startsWith('sp-icon-')) {
-      const iconEl = createTag(spIcon, { 'slot': 'icon' });
+      const iconEl = createTag(spIcon, { slot: 'icon' });
       tab.appendChild(iconEl);
     }
     if (iconSlotHtml) {
-      const iconWrapper = createTag('span', { 'slot': 'icon', class: 'ax-custom-icon' }, iconSlotHtml);
+      const iconWrapper = createTag('span', { slot: 'icon', class: 'ax-custom-icon' }, iconSlotHtml);
       tab.prepend(iconWrapper);
     }
     tabsEl.appendChild(tab);
@@ -184,7 +187,7 @@ export async function createExpressTabs(config = {}) {
      * Add a tab panel for a given tab value.
      * @param {string} value — matches the tab's value attribute
     * @param {HTMLElement} content — content to place inside the panel
-    * @returns {HTMLElement} — the created sp-tab-panel
+    * @returns {HTMLElement} — the created tab panel
      */
     addPanel(value, content) {
       const panel = createTag('sp-tab-panel', { value });

@@ -49,15 +49,7 @@
 }
 
 main .font-bento-header a.con-button.fill:any-link {
-  background-color: var(--Background-Primary-Default);
-  border-color: var(--Background-Primary-Default);
-  color: var(--color-white);
   margin: 0;
-}
-
-main .font-bento-header a.con-button.fill:any-link:hover {
-  background-color: var(--Background-Primary-Hover);
-  border-color: var(--Background-Primary-Hover);
 }
 
 .font-bento-grid {
