@@ -6,11 +6,54 @@ import {
   setLibs,
   hideQuickActionsOnDevices,
   getIconElementDeprecated,
+  getBrandingLogoElement,
   convertToInlineSVG,
   getContentRoot,
   decorateButtonsDeprecated,
 } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
+
+describe('Branding logos', () => {
+  let originalDirection;
+
+  beforeEach(() => {
+    originalDirection = document.documentElement.getAttribute('dir');
+  });
+
+  afterEach(() => {
+    if (originalDirection === null) document.documentElement.removeAttribute('dir');
+    else document.documentElement.setAttribute('dir', originalDirection);
+  });
+
+  it('uses the standard logo in LTR', () => {
+    document.documentElement.dir = 'ltr';
+    expect(getBrandingLogoElement().getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo.svg');
+  });
+
+  it('uses the RTL asset for default and explicitly selected standard logos', () => {
+    document.documentElement.dir = 'rtl';
+    [undefined, 'adobe-express-logo'].forEach((name) => {
+      expect(getBrandingLogoElement(name).getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo-rtl.svg');
+    });
+  });
+
+  it('preserves custom, white, and explicit RTL assets in either direction', () => {
+    ['ltr', 'rtl'].forEach((direction) => {
+      document.documentElement.dir = direction;
+      ['cobrand-lockup-acrobat-express', 'adobe-express-logo-white', 'adobe-express-logo-rtl'].forEach((name) => {
+        const logo = getBrandingLogoElement(name, 22, 'Authored label', 'custom-logo');
+        expect(logo.getAttribute('src')).to.equal(`/express/code/icons/${name}.svg`);
+        expect(logo.alt).to.equal('Authored label');
+        expect(logo.classList.contains('custom-logo')).to.equal(true);
+      });
+    });
+  });
+
+  it('does not change the general icon helper in RTL', () => {
+    document.documentElement.dir = 'rtl';
+    expect(getIconElementDeprecated('adobe-express-logo').getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo.svg');
+  });
+});
 
 describe('Libs', () => {
   it('Default Libs', () => {

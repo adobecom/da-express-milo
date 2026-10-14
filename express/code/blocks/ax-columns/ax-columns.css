@@ -488,6 +488,10 @@ main .section .ax-columns.enterprise .column h2 {
   float: left;
 }
 
+.ax-columns .icon.icon-adobe-express-logo-rtl {
+  margin-right: 0;
+}
+
 .ax-columns .brand.icon {
   width: auto;
   margin-right: 0;
