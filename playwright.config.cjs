@@ -7,6 +7,10 @@ const USER_AGENT_DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 const USER_AGENT_MOBILE_CHROME = 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Mobile Safari/537.36 NALA-Acom';
 const USER_AGENT_MOBILE_SAFARI = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1 NALA-Acom';
 
+/* IMS stage only allows CORS from main--/stage-- hosts, so branch previews
+ * can't restore a session. Set this to run the login projects against one. */
+const LOGIN_BASE_URL = process.env.NALA_LOGIN_BASE_URL;
+
 function getRetries() {
   if (process.env.NALA_RETRIES !== undefined) return Number(process.env.NALA_RETRIES);
   return process.env.CI ? 2 : 1;
@@ -125,6 +129,7 @@ const config = {
       use: {
         ...devices['Desktop Chrome'],
         userAgent: USER_AGENT_DESKTOP,
+        ...(LOGIN_BASE_URL && { baseURL: LOGIN_BASE_URL }),
       },
     },
     {
@@ -136,6 +141,7 @@ const config = {
         ...devices['Desktop Chrome'],
         userAgent: USER_AGENT_DESKTOP,
         storageState: AUTH_FILE,
+        ...(LOGIN_BASE_URL && { baseURL: LOGIN_BASE_URL }),
       },
     },
   ],

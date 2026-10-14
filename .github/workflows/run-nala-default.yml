@@ -40,7 +40,9 @@ jobs:
           # Signed-in (IMS) tests: one unsharded lane so the user signs in once.
           # grep '@login' overrides PR-label tags so the auth setup always runs.
           # Optional for now: failures are reported but don't fail the gate.
-          - { lane_id: login, node: 24.x, shard: '', exclude: '', grep: '@login', workers: '1', projects: '--project=express-login-chromium', optional: true }
+          # base_url: IMS stage rejects branch preview origins (CORS), so
+          # login tests run against main-- content and code.
+          - { lane_id: login, node: 24.x, shard: '', exclude: '', grep: '@login', workers: '1', projects: '--project=express-login-chromium', optional: true, base_url: 'https://main--da-express-milo--adobecom.aem.live' }
 
     steps:
       - name: Checkout repository
@@ -94,6 +96,7 @@ jobs:
           NALA_EXTRA_GREP_INVERT: ${{ matrix.exclude }}
           NALA_GREP: ${{ matrix.grep }}
           NALA_WORKERS: ${{ matrix.workers }}
+          NALA_LOGIN_BASE_URL: ${{ matrix.base_url }}
           labels: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
           branch: ${{ github.event.pull_request.head.ref }}
           repoName: ${{ github.repository }}
