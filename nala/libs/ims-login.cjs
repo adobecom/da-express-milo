@@ -41,7 +41,10 @@ function readAuthState() {
 
 function hasAuthState() {
   const state = readAuthState();
-  return Boolean(state?.cookies?.some((c) => c.domain.includes('adobelogin.com')));
+  return Boolean(state?.cookies?.some((c) => {
+    const domain = String(c?.domain || '').toLowerCase().replace(/^\./, '');
+    return domain === 'adobelogin.com' || domain.endsWith('.adobelogin.com');
+  }));
 }
 
 function writeAuthState(state = EMPTY_STORAGE_STATE) {
