@@ -6,7 +6,8 @@ const PLACEHOLDER = 'feds-googleLogin';
 const WRAPPER = 'feds-profile';
 const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
 const REGULAR_CTA_PENDING_CLASS = 'google-login-prompt-pending';
-const REGULAR_CTA_SUPPRESSION_MS = 1000;
+const CTA_HANDOFF_MS = 1000;
+const CTA_PROMPT_FALLBACK_MS = 5000;
 const releaseFloatingCtas = () => document.body.classList.remove(REGULAR_CTA_PENDING_CLASS);
 
 const resolveDestination = (getMetadata) => {
@@ -51,10 +52,40 @@ const onToken = async (getMetadata, data) => {
 
 const promptGoogleLogin = () => {
   document.body.classList.add(REGULAR_CTA_PENDING_CLASS);
+  const prompt = window.google?.accounts?.id?.prompt;
+  if (!prompt) {
+    releaseFloatingCtas();
+    return;
+  }
+
+  let released = false;
+  let releaseTimer;
+  const release = () => {
+    if (released) return;
+    released = true;
+    window.clearTimeout(releaseTimer);
+    releaseFloatingCtas();
+  };
+  const releaseAfter = (delay) => {
+    if (released) return;
+    window.clearTimeout(releaseTimer);
+    releaseTimer = window.setTimeout(release, delay);
+  };
+  const handlePromptMoment = (notification) => {
+    if (notification?.isDisplayed?.()) {
+      releaseAfter(CTA_HANDOFF_MS);
+    } else if (notification?.isNotDisplayed?.()
+      || notification?.isSkippedMoment?.()
+      || notification?.isDismissedMoment?.()) {
+      release();
+    }
+  };
+
+  releaseAfter(CTA_PROMPT_FALLBACK_MS);
   try {
-    window.google?.accounts?.id?.prompt();
-  } finally {
-    window.setTimeout(releaseFloatingCtas, REGULAR_CTA_SUPPRESSION_MS);
+    prompt.call(window.google.accounts.id, handlePromptMoment);
+  } catch {
+    release();
   }
 };
 

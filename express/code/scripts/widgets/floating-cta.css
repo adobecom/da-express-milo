@@ -18,9 +18,6 @@
     height: 150px;
 }
 
-body.google-login-prompt-pending main .floating-button-wrapper:not(.mweb-mobile-fork) {
-    visibility: hidden;
-}
 .floating-button-wrapper.push-up {
     padding-bottom: 96px;
 }

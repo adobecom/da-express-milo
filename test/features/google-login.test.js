@@ -4,7 +4,7 @@ import initGoogleLogin from '../../express/code/libs/features/google-login.js';
 
 const ctaStyles = document.createElement('link');
 ctaStyles.rel = 'stylesheet';
-ctaStyles.href = new URL('../../express/code/scripts/widgets/floating-cta.css', import.meta.url).href;
+ctaStyles.href = new URL('../../express/code/styles/styles.css', import.meta.url).href;
 await new Promise((resolve, reject) => {
   ctaStyles.addEventListener('load', resolve, { once: true });
   ctaStyles.addEventListener('error', reject, { once: true });
@@ -102,6 +102,22 @@ describe('Google login', () => {
     expect(prompt.calledOnce).to.be.true;
   });
 
+  it('hides floating CTA source blocks before decoration completes', () => {
+    document.body.insertAdjacentHTML('beforeend', `<main>
+      <div class="floating-button meta-powered"></div>
+      <div class="mobile-fork-button meta-powered"></div>
+      <div class="mobile-fork-button-dismissable meta-powered"></div>
+      <div class="mobile-fork-button-frictionless meta-powered"></div>
+      <div class="mobile-fork-button-os-split meta-powered"></div>
+      <div class="mobile-fork-button-unity meta-powered"></div>
+    </main>`);
+    document.body.classList.add('google-login-prompt-pending');
+
+    document.querySelectorAll('main .meta-powered').forEach((cta) => {
+      expect(getComputedStyle(cta).visibility).to.equal('hidden');
+    });
+  });
+
   it('shows One Tap before every non-dismissable floating CTA', async () => {
     document.body.insertAdjacentHTML('beforeend', `<main>
       <div class="floating-button-wrapper"></div>
@@ -126,7 +142,7 @@ describe('Google login', () => {
       expect(getComputedStyle(cta).visibility).to.equal('hidden');
     });
 
-    clock.tick(999);
+    clock.tick(4999);
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
 
     clock.tick(1);
@@ -134,6 +150,29 @@ describe('Google login', () => {
     floatingCtas.forEach((cta) => {
       expect(getComputedStyle(cta).visibility).to.equal('visible');
     });
+  });
+
+  it('starts the CTA handoff after One Tap reports that it is displayed', async () => {
+    document.body.insertAdjacentHTML('beforeend', '<main><div class="floating-button-wrapper"></div></main>');
+    document.body.classList.add('google-login-prompt-pending');
+    let handlePromptMoment;
+    prompt.callsFake((listener) => {
+      handlePromptMoment = listener;
+    });
+
+    await initGoogleLogin(loadIms, getMetadata, loadScript);
+    clock.tick(1500);
+
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
+    expect(getComputedStyle(document.querySelector('.floating-button-wrapper')).visibility).to.equal('hidden');
+
+    handlePromptMoment({ isDisplayed: () => true });
+    clock.tick(999);
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
+
+    clock.tick(1);
+    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
+    expect(getComputedStyle(document.querySelector('.floating-button-wrapper')).visibility).to.equal('visible');
   });
 
   it('defers One Tap until the dismissable mobile fork resolves', async () => {
@@ -167,7 +206,7 @@ describe('Google login', () => {
     expect(regularCtaHiddenWhenPrompted).to.be.true;
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
 
-    clock.tick(999);
+    clock.tick(4999);
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.true;
 
     clock.tick(1);
