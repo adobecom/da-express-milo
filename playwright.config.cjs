@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 
 const { devices } = require('@playwright/test');
+const { AUTH_FILE } = require('./nala/libs/ims-login.cjs');
 
 const USER_AGENT_DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.6613.18 Safari/537.36 NALA-Acom';
 const USER_AGENT_MOBILE_CHROME = 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Mobile Safari/537.36 NALA-Acom';
@@ -36,6 +37,8 @@ const config = {
     timeout: Number(process.env.NALA_EXPECT_TIMEOUT) || 15000,
   },
   testMatch: '**/*.test.cjs',
+  /* Signed-in (`*.login.test.cjs`) tests only run in express-login-chromium. */
+  testIgnore: '**/*.login.test.cjs',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -109,6 +112,28 @@ const config = {
       use: {
         ...devices['iPhone 12'],
         userAgent: USER_AGENT_MOBILE_SAFARI,
+      },
+    },
+    /* Signed-in tests: setup logs in once (IMS_EMAIL/IMS_PASS or a session
+     * saved via `npm run nala:login`), then *.login.test.cjs reuse it. */
+    {
+      name: 'express-login-setup',
+      testMatch: /auth\.setup\.cjs$/,
+      testIgnore: [],
+      use: {
+        ...devices['Desktop Chrome'],
+        userAgent: USER_AGENT_DESKTOP,
+      },
+    },
+    {
+      name: 'express-login-chromium',
+      testMatch: '**/*.login.test.cjs',
+      testIgnore: [],
+      dependencies: ['express-login-setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        userAgent: USER_AGENT_DESKTOP,
+        storageState: AUTH_FILE,
       },
     },
   ],
