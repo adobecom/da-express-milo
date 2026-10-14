@@ -20,6 +20,7 @@ jobs:
     name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    continue-on-error: ${{ matrix.optional == true }}
     strategy:
       # Don't cancel the other lanes when one fails — we want the full picture.
       fail-fast: false
@@ -36,6 +37,10 @@ jobs:
           - { lane_id: shard3, node: 24.x, shard: '3/4', exclude: '@color', grep: '', workers: '' }
           - { lane_id: shard4, node: 24.x, shard: '4/4', exclude: '@color', grep: '', workers: '' }
           - { lane_id: color, node: 24.x, shard: '', exclude: '', grep: '@color', workers: '1' }
+          # Signed-in (IMS) tests: one unsharded lane so the user signs in once.
+          # grep '@login' overrides PR-label tags so the auth setup always runs.
+          # Optional for now: failures are reported but don't fail the gate.
+          - { lane_id: login, node: 24.x, shard: '', exclude: '', grep: '@login', workers: '1', projects: '--project=express-login-chromium', optional: true }
 
     steps:
       - name: Checkout repository
@@ -82,7 +87,7 @@ jobs:
         env:
           # PR gate: full cross-browser matrix, sharded across parallel jobs
           # so wall-clock stays low even with all three browsers.
-          NALA_PROJECTS: --project=express-live-chromium --project=express-live-firefox --project=express-live-webkit
+          NALA_PROJECTS: ${{ matrix.projects || '--project=express-live-chromium --project=express-live-firefox --project=express-live-webkit' }}
           # Sharded lanes: SHARD set + exclude @color. Color lane: no shard,
           # grep only @color, workers=1 (serial).
           SHARD: ${{ matrix.shard }}
