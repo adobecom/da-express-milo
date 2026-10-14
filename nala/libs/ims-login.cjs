@@ -22,6 +22,10 @@ const LOGIN_START_PATH = '/drafts/nala/blocks/ax-panels/ax-panels';
 // for AdobeExpressWeb). That page is not under test and is bot-protected, so it
 // is stubbed; only the adobelogin.com session cookies set before it matter.
 const IMS_REDIRECT_TARGETS = ['https://www.stage.adobe.com/**', 'https://www.adobe.com/home**'];
+// page.route() doesn't intercept redirected requests, so the real redirect
+// target still loads. Off the Adobe network (e.g. GitHub runners)
+// www.stage.adobe.com is unreachable and the hand-off ends on chrome-error://.
+const IMS_REDIRECT_HOST_PATTERN = /^www\.(stage\.)?adobe\.com$/;
 const IMS_HOST_PATTERN = /(^|\.)(services\.adobe\.com|adobelogin\.com)$/;
 // The SUSI sign-in form host (auth.services / auth-stg1.services). Leaving it
 // means credentials were accepted; IMS then hands off via adobeid-*/fromSusi.
@@ -129,6 +133,26 @@ class ImsLogin {
 }
 
 /**
+ * After `loginOnAppForm()`, waits for the IMS hand-off to finish and then
+ * navigates to `url`. Session cookies are set before the redirect target, so
+ * where the hand-off ends doesn't matter, but navigating earlier gets
+ * interrupted by it.
+ */
+async function returnAfterImsHandoff(page, url) {
+  await page.waitForURL(
+    (u) => u.protocol === 'chrome-error:' || IMS_REDIRECT_HOST_PATTERN.test(u.hostname),
+    { waitUntil: 'commit', timeout: 30000 },
+  ).catch(() => {});
+  try {
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+  } catch (e) {
+    if (!/interrupted by another navigation/.test(e.message)) throw e;
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+  }
+}
+
+/**
  * Signs in through `adobeIMS.signIn()` (independent of the gnav markup),
  * returns to `startUrl`, and verifies IMS restored the session there.
  */
@@ -140,8 +164,7 @@ async function signInViaIms(page, startUrl) {
   await page.evaluate(() => { setTimeout(() => window.adobeIMS.signIn(), 0); });
   await page.waitForURL((url) => IMS_HOST_PATTERN.test(url.hostname), { timeout: 30000 });
   await new ImsLogin(page).loginOnAppForm();
-
-  await page.goto(startUrl, { waitUntil: 'domcontentloaded' });
+  await returnAfterImsHandoff(page, startUrl);
   if (!await isSignedIn(page, 30000)) {
     throw new Error(`IMS login completed but ${startUrl} does not report a signed-in user.`);
   }
@@ -157,6 +180,7 @@ module.exports = {
   readAuthState,
   writeAuthState,
   stubImsRedirectTargets,
+  returnAfterImsHandoff,
   waitForIms,
   isSignedIn,
   signInViaIms,

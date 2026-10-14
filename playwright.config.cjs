@@ -120,6 +120,8 @@ const config = {
       name: 'express-login-setup',
       testMatch: /auth\.setup\.cjs$/,
       testIgnore: [],
+      // Repeated rapid sign-ins trip IMS's "Something went wrong" page.
+      retries: 1,
       use: {
         ...devices['Desktop Chrome'],
         userAgent: USER_AGENT_DESKTOP,
