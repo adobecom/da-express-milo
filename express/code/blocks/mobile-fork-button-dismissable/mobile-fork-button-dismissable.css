@@ -7,6 +7,7 @@ main  .floating-button-wrapper.mobile-fork-button, main .mobile-fork-button {
   z-index: 8;
 }
 
+
 main .mobile-fork-button.long-text {
   --mfb-font-size: 14px;
 }

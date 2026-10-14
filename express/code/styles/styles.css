@@ -563,6 +563,22 @@ body[data-device="mobile"] main .floating-button-wrapper[data-audience="mobile"]
   display: block;
 }
 
+body.google-login-prompt-pending main :is(
+  .floating-button-wrapper,
+  .floating-button,
+  .mobile-fork-button,
+  .mobile-fork-button-dismissable,
+  .mobile-fork-button-frictionless,
+  .mobile-fork-button-os-split,
+  .mobile-fork-button-unity
+):not(.mweb-mobile-fork) {
+  visibility: hidden;
+}
+
+body.google-login-prompt-pending main .mweb-mobile-fork .floating-button {
+  visibility: visible;
+}
+
 /* gnav */
 body>header {
   box-sizing: content-box;
