@@ -66,7 +66,7 @@
 }
 
 .transparent-img-marquee .text-container :is(h1, h2, h3, h4, h5, h6) {
-  color: inherit;
+  color: var(--Alias-content-typography-Heading);
   font-size: var(--Global-Typography-Size-Headings-Heading-2XL);
   font-weight: var(--heading-font-weight-extra);
   line-height: 1.04;
@@ -76,7 +76,7 @@
 /* Express web/Body/Body-S — 14px (mobile/tablet), 16px (desktop) */
 /* (0,3,1) beats main .section p (0,1,2) */
 .transparent-img-marquee .text-content .text-container p {
-  color: inherit;
+  color: var(--Alias-content-typography-Body);
   font-size: var(--body-font-size-s);
   line-height: 1.3;
   margin: 0;
@@ -357,7 +357,7 @@ main .transparent-img-marquee a.con-button:any-link {
 
   .transparent-img-marquee .main-container {
     max-width: var(--tim-text-desktop-max);
-    padding-block: var(--spacing-900);
+    padding-block: calc(var(--section-padding-xl) + var(--section-padding-s));
     /* desktop uses the text-content max-width cap + foreground gap; no tablet inset */
     padding-inline-end: 0;
   }
