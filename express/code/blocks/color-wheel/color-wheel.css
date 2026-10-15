@@ -550,6 +550,11 @@ color-wheel-express {
 
 .color-harmony-card-content {
   gap: var(--spacing-200);
+  align-self: stretch;
+}
+
+.color-harmony-card-content > .color-harmony-card-palette {
+  margin-block-start: auto;
 }
 
 .color-harmony-card-text {
