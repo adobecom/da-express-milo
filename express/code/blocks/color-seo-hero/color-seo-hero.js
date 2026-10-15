@@ -53,12 +53,12 @@ async function loadStrings() {
   };
 
   // TEMP-LOCALE-TEST: local placeholders.json has no translations for these
-  // locales, so this always falls back to English. Force real strings when
-  // testing under /nl, /de, /fr or /it locally (matching the reviewer's
-  // reported locales) so overflow/wrap fixes can be checked with real-length
-  // text. Remove before merging.
+  // locales, so this always falls back to English. Force real strings via
+  // a ?lcid=nl|de|fr|it query param (no need to navigate to a locale-prefixed
+  // path) so overflow/wrap fixes can be checked with real-length text locally.
+  // Remove before merging.
   const TEMP_LOCALE_STRINGS = {
-    '/nl': {
+    nl: {
       ruleLabels: {
         SHADES: 'Schaduwen',
         COMPLEMENTARY: 'Complementair',
@@ -87,7 +87,7 @@ async function loadStrings() {
       downloadFailed: 'Downloaden niet mogelijk. Probeer het opnieuw.',
       downloadStarted: 'Download gestart',
     },
-    '/de': {
+    de: {
       ruleLabels: {
         SHADES: 'Farbtöne',
         COMPLEMENTARY: 'Komplementär',
@@ -116,7 +116,7 @@ async function loadStrings() {
       downloadFailed: 'Herunterladen nicht möglich. Bitte versuche es erneut.',
       downloadStarted: 'Download gestartet',
     },
-    '/fr': {
+    fr: {
       ruleLabels: {
         SHADES: 'Nuances',
         COMPLEMENTARY: 'Complémentaire',
@@ -145,7 +145,7 @@ async function loadStrings() {
       downloadFailed: 'Téléchargement impossible. Veuillez réessayer.',
       downloadStarted: 'Téléchargement démarré',
     },
-    '/it': {
+    it: {
       ruleLabels: {
         SHADES: 'Sfumature',
         COMPLEMENTARY: 'Complementare',
@@ -175,7 +175,8 @@ async function loadStrings() {
       downloadStarted: 'Download avviato',
     },
   };
-  const tempLocaleStrings = TEMP_LOCALE_STRINGS[config.locale?.prefix];
+  const lcid = new URLSearchParams(window.location.search).get('lcid');
+  const tempLocaleStrings = TEMP_LOCALE_STRINGS[lcid];
   if (tempLocaleStrings) {
     return { railStrings, ...tempLocaleStrings };
   }
