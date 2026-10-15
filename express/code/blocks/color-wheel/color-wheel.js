@@ -225,33 +225,15 @@ const COLOR_WHEEL_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="
 `;
 const HARMONY_THUMB_BASE = '/express/code/blocks/color-wheel/harmony-thumbnails';
 const HARMONY_RULES = [
-  {
-    value: 'CUSTOM', label: 'Custom', thumb: 'custom.png', previewColors: ['#1900AB', '#6BB1FF', '#FF7500', '#FFFDEB', '#0076FF'],
-  },
-  {
-    value: 'ANALOGOUS', label: 'Analogous', thumb: 'analogous.png', previewColors: ['#1900AB', '#DB8B69', '#FFA000', '#FF1F02', '#FFBE00'],
-  },
-  {
-    value: 'COMPLEMENTARY', label: 'Complementary', thumb: 'complementary.png', previewColors: ['#1900AB', '#00D2FF', '#C07330', '#3A96AB', '#805F41'],
-  },
-  {
-    value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary', thumb: 'split-complementary.png', previewColors: ['#1900AB', '#0082FF', '#03FFDA', '#805F41', '#406080'],
-  },
-  {
-    value: 'TRIAD', label: 'Triad', thumb: 'triad.png', previewColors: ['#1900AB', '#3C00FF', '#00FF0E', '#AA6E39', '#4F4080'],
-  },
-  {
-    value: 'SQUARE', label: 'Square', thumb: 'square.png', previewColors: ['#1900AB', '#C700FF', '#00D2FF', '#A0FF00', '#AA6E39'],
-  },
-  {
-    value: 'COMPOUND', label: 'Compound', thumb: 'compound.png', previewColors: ['#1900AB', '#FF2D00', '#004CFF', '#00D2FF', '#AA6E39'],
-  },
-  {
-    value: 'SHADES', label: 'Shades', thumb: 'shades.png', previewColors: ['#1900AB', '#F67300', '#D46300', '#B35300', '#914300'],
-  },
-  {
-    value: 'MONOCHROMATIC', label: 'Monochromatic', thumb: 'monochromatic.png', previewColors: ['#1900AB', '#D57623', '#AA6E39', '#805E40', '#554639'],
-  },
+  { value: 'CUSTOM', label: 'Custom', thumb: 'custom.png' },
+  { value: 'ANALOGOUS', label: 'Analogous', thumb: 'analogous.png' },
+  { value: 'COMPLEMENTARY', label: 'Complementary', thumb: 'complementary.png' },
+  { value: 'SPLIT_COMPLEMENTARY', label: 'Split complementary', thumb: 'split-complementary.png' },
+  { value: 'TRIAD', label: 'Triad', thumb: 'triad.png' },
+  { value: 'SQUARE', label: 'Square', thumb: 'square.png' },
+  { value: 'COMPOUND', label: 'Compound', thumb: 'compound.png' },
+  { value: 'SHADES', label: 'Shades', thumb: 'shades.png' },
+  { value: 'MONOCHROMATIC', label: 'Monochromatic', thumb: 'monochromatic.png' },
 ];
 const HARMONY_ALLOWED_FOR_TWO = new Set([
   'CUSTOM', 'MONOCHROMATIC', 'COMPLEMENTARY', 'SHADES',
@@ -315,6 +297,37 @@ function harmonyRulesForSwatchCount(n) {
     return HARMONY_RULES.filter((r) => HARMONY_ALLOWED_FOR_THREE.has(r.value));
   }
   return HARMONY_RULES.filter((r) => HARMONY_ALLOWED_FOR_TWO.has(r.value));
+}
+
+function withHarmonyPreviewColors(Controller, initialState, rules) {
+  const initialHexes = (initialState?.swatches || []).map((swatch) => swatch.hex);
+  if (!Controller || !initialHexes.length) return rules.map((rule) => ({ ...rule }));
+  const initialRule = initialState.harmonyRule || 'CUSTOM';
+  const baseColorIndex = initialState.baseColorIndex ?? 0;
+  const previewController = new Controller({
+    swatches: initialHexes,
+    harmonyRule: initialRule,
+    baseColorIndex,
+  });
+
+  try {
+    return rules.map((rule) => {
+      previewController.replaceSwatchesFromHexes(initialHexes, {
+        baseIndex: baseColorIndex,
+        harmonyRule: initialRule,
+      });
+      if (rule.value !== initialRule) {
+        previewController.theme.harmonyRule = rule.value;
+        previewController.harmonyAdapter.onRuleChange(rule.value);
+      }
+      return {
+        ...rule,
+        previewColors: previewController.getState().swatches.map((swatch) => swatch.hex),
+      };
+    });
+  } finally {
+    previewController.destroy();
+  }
 }
 
 async function buildHarmonySelector(controller, strings = {}) {
@@ -392,17 +405,19 @@ async function buildHarmonySelector(controller, strings = {}) {
       import('./createHarmonyModal.js'),
     ]);
     harmonyModalManager ||= modalModule.createModalManager();
-    const rules = harmonyRulesForSwatchCount(countThemeSwatches(controller.getState()))
+    const initialState = controller.getState();
+    const modalRules = harmonyRulesForSwatchCount(countThemeSwatches(initialState))
       .map((rule) => ({
         ...rule,
         label: getHarmonyLabel(rule.value),
         description: getHarmonyDescription(rule.value),
         imageSrc: `${HARMONY_THUMB_BASE}/${rule.thumb}`,
       }));
+    const rules = withHarmonyPreviewColors(ColorThemeExpressController, initialState, modalRules);
     const contentView = contentModule.default({
       rules,
-      selectedValue: controller.getState().harmonyRule || 'CUSTOM',
-      paletteColors: controller.getState().swatches.map((swatch) => swatch.hex),
+      selectedValue: initialState.harmonyRule || 'CUSTOM',
+      paletteColors: initialState.swatches.map((swatch) => swatch.hex),
       strings: {
         title: strings.harmonyModalTitle,
         confirm: strings.confirmHarmony,
@@ -1395,6 +1410,7 @@ export {
   configureResponsiveLayout,
   normalizeSwatchHexes,
   harmonyRulesForSwatchCount,
+  withHarmonyPreviewColors,
   makeTransformPalette,
   paletteFromThemeState,
   swatchHexListFromState,
