@@ -52,6 +52,134 @@ async function loadStrings() {
     return value && value !== KEYS[i].replaceAll('-', ' ') ? value : fallbackText;
   };
 
+  // TEMP-LOCALE-TEST: local placeholders.json has no translations for these
+  // locales, so this always falls back to English. Force real strings when
+  // testing under /nl, /de, /fr or /it locally (matching the reviewer's
+  // reported locales) so overflow/wrap fixes can be checked with real-length
+  // text. Remove before merging.
+  const TEMP_LOCALE_STRINGS = {
+    '/nl': {
+      ruleLabels: {
+        SHADES: 'Schaduwen',
+        COMPLEMENTARY: 'Complementair',
+        ANALOGOUS: 'Analoog',
+        TRIAD: 'Triade',
+        DOUBLE_SPLIT_COMPLEMENTARY: 'Tetradisch',
+      },
+      editColor: 'Kleur bewerken',
+      copyColorCode: 'Kopiëren als code',
+      shareThisColor: 'Deze kleur delen',
+      downloadThisPalette: 'Dit palet downloaden',
+      buildAPalette: 'Een palet samenstellen',
+      colorCodeCopied: '{hex} gekopieerd naar klembord',
+      linkCopied: 'Link gekopieerd naar klembord',
+      copyFailed: 'Kan kleurcode niet kopiëren.',
+      shareFailed: 'Kan deze kleur niet delen.',
+      pickAColorPalette: 'Een kleurenpalet kiezen',
+      copyHex: 'Hex kopiëren',
+      createAPalette: 'Een kleurenpalet maken',
+      colorCopiedToClipboard: 'Kleur gekopieerd naar klembord',
+      codeFormatLabels: {
+        CSS: 'Kopiëren als CSS', SASS: 'Kopiëren als SASS', LESS: 'Kopiëren als LESS', XML: 'Kopiëren als XML',
+      },
+      downloadFormatLabels: { JPEG: 'Downloaden als JPEG', ASE: 'Downloaden als ASE' },
+      codeCopied: 'Code gekopieerd naar klembord',
+      downloadFailed: 'Downloaden niet mogelijk. Probeer het opnieuw.',
+      downloadStarted: 'Download gestart',
+    },
+    '/de': {
+      ruleLabels: {
+        SHADES: 'Farbtöne',
+        COMPLEMENTARY: 'Komplementär',
+        ANALOGOUS: 'Analog',
+        TRIAD: 'Triade',
+        DOUBLE_SPLIT_COMPLEMENTARY: 'Tetradisch',
+      },
+      editColor: 'Farbe bearbeiten',
+      copyColorCode: 'Als Code kopieren',
+      shareThisColor: 'Diese Farbe teilen',
+      downloadThisPalette: 'Diese Palette herunterladen',
+      buildAPalette: 'Erstelle eine Farbpalette',
+      colorCodeCopied: '{hex} in die Zwischenablage kopiert',
+      linkCopied: 'Link in die Zwischenablage kopiert',
+      copyFailed: 'Farbcode konnte nicht kopiert werden.',
+      shareFailed: 'Diese Farbe konnte nicht geteilt werden.',
+      pickAColorPalette: 'Wähle eine Farbpalette aus',
+      copyHex: 'Hex kopieren',
+      createAPalette: 'Erstelle eine Farbpalette',
+      colorCopiedToClipboard: 'Farbe in die Zwischenablage kopiert',
+      codeFormatLabels: {
+        CSS: 'Als CSS kopieren', SASS: 'Als SASS kopieren', LESS: 'Als LESS kopieren', XML: 'Als XML kopieren',
+      },
+      downloadFormatLabels: { JPEG: 'Als JPEG herunterladen', ASE: 'Als ASE herunterladen' },
+      codeCopied: 'Code in die Zwischenablage kopiert',
+      downloadFailed: 'Herunterladen nicht möglich. Bitte versuche es erneut.',
+      downloadStarted: 'Download gestartet',
+    },
+    '/fr': {
+      ruleLabels: {
+        SHADES: 'Nuances',
+        COMPLEMENTARY: 'Complémentaire',
+        ANALOGOUS: 'Analogue',
+        TRIAD: 'Triade',
+        DOUBLE_SPLIT_COMPLEMENTARY: 'Tétradique',
+      },
+      editColor: 'Modifier la couleur',
+      copyColorCode: 'Copier en tant que code',
+      shareThisColor: 'Partager cette couleur',
+      downloadThisPalette: 'Télécharger cette palette',
+      buildAPalette: 'Créer une palette',
+      colorCodeCopied: '{hex} copié dans le presse-papiers',
+      linkCopied: 'Lien copié dans le presse-papiers',
+      copyFailed: 'Impossible de copier le code couleur.',
+      shareFailed: 'Impossible de partager cette couleur.',
+      pickAColorPalette: 'Choisir une palette de couleurs',
+      copyHex: 'Copier le code hexadécimal',
+      createAPalette: 'Créer une palette de couleurs',
+      colorCopiedToClipboard: 'Couleur copiée dans le presse-papiers',
+      codeFormatLabels: {
+        CSS: 'Copier en CSS', SASS: 'Copier en SASS', LESS: 'Copier en LESS', XML: 'Copier en XML',
+      },
+      downloadFormatLabels: { JPEG: 'Télécharger en JPEG', ASE: 'Télécharger en ASE' },
+      codeCopied: 'Code copié dans le presse-papiers',
+      downloadFailed: 'Téléchargement impossible. Veuillez réessayer.',
+      downloadStarted: 'Téléchargement démarré',
+    },
+    '/it': {
+      ruleLabels: {
+        SHADES: 'Sfumature',
+        COMPLEMENTARY: 'Complementare',
+        ANALOGOUS: 'Analogo',
+        TRIAD: 'Triade',
+        DOUBLE_SPLIT_COMPLEMENTARY: 'Tetradico',
+      },
+      editColor: 'Modifica colore',
+      copyColorCode: 'Copia come codice',
+      shareThisColor: 'Condividi questo colore',
+      downloadThisPalette: 'Scarica questa palette',
+      buildAPalette: 'Crea una palette',
+      colorCodeCopied: '{hex} copiato negli appunti',
+      linkCopied: 'Link copiato negli appunti',
+      copyFailed: 'Impossibile copiare il codice colore.',
+      shareFailed: 'Impossibile condividere questo colore.',
+      pickAColorPalette: 'Scegli una palette di colori',
+      copyHex: 'Copia hex',
+      createAPalette: 'Crea una palette di colori',
+      colorCopiedToClipboard: 'Colore copiato negli appunti',
+      codeFormatLabels: {
+        CSS: 'Copia come CSS', SASS: 'Copia come SASS', LESS: 'Copia come LESS', XML: 'Copia come XML',
+      },
+      downloadFormatLabels: { JPEG: 'Scarica come JPEG', ASE: 'Scarica come ASE' },
+      codeCopied: 'Codice copiato negli appunti',
+      downloadFailed: 'Download non riuscito. Riprova.',
+      downloadStarted: 'Download avviato',
+    },
+  };
+  const tempLocaleStrings = TEMP_LOCALE_STRINGS[config.locale?.prefix];
+  if (tempLocaleStrings) {
+    return { railStrings, ...tempLocaleStrings };
+  }
+
   return {
     railStrings,
     ruleLabels: {
