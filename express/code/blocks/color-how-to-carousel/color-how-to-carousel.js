@@ -397,7 +397,11 @@ function buildGraphic(payload) {
   graphic.innerHTML = getColorSVG(payload.colorGraphName) || '';
 
   const svg = graphic.querySelector('svg');
-  if (svg && payload.secondaryHex) svg.style.fill = payload.secondaryHex;
+  if (svg && payload.secondaryHex) {
+    svg.style.fill = payload.secondaryHex;
+    svg.style.stroke = payload.secondaryHex;
+    svg.style.strokeWidth = '0';
+  }
   if (svg && payload.primaryHex) svg.style.setProperty('--chtc-graph-accent-color', payload.primaryHex);
 
   return graphic;
