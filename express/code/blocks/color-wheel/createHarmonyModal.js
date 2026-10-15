@@ -30,7 +30,7 @@ function createHarmonyModalContent({
   onConfirm = () => {},
 } = {}) {
   const title = strings.title || 'Learn about color harmonies';
-  const confirmLabel = strings.confirm || 'Confirm';
+  const confirmLabel = strings.confirm || 'Apply Harmony';
   const uid = `color-harmony-modal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const titleId = `${uid}-title`;
   const element = createTag('div', { class: 'color-harmony-modal' });
@@ -61,14 +61,14 @@ function createHarmonyModalContent({
     height: '32',
   });
   const summaryName = createTag('strong', { class: 'color-harmony-modal-summary-name' });
-  const summaryPalette = createTag('span', { class: 'color-harmony-modal-summary-palette' });
-  summaryPalette.appendChild(createColorStrip(
+  const paletteStrip = createTag('div', { class: 'color-harmony-modal-palette-strip' });
+  paletteStrip.appendChild(createColorStrip(
     paletteColors,
     'palette',
     null,
     STRIP_DEFAULTS,
   ));
-  summary.append(summaryImage, summaryName, summaryPalette);
+  summary.append(summaryImage, summaryName);
 
   function updateSummary(rule) {
     if (!rule) return;
@@ -78,7 +78,7 @@ function createHarmonyModalContent({
 
   function updateConfiguredPalette(colors) {
     if (!Array.isArray(colors) || !colors.length) return;
-    summaryPalette.replaceChildren(createColorStrip(
+    paletteStrip.replaceChildren(createColorStrip(
       colors,
       'palette',
       null,
@@ -150,6 +150,7 @@ function createHarmonyModalContent({
   });
 
   const footer = createTag('footer', { class: 'color-harmony-modal-footer' });
+  const footerContent = createTag('div', { class: 'color-harmony-modal-footer-content' });
   const confirmButton = createTag('button', {
     type: 'button',
     class: 'color-harmony-modal-confirm',
@@ -158,7 +159,8 @@ function createHarmonyModalContent({
   confirmButton.addEventListener('click', () => {
     if (pendingValue) onConfirm(pendingValue);
   });
-  footer.append(summary, confirmButton);
+  footerContent.append(summary, confirmButton);
+  footer.append(paletteStrip, footerContent);
   element.append(header, cardsGrid, footer);
   selectRule(pendingValue);
 

@@ -50,11 +50,11 @@ describe('color harmony modal content', () => {
     view = createHarmonyModalContent({
       rules: RULES,
       selectedValue: 'ANALOGOUS',
-      paletteColors: ['#112233', '#445566', '#778899'],
-      strings: { title: 'Learn about color harmonies', confirm: 'Confirm' },
+      paletteColors: ['#112233', '#445566', '#778899', '#AABBCC', '#DDEEFF'],
+      strings: { title: 'Learn about color harmonies', confirm: 'Apply Harmony' },
       onSelect: (value) => {
         selected.push(value);
-        return ['#AABBCC', '#DDEEFF'];
+        return ['#AABBCC', '#DDEEFF', '#123456', '#789ABC', '#FEDCBA'];
       },
       onConfirm: (value) => confirmed.push(value),
     });
@@ -78,10 +78,15 @@ describe('color harmony modal content', () => {
     expect(cards[1].tabIndex).to.equal(0);
     expect(cards.every((card) => card.tabIndex === 0)).to.equal(true);
     expect(view.element.querySelectorAll('.color-harmony-card-palette-swatch')).to.have.length(15);
-    const configuredPalette = view.element.querySelector('.color-harmony-modal-summary-palette .ax-swatch-strip');
+    const configuredPalette = view.element.querySelector('.color-harmony-modal-palette-strip .ax-swatch-strip');
     expect(configuredPalette).to.exist;
-    expect(configuredPalette.querySelectorAll('.ax-swatch')).to.have.length(3);
-    expect(configuredPalette.getAttribute('aria-label')).to.equal('3 colors in palette');
+    expect(configuredPalette.querySelectorAll('.ax-swatch')).to.have.length(5);
+    expect(configuredPalette.getAttribute('aria-label')).to.equal('5 colors in palette');
+    expect(view.element.querySelector('.color-harmony-modal-summary-palette')).to.not.exist;
+    const footerContent = view.element.querySelector('.color-harmony-modal-footer-content');
+    expect(footerContent.contains(view.element.querySelector('.color-harmony-modal-summary'))).to.equal(true);
+    expect(footerContent.contains(view.element.querySelector('.color-harmony-modal-confirm'))).to.equal(true);
+    expect(view.element.querySelector('.color-harmony-modal-confirm').textContent).to.equal('Apply Harmony');
   });
 
   it('applies a card selection immediately and still confirms it', () => {
@@ -93,9 +98,9 @@ describe('color harmony modal content', () => {
     expect(confirmed).to.deep.equal([]);
     expect(view.element.querySelector('.color-harmony-modal-summary-name').textContent).to.equal('Triad');
     expect(selected).to.deep.equal(['TRIAD']);
-    const configuredPalette = view.element.querySelector('.color-harmony-modal-summary-palette .ax-swatch-strip');
-    expect(configuredPalette.querySelectorAll('.ax-swatch')).to.have.length(2);
-    expect(configuredPalette.getAttribute('aria-label')).to.equal('2 colors in palette');
+    const configuredPalette = view.element.querySelector('.color-harmony-modal-palette-strip .ax-swatch-strip');
+    expect(configuredPalette.querySelectorAll('.ax-swatch')).to.have.length(5);
+    expect(configuredPalette.getAttribute('aria-label')).to.equal('5 colors in palette');
 
     view.element.querySelector('.color-harmony-modal-confirm').click();
     expect(confirmed).to.deep.equal(['TRIAD']);

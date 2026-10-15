@@ -131,7 +131,7 @@ async function loadPlaceholders() {
     'contrast-checker', 'color-blindness-simulator', 'no-image-try-ours', 'use-this-image',
     'extracting-colors', 'color-wheel-keyboard-hint', 'color-wheel-harmony-aria',
     'color-wheel-aria-with-hint', 'color-wheel-marker-aria', 'minimize', 'learn-more',
-    'learn-about-color-harmonies', 'confirm', 'custom-harmony-description',
+    'learn-about-color-harmonies', 'apply-harmony', 'custom-harmony-description',
     'analogous-harmony-description', 'complementary-harmony-description',
     'split-complementary-harmony-description', 'triad-harmony-description',
     'square-harmony-description', 'compound-harmony-description', 'shades-harmony-description',
@@ -175,7 +175,7 @@ async function loadPlaceholders() {
     markerAriaTemplate: v(26, '{hex}, use arrow keys to move'),
     learnMore: v(28, 'Learn More'),
     harmonyModalTitle: v(29, 'Learn about color harmonies'),
-    confirmHarmony: v(30, 'Confirm'),
+    confirmHarmony: v(30, 'Apply Harmony'),
     harmonyDescriptions: {
       CUSTOM: v(31, 'Randomly selects a color combination scheme.'),
       ANALOGOUS: v(32, 'Uses colors that sit next to each other on the color wheel, creating a harmonious and natural look.'),
