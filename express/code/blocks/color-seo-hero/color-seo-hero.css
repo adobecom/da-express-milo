@@ -321,7 +321,7 @@
 
 .color-seo-hero-actions-row.is-stacked {
   display: grid;
-  grid-template-columns: minmax(min-content, max-content) minmax(0, 1fr);
+  grid-template-columns: minmax(min-content, 1fr) minmax(min-content, max-content);
   align-items: center;
 }
 
