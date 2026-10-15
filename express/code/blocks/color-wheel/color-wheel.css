@@ -455,6 +455,7 @@ color-wheel-express {
 }
 .ax-color-modal-container:has(.color-harmony-modal) {
   background: var(--color-white);
+  border-radius: 16px;
 }
 
 .ax-color-modal-container:has(.color-harmony-modal) .ax-color-modal-content {
@@ -469,6 +470,8 @@ color-wheel-express {
   min-height: 0;
   max-height: calc(95vh - var(--spacing-300));
   background: var(--color-white);
+  overflow: hidden;
+  border-radius: 16px;
   color: var(--color-default-font);
 }
 
