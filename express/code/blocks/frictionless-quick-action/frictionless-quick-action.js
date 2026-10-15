@@ -236,6 +236,7 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
 
   const appConfig = {
     metaData: {
+      workflowStartTimeStamp: new Date().getTime(),
       isFrictionlessQa: 'true',
       ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
       ...(quickActionId === 'remove-background' && {

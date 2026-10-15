@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@list-default",
       "selector": "div.list",
-      "path": "/drafts/nala/test-gen/list/list",
+      "path": "/drafts/nala/blocks/list/list",
       "data": {
         "semantic": {
           "texts": [

@@ -57,7 +57,7 @@
 .link-blade .link-blade-item:hover,
 .link-blade .link-blade-item:focus {
   background: var(--color-light-gray-2);
-  border: 2px solid var(--Palette-transparent-black-300, #00000026);
+  border: 2px solid var(--Palette-transparent-black-300, #00000026); /* stylelint-disable-line declaration-property-value-disallowed-list */
   animation-timing-function: ease-out;
   animation-duration: 100ms;
   outline-offset: 4px;

@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@banner-bg-light-bg-multi-button",
       "selector": "div.banner-bg.light-bg.multi-button",
-      "path": "/drafts/nala/test-gen/banner-bg/banner-bg",
+      "path": "/drafts/nala/blocks/banner-bg/banner-bg",
       "data": {
         "semantic": {
           "texts": [
@@ -45,7 +45,7 @@
               "selector": "a.quick-link.button.accent.accent.dark.bg-banner-button.reverse",
               "nth": 0,
               "text": "Get free plan",
-              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fbanner-bg%2Fbanner-bg&placement=banner-bg&locale=en-US&contentRegion=us",
+              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Fblocks%2Fbanner-bg%2Fbanner-bg&placement=banner-bg&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Get free plan",

@@ -68,10 +68,10 @@
 .toolbar-count {
   color: var(--color-gray-950);
   font-family: var(--body-font-family);
-  font-size: var(--Global-Typography-Size-Title-Title-2XS, 16px);
+  font-size: var(--body-font-size-m);
   font-style: normal;
   font-weight: 700;
-  line-height: var(--Global-Typography-Line-height-Title-Title-2XS, 22px);
+  line-height: 22px;
   white-space: nowrap;
 }
 
@@ -89,11 +89,11 @@
 .toolbar-slider-value {
   color: var(--color-dark-gray);
   font-family: var(--body-font-family);
-  font-size: var(--Font-size-100, 14px);
+  font-size: var(--body-font-size-s);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--Line-height-100, 18px);
-  letter-spacing: var(--Letter-spacing, 0);
+  line-height: 18px;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
@@ -110,8 +110,8 @@
   border-radius: 4px;
   background: linear-gradient(
     to right,
-    var(--color-dark-gray) var(--fill, 11%),
-    var(--color-gray-300-variant) var(--fill, 11%)
+    var(--color-dark-gray) var(--fill),
+    var(--color-gray-300-variant) var(--fill)
   );
   outline: none;
   cursor: pointer;

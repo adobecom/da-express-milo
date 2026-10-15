@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@how-to-steps-default",
       "selector": "div.how-to-steps",
-      "path": "/drafts/nala/test-gen/how-to-steps/how-to-steps",
+      "path": "/drafts/nala/blocks/how-to-steps/how-to-steps",
       "data": {
         "semantic": {
           "texts": [
@@ -80,7 +80,7 @@
       "tcid": "1",
       "name": "@how-to-steps-noschema",
       "selector": "div.how-to-steps.noschema",
-      "path": "/drafts/nala/test-gen/how-to-steps/how-to-steps-noschema",
+      "path": "/drafts/nala/blocks/how-to-steps/how-to-steps-noschema",
       "data": {
         "semantic": {
           "texts": [

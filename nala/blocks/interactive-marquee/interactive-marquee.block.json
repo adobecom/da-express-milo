@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@interactive-marquee-horizontal-masonry-dark",
       "selector": "div.interactive-marquee.horizontal-masonry.dark",
-      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee",
+      "path": "/drafts/nala/blocks/interactive-marquee/interactive-marquee",
       "data": {
         "semantic": {
           "texts": [
@@ -158,7 +158,7 @@
               "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
               "nth": 0,
               "text": "Get Firefly free",
-              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Fblocks%2Finteractive-marquee%2Finteractive-marquee&placement=interactive-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,
@@ -199,7 +199,7 @@
       "tcid": "1",
       "name": "@interactive-marquee-horizontal-masonry-square-dark",
       "selector": "div.interactive-marquee.horizontal-masonry.square.dark",
-      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-square",
+      "path": "/drafts/nala/blocks/interactive-marquee/interactive-marquee-square",
       "data": {
         "semantic": {
           "texts": [
@@ -352,7 +352,7 @@
               "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
               "nth": 0,
               "text": "Get Firefly free",
-              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-square&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Fblocks%2Finteractive-marquee%2Finteractive-marquee-square&placement=interactive-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,
@@ -393,7 +393,7 @@
       "tcid": "2",
       "name": "@interactive-marquee-horizontal-masonry-quad-dark",
       "selector": "div.interactive-marquee.horizontal-masonry.quad.dark",
-      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-quad-dark",
+      "path": "/drafts/nala/blocks/interactive-marquee/interactive-marquee-quad-dark",
       "data": {
         "semantic": {
           "texts": [
@@ -504,7 +504,7 @@
               "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
               "nth": 0,
               "text": "Generate now",
-              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-quad-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Fblocks%2Finteractive-marquee%2Finteractive-marquee-quad-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,
@@ -545,7 +545,7 @@
       "tcid": "3",
       "name": "@interactive-marquee-horizontal-masonry-quad-dark-no-search",
       "selector": "div.interactive-marquee.horizontal-masonry.quad.dark.no-search",
-      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-quad-dark-no-search",
+      "path": "/drafts/nala/blocks/interactive-marquee/interactive-marquee-quad-dark-no-search",
       "data": {
         "semantic": {
           "texts": [
@@ -663,7 +663,7 @@
               "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
               "nth": 0,
               "text": "Get Firefly free",
-              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-quad-dark-no-search&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Fblocks%2Finteractive-marquee%2Finteractive-marquee-quad-dark-no-search&placement=interactive-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,
@@ -682,7 +682,7 @@
       "tcid": "4",
       "name": "@interactive-marquee-horizontal-masonry-tall-dark",
       "selector": "div.interactive-marquee.horizontal-masonry.tall.dark",
-      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-tall-dark",
+      "path": "/drafts/nala/blocks/interactive-marquee/interactive-marquee-tall-dark",
       "data": {
         "semantic": {
           "texts": [
@@ -821,7 +821,7 @@
               "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
               "nth": 0,
               "text": "Get Firefly free",
-              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-tall-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Fblocks%2Finteractive-marquee%2Finteractive-marquee-tall-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,
@@ -862,7 +862,7 @@
       "tcid": "5",
       "name": "@interactive-marquee-horizontal-masonry-wide-dark",
       "selector": "div.interactive-marquee.horizontal-masonry.wide.dark",
-      "path": "/drafts/nala/test-gen/interactive-marquee/interactive-marquee-wide-dark",
+      "path": "/drafts/nala/blocks/interactive-marquee/interactive-marquee-wide-dark",
       "data": {
         "semantic": {
           "texts": [
@@ -980,7 +980,7 @@
               "selector": ".text a.quick-link.con-button.blue.button-xl.button-justified-mobile",
               "nth": 0,
               "text": "Get Firefly free",
-              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Finteractive-marquee%2Finteractive-marquee-wide-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
+              "href": "/e/RohcL3leMKb?url=%2Fdrafts%2Fnala%2Fblocks%2Finteractive-marquee%2Finteractive-marquee-wide-dark&placement=interactive-marquee&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,

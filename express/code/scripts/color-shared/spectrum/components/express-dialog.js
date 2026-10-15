@@ -22,6 +22,7 @@
  */
 
 import { loadDialog } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import {
   trapFocus,
@@ -60,7 +61,7 @@ export async function createExpressDialog(config) {
 
   await loadDialog();
   await loadOverrideStyles('dialog', STYLES_PATH);
-  await customElements.whenDefined('sp-dialog');
+  await waitForComponents(['sp-dialog']);
 
   const theme = createThemeWrapper();
   const listeners = {};

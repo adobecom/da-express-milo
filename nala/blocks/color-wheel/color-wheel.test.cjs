@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./color-wheel.spec.cjs');
 const ColorWheelBlock = require('./color-wheel.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
@@ -59,9 +59,8 @@ test.describe('ColorWheelBlock Test Suite', () => {
       }
     });
 
-    // TODO: Remove skip flag when toolbar is fixed MWPW-191732
     await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: true });
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
     await test.step('step-4: SEO validation', async () => {

@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@tutorials-default",
       "selector": "div.tutorials",
-      "path": "/drafts/nala/test-gen/tutorials/tutorials",
+      "path": "/drafts/nala/blocks/tutorials/tutorials",
       "data": {
         "semantic": {
           "texts": [
@@ -101,7 +101,7 @@
       "tcid": "1",
       "name": "@tutorials-twoperrow",
       "selector": "div.tutorials.twoperrow",
-      "path": "/drafts/nala/test-gen/tutorials/tutorials-twoperrow",
+      "path": "/drafts/nala/blocks/tutorials/tutorials-twoperrow",
       "data": {
         "semantic": {
           "texts": [

@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@floating-panel-default",
       "selector": "div.floating-panel",
-      "path": "/drafts/nala/test-gen/floating-panel/floating-panel",
+      "path": "/drafts/nala/blocks/floating-panel/floating-panel",
       "data": {
         "semantic": {
           "texts": [],
@@ -42,7 +42,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 0,
               "text": "Get free app",
-              "href": "/JNzVVaLJsSb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Ffloating-panel%2Ffloating-panel&placement=floating-panel&locale=en-US&contentRegion=us",
+              "href": "/JNzVVaLJsSb?url=%2Fdrafts%2Fnala%2Fblocks%2Ffloating-panel%2Ffloating-panel&placement=floating-panel&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,
@@ -61,7 +61,7 @@
       "tcid": "1",
       "name": "@floating-panel-dark",
       "selector": "div.floating-panel.dark",
-      "path": "/drafts/nala/test-gen/floating-panel/floating-panel-dark",
+      "path": "/drafts/nala/blocks/floating-panel/floating-panel-dark",
       "data": {
         "semantic": {
           "texts": [],
@@ -91,7 +91,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 0,
               "text": "Get free app",
-              "href": "/AllFhZicxOb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Ffloating-panel%2Ffloating-panel-dark&placement=floating-panel&locale=en-US&contentRegion=us",
+              "href": "/AllFhZicxOb?category=templates&url=%2Fdrafts%2Fnala%2Fblocks%2Ffloating-panel%2Ffloating-panel-dark&placement=floating-panel&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,
@@ -102,7 +102,7 @@
               "selector": "a.quick-link.con-button.outline",
               "nth": 0,
               "text": "Continue with web",
-              "href": "/AllFhZicxOb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Ffloating-panel%2Ffloating-panel-dark&placement=floating-panel&locale=en-US&contentRegion=us",
+              "href": "/AllFhZicxOb?category=templates&url=%2Fdrafts%2Fnala%2Fblocks%2Ffloating-panel%2Ffloating-panel-dark&placement=floating-panel&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,

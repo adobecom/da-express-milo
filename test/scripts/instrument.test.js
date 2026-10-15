@@ -97,7 +97,7 @@ describe('instrument mini-editor analytics', () => {
     await Promise.resolve();
 
     const [, payload] = trackStub.firstCall.args;
-    const { custom } = getCorpnewPayload(payload);
+    const { event: { custom } } = getCorpnewPayload(payload);
     expect(findProperty(custom, 'custom.task.name')).to.deep.equal({
       propertyName: 'custom.task.name',
       propertyValue: 'social',
@@ -115,7 +115,8 @@ describe('instrument mini-editor analytics', () => {
     expect(eventName).to.equal('event');
 
     const corpnew = getCorpnewPayload(payload);
-    const { sdm, custom } = corpnew;
+    const { sdm, event } = corpnew;
+    const { custom } = event;
     expect(sdm.event).to.deep.include({
       pagename: 'view-acom-express-features',
       event_date: '2026-09-01',
@@ -133,7 +134,6 @@ describe('instrument mini-editor analytics', () => {
     expect(sdm.source).to.deep.equal({
       name: 'CCEX',
       client_id: 'projectx_webapp',
-      platform: TEST_PLATFORM,
     });
     expect(sdm.hz).to.deep.equal({
       source_platform_type: 'desktop-web',
@@ -156,11 +156,6 @@ describe('instrument mini-editor analytics', () => {
     expect(findProperty(custom, 'event.user_guid')).to.deep.equal({
       propertyName: 'event.user_guid',
       propertyValue: 'user-123',
-      propertyType: 'string',
-    });
-    expect(findProperty(custom, 'source.platform')).to.deep.equal({
-      propertyName: 'source.platform',
-      propertyValue: TEST_PLATFORM,
       propertyType: 'string',
     });
     expect(findProperty(custom, 'hz.device_name')).to.deep.equal({

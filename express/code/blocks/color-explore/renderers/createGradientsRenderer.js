@@ -13,6 +13,11 @@ const PAGINATION = {
   LOAD_MORE_INCREMENT: 12,
 };
 
+// Grid card visual preview caps at 10 stops, even though the gradient itself
+// may have more — the modal opened from this same card still shows every
+// stop (see createGradientCard below).
+const MAX_STRIP_COLORS = 10;
+
 export function createGradientsRenderer(options) {
   const {
     container, data = [], config = {}, placeholders = createColorExplorePlaceholders(),
@@ -599,7 +604,13 @@ export function createGradientsRenderer(options) {
       errorCard.textContent = placeholders.gridInvalidData;
       return errorCard;
     }
-    const cards = createGradientStripElements([gradient], getCardOptions(linkIndex));
+    // Capped copy for the strip's own visual only — `gradient` itself (used
+    // below by attachCardListeners to open the modal) stays uncapped so
+    // opening the modal from this card still shows every stop.
+    const stripGradient = gradient.colorStops?.length > MAX_STRIP_COLORS
+      ? { ...gradient, colorStops: gradient.colorStops.slice(0, MAX_STRIP_COLORS) }
+      : gradient;
+    const cards = createGradientStripElements([stripGradient], getCardOptions(linkIndex));
     const card = cards[0];
     if (!card) return createTag('div', { class: 'gradient-strip-error' });
     card.setAttribute('role', 'gridcell');
@@ -637,15 +648,17 @@ export function createGradientsRenderer(options) {
       }
     }
 
-    if (existingCount !== newCount) {
-      existingCards.slice(0, Math.min(existingCount, newCount)).forEach((card, index) => {
-        const gradient = cardsToShow[index];
-        if (gradient && card.getAttribute('data-gradient-id') !== gradient.id) {
-          const newCard = createGradientCard(gradient, index + 1);
-          card.replaceWith(newCard);
-        }
-      });
-    }
+    // Reconcile the overlapping range on every update, not just when the count
+    // changes. Sort filters (e.g. Most popular -> Random -> Most used) reorder
+    // the same set, so existingCount === newCount while the id at each position
+    // changes; without this the grid would keep rendering the previous order.
+    existingCards.slice(0, Math.min(existingCount, newCount)).forEach((card, index) => {
+      const gradient = cardsToShow[index];
+      if (gradient && card.getAttribute('data-gradient-id') !== gradient.id) {
+        const newCard = createGradientCard(gradient, index + 1);
+        card.replaceWith(newCard);
+      }
+    });
 
     updateCardTabIndexes();
     updateCardAriaAttributes();

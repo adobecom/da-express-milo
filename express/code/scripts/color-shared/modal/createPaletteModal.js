@@ -1,6 +1,6 @@
 import { createTag } from '../../utils.js';
 import { createPaletteAdapter } from '../adapters/litComponentAdapters.js';
-import { decorateAnalyticsAttributes } from '../utils/utilities.js';
+import { decorateAnalyticsAttributes, trackColorExport } from '../utils/utilities.js';
 
 export default function createPaletteModal(palette, options = {}) {
   const {
@@ -66,6 +66,7 @@ export default function createPaletteModal(palette, options = {}) {
       decorateAnalyticsAttributes(copyBtn, { linkLabel: 'Copy color' });
       copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(color);
+        trackColorExport('copy-clipboard');
         copyBtn.textContent = 'Copied!';
         setTimeout(() => {
           copyBtn.textContent = 'Copy';

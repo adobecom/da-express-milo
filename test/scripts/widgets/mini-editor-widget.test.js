@@ -2,6 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { createTag, getIconElementDeprecated } from '../../../express/code/scripts/utils.js';
 import createMiniEditorWidget from '../../../express/code/scripts/widgets/mini-editor-widget/mini-editor-widget.js';
+import { waitFor } from '../../helpers/waitfor.js';
 
 const noop = () => {};
 const a11y = {
@@ -135,6 +136,7 @@ describe('mini-editor-widget', () => {
     const serifBtn = Array.from(root.querySelectorAll('.me-row--fonts .me-font'))
       .find((b) => b.textContent === 'Serif');
     serifBtn.click();
+    await clock.tickAsync(120);
     expect(root.style.getPropertyValue('--me-quote-font')).to.equal(fontOptions[1].font);
     expect(root.style.getPropertyValue('--me-quote-font-style')).to.equal('italic');
     expect(serifBtn.classList.contains('is-selected')).to.be.true;
@@ -177,6 +179,7 @@ describe('mini-editor-widget', () => {
     const serifBtn = Array.from(root.querySelectorAll('.me-row--fonts .me-font'))
       .find((b) => b.textContent === 'Serif');
     serifBtn.click();
+    await clock.tickAsync(120);
     expect(editor.getContentModel().font).to.deep.equal({
       family: fontOptions[1].family,
       style: 'italic',
@@ -215,6 +218,7 @@ describe('mini-editor-widget', () => {
   it('useQuote swaps the quote/author shown in the main widget card', async () => {
     const { root, editor } = await mount();
     editor.useQuote({ quote: 'Swapped in', author: 'Someone Else' });
+    await clock.tickAsync(120);
     expect(root.querySelector('.me-quote').textContent).to.equal('Swapped in');
     expect(root.querySelector('.me-author').textContent).to.equal('Someone Else');
     expect(root.querySelector('.me-author').style.display).to.equal('');
@@ -261,6 +265,7 @@ describe('mini-editor-widget', () => {
     document.dispatchEvent(new CustomEvent('mini-editor:use-quote', {
       detail: { quote: 'From collapsible-rows', author: 'Some Author' },
     }));
+    await clock.tickAsync(120);
     expect(root.querySelector('.me-quote').textContent).to.equal('From collapsible-rows');
   });
 
@@ -315,6 +320,7 @@ describe('mini-editor-widget', () => {
       const serifBtn = Array.from(root.querySelectorAll('.me-row--fonts .me-font'))
         .find((b) => b.textContent === 'Serif');
       serifBtn.click();
+      await clock.tickAsync(120);
       const centerQuote = root.querySelector('.me-arc-card--center .me-arc-quote');
       expect(centerQuote.style.fontStyle).to.equal('italic');
     });
@@ -331,6 +337,9 @@ describe('mini-editor-widget', () => {
       });
       const bar = root.querySelector('.mini-editor-widget > .me-actions');
       expect(bar).to.exist;
+      // The action bar's icons/tooltips are populated in the background
+      // (not part of the card's own first paint) — see buildMiniEditorActions.
+      await waitFor(() => bar.querySelectorAll('.me-action').length === 3);
       const buttons = bar.querySelectorAll('.me-action');
       expect(buttons.length).to.equal(3);
       expect([...buttons].map((b) => b.className)).to.deep.equal([
@@ -343,6 +352,7 @@ describe('mini-editor-widget', () => {
     it('renders only the types supplied', async () => {
       const { root } = await mount({ topActions: [{ type: 'share', onClick: () => {} }] });
       const bar = root.querySelector('.me-actions');
+      await waitFor(() => bar.querySelectorAll('.me-action').length === 1);
       expect(bar.querySelectorAll('.me-action').length).to.equal(1);
       expect(bar.querySelector('.me-action--share')).to.exist;
       expect(bar.querySelector('.me-action--edit')).to.not.exist;
@@ -360,6 +370,7 @@ describe('mini-editor-widget', () => {
         ],
       });
 
+      await waitFor(() => root.querySelectorAll('.me-action').length === 3);
       root.querySelector('.me-action--edit').click();
       root.querySelector('.me-action--share').click();
       root.querySelector('.me-action--download').click();

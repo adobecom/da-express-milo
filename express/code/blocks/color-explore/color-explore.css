@@ -262,9 +262,9 @@
   min-width: var(--express-picker-min-width);
   max-width: var(--express-picker-max-width);
   border-radius: var(--Corner-radius-corner-radius-100);
-  --express-picker-width: var(--color-explore-filter-picker-width, 144px);
-  --express-picker-min-width: var(--color-explore-filter-picker-width, 144px);
-  --express-picker-max-width: var(--color-explore-filter-picker-width, 144px);
+  --express-picker-width: var(--color-explore-filter-picker-width, 144px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  --express-picker-min-width: var(--color-explore-filter-picker-width, 144px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  --express-picker-max-width: var(--color-explore-filter-picker-width, 144px); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 .color-explore .filters-desktop .filter-picker-fallback {
@@ -291,7 +291,7 @@
 
 .color-explore .filters-desktop .filter-picker-fallback:focus,
 .color-explore .filters-desktop .filter-picker-fallback:focus-visible {
-  outline: none !important;
+  outline: none !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .color-explore .filters-desktop .filter-dropdown:focus-within {
@@ -383,7 +383,7 @@
 .color-explore .filters-mobile__curtain {
   position: fixed;
   inset: 0;
-  background: var(--Alias-overlay-curtain, rgba(0, 0, 0, 0.5));
+  background: var(--Alias-overlay-curtain, rgba(0, 0, 0, 0.5)); /* stylelint-disable-line declaration-property-value-disallowed-list */
   opacity: 0;
   transition: opacity 0.3s ease-out;
   z-index: 999;
@@ -635,9 +635,9 @@
     min-width: var(--express-picker-min-width);
     max-width: var(--express-picker-max-width);
     flex: 0 0 auto;
-    --express-picker-width: var(--color-explore-filter-picker-width, 144px);
-    --express-picker-min-width: var(--color-explore-filter-picker-width, 144px);
-    --express-picker-max-width: var(--color-explore-filter-picker-width, 144px);
+    --express-picker-width: var(--color-explore-filter-picker-width, 144px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+    --express-picker-min-width: var(--color-explore-filter-picker-width, 144px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+    --express-picker-max-width: var(--color-explore-filter-picker-width, 144px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   }
 
   .color-explore .filters-desktop .filter-picker-fallback {

@@ -5,7 +5,7 @@ import initPanel from './panel.js';
 import { initFromUrl, initFonts } from './state.js';
 import createFontCardGrid from './fontCardGrid.js';
 import createToolbar from './toolbar.js';
-import loadFontGeneratorPlaceholders from './placeholders.js';
+import loadFontGeneratorPlaceholders, { loadFontLabels } from './placeholders.js';
 
 let filterPanelCount = 0;
 
@@ -13,7 +13,7 @@ let filterPanelCount = 0;
 // in font-styles.json (Gothic A1, Noto Sans, …). The names the kit exposes in
 // CSS must match each font's `fontSupported` value for cards to render in the
 // intended face.
-const ADOBE_FONTS_KIT_ID = 'iqd6egj';
+const ADOBE_FONTS_KIT_ID = 'zlz1zki';
 
 // This kit's web-project CSS endpoint (use.typekit.net/<id>.css) is domain-
 // locked and 412s off allow-listed domains, but the JS embed kit serves
@@ -185,7 +185,11 @@ async function decorateAsync(block) {
 
   // Await resolved copy before building any text-bearing component so the
   // user never sees English placeholder text swapped out (color-extract.js).
-  const strings = await placeholdersPromise;
+  const [placeholders, fontLabels] = await Promise.all([
+    placeholdersPromise,
+    loadFontLabels(fonts),
+  ]);
+  const strings = { ...placeholders, ...fontLabels };
   const content = getContent(strings);
 
   // Build the full component tree hidden alongside the skeleton so Spectrum

@@ -69,7 +69,6 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
       await navigator.clipboard.writeText(text);
       trackMiniEditorExport({
         exportMethod: 'copy-clipboard',
-        uiLocation: 'seo-discover-page-collapsible-row',
       });
       showCopyToast('Quote copied to clipboard');
     } catch {

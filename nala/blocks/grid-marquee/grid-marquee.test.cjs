@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-const { expect, test } = require('@playwright/test');
+const { expect, test } = require('../../utils/test.cjs');
 const { features } = require('./grid-marquee.spec.cjs');
 const GridMarquee = require('./grid-marquee.page.cjs');
 

@@ -1,0 +1,76 @@
+{
+  "block": "resume-hero",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@resume-hero-default",
+      "selector": "div.resume-hero",
+      "path": "/drafts/echen/resume-hero/resume-hero",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2.heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Create Your Professional Resume",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Build a standout resume in minutes with our easy-to-use resume builder. Choose from professionally designed templates and customize to match your style.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Get Started Free Learn More",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_resume_hero.png?width=600&format=png&optimize=medium",
+              "alt": "Resume builder interface"
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Get Started Free",
+              "href": "https://www.adobe.com/",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.button.accent",
+              "nth": 1,
+              "text": "Learn More",
+              "href": "https://www.adobe.com/",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@resume-hero",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

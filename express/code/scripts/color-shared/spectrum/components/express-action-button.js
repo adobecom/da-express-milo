@@ -5,6 +5,7 @@
  */
 
 import { loadActionButton } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 import { createIconSlot } from '../../utils/utilities.js';
@@ -46,7 +47,7 @@ export default async function createExpressActionButton(config = {}) {
 
   await loadActionButton();
   await loadOverrideStyles('action-button', STYLES_PATH);
-  await customElements.whenDefined('sp-action-button');
+  await waitForComponents(['sp-action-button']);
 
   const theme = createThemeWrapper();
   const button = document.createElement('sp-action-button');

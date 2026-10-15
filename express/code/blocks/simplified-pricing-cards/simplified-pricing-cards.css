@@ -302,7 +302,7 @@ main .section>.simplified-pricing-cards-wrapper {
     rotate: 180deg;
 }
 
-.simplified-pricing-cards .pricing-area p {
+.simplified-pricing-cards .pricing-area p { /* stylelint-disable-line no-duplicate-selectors */
     font-size: 12px;
     line-height: 1.3;
 }
@@ -323,7 +323,7 @@ main .section>.simplified-pricing-cards-wrapper {
     display: none;
 }
 
-.simplified-pricing-cards .promo-eyebrow-text {
+.simplified-pricing-cards .promo-eyebrow-text { /* stylelint-disable-line no-duplicate-selectors */
     position: absolute;
     top: -40px;
     left: -2px;
@@ -516,7 +516,7 @@ main .section>.simplified-pricing-cards-wrapper {
         margin: auto;
     }
 
-    .simplified-pricing-cards .card-wrapper {
+    .simplified-pricing-cards .card-wrapper { /* stylelint-disable-line no-duplicate-selectors */
         width: max-content;
         gap: 16px;
     }

@@ -131,6 +131,7 @@ async function loadPlaceholders() {
     'contrast-checker', 'color-blindness-simulator', 'no-image-try-ours', 'use-this-image',
     'extracting-colors', 'color-wheel-keyboard-hint', 'color-wheel-harmony-aria',
     'color-wheel-aria-with-hint', 'color-wheel-marker-aria', 'minimize',
+    'new-random-palette-generated',
   ];
   const values = await replaceKeyArray(KEYS, getConfig());
   const v = (i, fallback) => {
@@ -139,7 +140,6 @@ async function loadPlaceholders() {
     return fallback;
   };
   return {
-    tabPrimaryColor: v(0, 'Primary color'),
     tabImage: v(1, 'Image'),
     tabColorWheel: v(2, 'Color Wheel'),
     harmonyLabels: {
@@ -169,6 +169,7 @@ async function loadPlaceholders() {
     harmonyAriaTemplate: v(24, '{harmony} color harmony'),
     wheelAriaWithHint: v(25, 'Color Wheel - Press Enter to access color handles'),
     markerAriaTemplate: v(26, '{hex}, use arrow keys to move'),
+    newRandomPaletteGenerated: v(28, 'New random palette generated'),
     baseColorStrings,
     colorEditStrings,
     imageUploadStrings,
@@ -235,6 +236,7 @@ async function buildDefaultActionMenuConfig(strings) {
     id: ACTION_MENU_ID,
     activeId: 'palette',
     daaLh: 'color-wheel',
+    randomPaletteAnnouncement: strings.newRandomPaletteGenerated,
     navLinks: [
       { id: 'palette', label: strings.createPalette, href: `${locale.contentRoot}/create/color-wheel` },
       { id: 'contrast', label: strings.contrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
@@ -254,13 +256,13 @@ let setColorRafId = null;
 let pendingSetColorHex = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
-let imagePanelGetSrc = null;
 let imagePanelHandleFile = null;
 let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
 let historyCleanup = null;
-let currentInitToken = 0;
+let mobileActionMenu = null;
+let responsiveCleanup = null;
 
 function swatchHexListFromState(state) {
   const swatches = state?.swatches || [];
@@ -579,7 +581,6 @@ function buildImageContent(
     viewportEl,
   });
   imagePanelDestroy = panel.destroy;
-  imagePanelGetSrc = panel.getCurrentSrc;
   imagePanelHandleFile = panel.handleFile;
   image.appendChild(panel.element);
   return image;
@@ -610,7 +611,7 @@ async function buildTabs(controller, suggestionsRow, {
       size: 'm',
       quiet: true,
       tabs: [
-        { label: strings.tabPrimaryColor || 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
+        { label: strings.baseColorStrings?.title || 'Base color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
         { label: strings.tabImage || 'Image', value: 'image', spIcon: 'sp-icon-image' },
         { label: strings.tabColorWheel || 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
       ],
@@ -805,6 +806,10 @@ function makeTransformPalette(getActiveHarmonyRule, getSwatchRailController, get
 }
 
 function cleanup() {
+  responsiveCleanup?.();
+  responsiveCleanup = null;
+  mobileActionMenu?.destroy();
+  mobileActionMenu = null;
   harmonyStateUnsubscribe?.();
   harmonyStateUnsubscribe = null;
   harmonyCarouselCleanup?.();
@@ -820,7 +825,6 @@ function cleanup() {
   swatchRailController = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
-  imagePanelGetSrc = null;
   imagePanelHandleFile = null;
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
@@ -856,38 +860,42 @@ function resolveInitialTabAndSrc() {
   return { activeTab, imageSrc };
 }
 
+function configureResponsiveLayout(block, layout, onExitDesktop) {
+  const desktopQuery = window.matchMedia('(min-width: 1200px)');
+  // Keep a consistent reading order, including desktop-first loads resized to mobile.
+  layout.slots.sidebar.before(layout.slots.topbar);
+
+  const onBreakpointChange = () => {
+    if (!block.isConnected) {
+      desktopQuery.removeEventListener('change', onBreakpointChange);
+      return;
+    }
+    if (!desktopQuery.matches) {
+      if (block.hasAttribute('data-sidebar-collapsed')) {
+        layout.actionMenu?.element.querySelector('.expand-btn')?.click();
+      }
+      onExitDesktop();
+    }
+  };
+  desktopQuery.addEventListener('change', onBreakpointChange);
+  onBreakpointChange();
+  return () => desktopQuery.removeEventListener('change', onBreakpointChange);
+}
+
 export default async function decorate(block) {
   const layoutRows = [...block.children];
   const suggestionsRow = layoutRows[0] || null;
-  const desktopQuery = window.matchMedia('(min-width: 1200px)');
-
-  // Preserved across breakpoint re-inits so the user's palette survives resize
   let currentPalette = null;
-  let savedActiveTab = 'color-wheel';
-  let savedImageSrc = null;
 
   // Activate the tab stored in the URL (e.g. ?tab=image) and restore an image
   // uploaded before a SUSI sign-in redirect (parallel to color-extract's flow).
-  ({ activeTab: savedActiveTab, imageSrc: savedImageSrc } = resolveInitialTabAndSrc());
+  const { activeTab: initialActiveTab, imageSrc: initialImageSrc } = resolveInitialTabAndSrc();
 
   async function init() {
     // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
     const headline = document.querySelector('.color-headline.tools');
-    // On re-init (breakpoint change), tear down immediately to prevent two layouts running in
-    // parallel. On first load, keep authored content visible during the async stall so the block
-    // doesn't show as a blank white area while placeholders and CSS load.
-    const isReinit = !!layoutInstance;
-    if (isReinit) {
-      savedImageSrc = imagePanelGetSrc?.() ?? savedImageSrc;
-      cleanup();
-      block.innerHTML = '';
-    }
+    // Keep authored content visible until the initial dependencies are ready.
     block.className = 'color-wheel';
-
-    // Each init() call claims a token. After every await, bail if a newer call has started.
-    // This prevents a stale concurrent init from appending duplicate tabs/layout to the DOM.
-    currentInitToken += 1;
-    const myToken = currentInitToken;
 
     // Capture any file dropped while createImageExtractComponent's window handlers are not yet
     // ready, so it can be replayed once buildTabs resolves. Only active when block is in viewport.
@@ -916,18 +924,13 @@ export default async function decorate(block) {
         loadHeavyModules(),
       ]);
 
-      if (myToken !== currentInitToken) return;
-
-      // First load: authored content was preserved during the async wait; clear it now
-      if (!isReinit) {
-        cleanup();
-        block.innerHTML = '';
-      }
+      cleanup();
+      block.replaceChildren();
       const section = createTag('section');
       block.appendChild(section);
       const savedItemId = getResolvedItemId();
       const savedLibraryId = getResolvedLibraryId();
-      const initialPalette = currentPalette || (() => {
+      const initialPalette = (() => {
         const name = getResolvedPaletteName() || THEME_NAME;
         const colors = getResolvedPalette();
         return {
@@ -954,8 +957,18 @@ export default async function decorate(block) {
       let isGeneratingRandom = false;
       let activeHarmonyRule = controller.getState().harmonyRule || 'CUSTOM';
 
-      const isDesktop = desktopQuery.matches;
       const defaultActionMenuConfig = await buildDefaultActionMenuConfig(strings);
+      const onGenerateRandom = () => {
+        isGeneratingRandom = true;
+        // Reset if no history event fires (for example, when all swatches are locked).
+        queueMicrotask(() => { isGeneratingRandom = false; });
+        primaryColorAdapter?.element?.resetOriginalColor?.();
+      };
+      const transformPalette = makeTransformPalette(
+        () => activeHarmonyRule,
+        () => swatchRailController,
+        () => controller.getState(),
+      );
 
       layoutInstance = await createColorToolLayout(section, {
         palette: initialPalette,
@@ -975,23 +988,13 @@ export default async function decorate(block) {
             { id: 'generate-random', label: strings.generateRandom },
             { id: 'expand', label: strings.maximize, expandedLabel: strings.minimize },
           ],
-          type: isDesktop ? 'full' : 'nav-only',
+          type: 'full',
           getName: () => currentPalette?.name || initialPalette.name,
           paletteTags: initialPalette.tags,
           paletteId: initialPalette.id,
           paletteLibraryId: initialPalette.libraryId,
-          onGenerateRandom: () => {
-            isGeneratingRandom = true;
-            // If no HISTORY_EVENT fires (e.g. all colors locked, palette unchanged),
-            // reset the flag so it doesn't corrupt the next undo/redo
-            queueMicrotask(() => { isGeneratingRandom = false; });
-            primaryColorAdapter?.element?.resetOriginalColor?.();
-          },
-          transformPalette: makeTransformPalette(
-            () => activeHarmonyRule,
-            () => swatchRailController,
-            () => controller.getState(),
-          ),
+          onGenerateRandom,
+          transformPalette,
           onExpand: (expanded) => {
             const sidebarSlot = block.querySelector('.ax-shell-slot--sidebar');
             const layout = block.querySelector('.ax-color-tool-layout');
@@ -1034,8 +1037,6 @@ export default async function decorate(block) {
         },
       });
 
-      if (myToken !== currentInitToken) return;
-
       const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
       layoutInstance.slots.canvas.appendChild(stripHost);
 
@@ -1054,7 +1055,6 @@ export default async function decorate(block) {
         buildTabs(controller, suggestionsRow?.cloneNode(true), {
           onSelectionChange: ({ selected }) => {
             activeTab = selected;
-            savedActiveTab = selected;
             updateBaseColorBadge();
             if (selected !== 'color-wheel') {
               controller.setHarmonyRule('CUSTOM');
@@ -1068,7 +1068,7 @@ export default async function decorate(block) {
             window.history.replaceState(null, '', url.toString());
           },
           strings,
-          initialImageSrc: savedImageSrc,
+          initialImageSrc,
           viewportEl: block,
         }),
       ]);
@@ -1080,11 +1080,9 @@ export default async function decorate(block) {
         imagePanelHandleFile?.(file);
       }
 
-      if (myToken !== currentInitToken) return;
-
-      if (savedActiveTab !== 'color-wheel') {
-        tabs.setSelected(savedActiveTab);
-        activeTab = savedActiveTab;
+      if (initialActiveTab !== 'color-wheel') {
+        tabs.setSelected(initialActiveTab);
+        activeTab = initialActiveTab;
         updateBaseColorBadge();
       }
 
@@ -1101,9 +1099,6 @@ export default async function decorate(block) {
         actionMenuApi?.pushState?.(hexes);
         pushingState = false;
       };
-
-      // Push initial palette into history
-      actionMenuApi?.pushState?.(initialPalette.colors);
 
       // Subscribe to controller — push history on user-facing state changes
       const historyUnsubscribe = controller.subscribe((_, detail) => {
@@ -1156,30 +1151,25 @@ export default async function decorate(block) {
       });
       layoutInstance.slots.sidebar.appendChild(tabs.element);
 
-      if (!isDesktop) {
-        const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
-
-        const actionMenu = await createActionMenuComponent({
-          ...defaultActionMenuConfig,
-          type: 'controls-only',
-          onGenerateRandom: () => {
-            isGeneratingRandom = true;
-            queueMicrotask(() => { isGeneratingRandom = false; });
-            primaryColorAdapter?.element?.resetOriginalColor?.();
-          },
-          transformPalette: makeTransformPalette(
-            () => activeHarmonyRule,
-            () => swatchRailController,
-            () => controller.getState(),
-          ),
-          controls: [
-            { id: 'undo', label: strings.undo },
-            { id: 'redo', label: strings.redo },
-            { id: 'generate-random', label: strings.generateRandom },
-          ],
-        });
-        layoutInstance.slots.canvas.insertAdjacentElement('afterbegin', actionMenu.element);
-      }
+      const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
+      mobileActionMenu = await createActionMenuComponent({
+        ...defaultActionMenuConfig,
+        type: 'controls-only',
+        onGenerateRandom,
+        transformPalette,
+        controls: [
+          { id: 'undo', label: strings.undo },
+          { id: 'redo', label: strings.redo },
+          { id: 'generate-random', label: strings.generateRandom },
+        ],
+      });
+      layoutInstance.slots.canvas.prepend(mobileActionMenu.element);
+      // Both persistent control sets receive the same initial history state.
+      actionMenuApi?.pushState?.(initialPalette.colors);
+      responsiveCleanup = configureResponsiveLayout(block, layoutInstance, () => {
+        sidebarTransitionCleanup?.();
+        sidebarTransitionCleanup = null;
+      });
       stripRenderer = createStripContainerRenderer({
         container: stripHost,
         data: [swatchRailController],
@@ -1304,18 +1294,10 @@ export default async function decorate(block) {
   }
 
   await init();
-
-  const onBreakpointChange = async () => {
-    if (!block.isConnected) {
-      desktopQuery.removeEventListener('change', onBreakpointChange);
-      return;
-    }
-    await init();
-  };
-  desktopQuery.addEventListener('change', onBreakpointChange);
 }
 
 export {
+  configureResponsiveLayout,
   normalizeSwatchHexes,
   harmonyRulesForSwatchCount,
   makeTransformPalette,

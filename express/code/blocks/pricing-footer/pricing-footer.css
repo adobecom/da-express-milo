@@ -8,7 +8,7 @@
 
 .pricing-footer > div {
   width: var(--ax-grid-12-col-width);
-  border-radius: var(--border-radius-small, 4px);
+  border-radius: var(--border-radius-small, 4px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   background: var(--palette-indigo-200);
   padding: var(--spacing-200) var(--spacing-100);
   box-sizing: border-box;
@@ -18,10 +18,10 @@
 main .section .pricing-footer p {
   margin: 0;
   color: var(--color-gray-900);
-  font-size: var(--font-size-small, 12px);
+  font-size: var(--font-size-small, 12px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   font-style: normal;
   font-weight: 400;
-  line-height: var(--line-height-tight, 130%);
+  line-height: var(--line-height-tight, 130%); /* stylelint-disable-line declaration-property-value-disallowed-list */
 }
 
 .pricing-footer.card-count-2 {

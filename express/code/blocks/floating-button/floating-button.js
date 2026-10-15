@@ -1,4 +1,4 @@
-import { addTempWrapperDeprecated } from '../../scripts/utils.js';
+import { addTempWrapperDeprecated, isIPad } from '../../scripts/utils.js';
 import {
   createFloatingButton,
   collectFloatingButtonData,
@@ -19,6 +19,9 @@ export default async function decorate(block) {
 
   const parentSection = block.closest('.section');
   const data = collectFloatingButtonData();
+  if (audience === 'desktop' && isIPad()) {
+    data.delayUntilViewportPassed = document.querySelector('.resume-hero, .verb-express-hero');
+  }
 
   const blockWrapper = await createFloatingButton(
     block,

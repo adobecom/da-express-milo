@@ -1,5 +1,5 @@
 /* eslint-disable no-plusplus */
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../utils/test.cjs';
 import { features } from './pricing-cards-v2.spec.cjs';
 import PricingCardsV2 from './pricing-cards-v2.page.cjs';
 

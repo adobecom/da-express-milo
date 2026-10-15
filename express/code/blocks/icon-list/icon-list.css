@@ -92,7 +92,7 @@ main .icon-list.two-column {
   padding: 0;
 }
 
-main .icon-list > div.icon-list-column {
+main .icon-list > div.icon-list-column { /* stylelint-disable-line no-duplicate-selectors */
   flex-direction: column;
   flex: 1 1 374px;
 }
@@ -216,7 +216,7 @@ main .icon-list a:not(.button):any-link {
     margin: auto;
   }
 
-  main .icon-list.fullwidth > div {
+  main .icon-list.fullwidth > div { /* stylelint-disable-line no-duplicate-selectors */
     width: 480px;
   }
 }

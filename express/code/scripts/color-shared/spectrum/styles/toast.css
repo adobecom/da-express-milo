@@ -20,6 +20,8 @@
 
 .express-toast-container > * {
   pointer-events: auto;
+  width: max-content;
+  max-width: 100%;
 }
 
 /* ── Toast base ───────────────────────────────────────────────────── */
@@ -76,6 +78,10 @@ sp-toast[variant="info"] {
     transform: none;
   }
 
+  .express-toast-container > * {
+    width: 100%;
+  }
+
   sp-toast {
     min-width: auto;
     max-width: 100%;
@@ -87,7 +93,9 @@ sp-toast[variant="info"] {
 
 @media (prefers-reduced-motion: reduce) {
   sp-toast {
+    /* stylelint-disable declaration-no-important */
     transition: none !important;
     animation: none !important;
+    /* stylelint-enable declaration-no-important */
   }
 }

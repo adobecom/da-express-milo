@@ -1,3 +1,8 @@
+/*
+ * DEPRECATED: This block reflects what's live today. Do not extend it. Its replacement
+ * is the `color-carousel` block, which supports both authored chips and the dynamic
+ * CKG variant.
+ */
 import { getLibs, decorateButtonsDeprecated } from '../../scripts/utils.js';
 import getData from '../../scripts/utils/browse-api-controller.js';
 import buildCarousel from '../../scripts/widgets/carousel.js';

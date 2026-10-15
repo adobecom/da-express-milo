@@ -49,6 +49,17 @@
   src: local('Arial'), local('Helvetica');
 }
 
+/* Adobe Clean Display Fallback */
+@font-face {
+  font-family: 'Arial Bold Adjusted';
+  font-weight: 900;
+  size-adjust: 93%;
+  ascent-override: 91%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('ArialBold');
+}
+
 :root {
   --color-white: #fff;
 
@@ -114,10 +125,13 @@
   --color-background-accent-down: #3236A8;
   --color-background-accent-focus: var(--color-background-accent-hover);
 
+  /* font families */
+  --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --heading-font-family: "Adobe Clean Display Black", var(--s2a-font-family-heading), adobe-clean-display, "Arial Bold Adjusted", sans-serif;
+
   /* body */
   --body-background-color: var(--color-white);
   --body-alt-background-color: var(--color-gray-200);
-  --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
   --body-font-weight: normal;
   --body-color: var(--color-gray-800);
   --body-line-height: 1.5;
@@ -136,7 +150,7 @@
   /* headings */
   --heading-font-weight-regular: 400;
   --heading-font-weight-medium: 700;
-  --heading-font-weight: 800;
+  --heading-font-weight: 900;
   --heading-font-weight-extra: 900;
   --subheading-font-weight: 700;
   --heading-color: var(--color-gray-800);
@@ -400,6 +414,7 @@
 
   /* S2AC transparent palette tokens */
   --S2AC-Palette-transparent-black-50: rgb(0 0 0 / 3%);
+  --S2AC-Palette-gray-50: var(--color-gray-100);
   --S2AC-Palette-gray-75: var(--color-gray-150);
   --S2AC-Palette-gray-300: var(--color-gray-300-variant);
   --Palette-transparent-white-700: rgb(255 255 255 / 66%);
@@ -424,7 +439,10 @@
   --Grid-container-padding-side: var(--spacing-300);
   --Grid-grid-gutter: var(--spacing-100);
   --section-padding-xl: var(--spacing-600);
+  --section-padding-l: var(--spacing-500);
+  --section-padding-m: var(--spacing-400);
 
+  --section-padding-s: var(--spacing-300);
 }
 
 @media (min-width: 600px) {
@@ -436,6 +454,9 @@
     --Grid-container-padding-side: var(--spacing-500);
     --Grid-grid-gutter: var(--spacing-300);
     --section-padding-xl: var(--spacing-600);
+    --section-padding-l: var(--spacing-500);
+    --section-padding-m: var(--spacing-400);
+    --section-padding-s: var(--spacing-300);
   }
 }
 
@@ -475,6 +496,9 @@
     --Grid-container-padding-side: var(--spacing-600);
     --Grid-grid-gutter: var(--spacing-400);
     --section-padding-xl: var(--spacing-900);
+    --section-padding-l: var(--spacing-800);
+    --section-padding-m: var(--spacing-700);
+    --section-padding-s: var(--spacing-600);
   }
 }
 
@@ -615,7 +639,7 @@ main a.con-button:any-link {
 
 main svg.icon-milo,
 main img.icon-milo {
-  top: 0.15em !important;
+  top: 0.15em !important; /* stylelint-disable-line declaration-no-important */
 }
 
 
@@ -858,6 +882,52 @@ main .dark a.con-button.outline:any-link:focus {
   background-color: var(--color-white);
   border-color: var(--color-white);
   color: var(--color-info-accent-hover);
+}
+
+/* Black fill button — Milo authoring: a `#_button-fill` link hash adds `fill`
+   (Milo decorateButtons for con-buttons, decorateButtonsDeprecated for legacy
+   `.button`s). Colors follow the Express SoT Background/Primary tokens. Only
+   color changes; each block keeps its own button geometry.
+   Whitelisted blocks only — add a block to every `:is()` list below to opt in:
+   ax-columns, blog-columns, font-bento, comparison-table-v2, palette-columns. */
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
+  a:is(.con-button, .button).fill:any-link {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+}
+
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
+  a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible) {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
+/* On dark surfaces the fill inverts to white. Covers a `.dark` section
+   ancestor, a `.dark` block/inner wrapper, and the button-level `.dark` class. */
+main :is(
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns) .dark
+) a:is(.con-button, .button).fill:any-link,
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
+  a:is(.con-button, .button).fill.dark:any-link {
+  color: var(--Background-Primary-Default);
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+}
+
+main :is(
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns) .dark
+) a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible),
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
+  a:is(.con-button, .button).fill.dark:any-link:is(:hover, :active, :focus-visible) {
+  color: var(--Background-Primary-Hover);
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-100);
 }
 
 main a.button.wide,
@@ -1249,8 +1319,8 @@ main .section:not(.xxxl-spacing-static,
   padding-bottom: var(--spacing-600);
 }
 
-div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2, .cta-carousel) a.button.same-fcta,
-div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2, .cta-carousel) a.con-button.same-fcta,
+div[data-block-status]:not(.resume-hero, .pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2, .cta-carousel) a.button.same-fcta,
+div[data-block-status]:not(.resume-hero, .pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2, .cta-carousel) a.con-button.same-fcta,
 #hero a.same-fcta {
   display: none;
 }

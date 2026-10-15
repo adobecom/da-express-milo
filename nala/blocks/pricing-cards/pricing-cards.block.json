@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@pricing-cards-default",
       "selector": "div.pricing-cards",
-      "path": "/drafts/nala/test-gen/pricing-cards/pricing-cards",
+      "path": "/drafts/nala/blocks/pricing-cards/pricing-cards",
       "data": {
         "semantic": {
           "texts": [
@@ -375,7 +375,7 @@
               "selector": "a.quick-link.con-button.blue.large.button.primary",
               "nth": 0,
               "text": "Get Adobe Express Free",
-              "href": "/mPsRQWMNtub?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fpricing-cards%2Fpricing-cards&placement=pricing-cards&locale=en-US&contentRegion=us",
+              "href": "/mPsRQWMNtub?url=%2Fdrafts%2Fnala%2Fblocks%2Fpricing-cards%2Fpricing-cards&placement=pricing-cards&locale=en-US&contentRegion=us",
               "ariaLabel": "Get Adobe Express Free undefined",
               "rel": "nofollow",
               "title": null,

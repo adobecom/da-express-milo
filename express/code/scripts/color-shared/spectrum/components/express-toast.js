@@ -15,6 +15,7 @@
  */
 
 import { loadToast, loadButton } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { announceToScreenReader } from '../utils/a11y.js';
 import { loadOverrideStyles } from './style-loader.js';
@@ -68,11 +69,11 @@ export async function showExpressToast(config) {
 
   await loadToast();
   await loadOverrideStyles('toast', STYLES_PATH);
-  await customElements.whenDefined('sp-toast');
+  await waitForComponents(['sp-toast']);
 
   if (action?.label && (action.href || action.onClick)) {
     await loadButton();
-    await customElements.whenDefined('sp-button');
+    await waitForComponents(['sp-button']);
   }
 
   const container = ensureContainer();

@@ -1,3 +1,4 @@
+// DEPRECATED: replaced by the `color-carousel` block. Do not extend this block.
 module.exports = {
   FeatureName: 'ckg-link-list block',
   features: [

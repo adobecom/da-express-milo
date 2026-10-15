@@ -14,6 +14,7 @@ test-a11y-results/
 *.crt
 *.pfx
 **/build/
+.qa-screendiff/*
 
 # Development and testing files
 dev/
@@ -23,3 +24,7 @@ actionlint
 .playwright-mcp/
 !.eslintrc-code-compatibility.js
 !.browserslistrc
+
+.hlx/.da-token.json
+
+content

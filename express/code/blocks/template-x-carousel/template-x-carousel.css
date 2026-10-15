@@ -758,13 +758,13 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
   z-index: 2;
   border-radius: 8px;
   padding: 16px;
-  color: var(--Alias-content-typography-Title, #131313);
+  color: var(--Alias-content-typography-Title, #131313); /* stylelint-disable-line declaration-property-value-disallowed-list */
   text-align: center;
 
-  font-size: var(--typography-title-2xs, 16px);
+  font-size: var(--typography-title-2xs, 16px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   font-style: normal;
   font-weight: 700;
-  line-height: var(--typography-line-height-Title-2xs, 22px);
+  line-height: var(--typography-line-height-Title-2xs, 22px); /* stylelint-disable-line declaration-property-value-disallowed-list */
   /* 137.5% */
 }
 

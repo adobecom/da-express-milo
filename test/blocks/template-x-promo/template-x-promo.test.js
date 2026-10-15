@@ -14,7 +14,7 @@ const { default: decorate } = imports[2];
 // const { isValidTemplate: originalIsValidTemplate } = imports[3]; // Not used in tests
 
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
-  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
+  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'iwo3rvz.css' } } });
 });
 
 const body = await readFile({ path: './mocks/body.html' });

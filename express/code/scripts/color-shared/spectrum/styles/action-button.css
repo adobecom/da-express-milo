@@ -4,12 +4,13 @@
    ============================================================================ */
 
 sp-action-button {
-  --mod-button-border-radius: var(--corner-radius-100, 8px);
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-button-border-radius: var(--Corner-radius-corner-radius-100);
   --mod-button-font-family: var(--body-font-family);
-  --mod-button-line-height: var(--line-height-100, 18px);
+  --mod-button-line-height: var(--line-height-100);
   --mod-button-background-color-default: var(--color-white);
   --mod-button-background-color-hover: var(--color-light-gray);
-  --mod-button-border-color-default: var(--color-gray-300, #DADADA);
+  --mod-button-border-color-default: var(--color-gray-300);
   --mod-button-border-color-hover: var(--color-gray-800-variant);
   --mod-button-content-color-default: var(--color-gray-800-variant);
   --mod-button-content-color-hover: var(--color-gray-800-variant);
@@ -19,17 +20,17 @@ sp-action-button {
 
 sp-action-button[size="s"] {
   min-block-size: 28px;
-  font-size: var(--body-font-size-xs, 12px);
+  font-size: var(--body-font-size-xs);
 }
 
 sp-action-button[size="m"] {
   min-block-size: 32px;
-  font-size: var(--body-font-size-s, 14px);
+  font-size: var(--body-font-size-s);
 }
 
 sp-action-button[size="l"] {
   min-block-size: 40px;
-  font-size: var(--body-font-size-m, 16px);
+  font-size: var(--body-font-size-m);
 }
 
 sp-action-button[quiet] {
@@ -46,6 +47,7 @@ sp-action-button[disabled] {
 
 @media (prefers-reduced-motion: reduce) {
   sp-action-button {
+    /* stylelint-disable-next-line declaration-no-important */
     transition: none !important;
   }
 }

@@ -1,12 +1,14 @@
 
 import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { getContrastTextColor, isSuperLight } from '../../utils/ColorConversions.js';
+import { getColorModeChannels } from '../../utils/colorModeChannels.js';
 import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
 import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
+import { safeClipboardWrite } from '../../../services/plugins/download/actions/helpers.js';
 import {
   TYPE_ORDER,
   getConflictPairs,
@@ -14,6 +16,7 @@ import {
   simulateHex as simulateHexService,
 } from '../../../../scripts/color-shared/services/createColorBlindnessService.js';
 import { DEFAULT_PLACEHOLDERS as SWATCH_RAIL_DEFAULTS } from '../../../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import { trackColorExport } from '../../../../scripts/color-shared/utils/utilities.js';
 
 
 const MAX_SWATCHES = 10;
@@ -23,6 +26,7 @@ const MAX_SWATCHES_FOUR_ROWS = 20;
 
 const FOUR_ROWS_ROWS = 4;
 const DEFAULT_VERTICAL_MAX_PER_ROW = 5;
+
 const TINT_BAND_STOPS = [
   { id: 'tint-1', mode: 'white', baseWeight: 0.2 },
   { id: 'tint-2', mode: 'white', baseWeight: 0.4 },
@@ -45,6 +49,7 @@ const DEFAULT_FEATURES = {
   addLeft: false,
   addRight: false,
   editTint: false,
+  editTintInline: false,
   colorBlindness: false,
   baseColor: false,
   baseColorReadOnly: false,
@@ -64,6 +69,7 @@ const ALL_FEATURES = {
   addLeft: true,
   addRight: true,
   editTint: true,
+  editTintInline: false,
   colorBlindness: true,
   baseColor: true,
   baseColorReadOnly: false,
@@ -87,11 +93,13 @@ function normalizeFeatures(features) {
       addLeft: set.has('addLeft'),
       addRight: set.has('addRight'),
       editTint: set.has('editTint'),
+      editTintInline: set.has('editTintInline'),
       colorBlindness: set.has('colorBlindness'),
       baseColor: set.has('baseColor'),
       baseColorReadOnly: set.has('baseColorReadOnly'),
       emptyStrip: set.has('emptyStrip'),
       editColorDisabled: set.has('editColorDisabled'),
+      hexCopyHoverOnly: set.has('hexCopyHoverOnly'),
     };
   }
   return { ...DEFAULT_FEATURES, ...features };
@@ -110,6 +118,9 @@ const ICON_MAP = {
   copy: () => (hasIcon('sp-icon-copy')
     ? html`<sp-icon-copy size="m" aria-hidden="true"></sp-icon-copy>`
     : iconFallback('m11.75,18h-7.5c-1.24023,0-2.25-1.00977-2.25-2.25v-7.5c0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75v7.5c0,.41309.33691.75.75.75h7.5c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm-5-13c-.41406,0-.75-.33594-.75-.75,0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75,0,.41406-.33594.75-.75.75Zm6.25-1.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm0,10.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm2.75,0c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm1.5-9c-.41406,0-.75-.33594-.75-.75,0-.41309-.33691-.75-.75-.75-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c1.24023,0,2.25,1.00977,2.25,2.25,0,.41406-.33594.75-.75.75Zm0,4.75c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm-10.5,0c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm1.5,4.25c-1.24023,0-2.25-1.00977-2.25-2.25,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,.41309.33691.75.75.75.41406,0,.75.33594.75.75s-.33594.75-.75.75Z')),
+  edit: () => (hasIcon('sp-icon-edit')
+    ? html`<sp-icon-edit size="m" aria-hidden="true"></sp-icon-edit>`
+    : iconFallback('m4,15.4497l9.02-9.02,1.55,1.55L5.55,17l-1.55-1.55Zm11.06-11.06l1.5-1.5,1.55,1.55-1.5,1.5-1.55-1.55Zm-13,12.06l-.5,2.5,2.5-.5,10.5-10.5-1.5-1.5L2.06,16.45Z')),
   editTint: () => html`<svg class="icon-tint" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M9.99999 12.7764C12.4228 12.7764 14.25 11.0645 14.25 8.79493C14.25 7.09473 12.8633 5.27149 11.6401 3.66407C11.2656 3.17188 10.9092 2.70411 10.624 2.27637C10.3457 1.8584 9.65429 1.8584 9.37597 2.27637C9.09081 2.7041 8.73437 3.17188 8.35986 3.66407C7.13672 5.27149 5.75 7.09473 5.75 8.79493C5.75 11.0645 7.57714 12.7764 9.99999 12.7764ZM9.5537 4.57228C9.70653 4.37111 9.85643 4.17384 9.99999 3.98146C10.1435 4.17384 10.2934 4.37111 10.4463 4.57228C11.4727 5.92091 12.75 7.59962 12.75 8.79494C12.75 10.2324 11.5933 11.2764 9.99999 11.2764C8.40673 11.2764 7.24999 10.2324 7.24999 8.79494C7.24999 7.59963 8.52733 5.92092 9.5537 4.57228Z" fill="currentColor"/><path d="M18.25 5.80176C17.8359 5.80176 17.5 6.1377 17.5 6.55176V8.48731H16.2827C15.8686 8.48731 15.5327 8.82325 15.5327 9.23731C15.5327 9.65137 15.8686 9.98731 16.2827 9.98731H17.5V15.8018C17.5 16.2148 17.1636 16.5518 16.75 16.5518H3.25C2.83643 16.5518 2.5 16.2148 2.5 15.8018V9.98731H3.71729C4.13135 9.98731 4.46729 9.65137 4.46729 9.23731C4.46729 8.82325 4.13135 8.48731 3.71729 8.48731H2.5V6.55176C2.5 6.1377 2.16406 5.80176 1.75 5.80176C1.33594 5.80176 1 6.1377 1 6.55176V15.8018C1 17.042 2.00928 18.0518 3.25 18.0518H16.75C17.9907 18.0518 19 17.042 19 15.8018V6.55176C19 6.1377 18.6641 5.80176 18.25 5.80176Z" fill="currentColor"/></svg>`,
   trash: () => (hasIcon('sp-icon-delete')
     ? html`<sp-icon-delete size="m" aria-hidden="true"></sp-icon-delete>`
@@ -182,7 +193,9 @@ export class ColorSwatchRail extends LitElement {
       hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
       hideBaseColorBadge: { type: Boolean, attribute: 'hide-base-color-badge' },
       hideLock: { type: Boolean, attribute: 'hide-lock' },
+      colorMode: { type: String, attribute: 'color-mode' },
       strings: { attribute: false },
+      onCopyHex: { attribute: false },
     };
   }
 
@@ -200,7 +213,9 @@ export class ColorSwatchRail extends LitElement {
     this.hexCopyFirstRowOnly = false;
     this.hideBaseColorBadge = false;
     this.hideLock = false;
+    this.colorMode = 'HEX';
     this.strings = SWATCH_RAIL_DEFAULTS;
+    this.onCopyHex = null;
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
@@ -303,7 +318,8 @@ export class ColorSwatchRail extends LitElement {
     const tooltipRelevantChange = changedProperties.has('orientation')
       || changedProperties.has('swatchFeatures')
       || changedProperties.has('hexCopyFirstRowOnly')
-      || changedProperties.has('embedded');
+      || changedProperties.has('embedded')
+      || changedProperties.has('colorMode');
     if (this._tooltipsInitialized && tooltipRelevantChange) {
       this._scheduleTooltipsRefresh();
     }
@@ -462,47 +478,59 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  _copyTextFallback(text) {
-    try {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.setAttribute('readonly', '');
-      textarea.style.position = 'absolute';
-      textarea.style.left = '-9999px';
-      document.body.appendChild(textarea);
-      textarea.select();
-      textarea.setSelectionRange(0, text.length);
-      const copied = document.execCommand('copy');
-      textarea.remove();
-      return Boolean(copied);
-    } catch {
-      return false;
-    }
-  }
-
-  async _copyText(text) {
-    if (navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch {
-        // Fallback supports environments where Clipboard API is unavailable/blocked.
-      }
-    }
-    return this._copyTextFallback(text);
-  }
-
   async _handleCopy(hex) {
     if (!hex) return;
     const s = this.strings || SWATCH_RAIL_DEFAULTS;
     try {
-      const copied = await this._copyText(hex);
+      const copied = await safeClipboardWrite(hex, 'swatch-hex');
       if (!copied) throw new Error('clipboard_copy_failed');
-      showExpressToast({ message: s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast, variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
-      announceToScreenReader(s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast);
+      trackColorExport('copy-clipboard');
+      // Opt-in only: lets a consumer show its own richer toast
+      if (this.onCopyHex) {
+        this.onCopyHex(hex);
+      } else {
+        showExpressToast({ message: s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast, variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+        announceToScreenReader(s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast);
+      }
     } catch (error) {
       showExpressToast({ message: s.copyFailedToast || SWATCH_RAIL_DEFAULTS.copyFailedToast, variant: 'negative', timeout: 2000 });
     }
+  }
+
+  /**
+   * @param {{inline?: boolean}} [config] - inline: single row (stacked/mobile-tablet
+   *   layout), no own copy-all button — that layout already has a copy icon in
+   *   stacked-row__icons, which copies the joined code instead of the hex in this mode.
+   */
+  _renderColorModeRows(rows, { inline = false } = {}) {
+    const s = this.strings || SWATCH_RAIL_DEFAULTS;
+    const channelTemplate = s.copyChannelValue || SWATCH_RAIL_DEFAULTS.copyChannelValue;
+    const rowsMarkup = rows.map((row) => {
+      const label = channelTemplate.replace('{channel}', row.label).replace('{value}', row.value);
+      return html`
+        <div class="hex-code-row">
+          <span class="hex-code-row__label" aria-hidden="true">${row.label}</span>
+          <button type="button" class="hex-code-row__value swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(row.value, e.currentTarget)} aria-label="${label}" title="${label}">${row.value}</button>
+        </div>
+      `;
+    });
+
+    if (inline) {
+      return html`<div class="hex-code-multi hex-code-multi--inline">${rowsMarkup}</div>`;
+    }
+
+    // This button only ever renders in a non-HEX mode (colorModeRows is null
+    // for HEX), and it copies every channel joined together, not a hex
+    // string — "Copy all values" (not "Copy hex", and not mode-specific
+    // either, unlike each individual row's own "Copy {channel} value").
+    const labelCopyCode = s.copyAllValues || SWATCH_RAIL_DEFAULTS.copyAllValues;
+    const fullCode = rows.map((row) => row.value).join(', ');
+    return html`
+      <div class="hex-code-multi">
+        ${rowsMarkup}
+        <button type="button" class="icon-button icon-button--copy hex-code-multi__copy-all swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(fullCode, e.currentTarget)} aria-label="${labelCopyCode}" title="${labelCopyCode}">${icon('copy')}</button>
+      </div>
+    `;
   }
 
   _handleLock(index) {
@@ -1301,7 +1329,19 @@ export class ColorSwatchRail extends LitElement {
       const resolvedTintIndex = this._resolveTintIndex();
       const isTintSelected = tintMode && resolvedTintIndex != null && index === resolvedTintIndex;
       const tintBands = isTintSelected ? this._buildTintBands(swatch.hex) : [];
-      const showEdit = (f.colorPicker || f.editTint) && !editDisabled;
+      const showEdit = (f.colorPicker || f.editTint || f.editTintInline) && !editDisabled;
+      const colorModeRows = !showEdit && !f.copyFromHex
+        ? getColorModeChannels(swatch.hex, this.colorMode)
+        : null;
+      // Stacked layout (mobile/tablet) has one pre-existing copy icon in
+      // stacked-row__icons rather than a second one inside the color-mode
+      // rows — it copies this joined code instead of the hex when present.
+      const colorModeFullCode = colorModeRows ? colorModeRows.map((row) => row.value).join(', ') : null;
+      // Same button copies hex in HEX mode and the joined per-channel code in
+      // any other mode, so its label must switch to match what's copied.
+      const labelCopyStacked = colorModeFullCode
+        ? (s.copyAllValues || sFallback.copyAllValues)
+        : labelCopyHex;
       const atMinSwatches = f.minSwatches != null && swatches.length <= f.minSwatches;
       
       
@@ -1367,7 +1407,7 @@ export class ColorSwatchRail extends LitElement {
             >${baseColorIcon}</button>
           ` : ''}
           ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="${labelBaseColor}">${icon('baseColorTarget')}</span>` : ''}
-          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="${labelCopyHex}" title="${labelCopyHex}">${icon('copy')}</button>` : ''}
+          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(colorModeFullCode ?? swatch.hex, e.currentTarget)} aria-label="${labelCopyStacked}" title="${labelCopyStacked}">${icon('copy')}</button>` : ''}
           ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? labelUnlockColor : labelLockColor} title=${isLocked ? labelUnlockColor : labelLockColor}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
           ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditTint}" title=${swatch.hex.toUpperCase()}>${icon('editTint')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="${labelDeleteColor}" title="${labelDeleteColor}" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
@@ -1388,7 +1428,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? ((showEdit || f.copyFromHex) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`) : ''}
+          ${f.hexCode ? ((showEdit || (f.copyFromHex && !f.hexCopyHoverOnly)) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>` : (colorModeRows ? this._renderColorModeRows(colorModeRows, { inline: true }) : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`)) : ''}
         </div>
         ${stackedIcons}
       `;
@@ -1402,14 +1442,24 @@ export class ColorSwatchRail extends LitElement {
         f.drag && 'swatch-column--draggable',
         superLight && 'swatch-column--super-light',
         f.rightActionsHoverOnly && 'swatch-column--right-actions-hover-only',
+        f.hexCopyHoverOnly && 'swatch-column--hex-copy-hover-only',
         opts.cornerClass || ''
       ].filter(Boolean).join(' ');
 
+      // In a non-HEX mode, describe the swatch by its per-channel values
+      // (e.g. "R 228, G 220, B 209") instead of the hex template below —
+      // the hex itself isn't what's currently shown or copied for this swatch.
+      const modeChannels = this.colorMode !== 'HEX'
+        ? getColorModeChannels(swatch.hex, this.colorMode)
+        : null;
+      const colorDescription = modeChannels
+        ? modeChannels.map((c) => `${c.label} ${c.value}`).join(', ')
+        : swatch.hex;
       const stripAriaLabel = orientation === 'vertical'
-        ? colorStripTemplate.replace('{hex}', swatch.hex)
+        ? (modeChannels ? colorDescription : colorStripTemplate.replace('{hex}', colorDescription))
         : colorPositionTemplate
             .replace('{index}', String(index + 1))
-            .replace('{hex}', swatch.hex);
+            .replace('{hex}', colorDescription);
       const tintAndShadeAriaLabel = tintAndShadeTemplate.replace('{index}', String(index + 1));
       return html`
         <div class="${swatchClasses}"
@@ -1457,16 +1507,23 @@ export class ColorSwatchRail extends LitElement {
               ${topRightIcons}
             </div>
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
-          ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
+          ${!isStacked ? html`<div class="bottom-info ${colorModeRows ? 'bottom-info--multi' : ''}" part="bottom-info">
             ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
             ${f.hexCode && showHexCopyForThisSwatch ? (
-              showEdit || f.copyFromHex
-                ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>`
-                : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`
+              f.editTintInline && showEdit
+                ? html`<div class="hex-code-group">
+                    <button type="button" class="hex-code hex-code--editable swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditColor}" title=${labelEditColor}>${swatch.hex}</button>
+                    <button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditColor}" title=${labelEditColor}>${icon('edit')}</button>
+                  </div>`
+                : (colorModeRows
+                  ? this._renderColorModeRows(colorModeRows)
+                  : (showEdit || (f.copyFromHex && !f.hexCopyHoverOnly)
+                    ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>`
+                    : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`))
             ) : ''}
-            <div class="bottom-info__actions">
+            ${!colorModeRows ? html`<div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="${labelCopyHex}" title="${labelCopyHex}">${icon('copy')}</button>` : ''}
-            </div>
+            </div>` : ''}
           </div>` : ''}
           ${showAddLeftHere ? html`<div class="add-slot add-slot--column add-slot--column-left">
             <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="${labelAddColorLeft}" title="${labelAddColorLeft}">${icon('add')}</button>

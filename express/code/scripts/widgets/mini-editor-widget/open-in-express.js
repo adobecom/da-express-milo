@@ -12,7 +12,9 @@
 //
 // The Express side is the `@hz/x-acom-mini-editor-entry` feature, which reads:
 //   referrer=express-mini-editor            (activation allow-list)
-//   feature-enable=acom-mini-editor-entry   (enables the hz feature flag)
+//   feature-enable=acom-mini-editor-entry,enable-emoji-clr-support
+//     (enables the hz entry feature + the color-emoji fallback font — scoped to this
+//      session so the quote's emoji render instead of tofu)
 //   miniEditor=<base64url(JSON)>            (background URN + quote + author + font)
 //   width/height/unit                       (blank-canvas size, consumed by /new)
 
@@ -65,6 +67,9 @@ const STAGE_BASE_URL = 'https://stage.projectx.corp.adobe.com/new';
 const PROD_BASE_URL = 'https://adobesparkpost.app.link/JpBOBeJz35b';
 const REFERRER = 'express-mini-editor';
 const FEATURE_FLAG = 'acom-mini-editor-entry';
+// Enables the hz color-emoji fallback font (NotoColorEmoji) for this session so emoji in the quote
+// render instead of tofu; scoped via feature-enable so only the mini-editor entry turns it on.
+const EMOJI_FEATURE_FLAG = 'enable-emoji-clr-support';
 const CANVAS_UNIT = 'px';
 
 // Hosts a ?base= override may point at for non-prod testing: local dev, prenv, and stage.
@@ -121,14 +126,11 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
   const hzenv = params.get('hzenv');
   const isTestEnv = hzenv === 'local' || hzenv === 'stage';
 
-  // On prod, a template that carries its own Branch deep link opens THAT template as the Express
-  // project (background already applied), so we open the branch link instead of the generic base
-  // and hand off text only — no background URL, no /new canvas-size params. Test envs keep the
-  // /new base + background so the Edit flow stays exercisable against non-prod Express.
-  const branchUrl = model.backgroundBranchUrl;
-  const useBranch = !isTestEnv && !!branchUrl;
-  const prodBase = useBranch ? branchUrl : prodBaseUrl;
-  const baseUrl = isTestEnv ? getTestBaseUrl(hzenv, params.get('base')) : prodBase;
+  // Prod uses the default Branch link (PROD_BASE_URL) or the authored `mini-editor-cta-base-url`
+  // override (passed as prodBaseUrl). The per-template branch link (model.backgroundBranchUrl) is
+  // intentionally NOT used for now — the generic base opens a /new canvas, so we pass the
+  // background + canvas-size params below and Express reproduces the card.
+  const baseUrl = isTestEnv ? getTestBaseUrl(hzenv, params.get('base')) : prodBaseUrl;
 
   // Attribution params only (placement) — not isSearchOverride, which would
   // inject category=templates and its own width/height. Our params are set
@@ -137,7 +139,9 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
 
   // Reproduce the card's text contrast: a dark background (or unknown) gets light text,
   // a light background gets dark text — matching the widget's light-mode/dark-mode CSS.
-  const isLight = model.mode === 'light';
+  // `backgroundMode` is the canonical field the content model always carries (init, useQuote,
+  // colour pick), unlike the old `mode`, which was only set on a colour-control pick.
+  const isLight = model.backgroundMode === 'light';
   const quoteColor = isLight ? '#131313' : '#FFFFFF';
   const authorColor = isLight ? '#505050' : '#E6E6E6';
 
@@ -151,9 +155,8 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
   const payload = {
     // URN is carried for provenance/analytics; backgroundUrl is what Express fetches
     // (the template rendition — a bare public template URN isn't dereferenceable on the hz side).
-    // Empty in the branch case: the branch-opened template already supplies the background.
     backgroundUrn: model.backgroundUrn || '',
-    backgroundUrl: useBranch ? '' : (model.backgroundFullUrl || model.backgroundUrl || ''),
+    backgroundUrl: model.backgroundFullUrl || model.backgroundUrl || '',
     quote: model.quote || '',
     author: model.author || '',
     quoteColor,
@@ -169,18 +172,13 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
     layout: buildCardLayout(quoteWidth, canvasWidth, canvasHeight),
   };
 
-  // referrer/feature-enable/miniEditor are our own keys — `.set` appends them to (never clobbers)
-  // any params the branch link already carries; Branch forwards them to Express on expansion.
   url.searchParams.set('referrer', REFERRER);
-  url.searchParams.set('feature-enable', FEATURE_FLAG);
+  url.searchParams.set('feature-enable', `${FEATURE_FLAG},${EMOJI_FEATURE_FLAG}`);
   url.searchParams.set('miniEditor', encodePayload(payload));
-  // width/height/unit are /new-only. The branch link opens an existing template that owns its
-  // canvas (and may carry its own sizing params), so don't send — or override — them there.
-  if (!useBranch) {
-    url.searchParams.set('width', String(canvasWidth));
-    url.searchParams.set('height', String(canvasHeight));
-    url.searchParams.set('unit', CANVAS_UNIT);
-  }
+  // Canvas size for the /new route Express opens.
+  url.searchParams.set('width', String(canvasWidth));
+  url.searchParams.set('height', String(canvasHeight));
+  url.searchParams.set('unit', CANVAS_UNIT);
 
   return url.toString();
 }

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./template-x-promo.spec.cjs');
 const TemplateXPromo = require('./template-x-promo.page.cjs');
 

@@ -1,0 +1,23 @@
+{
+  "block": "color-carousel",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-carousel-authored",
+      "selector": "div.color-carousel",
+      "path": "/drafts/nala/blocks/color-carousel",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@color-carousel",
+        "@authored",
+        "@express"
+      ]
+    }
+  ]
+}

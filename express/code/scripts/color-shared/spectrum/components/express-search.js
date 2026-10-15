@@ -15,6 +15,7 @@
  */
 
 import { loadSearch } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
@@ -54,7 +55,7 @@ export async function createExpressSearch(config) {
 
   await loadSearch();
   await loadOverrideStyles('search', STYLES_PATH);
-  await customElements.whenDefined('sp-search');
+  await waitForComponents(['sp-search']);
 
   const theme = createThemeWrapper();
   const search = document.createElement('sp-search');

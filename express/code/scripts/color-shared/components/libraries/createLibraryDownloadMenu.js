@@ -1,13 +1,8 @@
 import { serviceManager } from '../../../../libs/services/index.js';
 import { announceToScreenReader } from '../../spectrum/index.js';
+import { trackColorExport } from '../../utils/utilities.js';
 import { createLibraryCardActionMenu } from './createLibraryCardActionMenu.js';
-import { libraryItemToDownloadData } from './libraryDownloadUtils.js';
-
-function isIOSDevice() {
-  if (typeof navigator === 'undefined') return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
+import { libraryItemToDownloadData, isIOSDevice } from './libraryDownloadUtils.js';
 
 const THEME_DOWNLOAD_ACTIONS = {
   ase: 'downloadASE',
@@ -15,6 +10,7 @@ const THEME_DOWNLOAD_ACTIONS = {
 };
 
 const GRADIENT_DOWNLOAD_ACTIONS = {
+  jpeg: 'downloadJPEG',
   png: 'downloadPNG',
   svg: 'downloadSVG',
 };
@@ -24,6 +20,7 @@ function buildDownloadItems(item, strings) {
 
   if (isGradient) {
     return [
+      { value: 'jpeg', label: strings.librariesDownloadAsJPEG },
       { value: 'png', label: strings.librariesDownloadAsPNG },
       { value: 'svg', label: strings.librariesDownloadAsSVG },
     ].filter((entry) => entry.label);
@@ -77,8 +74,11 @@ export function createLibraryDownloadMenu({
     async onSelect(format, { closePopover }) {
       try {
         const started = await runDownload(item, format);
-        if (started && strings.librariesDownloadStarted) {
-          announceToScreenReader(strings.librariesDownloadStarted);
+        if (started) {
+          trackColorExport('download');
+          if (strings.librariesDownloadStarted) {
+            announceToScreenReader(strings.librariesDownloadStarted);
+          }
         }
       } catch (err) {
         window.lana?.log(`Library download failed: ${err?.message}`, {

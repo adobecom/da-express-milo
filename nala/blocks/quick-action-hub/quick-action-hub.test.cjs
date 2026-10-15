@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./quick-action-hub.spec.cjs');
 const QuickActionHubBlock = require('./quick-action-hub.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');

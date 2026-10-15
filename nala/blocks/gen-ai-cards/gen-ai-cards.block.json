@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@gen-ai-cards-default",
       "selector": "div.gen-ai-cards",
-      "path": "/drafts/nala/test-gen/ax-gen-ai-cards/gen-ai-cards",
+      "path": "/drafts/nala/blocks/ax-gen-ai-cards/gen-ai-cards",
       "data": {
         "semantic": {
           "texts": [

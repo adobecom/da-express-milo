@@ -337,6 +337,36 @@
   border-color: var(--Buttons-default);
 }
 
+/* Partial-unicode-support disclaimer (MWPW-206090). Hidden by default and
+   toggled to flex via .is-visible from JS (see syncDisclaimer in
+   textInput.js) rather than driven off :empty, so the aria-live region can
+   announce reliably regardless of how a screen reader treats the transition. */
+.font-generator-text-input .disclaimer {
+  display: none;
+  align-items: center;
+  gap: var(--spacing-80);
+  align-self: stretch;
+  width: 100%;
+  color: var(--Alias-content-typography-Title);
+}
+
+.font-generator-text-input .disclaimer.is-visible {
+  display: flex;
+}
+
+.font-generator-text-input .disclaimer-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.font-generator-text-input .disclaimer-text {
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+}
+
 .font-generator-text-input .tag-pills:focus-visible::after {
   content: '';
   position: absolute;

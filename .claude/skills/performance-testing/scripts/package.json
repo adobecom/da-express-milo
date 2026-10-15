@@ -1,0 +1,16 @@
+{
+  "name": "performance-testing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Performance testing tools for Express pages: LCP comparison today, with room for single-page reports and other metrics later.",
+  "bin": {
+    "perf-compare": "./compare.mjs"
+  },
+  "scripts": {
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.62.1"
+  }
+}

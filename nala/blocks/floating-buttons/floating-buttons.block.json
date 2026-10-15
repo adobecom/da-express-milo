@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@floating-buttons-default",
       "selector": "div.floating-buttons",
-      "path": "/drafts/nala/test-gen/ax-floating-buttons/floating-buttons",
+      "path": "/drafts/nala/blocks/ax-floating-buttons/floating-buttons",
       "data": {
         "semantic": {
           "texts": [],

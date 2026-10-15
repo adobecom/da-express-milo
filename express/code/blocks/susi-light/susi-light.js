@@ -2,6 +2,7 @@
 /* eslint-disable camelcase */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { getTrackingAppendedURL } from '../../scripts/branchlinks.js';
+import { transformLinkToAnimation } from '../../scripts/utils/media.js';
 
 let createTag; let loadScript;
 let getConfig; let isStage;
@@ -23,6 +24,16 @@ export const DCTX_ID_MAP = {
 };
 
 const usp = new URLSearchParams(window.location.search);
+
+// English "Not ready to Sign in? Continue as a guest" is 41 characters and stays inline;
+// longer localized copy (e.g. French, 76 characters) stacks the prompt above the link.
+export const SUSI_BANNER_STACK_THRESHOLD = 50;
+
+export function decorateSusiBanner(footer) {
+  footer.classList.add('footer', 'susi-banner');
+  const { length } = footer.textContent.replace(/\s+/g, ' ').trim();
+  footer.classList.toggle('stacked', length > SUSI_BANNER_STACK_THRESHOLD);
+}
 
 const onRedirect = (e) => {
   // eslint-disable-next-line no-console
@@ -269,7 +280,7 @@ async function buildB2B(el, locale, imsClientId, noRedirect) {
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
   const footer = rows[3];
-  footer?.classList.add('footer', 'susi-banner');
+  if (footer) decorateSusiBanner(footer);
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
   const susiConfigs = {
@@ -300,7 +311,7 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
   const title = rows[2]?.textContent?.trim();
   const studentCheckText = rows[3]?.textContent?.trim();
   const footer = rows[4];
-  footer?.classList.add('footer', 'susi-banner');
+  if (footer) decorateSusiBanner(footer);
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
   if (checked) {
@@ -353,11 +364,116 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
 
 // each tab wraps susi component with custom logo + footer
 let tabsId = 0;
+
+const TABS_PANEL_HEIGHTS = {
+  standard: 508,
+  'edu-express': 521,
+};
+const TABS_PANEL_BUFFER = 0;
+const TABS_PANEL_FALLBACK = 521;
+
+// Per-variant tab wrapper min-heights are owned by CSS
+// (--susi-tabs-wrapper-* in susi-light.css), applied statically per tabpanel.
+
+export function resolveTabsPanelMinHeight(variants) {
+  const heights = variants
+    .filter(Boolean)
+    .map((v) => TABS_PANEL_HEIGHTS[v] ?? TABS_PANEL_HEIGHTS.standard);
+  if (!heights.length) return TABS_PANEL_FALLBACK;
+  return Math.ceil(Math.max(...heights) + TABS_PANEL_BUFFER);
+}
+
+/** CLS: reserve tab panel slot from authoring row 2 variants. */
+export function applyTabsReserveFromAuthoring(el, variants) {
+  el.style.setProperty('--susi-tabs-panel-height', `${resolveTabsPanelMinHeight(variants)}px`);
+}
+
+const MODAL_FLAVORS = ['b2b', 'edu', 'student'];
+
+function readClientIdFromAuthoring(el, imsClientId) {
+  const cells = el.querySelectorAll(':scope > div > div');
+  return cells[1]?.textContent?.trim() || imsClientId || 'AdobeExpressWeb';
+}
+
+function resolveFlavorModalWrapperProfile(el, flavor, clientId) {
+  if (el.classList.contains('email-only')) return `${flavor}-email-only`;
+  if (flavor === 'b2b' && el.classList.contains('email-first')) return 'b2b-email-first';
+  if (clientId === 'AdobeExpressWeb_HED' || clientId?.endsWith('_HED')) return `${flavor}-hed`;
+  if (clientId === 'AdobeExpressWeb_Business' || clientId?.endsWith('_Business')) {
+    return `${flavor}-business`;
+  }
+  return `${flavor}-default`;
+}
+
+/** Legacy: no flavor class, bare susi-sentry-light. */
+function resolveLegacyModalWrapperProfile(clientId) {
+  if (clientId === 'AdobeExpressWeb_HED' || clientId?.endsWith('_HED')) return 'legacy-edu-hed';
+  if (clientId === 'AdobeExpressWeb_Business' || clientId?.endsWith('_Business')) {
+    return 'edu-business';
+  }
+  return 'legacy-edu-express';
+}
+
+/** Profile id matches fragment names, e.g. b2b-hed, edu-business. */
+export function resolveModalWrapperProfile(el, clientId) {
+  if (el.classList.contains('tabs')) return null;
+  if (el.classList.contains('simplified')) return 'simplified';
+  const flavor = MODAL_FLAVORS.find((c) => el.classList.contains(c));
+  if (flavor) return resolveFlavorModalWrapperProfile(el, flavor, clientId);
+  return resolveLegacyModalWrapperProfile(clientId);
+}
+
+/** Measured px per profile — mirrors :root --susi-wrapper-* tokens. */
+const MODAL_WRAPPER_FALLBACK_PX = {
+  'b2b-default': 484,
+  'b2b-hed': 291,
+  'b2b-business': 393,
+  'b2b-email-first': 409,
+  'b2b-email-only': 294,
+  'edu-default': 484,
+  'edu-hed': 333,
+  'edu-business': 393,
+  'student-default': 462,
+  'student-hed': 422,
+  'student-business': 422,
+  'student-email-only': 294,
+  'legacy-edu-express': 520,
+  'legacy-edu-hed': 477,
+  simplified: 400,
+};
+
+export function resolveModalWrapperHeight(el, clientId) {
+  const profile = resolveModalWrapperProfile(el, clientId);
+  if (!profile) return null;
+  return MODAL_WRAPPER_FALLBACK_PX[profile] ?? 484;
+}
+
+/** CLS: set --susi-modal-wrapper-height before SUSI hydrates. */
+export function applyModalWrapperReserve(el, clientId) {
+  const profile = resolveModalWrapperProfile(el, clientId);
+  if (!profile) return;
+  const height = resolveModalWrapperHeight(el, clientId);
+  if (!height) return;
+  el.dataset.susiWrapperProfile = profile;
+  el.style.setProperty('--susi-modal-wrapper-height', `${height}px`);
+}
+
+function setTabPanelActive(panel, isActive) {
+  panel.classList.toggle('hide', !isActive);
+  panel.setAttribute('aria-hidden', String(!isActive));
+  if (isActive) {
+    panel.removeAttribute('inert');
+  } else {
+    panel.setAttribute('inert', '');
+  }
+}
+
 async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
   const rows = [...el.children];
   const title = rows[0].textContent?.trim();
   const tabNames = [...rows[1].querySelectorAll('div')].map((div) => div.textContent);
   const variants = [...rows[2].querySelectorAll('div')].map((div) => div.textContent?.trim().toLowerCase());
+  applyTabsReserveFromAuthoring(el, variants);
   const redirectUrls = [...rows[3].querySelectorAll('div')].map((div) => div.textContent?.trim());
   const client_ids = [...rows[4].querySelectorAll('div')].map((div) => div.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb'));
   const footers = rows[5] ? [...rows[5].querySelectorAll('div')] : [];
@@ -391,9 +507,8 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     susiScriptReady.then(() => susiWrapper.append(createSUSIComponent(option)));
 
     if (footer) {
-      footer.classList.add('footer');
       if (footer.querySelector('h2')) {
-        footer.classList.add('susi-bubbles');
+        footer.classList.add('footer', 'susi-bubbles');
         const bubbleContainer = createTag('div', { class: 'susi-bubble-container' });
         [...footer.querySelectorAll('p')].forEach((p) => {
           p.classList.add('susi-bubble');
@@ -401,7 +516,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
         });
         footer.append(bubbleContainer);
       } else {
-        footer.classList.add('susi-banner');
+        decorateSusiBanner(footer);
       }
       panel.append(footer);
     }
@@ -409,7 +524,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     const id = sanitizeId(`${tabName}-${tabsId}`);
     panel.setAttribute('aria-labelledby', `tab-${id}`);
     panel.id = `panel-${id}`;
-    i > 0 && panel.classList.add('hide');
+    setTabPanelActive(panel, i === 0);
     const tab = createTag('button', {
       role: 'tab',
       'aria-selected': i === 0,
@@ -419,16 +534,58 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     tab.addEventListener('click', () => {
       tabList.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', false);
       tab.setAttribute('aria-selected', true);
-      panels.forEach((p) => {
-        p !== panel ? p.classList.add('hide') : p.classList.remove('hide');
-      });
+      panels.forEach((p) => setTabPanelActive(p, p === panel));
     });
     tabList.append(tab);
     return panel;
   });
   const titleDiv = createTag('div', { class: 'title' }, title);
-  layout.append(createLogo(), titleDiv, tabList, ...panels);
+  const tabPanelsSlot = createTag('div', { class: 'susi-tab-panels' });
+  panels.forEach((panel) => tabPanelsSlot.append(panel));
+  layout.append(createLogo(), titleDiv, tabList, tabPanelsSlot);
   return layout;
+}
+
+/**
+ * Waits for `.modal-curtain` to satisfy `predicate`, then calls `callback`
+ * with it — immediately if already satisfied, otherwise via a one-shot
+ * MutationObserver. Shared by blurModalCurtain and the video autoplay retry,
+ * since both just need to react to the curtain's open state.
+ */
+function onModalCurtainMatch(predicate, callback) {
+  const curtain = document.querySelector('.modal-curtain');
+  if (curtain && predicate(curtain)) {
+    callback(curtain);
+    return;
+  }
+  const observer = new MutationObserver(() => {
+    const c = document.querySelector('.modal-curtain');
+    if (c && predicate(c)) {
+      callback(c);
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+}
+
+function playSusiVideoOnModalOpen(video) {
+  onModalCurtainMatch(
+    (curtain) => curtain.classList.contains('is-open'),
+    () => video.play().catch(() => { /* ignore — may still be blocked */ }),
+  );
+}
+
+function buildSusiMedia(row) {
+  const videoLink = row?.querySelector('a[href$=".mp4"]');
+  if (!videoLink) return null;
+  transformLinkToAnimation(videoLink);
+  const video = row.querySelector('video');
+  if (!video) return row;
+  video.classList.add('susi-image');
+  video.setAttribute('disablepictureinpicture', '');
+  video.play().catch(() => { /* ignore — autoplay may be blocked until visible */ });
+  playSusiVideoOnModalOpen(video);
+  return row;
 }
 
 async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
@@ -447,6 +604,9 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
 
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
+  const mobileTitle = isColor ? rows[3]?.textContent?.trim() : undefined;
+  const isDesktopViewport = window.matchMedia('(min-width: 1200px)').matches;
+  const media = (isColor && isDesktopViewport) ? buildSusiMedia(rows[4]) : null;
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
@@ -484,36 +644,38 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
     ...params,
     onSuccessfulToken: () => window.location.assign(destURL.toString()),
   }));
-  const layout = createTag('div', { class: 'susi-layout' }, [createLogo(), titleDiv, susiWrapper]);
+  if (mobileTitle) {
+    titleDiv.classList.add('desktop-only');
+  }
+  const mobileTitleDiv = mobileTitle
+    ? createTag('div', { class: 'title mobile-only' }, mobileTitle)
+    : null;
+  if (media && isColor) {
+    el.classList.add('has-media');
+    const mediaPane = media;
+    mediaPane.classList.add('susi-media');
+    const formPaneChildren = [createLogo(), titleDiv];
+    if (mobileTitleDiv) {
+      formPaneChildren.push(mobileTitleDiv);
+    }
+    formPaneChildren.push(susiWrapper);
+    const formPane = createTag('div', { class: 'susi-form-pane' }, formPaneChildren);
+    return createTag('div', { class: 'susi-layout' }, [mediaPane, formPane]);
+  }
+  const layoutChildren = [createLogo(), titleDiv];
+  if (mobileTitleDiv) {
+    layoutChildren.push(mobileTitleDiv);
+  }
+  layoutChildren.push(susiWrapper);
+  const layout = createTag('div', { class: 'susi-layout' }, layoutChildren);
   return layout;
 }
 
 function blurModalCurtain() {
-  const updateBlurState = () => {
-    const modalCurtain = document.querySelector('.modal-curtain');
-    const dialogModal = document.querySelector('.dialog-modal');
-    if (modalCurtain && dialogModal) {
-      if (modalCurtain.classList.contains('is-open')) {
-        modalCurtain.classList.add('blurred');
-      } else if (!modalCurtain.classList.contains('is-open')) {
-        modalCurtain.classList.remove('blurred');
-      }
-    }
-  };
-
-  const modalCurtain = document.querySelector('.modal-curtain');
-  if (modalCurtain) {
-    updateBlurState();
-  } else {
-    const observer = new MutationObserver(() => {
-      const curtain = document.querySelector('.modal-curtain');
-      if (curtain) {
-        updateBlurState();
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
+  onModalCurtainMatch(() => true, (modalCurtain) => {
+    if (!document.querySelector('.dialog-modal')) return;
+    modalCurtain.classList.toggle('blurred', modalCurtain.classList.contains('is-open'));
+  });
 }
 
 export default async function init(el) {
@@ -522,6 +684,8 @@ export default async function init(el) {
   const locale = getConfig().locale.ietf.toLowerCase();
   const { imsClientId } = getConfig();
   const noRedirect = el.classList.contains('no-redirect');
+  const clientId = readClientIdFromAuthoring(el, imsClientId);
+  applyModalWrapperReserve(el, clientId);
 
   /**
    * customize can be used to add custom logic to the susi-light component

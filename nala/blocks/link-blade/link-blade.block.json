@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@link-blade-default",
       "selector": "div.link-blade",
-      "path": "/drafts/nala/test-gen/link-blade/link-blade",
+      "path": "/drafts/nala/blocks/link-blade/link-blade",
       "data": {
         "semantic": {
           "texts": [

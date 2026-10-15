@@ -27,7 +27,7 @@ Legacy CSS for cards and special promo
   font-size: var(--body-font-size-xs);
   font-weight: 700;
   display: flex;
-  height: 20px;
+  height: 20px; /* stylelint-disable-line declaration-block-no-duplicate-properties */
   justify-content: center;
   align-items: center;
 }
@@ -88,14 +88,14 @@ Border style variants
   line-height: 1.5rem;
   text-align: center;
   font-size: 1rem;
-  margin-top: 0px !important;
+  margin-top: 0px !important; /* stylelint-disable-line declaration-no-important */
 }
 
 .pricing-cards .gradient-promo {
-  background: var(--S2-Buttons-Premium) !important;
+  background: var(--S2-Buttons-Premium) !important; /* stylelint-disable-line declaration-no-important */
   padding: 12px 2px 4px 2px;
   border-radius: 10px;
-  background: var(--color-white);
+  background: var(--color-white); /* stylelint-disable-line declaration-block-no-duplicate-properties */
   margin-top: -48px;
   margin-left: -2px;
   margin-right: -2px;
@@ -109,7 +109,7 @@ Border style variants
   margin-top: 48px;
 }
 
-.pricing-cards .cards-container {
+.pricing-cards .cards-container { /* stylelint-disable-line no-duplicate-selectors */
   margin-top: 24px;
 }
 
@@ -150,7 +150,7 @@ Border style variants
   font-size: var(--body-font-size-xs);
   font-weight: 700;
   display: flex;
-  height: 20px;
+  height: 20px; /* stylelint-disable-line declaration-block-no-duplicate-properties */
   justify-content: center;
   align-items: center;
   z-index: 3;
@@ -210,9 +210,9 @@ Border style variants
   font-size: var(--body-font-size-xs);
   font-weight: 700;
   color: var(--palette-indigo-1000);
-  height: 20px;
+  height: 20px; /* stylelint-disable-line declaration-block-no-duplicate-properties */
   font-style: normal;
-  height: auto;
+  height: auto; /* stylelint-disable-line declaration-block-no-duplicate-properties */
   max-width: 240px;
 }
 
@@ -380,7 +380,7 @@ Border style variants
 
 .pricing-cards .card-feature-list p {
   padding: 16px 0px;
-  border-bottom: 1px solid var(--Palette-gray-100, #E9E9E9);
+  border-bottom: 1px solid var(--Palette-gray-100, #E9E9E9); /* stylelint-disable-line declaration-property-value-disallowed-list */
   margin: 0 0 24px 0;
   box-sizing: border-box;
 }

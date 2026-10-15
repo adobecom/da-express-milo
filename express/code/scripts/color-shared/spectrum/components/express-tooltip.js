@@ -16,6 +16,7 @@
  */
 
 import { loadTooltip } from '../load-spectrum.js';
+import { waitForComponents } from '../registry.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { ariaDescribedBy } from '../utils/a11y.js';
 import { loadOverrideStyles } from './style-loader.js';
@@ -45,7 +46,7 @@ export async function createExpressTooltip(config) {
 
   await loadTooltip();
   await loadOverrideStyles('tooltip', STYLES_PATH);
-  await customElements.whenDefined('sp-tooltip');
+  await waitForComponents(['sp-tooltip']);
 
   const isTouchDevice = window.matchMedia?.('(hover: none)')?.matches ?? false;
 

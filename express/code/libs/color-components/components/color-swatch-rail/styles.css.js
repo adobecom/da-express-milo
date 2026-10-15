@@ -7,6 +7,26 @@ export const style = css`
     width: 100%;
     height: 100%;
     font-family: var(--body-font-family);
+
+    --swatch-rail-gap: var(--spacing-50);
+    --swatch-rail-horizontal-height: 48px;
+    --swatch-rail-horizontal-padding: 8px 12px;
+    --swatch-column-horizontal-padding: 0;
+    --swatch-column-horizontal-gap: 0;
+    --swatch-column-horizontal-radius: 0;
+    --four-rows-cols: 5;
+    --vertical-max-per-row: 5;
+    --bottom-info-horizontal-height: auto;
+    --bottom-info-horizontal-padding: 0 var(--spacing-100);
+    --bottom-info-horizontal-gap: 0;
+    --bottom-info-horizontal-radius: 0;
+    --bottom-info-horizontal-box-sizing: content-box;
+    --hex-code-group-gap: 6px;
+    --hex-code-edit-tint-background: rgba(0, 0, 0, 0.15);
+    --hex-code-edit-tint-radius: 6px;
+    --hex-code-edit-tint-size: 24px;
+    --swatch-column-stacked-padding: 0 12px;
+    --hex-code-stacked-width: 75px;
   }
   :host([orientation="stacked"]) {
     overflow: visible;
@@ -20,7 +40,7 @@ export const style = css`
     position: relative;
     display: flex;
     flex-direction: row;
-    gap: var(--swatch-rail-gap, var(--spacing-50));
+    gap: var(--swatch-rail-gap);
     width: 100%;
     height: 100%;
     border-radius: var(--figma-strip-radius);
@@ -183,9 +203,9 @@ export const style = css`
 
   
   .swatch-rail[data-orientation="horizontal"] {
-    height: 48px;
-    padding: 8px 12px;
-    gap: var(--swatch-rail-gap, var(--spacing-50));
+    height: var(--swatch-rail-horizontal-height);
+    padding: var(--swatch-rail-horizontal-padding);
+    gap: var(--swatch-rail-gap);
     border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
 
@@ -193,7 +213,9 @@ export const style = css`
     flex: 1 1 0;
     width: auto;
     min-width: 0;
-    padding: 0;
+    padding: var(--swatch-column-horizontal-padding);
+    gap: var(--swatch-column-horizontal-gap);
+    border-radius: var(--swatch-column-horizontal-radius);
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:first-child {
@@ -210,7 +232,7 @@ export const style = css`
     grid-template-columns: repeat(var(--rail-columns), 1fr);
     grid-auto-rows: 1fr;
     flex-direction: unset;
-    gap: var(--swatch-rail-gap, var(--spacing-50));
+    gap: var(--swatch-rail-gap);
   }
 
   .swatch-rail[data-orientation="vertical"] .swatch-column {
@@ -221,9 +243,9 @@ export const style = css`
   
   .swatch-rail[data-orientation="vertical"].vertical--four-rows {
     display: grid;
-    grid-template-columns: repeat(var(--four-rows-cols, 5), 1fr);
+    grid-template-columns: repeat(var(--four-rows-cols), 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: var(--swatch-rail-gap, var(--spacing-50));
+    gap: var(--swatch-rail-gap);
     border-radius: var(--Corner-radius-corner-radius-200);
     overflow: hidden;
   }
@@ -313,9 +335,9 @@ export const style = css`
   
   .swatch-rail[data-orientation="vertical"].vertical--two-rows {
     display: grid;
-    grid-template-columns: repeat(var(--vertical-max-per-row, 5), 1fr);
+    grid-template-columns: repeat(var(--vertical-max-per-row), 1fr);
     grid-template-rows: 1fr 1fr;
-    gap: var(--swatch-rail-gap, var(--spacing-50));
+    gap: var(--swatch-rail-gap);
     border-radius: var(--Corner-radius-corner-radius-200);
     overflow: hidden;
   }
@@ -472,7 +494,11 @@ export const style = css`
     width: 100%;
     justify-content: space-between;
     flex-direction: row;
-    padding: 0 8px;
+    height: var(--bottom-info-horizontal-height);
+    padding: var(--bottom-info-horizontal-padding);
+    gap: var(--bottom-info-horizontal-gap);
+    border-radius: var(--bottom-info-horizontal-radius);
+    box-sizing: var(--bottom-info-horizontal-box-sizing);
   }
 
   .swatch-rail[data-orientation="horizontal"] .hex-code {
@@ -488,13 +514,27 @@ export const style = css`
     margin-left: 0;
   }
 
+  .hex-code-group {
+    display: flex;
+    align-items: center;
+    gap: var(--hex-code-group-gap);
+    min-width: 0;
+  }
+
+  .hex-code-group .icon-button--edit-tint {
+    background: var(--hex-code-edit-tint-background);
+    border-radius: var(--hex-code-edit-tint-radius);
+    width: var(--hex-code-edit-tint-size);
+    height: var(--hex-code-edit-tint-size);
+  }
+
   
   
   .swatch-rail[data-orientation="stacked"] {
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    gap: var(--swatch-rail-gap, var(--spacing-50));
+    gap: var(--swatch-rail-gap);
     padding: 0;
     border-radius: var(--figma-strip-radius);
     overflow: visible;
@@ -505,7 +545,7 @@ export const style = css`
     min-height: 48px;
     width: 100%;
     min-width: 0;
-    padding: 0 12px;
+    padding: var(--swatch-column-stacked-padding);
     border-radius: 0;
     flex-direction: row;
     align-items: center;
@@ -559,6 +599,10 @@ export const style = css`
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
     flex-shrink: 0;
+  }
+
+  .swatch-rail[data-orientation="stacked"] button.hex-code {
+    width: var(--hex-code-stacked-width);
   }
 
   .swatch-rail[data-orientation="stacked"] .stacked-row__icons {
@@ -650,6 +694,20 @@ export const style = css`
   .swatch-column--right-actions-hover-only.locked:not(:hover):not(:focus-visible):not(:has(.swatch-column-focusable:focus-visible)) .top-actions--right > :not(.icon-button--lock) {
     opacity: 0;
     pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .swatch-column--hex-copy-hover-only .bottom-info {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+
+    .swatch-column--hex-copy-hover-only:hover .bottom-info,
+    .swatch-column--hex-copy-hover-only:focus-within .bottom-info {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
 
@@ -1048,6 +1106,101 @@ export const style = css`
   .hex-code--static {
     cursor: default;
     padding-left: var(--hex-code-static-padding-left);
+  }
+
+  .bottom-info--multi {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+  }
+  .hex-code-multi {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 2px;
+  }
+  /* Stacked layout (mobile/tablet): channels in a single row, no per-swatch
+     copy-all button — stacked-row__icons already has one copy icon that
+     copies the joined code in this mode instead of the hex. */
+  .hex-code-multi--inline {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    min-width: 0;
+    gap: var(--spacing-200);
+    overflow: hidden;
+    padding-left: var(--spacing-80);
+  }
+  .hex-code-multi--inline .hex-code-row {
+    flex-shrink: 0;
+    padding-left: 0;
+    gap: 0;
+  }
+  .hex-code-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2px;
+    color: var(--swatch-text-color);
+    text-shadow: var(--swatch-text-shadow);
+    /* Figma's "Codes" layer (the column wrapping the stacked rows, desktop
+       only) carries this left inset; it isn't its own element in this
+       codebase (the rows render directly into .hex-code-multi), so it's
+       applied per-row here instead. Zeroed out for the inline mobile/tablet
+       layout above, which gets the same inset once on the shared row
+       instead (its own "Codes" layer sits inline, not stacked). */
+    padding-left: 6px;
+  }
+  .hex-code-row__label {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    flex-shrink: 0;
+  }
+  /* The value itself is the copy target (click the number, no icon) — only
+     the full-code button below the rows gets an icon. Figma's "Color-value-
+     button" is a quiet Action Button (Content stack + Text Frame, flattened
+     here into one element): 32px tall, 8px corner radius, 12px/7px padding —
+     matching button.hex-code's own quiet-button treatment below, since it's
+     the same component reused per-channel instead of for one hex string. */
+  .hex-code-row__value {
+    background: none;
+    border: none;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    color: inherit;
+    text-shadow: inherit;
+    text-align: start;
+    cursor: pointer;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    height: 32px;
+    padding: 7px 12px;
+    box-sizing: border-box;
+    border-radius: var(--Corner-radius-corner-radius-100);
+  }
+  @media (hover: hover) {
+    .swatch-column[data-contrast="dark"] .hex-code-row__value:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    .swatch-column[data-contrast="light"] .hex-code-row__value:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+    }
+  }
+  .hex-code-row__value:focus-visible {
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: 2px;
+  }
+  .hex-code-multi__copy-all {
+    align-self: flex-start;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
   }
   .icon-button {
     background: none;

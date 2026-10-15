@@ -41,7 +41,7 @@
 
 .playlist .thumbnails-container .session.active *,
 .playlist .thumbnails-container .session:hover * {
-    font-weight: 800;
+    font-weight: 900;
 }
 
 .playlist .thumbnails-container .session.active picture,
@@ -283,7 +283,7 @@
 
 .playlist .video-player-video-list-wrapper .video-player-video-list .video-button.active .video-button-title,
 .playlist .video-player-video-list-wrapper .video-player-video-list .video-button:hover .video-button-title {
-    font-weight: 800;
+    font-weight: 900;
 }
 
 .playlist .video-player-video-list-wrapper .video-player-video-list .video-button svg {
