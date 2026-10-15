@@ -321,8 +321,14 @@
 
 .color-seo-hero-actions-row.is-stacked {
   display: grid;
-  grid-template-columns: minmax(min-content, max-content) minmax(max-content, 1fr);
+  grid-template-columns: minmax(min-content, max-content) minmax(0, 1fr);
   align-items: center;
+}
+
+@media (min-width: 600px) {
+  .color-seo-hero-actions-row.is-stacked {
+    grid-template-columns: minmax(min-content, max-content) minmax(max-content, 1fr);
+  }
 }
 
 .color-seo-hero-actions-row.is-stacked .color-seo-hero-dropdown-group,
