@@ -73,9 +73,7 @@ export default async function decorate(block) {
     const thumbWidth = 60;
     const pos = (value - $input.getAttribute('min'))
         / ($input.getAttribute('max') - $input.getAttribute('min'));
-    const isRTL = getComputedStyle(block).direction === 'rtl';
-    const inlinePos = isRTL ? 1 - pos : pos;
-    const titlePos = inlinePos * ($input.offsetWidth - thumbWidth);
+    const titlePos = pos * ($input.offsetWidth - thumbWidth);
     $tooltip.style.insetInlineStart = `${titlePos}px`;
     $sliderFill.style.width = `${titlePos + thumbWidth / 2}px`;
   }
