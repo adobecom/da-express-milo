@@ -69,12 +69,12 @@ export async function measureFixedTopOffset(config, doc = document) {
   const headerHeight = header?.offsetHeight || 0;
   if (!header && !usesC2Gnav(doc)) return 0;
 
-  if (usesC2Gnav(doc)) {
-    const globalNavigation = await config?.federal?.fedsGlobalNavigation;
-    return globalNavigation?.getGnavHeight?.() ?? headerHeight;
-  }
-
   try {
+    if (usesC2Gnav(doc)) {
+      const globalNavigation = await config?.federal?.fedsGlobalNavigation;
+      return globalNavigation?.getGnavHeight?.() ?? headerHeight;
+    }
+
     const { getGnavHeight } = await import(`${getLibs()}/blocks/global-navigation/utilities/utilities.js`);
     return getGnavHeight();
   } catch (error) {

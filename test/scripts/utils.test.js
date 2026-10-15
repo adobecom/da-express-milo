@@ -119,6 +119,40 @@ describe('Fixed navigation stack offset', () => {
     expect(await measureFixedTopOffset(config)).to.equal(88);
   });
 
+  it('falls back to the header height when C2 navigation initialization rejects', async () => {
+    setMetadata('gnav-foundation', 'c2');
+    const header = document.createElement('header');
+    Object.defineProperty(header, 'offsetHeight', { value: 64 });
+    document.body.append(header);
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.reject(new Error('C2 failed to initialize')),
+      },
+    };
+
+    expect(await measureFixedTopOffset(config)).to.equal(64);
+    header.remove();
+  });
+
+  it('falls back to the header height when C2 height measurement fails', async () => {
+    setMetadata('gnav-foundation', 'c2');
+    const header = document.createElement('header');
+    Object.defineProperty(header, 'offsetHeight', { value: 64 });
+    document.body.append(header);
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.resolve({
+          getGnavHeight: () => {
+            throw new Error('C2 height unavailable');
+          },
+        }),
+      },
+    };
+
+    expect(await measureFixedTopOffset(config)).to.equal(64);
+    header.remove();
+  });
+
   it('publishes runtime stack changes and stops cleanly', async () => {
     setMetadata('gnav-foundation', 'c2');
     let height = 88;

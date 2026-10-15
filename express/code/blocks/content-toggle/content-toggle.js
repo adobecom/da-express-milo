@@ -3,6 +3,18 @@ import { trackButtonClick } from '../../scripts/instrument.js';
 
 let createTag;
 
+const DEFAULT_SCROLL_GAP = 16;
+
+function getScrollGap(block) {
+  const spacing = window.getComputedStyle(block).getPropertyValue('--spacing-200');
+  return Number.parseFloat(spacing) || DEFAULT_SCROLL_GAP;
+}
+
+export function getContentToggleScrollTop(block, scrollY = window.scrollY) {
+  return block.getBoundingClientRect().top + scrollY
+    - getFixedTopOffset() - getScrollGap(block);
+}
+
 function decorateButton($block, $toggle) {
   const $button = createTag('button', { class: 'content-toggle-button' });
   const tagText = $toggle.textContent.trim().match(/\[(.*?)\]/);
@@ -83,8 +95,7 @@ function initButton($block, $sections, index) {
 
     $buttons[index].addEventListener('click', () => {
       const $activeButton = $block.querySelector('button.active');
-      const blockPosition = $block.getBoundingClientRect().top;
-      const offsetPosition = blockPosition + window.scrollY - getFixedTopOffset();
+      const offsetPosition = getContentToggleScrollTop($block);
 
       if ($activeButton !== $buttons[index]) {
         setActiveButton(index);
