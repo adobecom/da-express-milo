@@ -158,6 +158,7 @@ async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
     onRedo: actionMenuConfig.onRedo,
     onGenerateRandom: actionMenuConfig.onGenerateRandom,
     transformPalette: actionMenuConfig.transformPalette,
+    randomPaletteAnnouncement: actionMenuConfig.randomPaletteAnnouncement,
     getName: actionMenuConfig.getName,
     paletteTags: actionMenuConfig.paletteTags,
     paletteId: actionMenuConfig.paletteId,
