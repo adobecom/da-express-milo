@@ -26,6 +26,7 @@ function createHarmonyModalContent({
   selectedValue,
   paletteColors = [],
   strings = {},
+  onSelect = () => null,
   onConfirm = () => {},
 } = {}) {
   const title = strings.title || 'Learn about color harmonies';
@@ -75,7 +76,17 @@ function createHarmonyModalContent({
     summaryName.textContent = rule.label;
   }
 
-  function selectRule(value, { focus = false } = {}) {
+  function updateConfiguredPalette(colors) {
+    if (!Array.isArray(colors) || !colors.length) return;
+    summaryPalette.replaceChildren(createColorStrip(
+      colors,
+      'palette',
+      null,
+      STRIP_DEFAULTS,
+    ));
+  }
+
+  function selectRule(value, { focus = false, notify = false } = {}) {
     const selectedRule = rules.find((rule) => rule.value === value);
     if (!selectedRule) return;
     pendingValue = value;
@@ -84,6 +95,7 @@ function createHarmonyModalContent({
       card.setAttribute('aria-checked', String(selected));
     });
     updateSummary(selectedRule);
+    if (notify) updateConfiguredPalette(onSelect(value));
     if (focus) cards.find((card) => card.dataset.harmonyValue === value)?.focus();
   }
 
@@ -115,7 +127,7 @@ function createHarmonyModalContent({
     content.append(text, createPaletteSummary(rule.previewColors));
     card.append(image, content);
 
-    card.addEventListener('click', () => selectRule(rule.value));
+    card.addEventListener('click', () => selectRule(rule.value, { notify: true }));
     card.addEventListener('keydown', (event) => {
       if (!NAVIGATION_KEYS.has(event.key)) return;
       event.preventDefault();
@@ -130,7 +142,7 @@ function createHarmonyModalContent({
       } else if (event.key === 'End') {
         nextIndex = cards.length - 1;
       }
-      selectRule(cards[nextIndex].dataset.harmonyValue, { focus: true });
+      selectRule(cards[nextIndex].dataset.harmonyValue, { focus: true, notify: true });
     });
 
     cards.push(card);

@@ -30,6 +30,7 @@ const RULES = [
 describe('color harmony modal content', () => {
   let view;
   let confirmed;
+  let selected;
   let style;
 
   before(async () => {
@@ -45,11 +46,16 @@ describe('color harmony modal content', () => {
 
   beforeEach(() => {
     confirmed = [];
+    selected = [];
     view = createHarmonyModalContent({
       rules: RULES,
       selectedValue: 'ANALOGOUS',
       paletteColors: ['#112233', '#445566', '#778899'],
       strings: { title: 'Learn about color harmonies', confirm: 'Confirm' },
+      onSelect: (value) => {
+        selected.push(value);
+        return ['#AABBCC', '#DDEEFF'];
+      },
       onConfirm: (value) => confirmed.push(value),
     });
     document.body.appendChild(view.element);
@@ -78,7 +84,7 @@ describe('color harmony modal content', () => {
     expect(configuredPalette.getAttribute('aria-label')).to.equal('3 colors in palette');
   });
 
-  it('keeps a card selection pending until confirmation', () => {
+  it('applies a card selection immediately and still confirms it', () => {
     const triad = view.element.querySelector('[data-harmony-value="TRIAD"]');
     triad.click();
 
@@ -86,6 +92,10 @@ describe('color harmony modal content', () => {
     expect(triad.getAttribute('aria-checked')).to.equal('true');
     expect(confirmed).to.deep.equal([]);
     expect(view.element.querySelector('.color-harmony-modal-summary-name').textContent).to.equal('Triad');
+    expect(selected).to.deep.equal(['TRIAD']);
+    const configuredPalette = view.element.querySelector('.color-harmony-modal-summary-palette .ax-swatch-strip');
+    expect(configuredPalette.querySelectorAll('.ax-swatch')).to.have.length(2);
+    expect(configuredPalette.getAttribute('aria-label')).to.equal('2 colors in palette');
 
     view.element.querySelector('.color-harmony-modal-confirm').click();
     expect(confirmed).to.deep.equal(['TRIAD']);
