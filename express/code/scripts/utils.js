@@ -48,6 +48,89 @@ export function getCachedMetadata(name) {
   return cachedMetadata[name];
 }
 
+export const FIXED_TOP_OFFSET_PROPERTY = '--express-fixed-top-height';
+export const FIXED_TOP_OFFSET_CHANGE_EVENT = 'express:fixed-top-offset-change';
+
+export function usesC2Gnav(doc = document) {
+  return ['foundation', 'gnav-foundation']
+    .some((name) => getMetadata(name, doc)?.trim().toLowerCase() === 'c2');
+}
+
+export function getFixedTopOffset(doc = document) {
+  const value = doc.defaultView?.getComputedStyle(doc.documentElement)
+    .getPropertyValue(FIXED_TOP_OFFSET_PROPERTY);
+  const offset = Number.parseFloat(value);
+  if (!Number.isNaN(offset)) return offset;
+  return doc.querySelector('header.global-navigation, header')?.offsetHeight || 0;
+}
+
+export async function measureFixedTopOffset(config, doc = document) {
+  const header = doc.querySelector('header.global-navigation, header');
+  const headerHeight = header?.offsetHeight || 0;
+  if (!header && !usesC2Gnav(doc)) return 0;
+
+  try {
+    if (usesC2Gnav(doc)) {
+      const globalNavigation = await config?.federal?.fedsGlobalNavigation;
+      return globalNavigation?.getGnavHeight?.() ?? headerHeight;
+    }
+
+    const { getGnavHeight } = await import(`${getLibs()}/blocks/global-navigation/utilities/utilities.js`);
+    return getGnavHeight();
+  } catch (error) {
+    window.lana?.log(`Error measuring fixed navigation stack: ${error?.message || error}`, {
+      tags: 'fixed-top-offset',
+      severity: 'error',
+    });
+    return headerHeight;
+  }
+}
+
+export async function trackFixedTopOffset(config, doc = document) {
+  const root = doc.documentElement;
+  let animationFrame;
+  let stopped = false;
+
+  const update = async () => {
+    const previousHeight = getFixedTopOffset(doc);
+    const height = await measureFixedTopOffset(config, doc);
+    if (stopped) return;
+    root.style.setProperty(FIXED_TOP_OFFSET_PROPERTY, `${height}px`);
+    if (height !== previousHeight) {
+      window.dispatchEvent(new CustomEvent(FIXED_TOP_OFFSET_CHANGE_EVENT, {
+        detail: { height },
+      }));
+    }
+  };
+  const scheduleUpdate = () => {
+    window.cancelAnimationFrame(animationFrame);
+    animationFrame = window.requestAnimationFrame(update);
+  };
+
+  await update();
+
+  const resizeObserver = typeof ResizeObserver === 'undefined'
+    ? null
+    : new ResizeObserver(scheduleUpdate);
+  doc.querySelectorAll(`
+    header.global-navigation,
+    header,
+    .feds-localnav,
+    .feds-promo-aside-wrapper,
+    .feds-breadcrumbs-wrapper
+  `).forEach((element) => resizeObserver?.observe(element));
+  window.addEventListener('resize', scheduleUpdate);
+  window.addEventListener('feds:compactchange', scheduleUpdate);
+
+  return () => {
+    stopped = true;
+    window.cancelAnimationFrame(animationFrame);
+    resizeObserver?.disconnect();
+    window.removeEventListener('resize', scheduleUpdate);
+    window.removeEventListener('feds:compactchange', scheduleUpdate);
+  };
+}
+
 export function isIPad() {
   return /iPad/.test(navigator.userAgent)
     || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

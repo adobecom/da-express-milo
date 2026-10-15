@@ -61,6 +61,8 @@
 }
 
 :root {
+  --express-fixed-top-height: var(--global-height-nav, 0px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+
   --color-white: #fff;
 
   --color-light-gray: #E9E9E9;
