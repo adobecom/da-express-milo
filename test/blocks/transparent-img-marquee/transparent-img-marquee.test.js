@@ -31,6 +31,27 @@ describe('transparent-img-marquee', () => {
     expect(block.querySelector('.foreground')).to.exist;
   });
 
+  it('removes the CTA gap when its content is hidden and restores it when shown', async () => {
+    const block = await prepBlock('./mocks/with-ctas.html');
+    const mainContainer = block.querySelector('.main-container');
+    const ctaContainer = block.querySelector('.cta-container');
+    const children = [...ctaContainer.children];
+
+    children.forEach((child) => { child.style.display = 'none'; });
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    expect(ctaContainer.getBoundingClientRect().height).to.equal(0);
+    expect(mainContainer.style.rowGap).to.equal('0px');
+
+    children.forEach((child) => { child.style.display = ''; });
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    expect(ctaContainer.getBoundingClientRect().height).to.be.greaterThan(0);
+    expect(mainContainer.style.rowGap).to.equal('');
+  });
+
   it('creates text-content and text-container', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block.querySelector('.text-content')).to.exist;
