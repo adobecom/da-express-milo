@@ -429,13 +429,32 @@ async function buildRuleDropdown(context) {
   return picker.element;
 }
 
+function onSameLine(elA, elB) {
+  const a = elA.getBoundingClientRect();
+  const b = elB.getBoundingClientRect();
+  return a.top < b.bottom && b.top < a.bottom;
+}
+
+function isTextWrapped(el) {
+  const wrappedHeight = el.getBoundingClientRect().height;
+  const { whiteSpace } = el.style;
+  el.style.whiteSpace = 'nowrap';
+  const singleLineHeight = el.getBoundingClientRect().height;
+  el.style.whiteSpace = whiteSpace;
+  return wrappedHeight > singleLineHeight + 1;
+}
+
+const MOBILE_ROW_QUERY = '(max-width: 599px)';
+
 function checkActionsRowWrap(row, dropdownGroup, actionsGroup) {
   if (row.clientWidth === 0) return;
-  row.classList.remove('is-stacked');
-  const a = dropdownGroup.getBoundingClientRect();
-  const b = actionsGroup.getBoundingClientRect();
-  const sameLine = a.top < b.bottom && b.top < a.bottom;
-  row.classList.toggle('is-stacked', !sameLine);
+  row.classList.remove('is-stacked', 'cta-wraps');
+  const isStacked = !onSameLine(dropdownGroup, actionsGroup);
+  row.classList.toggle('is-stacked', isStacked);
+  if (isStacked && window.matchMedia?.(MOBILE_ROW_QUERY)?.matches) {
+    const buildLink = actionsGroup.querySelector('.color-seo-hero-build-link');
+    row.classList.toggle('cta-wraps', isTextWrapped(buildLink));
+  }
 }
 
 function watchActionsRowWrap(row, dropdownGroup, actionsGroup) {
