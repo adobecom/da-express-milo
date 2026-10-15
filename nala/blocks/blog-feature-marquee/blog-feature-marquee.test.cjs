@@ -41,6 +41,36 @@ test.describe('BlogFeatureMarqueeBlock Test Suite', () => {
         await expect(locator).toContainText(t.text);
       }
 
+      // Cards come from the live blog index, so assert structure and ordering rather than exact content
+      if (sem.cards) {
+        const cards = block.block.locator(sem.cards.selector);
+        await expect(cards.nth((sem.cards.minCount || 1) - 1)).toBeAttached();
+        const cardCount = await cards.count();
+        const hrefPattern = new RegExp(sem.cards.hrefPattern);
+        const dates = [];
+
+        for (let i = 0; i < cardCount; i += 1) {
+          const card = cards.nth(i);
+          await expect(card.locator(sem.cards.titleSelector)).toHaveText(/\S/);
+          const href = await card.getAttribute('href');
+          expect(new URL(href, 'https://dummy.base').pathname).toMatch(hrefPattern);
+
+          const dateLocator = card.locator(sem.cards.dateSelector);
+          if (await dateLocator.count()) {
+            const timestamp = Date.parse(await dateLocator.textContent());
+            expect(timestamp, `card ${i} date should be parseable`).not.toBeNaN();
+            dates.push(timestamp);
+          }
+        }
+
+        if (sem.cards.sortedByDateDesc) {
+          expect(dates.length, 'at least one card should show a date').toBeGreaterThan(0);
+          for (let i = 1; i < dates.length; i += 1) {
+            expect(dates[i], `card dates should be sorted newest first (index ${i})`).toBeLessThanOrEqual(dates[i - 1]);
+          }
+        }
+      }
+
       for (const m of sem.media || []) {
         const locator = block.block.locator(m.selector).nth(m.nth || 0);
         const isHiddenSelector = m.selector.includes('.isHidden');

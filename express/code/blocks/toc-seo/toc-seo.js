@@ -12,7 +12,6 @@ const CONFIG = {
     desktop: 1024,
   },
   selectors: {
-    startElement: '.section div.highlight, .blog-article-marquee',
     section: 'main .section',
     longFormSection: 'main .section.long-form',
     headers: 'main .section.long-form .content h2, main .section.long-form .content h3, main .section.long-form .content h4',
@@ -518,7 +517,7 @@ function getTopBarClearance() {
 }
 
 /**
- * Calculates and sets the desktop TOC position based on start element and scroll
+ * Calculates and sets the desktop TOC position based on long-form content and scroll
  * @param {HTMLElement} tocContainer - TOC container element
  */
 function updateDesktopPosition(tocContainer) {
@@ -716,13 +715,8 @@ export default async function decorate(block) {
     setupSocialSharing(socialIcons);
     const activeLinksHandlers = setupActiveLinks(content);
 
-    // Phase 6: Insert TOC after start element
-    const startElement = document.querySelector(CONFIG.selectors.startElement);
-    if (startElement) {
-      startElement.insertAdjacentElement('afterend', container);
-    } else {
-      window.lana?.log('TOC: No start element found', { tags: 'toc-seo', severity: 'error' });
-    }
+    // Keep the TOC outside preceding blocks' audience-specific visibility rules.
+    block.before(container);
 
     // Prime active link for hash navigation; one RAF after insertion lets layout settle.
     requestAnimationFrame(() => activeLinksHandlers.onScroll());

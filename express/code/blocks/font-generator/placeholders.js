@@ -7,12 +7,17 @@ import { getLibs } from '../../scripts/utils.js';
 // 'font-generator-symbol', 'font-generator-filters',
 // 'font-generator-close-filters', 'font-generator-promo-title',
 // 'font-generator-promo-cta') via filters.js/panel.js fetchStrings() —
+// and per-category count phrases / font names are resolved per-catalog by
+// loadFontLabels().
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   // Input panel
   previewPlaceholder: 'Type the preview text you want to get started...',
   inputLabel: 'Preview text input',
   previewTextLabel: 'Preview Text',
   tryThese: 'Try these:',
+  // Shown below the input when it contains a character with only partial
+  // unicode font support (see PARTIAL_SUPPORT_PATTERN in textInput.js).
+  disclaimerText: 'Some unicode fonts might not exist for certain characters.',
   // Semicolon-separated preview suggestions rendered as pills (semicolons,
   // not commas, so a suggestion can itself contain a comma).
   suggestions: 'The quick brown fox jumps over the lazy dog;ABCDEFGHIJKLMNOPQRSTUVWXYZ;Realigned equestrian fez bewilders picky monarch;Roger, hungry: ate 236 peaches & cantaloupes in 1904!',
@@ -46,6 +51,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   inputLabel: 'font-generator-input-label',
   previewTextLabel: 'font-generator-preview-text-label',
   tryThese: 'font-generator-try-these',
+  disclaimerText: 'font-generator-disclaimer-text',
   suggestions: 'font-generator-suggestions',
   maxLength: 'font-generator-max-length',
   filterTrigger: 'font-generator-filter',
@@ -71,6 +77,57 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
 // can't detect a miss.
 function isResolvedPlaceholder(value, key) {
   return value && value !== key.replaceAll('-', ' ');
+}
+
+// Filtered toolbar count copy is authored as a whole phrase per category
+// (e.g. 'Cool' -> 'font-generator-cool-font-count' = "Cool unicode fonts") so
+// locales can place the category before or after "unicode fonts".
+export const getCategoryCountKey = (category) => `font-generator-${category.toLowerCase()}-font-count`;
+// Font names are keyed by their stable font-styles.json id
+// (e.g. 'light-text-bubble' -> 'font-generator-light-text-bubble').
+export const getFontNameKey = (fontId) => `font-generator-${fontId}`;
+
+/**
+ * Resolves per-category toolbar count phrases and font display names for the
+ * loaded catalog in a single batched lookup. Font names fall back to the
+ * styleName from font-styles.json; count phrases are only included when
+ * authored (the toolbar composes its own fallback).
+ *
+ * @param {import('./types.js').FontDef[]} fonts
+ * @returns {Promise<{
+ *   categoryCountLabels: Record<string, string>,
+ *   fontNames: Record<string, string>,
+ * }>}
+ */
+export async function loadFontLabels(fonts = []) {
+  const categories = [...new Set(fonts.map((f) => f.category).filter(Boolean))];
+  const categoryCountLabels = {};
+  const fontNames = Object.fromEntries(fonts.map((f) => [f.id, f.styleName]));
+
+  try {
+    const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
+      import(`${getLibs()}/utils/utils.js`),
+      import(`${getLibs()}/features/placeholders.js`),
+    ]);
+
+    const categoryKeys = categories.map(getCategoryCountKey);
+    const fontKeys = fonts.map((f) => getFontNameKey(f.id));
+    const values = await replaceKeyArray([...categoryKeys, ...fontKeys], getConfig());
+
+    categories.forEach((category, i) => {
+      if (isResolvedPlaceholder(values[i], categoryKeys[i])) {
+        categoryCountLabels[category] = values[i];
+      }
+    });
+    fonts.forEach((font, i) => {
+      const value = values[categoryKeys.length + i];
+      if (isResolvedPlaceholder(value, fontKeys[i])) fontNames[font.id] = value;
+    });
+  } catch {
+    // Fall through with the English catalog values.
+  }
+
+  return { categoryCountLabels, fontNames };
 }
 
 /**

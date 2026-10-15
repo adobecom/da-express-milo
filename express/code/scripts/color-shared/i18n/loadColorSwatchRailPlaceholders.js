@@ -13,6 +13,8 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   baseColorClearedToast: 'Base color cleared',
   // Button aria-label + title
   copyHex: 'Copy hex',
+  copyChannelValue: 'Copy {channel} value ({value})',
+  copyAllValues: 'Copy all values',
   editColor: 'Edit color',
   editTint: 'Edit tint',
   lockColor: 'Lock color',
@@ -51,6 +53,8 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   baseColorSetToast: 'color-swatch-base-color-set-toast',
   baseColorClearedToast: 'color-swatch-base-color-cleared-toast',
   copyHex: 'color-swatch-copy-hex',
+  copyChannelValue: 'copy-channel-value',
+  copyAllValues: 'copy-all-values',
   editColor: 'color-swatch-edit-color',
   editTint: 'color-swatch-edit-tint',
   lockColor: 'color-swatch-lock-color',

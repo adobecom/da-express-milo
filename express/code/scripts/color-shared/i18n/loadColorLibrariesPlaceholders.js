@@ -76,6 +76,10 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   librariesModalGradientName: 'Gradient name',
   librariesModalGradientAria: 'Gradient with {count} colors',
   librariesModalGradientActionsAria: 'Gradient actions',
+  librariesColorModeLabel: 'Color mode',
+  librariesCodesToggleLabel: 'Copy as code',
+  librariesCodesDisabledTooltip: 'Copying to code requires RGB, HEX, or Lab',
+  librariesCopyAsFormat: 'Copy as {format}',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -154,6 +158,10 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   librariesModalGradientName: 'color-libraries-modal-gradient-name',
   librariesModalGradientAria: 'color-libraries-modal-gradient-aria',
   librariesModalGradientActionsAria: 'color-libraries-modal-gradient-actions-aria',
+  librariesColorModeLabel: 'color-mode',
+  librariesCodesToggleLabel: 'copy-as-code',
+  librariesCodesDisabledTooltip: 'codes-disabled-tooltip',
+  librariesCopyAsFormat: 'copy-as-format',
 });
 
 export function createColorLibrariesPlaceholders(overrides = {}) {
