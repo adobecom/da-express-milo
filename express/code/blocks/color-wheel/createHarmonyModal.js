@@ -1,4 +1,10 @@
 import { createTag } from '../../scripts/utils.js';
+import { createColorStrip } from '../../scripts/color-shared/toolbar/colorStrip.js';
+
+const STRIP_DEFAULTS = {
+  swatchLabel: 'Color {index}: {hex}',
+  swatchStripLabel: '{count} colors in {type}',
+};
 
 const NAVIGATION_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
 
@@ -18,6 +24,7 @@ function createPaletteSummary(colors = []) {
 function createHarmonyModalContent({
   rules = [],
   selectedValue,
+  paletteColors = [],
   strings = {},
   onConfirm = () => {},
 } = {}) {
@@ -54,13 +61,18 @@ function createHarmonyModalContent({
   });
   const summaryName = createTag('strong', { class: 'color-harmony-modal-summary-name' });
   const summaryPalette = createTag('span', { class: 'color-harmony-modal-summary-palette' });
+  summaryPalette.appendChild(createColorStrip(
+    paletteColors,
+    'palette',
+    null,
+    STRIP_DEFAULTS,
+  ));
   summary.append(summaryImage, summaryName, summaryPalette);
 
   function updateSummary(rule) {
     if (!rule) return;
     summaryImage.src = rule.imageSrc;
     summaryName.textContent = rule.label;
-    summaryPalette.replaceChildren(createPaletteSummary(rule.previewColors));
   }
 
   function selectRule(value, { focus = false } = {}) {
@@ -70,7 +82,6 @@ function createHarmonyModalContent({
     cards.forEach((card) => {
       const selected = card.dataset.harmonyValue === value;
       card.setAttribute('aria-checked', String(selected));
-      card.tabIndex = selected ? 0 : -1;
     });
     updateSummary(selectedRule);
     if (focus) cards.find((card) => card.dataset.harmonyValue === value)?.focus();
@@ -83,7 +94,7 @@ function createHarmonyModalContent({
       role: 'radio',
       'aria-checked': 'false',
       'data-harmony-value': rule.value,
-      tabindex: '-1',
+      tabindex: '0',
     });
     const image = createTag('img', {
       class: 'color-harmony-card-image',

@@ -402,6 +402,7 @@ async function buildHarmonySelector(controller, strings = {}) {
     const contentView = contentModule.default({
       rules,
       selectedValue: controller.getState().harmonyRule || 'CUSTOM',
+      paletteColors: controller.getState().swatches.map((swatch) => swatch.hex),
       strings: {
         title: strings.harmonyModalTitle,
         confirm: strings.confirmHarmony,
@@ -415,7 +416,7 @@ async function buildHarmonySelector(controller, strings = {}) {
       title: strings.harmonyModalTitle,
       showTitle: false,
       content: contentView.element,
-      initialFocusSelector: (body) => body.querySelector('.color-harmony-card[aria-checked="true"]'),
+      initialFocusSelector: (body) => body.querySelector('.color-harmony-card'),
     });
   }
 

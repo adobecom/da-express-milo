@@ -48,6 +48,7 @@ describe('color harmony modal content', () => {
     view = createHarmonyModalContent({
       rules: RULES,
       selectedValue: 'ANALOGOUS',
+      paletteColors: ['#112233', '#445566', '#778899'],
       strings: { title: 'Learn about color harmonies', confirm: 'Confirm' },
       onConfirm: (value) => confirmed.push(value),
     });
@@ -69,7 +70,12 @@ describe('color harmony modal content', () => {
     );
     expect(cards[1].getAttribute('aria-checked')).to.equal('true');
     expect(cards[1].tabIndex).to.equal(0);
-    expect(view.element.querySelectorAll('.color-harmony-card-palette-swatch')).to.have.length(20);
+    expect(cards.every((card) => card.tabIndex === 0)).to.equal(true);
+    expect(view.element.querySelectorAll('.color-harmony-card-palette-swatch')).to.have.length(15);
+    const configuredPalette = view.element.querySelector('.color-harmony-modal-summary-palette .ax-swatch-strip');
+    expect(configuredPalette).to.exist;
+    expect(configuredPalette.querySelectorAll('.ax-swatch')).to.have.length(3);
+    expect(configuredPalette.getAttribute('aria-label')).to.equal('3 colors in palette');
   });
 
   it('keeps a card selection pending until confirmation', () => {
