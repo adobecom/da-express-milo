@@ -52,6 +52,48 @@ async function loadStrings() {
     return value && value !== KEYS[i].replaceAll('-', ' ') ? value : fallbackText;
   };
 
+  // TEMP-NL-TEST: local placeholders.json has no Dutch translations, so this
+  // block always falls back to English. Force real Dutch strings (matching
+  // the PR-env screenshot) when testing under /nl locally. Remove before merging.
+  if (config.locale?.prefix === '/nl') {
+    return {
+      railStrings,
+      ruleLabels: {
+        SHADES: 'Schaduwen',
+        COMPLEMENTARY: 'Complementair',
+        ANALOGOUS: 'Analoog',
+        TRIAD: 'Triade',
+        DOUBLE_SPLIT_COMPLEMENTARY: 'Tetradisch',
+      },
+      editColor: 'Kleur bewerken',
+      copyColorCode: 'Kopiëren als code',
+      shareThisColor: 'Deze kleur delen',
+      downloadThisPalette: 'Dit palet downloaden',
+      buildAPalette: 'Een palet samenstellen',
+      colorCodeCopied: '{hex} gekopieerd naar klembord',
+      linkCopied: 'Link gekopieerd naar klembord',
+      copyFailed: 'Kan kleurcode niet kopiëren.',
+      shareFailed: 'Kan deze kleur niet delen.',
+      pickAColorPalette: 'Een kleurenpalet kiezen',
+      copyHex: 'Hex kopiëren',
+      createAPalette: 'Een kleurenpalet maken',
+      colorCopiedToClipboard: 'Kleur gekopieerd naar klembord',
+      codeFormatLabels: {
+        CSS: 'Kopiëren als CSS',
+        SASS: 'Kopiëren als SASS',
+        LESS: 'Kopiëren als LESS',
+        XML: 'Kopiëren als XML',
+      },
+      downloadFormatLabels: {
+        JPEG: 'Downloaden als JPEG',
+        ASE: 'Downloaden als ASE',
+      },
+      codeCopied: 'Code gekopieerd naar klembord',
+      downloadFailed: 'Downloaden niet mogelijk. Probeer het opnieuw.',
+      downloadStarted: 'Download gestart',
+    };
+  }
+
   return {
     railStrings,
     ruleLabels: {
