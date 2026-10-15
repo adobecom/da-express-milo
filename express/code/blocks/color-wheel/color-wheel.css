@@ -518,7 +518,8 @@ color-wheel-express {
 }
 
 .color-harmony-card[aria-checked='true'] {
-  border-color: var(--S2-Buttons-Accent-Color-Default);
+  padding: calc(var(--spacing-200) - 1px);
+  border: 2px solid var(--color-black);
 }
 
 .color-harmony-card:hover {
@@ -528,7 +529,7 @@ color-wheel-express {
 }
 
 .color-harmony-card[aria-checked='true']:hover {
-  border-color: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--color-black);
 }
 
 .color-harmony-card:focus-visible {
@@ -603,7 +604,6 @@ color-wheel-express {
   align-items: stretch;
   padding: 0;
   overflow: hidden;
-  border-top: 1px solid var(--color-gray-300-variant);
   background: var(--color-white);
 }
 
