@@ -430,18 +430,24 @@ function resolveUploadUserId() {
 }
 /* c8 ignore stop */
 
-const VIDEO_UPLOAD_LOG_META = {
+const MEDIA_UPLOAD_LOG_LABELS = {
+  video: 'Video',
+  image: 'Image',
+};
+
+// Tags are suffixed with the media kind, e.g. `frictionless-image-upload-success`.
+const MEDIA_UPLOAD_LOG_META = {
   started: {
-    verb: 'started', tag: 'frictionless-video-upload-started', severity: 'info', errorType: 'i',
+    verb: 'started', tagSuffix: 'started', severity: 'info', errorType: 'i',
   },
   success: {
-    verb: 'successful', tag: 'frictionless-video-upload-success', severity: 'info', errorType: 'i',
+    verb: 'successful', tagSuffix: 'success', severity: 'info', errorType: 'i',
   },
   failed: {
-    verb: 'failed', tag: 'frictionless-video-upload-failed', severity: 'error',
+    verb: 'failed', tagSuffix: 'failed', severity: 'error',
   },
   cancelled: {
-    verb: 'cancelled', tag: 'frictionless-video-upload-cancelled', severity: 'info', errorType: 'i',
+    verb: 'cancelled', tagSuffix: 'cancelled', severity: 'info', errorType: 'i',
   },
 };
 
@@ -451,14 +457,23 @@ function sanitizeLogValue(value) {
   return String(value ?? '').replace(/\s+/g, '_');
 }
 
-export function logVideoUploadEvent(status, {
+export function getUploadMediaKind(file) {
+  const type = file?.type;
+  if (typeof type !== 'string') return null;
+  if (type.startsWith('video/')) return 'video';
+  if (type.startsWith('image/')) return 'image';
+  return null;
+}
+
+export function logMediaUploadEvent(kind, status, {
   file, quickAction, uploadDuration, assetId, error,
 } = {}) {
-  const meta = VIDEO_UPLOAD_LOG_META[status];
-  if (!meta || !file) return;
+  const label = MEDIA_UPLOAD_LOG_LABELS[kind];
+  const meta = MEDIA_UPLOAD_LOG_META[status];
+  if (!label || !meta || !file) return;
 
   const parts = [
-    `Video upload ${meta.verb}`,
+    `${label} upload ${meta.verb}`,
     assetId ? `id:${assetId}` : null,
     `userId:${uploadUserId}`,
     `size:${file.size}`,
@@ -471,10 +486,14 @@ export function logVideoUploadEvent(status, {
 
   window.lana?.log(parts.join(' '), {
     clientId: 'express',
-    tags: `frictionless-quick-action, ${meta.tag}`,
+    tags: `frictionless-quick-action, frictionless-${kind}-upload-${meta.tagSuffix}`,
     severity: meta.severity,
     ...(meta.errorType && { errorType: meta.errorType }),
   });
+}
+
+export function logVideoUploadEvent(status, details) {
+  logMediaUploadEvent('video', status, details);
 }
 
 /* c8 ignore start */
@@ -491,8 +510,9 @@ async function uploadAssetToStorage(file, quickAction, uploadStartTime) {
   progressBar.setProgress(100);
   uploadInProgress = null; // clear on success
 
-  if (file.type.startsWith('video/')) {
-    logVideoUploadEvent('success', {
+  const mediaKind = getUploadMediaKind(file);
+  if (mediaKind) {
+    logMediaUploadEvent(mediaKind, 'success', {
       file,
       quickAction,
       uploadDuration: Date.now() - uploadStartTime,
@@ -508,13 +528,14 @@ async function uploadAssetToStorage(file, quickAction, uploadStartTime) {
 async function performStorageUpload(files, block, quickAction) {
   const file = files[0];
   const uploadStartTime = Date.now();
+  const mediaKind = getUploadMediaKind(file);
   await resolveUploadUserId();
   uploadInProgress = { file, startTime: uploadStartTime, quickAction };
 
   // Emit a "started" event so success/failure/cancellation rates have an
   // accurate denominator (uploads that never settle are otherwise invisible).
-  if (file?.type?.startsWith('video/')) {
-    logVideoUploadEvent('started', { file, quickAction });
+  if (mediaKind) {
+    logMediaUploadEvent(mediaKind, 'started', { file, quickAction });
   }
 
   try {
@@ -530,8 +551,8 @@ async function performStorageUpload(files, block, quickAction) {
 
     if (progressBar) resetUploadUI();
 
-    if (file?.type?.startsWith('video/')) {
-      logVideoUploadEvent('failed', {
+    if (mediaKind) {
+      logMediaUploadEvent(mediaKind, 'failed', {
         file,
         quickAction,
         uploadDuration: Date.now() - uploadStartTime,
@@ -1052,11 +1073,12 @@ export default async function decorate(block) {
   });
   dropzone.append(freePlanTags);
 
-  // Flush a cancellation log if the user abandons an in-progress video upload,
+  // Flush a cancellation log if the user abandons an in-progress upload,
   // whether via in-app back navigation (popstate) or leaving the page (pagehide).
   const flushUploadCancellation = () => {
-    if (uploadInProgress && uploadInProgress.file.type.startsWith('video/')) {
-      logVideoUploadEvent('cancelled', {
+    const mediaKind = getUploadMediaKind(uploadInProgress?.file);
+    if (mediaKind) {
+      logMediaUploadEvent(mediaKind, 'cancelled', {
         file: uploadInProgress.file,
         quickAction: uploadInProgress.quickAction,
         uploadDuration: Date.now() - uploadInProgress.startTime,

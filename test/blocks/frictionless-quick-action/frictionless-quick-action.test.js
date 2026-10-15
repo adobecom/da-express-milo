@@ -13,6 +13,8 @@ const {
   getFrictionlessTargetBaseUrl,
   buildSearchParamsForEditorUrl,
   logVideoUploadEvent,
+  logMediaUploadEvent,
+  getUploadMediaKind,
 } = imports[2];
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
@@ -433,6 +435,144 @@ describe('logVideoUploadEvent', () => {
   it('ignores unknown statuses and missing files', () => {
     logVideoUploadEvent('bogus', { file: videoFile() });
     logVideoUploadEvent('success', { quickAction: 'video-crop' });
+    expect(window.lana.log.called).to.be.false;
+  });
+});
+
+describe('getUploadMediaKind', () => {
+  it('classifies video and image files by MIME type', () => {
+    expect(getUploadMediaKind({ type: 'video/mp4' })).to.equal('video');
+    expect(getUploadMediaKind({ type: 'image/png' })).to.equal('image');
+    expect(getUploadMediaKind({ type: 'image/jpeg' })).to.equal('image');
+  });
+
+  it('returns null for unsupported or missing files', () => {
+    expect(getUploadMediaKind({ type: 'application/pdf' })).to.be.null;
+    expect(getUploadMediaKind({})).to.be.null;
+    expect(getUploadMediaKind(null)).to.be.null;
+    expect(getUploadMediaKind(undefined)).to.be.null;
+  });
+});
+
+describe('logMediaUploadEvent — image uploads', () => {
+  let originalLana;
+  const imageFile = () => new File([new ArrayBuffer(2048)], 'my photo.png', { type: 'image/png' });
+
+  beforeEach(() => {
+    originalLana = window.lana;
+    window.lana = { log: sinon.stub() };
+  });
+
+  afterEach(() => {
+    window.lana = originalLana;
+    sinon.restore();
+  });
+
+  it('logs a started image upload without duration/asset/error fields', () => {
+    logMediaUploadEvent('image', 'started', {
+      file: imageFile(),
+      quickAction: 'remove-background',
+    });
+
+    expect(window.lana.log.calledOnce).to.be.true;
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Image upload started');
+    expect(message).to.include('userId:');
+    expect(message).to.include('size:2048');
+    expect(message).to.include('type:image/png');
+    expect(message).to.include('quickAction:remove-background');
+    expect(message).to.not.include('uploadDuration:');
+    expect(message).to.not.include('id:');
+    expect(message).to.not.include('errorCode:');
+    expect(options.clientId).to.equal('express');
+    expect(options.tags).to.include('frictionless-quick-action');
+    expect(options.tags).to.include('frictionless-image-upload-started');
+    expect(options.severity).to.equal('info');
+    expect(options.errorType).to.equal('i');
+  });
+
+  it('logs a successful image upload with debugging context and no filename', () => {
+    logMediaUploadEvent('image', 'success', {
+      file: imageFile(),
+      quickAction: 'edit-image',
+      uploadDuration: 950,
+      assetId: 'asset-456',
+    });
+
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Image upload successful');
+    expect(message).to.include('id:asset-456');
+    expect(message).to.include('userId:');
+    expect(message).to.include('size:2048');
+    expect(message).to.include('type:image/png');
+    expect(message).to.include('quickAction:edit-image');
+    expect(message).to.include('uploadDuration:950');
+    expect(message).to.not.include('my photo'); // filename intentionally excluded (PII)
+    expect(message).to.not.include('my_photo');
+    expect(options.tags).to.include('frictionless-image-upload-success');
+    expect(options.tags).to.not.include('video');
+    expect(options.severity).to.equal('info');
+  });
+
+  it('logs a failed image upload with error details and sanitizes whitespace', () => {
+    logMediaUploadEvent('image', 'failed', {
+      file: imageFile(),
+      quickAction: 'qa-in-product-variant1',
+      uploadDuration: 300,
+      error: { code: 'UPLOAD_FAILED', message: 'request timed out' },
+    });
+
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Image upload failed');
+    expect(message).to.include('uploadDuration:300');
+    expect(message).to.include('errorCode:UPLOAD_FAILED');
+    expect(message).to.include('errorMessage:request_timed_out');
+    expect(message).to.not.include('id:');
+    expect(options.tags).to.include('frictionless-image-upload-failed');
+    expect(options.severity).to.equal('error');
+    expect(options.errorType).to.be.undefined;
+  });
+
+  it('logs a cancelled image upload without asset or error fields', () => {
+    logMediaUploadEvent('image', 'cancelled', {
+      file: imageFile(),
+      quickAction: 'remove-background-fast-track-variant',
+      uploadDuration: 150,
+    });
+
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Image upload cancelled');
+    expect(message).to.include('uploadDuration:150');
+    expect(message).to.not.include('id:');
+    expect(message).to.not.include('errorCode:');
+    expect(options.tags).to.include('frictionless-image-upload-cancelled');
+    expect(options.severity).to.equal('info');
+  });
+
+  it('keeps video tags unchanged when logging via the generalized helper', () => {
+    logMediaUploadEvent('video', 'success', {
+      file: new File([new ArrayBuffer(8)], 'clip.mp4', { type: 'video/mp4' }),
+      quickAction: 'video-crop',
+      uploadDuration: 10,
+      assetId: 'asset-789',
+    });
+    logVideoUploadEvent('success', {
+      file: new File([new ArrayBuffer(8)], 'clip.mp4', { type: 'video/mp4' }),
+      quickAction: 'video-crop',
+      uploadDuration: 10,
+      assetId: 'asset-789',
+    });
+
+    const [first, second] = window.lana.log.getCalls().map((call) => call.args);
+    expect(first[0]).to.include('Video upload successful');
+    expect(first[1].tags).to.equal('frictionless-quick-action, frictionless-video-upload-success');
+    expect(second).to.deep.equal(first);
+  });
+
+  it('ignores unknown media kinds, statuses, and missing files', () => {
+    logMediaUploadEvent('audio', 'success', { file: imageFile() });
+    logMediaUploadEvent('image', 'bogus', { file: imageFile() });
+    logMediaUploadEvent('image', 'success', { quickAction: 'edit-image' });
     expect(window.lana.log.called).to.be.false;
   });
 });
