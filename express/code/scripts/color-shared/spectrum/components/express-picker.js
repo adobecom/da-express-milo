@@ -155,7 +155,6 @@ export async function createExpressPicker(config) {
 
   const selected = options.find((o) => o.value === initialValue) || options[0];
   let pendingValue = selected?.value ?? '';
-  picker.style.visibility = 'hidden';
 
   // 6. Attach picker to theme (triggers connectedCallback)
   theme.appendChild(picker);
@@ -192,7 +191,6 @@ export async function createExpressPicker(config) {
     for (let attempt = 1; attempt <= 6; attempt += 1) {
       try {
         applyItemsAndValue();
-        picker.style.visibility = '';
         return;
       } catch (error) {
         lastError = error;
@@ -203,7 +201,6 @@ export async function createExpressPicker(config) {
       }
     }
 
-    picker.style.visibility = '';
     window.lana?.log(`Picker item init failed: ${lastError?.message}`, {
       tags: 'color-explorer,picker',
       severity: 'warning',
