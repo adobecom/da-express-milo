@@ -1,5 +1,17 @@
-import { readBlockConfig, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import { readBlockConfig, addTempWrapperDeprecated, getFixedTopOffset } from '../../scripts/utils.js';
 import createCarousel from '../../scripts/widgets/carousel.js';
+
+const DEFAULT_SCROLL_GAP = 16;
+
+function getScrollGap(block) {
+  const spacing = window.getComputedStyle(block).getPropertyValue('--spacing-200');
+  return Number.parseFloat(spacing) || DEFAULT_SCROLL_GAP;
+}
+
+export function getContentToggleScrollTop(block, scrollY = window.scrollY) {
+  return block.getBoundingClientRect().top + scrollY
+    - getFixedTopOffset() - getScrollGap(block);
+}
 
 function getTabIndexFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -82,7 +94,7 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
       });
       // After layout settles, only scroll if the block has drifted from intended position
       requestAnimationFrame(() => {
-        const newTop = block.getBoundingClientRect().top + window.scrollY - 80;
+        const newTop = getContentToggleScrollTop(block);
         const delta = Math.abs(window.scrollY - newTop);
         if (delta > 2) {
           window.scrollTo({
