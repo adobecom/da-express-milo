@@ -304,10 +304,7 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .ax-columns .column-picture {
-  margin: var(--spacing-300) 0;
-  position: relative;
-  padding-left: var(--spacing-100);
-  padding-right: var(--spacing-100);
+  position: relative; 
   transition: transform 0.3s ease;
 }
 
@@ -771,11 +768,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--body-font-size-m);
 }
 
-.ax-columns .column {
-  padding-left: var(--spacing-500);
-  padding-right: var(--spacing-500);
-}
-
 .ax-columns.fullsize .column-picture,
 .ax-columns.fullsize .hero-animation-overlay {
   order: -1;
@@ -796,18 +788,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .ax-columns.fullsize .has-brand>div p:first-child {
   margin: 0;
-}
-
-/* .ax-columns.fullsize .column {
-  padding-left: var(--spacing-400);
-  padding-right: var(--spacing-400);
-  width: calc(100% - 48px);
-} */
-
-.ax-columns .column.column-picture {
-  padding-left: var(--spacing-100);
-  padding-right: var(--spacing-100);
-  margin: auto;
 }
 
 .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon {
@@ -1866,10 +1846,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   border-radius: 16px;
 }
 
-.section.ax-max-entitled:has(.ax-columns) .column {
-  padding: 0px;
-}
-
 .section.ax-max-entitled:has(.ax-columns) h2 {
   font-size: var(--heading-font-size-m);
   font-weight: var(--heading-font-weight-extra);
@@ -2020,12 +1996,6 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
 
   .section.ax-max-entitled .ax-columns>div {
     gap: 0;
-  }
-
-
-  .section .ax-columns .column {
-    padding-left: 0;
-    padding-right: 0;
   }
 
   .section>.ax-columns p.button-container,
