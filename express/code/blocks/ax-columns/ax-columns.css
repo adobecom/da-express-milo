@@ -1908,6 +1908,19 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   border-color: var(--Background-Primary-Hover);
 }
 
+@media (min-width: 600px) {
+  .section .ax-columns.temporary-font-generator-styles {
+    max-width: 836px;
+    padding-inline: var(--spacing-500);
+  }
+}
+
+@media (min-width: 1200px) {
+  .section .ax-columns.temporary-font-generator-styles {
+    max-width: var(--block-lg-max-width);
+  }
+}
+
 @media (max-width: 1199px) {
   .section .ax-columns.temporary-font-generator-styles h3 {
     font-size: var(--typography-headings-xl);
