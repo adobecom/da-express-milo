@@ -7,7 +7,7 @@
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):first-child .ax-columns:first-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):first-child .ax-columns:first-child {
   padding-top: 0;
 }
 
@@ -16,7 +16,7 @@
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing).long-form .ax-columns:last-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing).long-form .ax-columns:last-child {
   padding-bottom: var(--spacing-600);
 }
 
@@ -117,23 +117,23 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child:not(.v2) {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child:not(.v2) {
   padding-top: 60px;
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.color:first-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.color:first-child {
   padding-top: 0;
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.has-ribbon-banner:first-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.has-ribbon-banner:first-child {
   padding-top: 0;
 }
 
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:empty:first-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:empty:first-child {
   padding-top: 0;
 }
 
@@ -148,14 +148,14 @@ main .section .ax-columns.enterprise .column h2 {
   padding-bottom: var(--ax-columns-v2-spacing);
 }
 
-.ax-columns.v2 > div {
-   gap : 16px;
-} 
+.ax-columns.v2>div {
+  gap: 16px;
+}
 
 .ax-columns.v2 .column {
   padding-left: 0;
   padding-right: 0;
-} 
+}
 
 .ax-columns.v2 .column,
 .ax-columns.v2 .column.column-picture {
@@ -178,9 +178,9 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color, .v2)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
 .section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
   padding-bottom: var(--spacing-600);
 }
 
@@ -199,13 +199,13 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:last-child,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:last-child,
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:last-child,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:last-child,
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:nth-last-child(2):has(+ .section-metadata),
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:nth-last-child(2):has(+ .section-metadata),
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:nth-last-child(2):has(+ .section-metadata) {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:nth-last-child(2):has(+ .section-metadata) {
   padding-bottom: 40px;
 }
 
@@ -427,6 +427,7 @@ main .section .ax-columns.enterprise .column h2 {
   flex-direction: column;
   justify-content: center;
 }
+
 .section .ax-columns:not(.v2)>div {
   padding: var(--spacing-600) 0;
 }
@@ -621,7 +622,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 .section:first-child:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child>div.columns-video {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child>div.columns-video {
   padding: var(--spacing-600) 0;
 }
 
@@ -896,14 +897,14 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 @media (min-width: 600px) and (max-width: 1199px) {
-  .section .ax-columns.color > div {
+  .section .ax-columns.color>div {
     padding: var(--spacing-900) 0;
     gap: var(--spacing-700);
   }
 }
 
 @media (min-width: 1200px) {
-  .section .ax-columns.color > div {
+  .section .ax-columns.color>div {
     padding: var(--section-padding-xl) 0;
     gap: var(--spacing-800);
   }
@@ -1004,7 +1005,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   display: none;
 }
 
-.section .ax-columns.marquee h1.columns-heading-long { /* stylelint-disable-line no-duplicate-selectors */
+.section .ax-columns.marquee h1.columns-heading-long {
+  /* stylelint-disable-line no-duplicate-selectors */
   font-size: var(--heading-font-size-m);
 }
 
@@ -1236,7 +1238,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     transform: unset;
   }
 
-  .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon { /* stylelint-disable-line no-duplicate-selectors */
+  .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon {
+    /* stylelint-disable-line no-duplicate-selectors */
     padding-left: 0;
   }
 
@@ -1684,7 +1687,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   }
 
   .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.extra-wide:first-child:not(:empty) {
+    .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.extra-wide:first-child:not(:empty) {
     padding-top: 0;
   }
 
@@ -1701,7 +1704,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-left: unset;
   }
 
-  .ax-columns.marquee .button-container.free-plan-container { /* stylelint-disable-line no-duplicate-selectors */
+  .ax-columns.marquee .button-container.free-plan-container {
+    /* stylelint-disable-line no-duplicate-selectors */
     align-items: center;
     margin-top: var(--spacing-200);
   }
@@ -1892,6 +1896,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .section.ax-max-entitled:has(.ax-columns)>.ax-columns p.button-container {
     margin-top: var(--spacing-600);
   }
+
   .section:not(:first-child).ax-max-entitled:has(.ax-columns) .column {
     width: 50%;
   }
@@ -1914,7 +1919,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     display: flex;
     min-width: 600px;
     max-width: 1199px;
-    padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+    padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px);
+    /* stylelint-disable-line declaration-property-value-disallowed-list */
     flex-direction: column;
     align-items: center;
     gap: 10px;
@@ -1951,7 +1957,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .section.ax-max-entitled:has(.ax-columns) div.ax-columns>div {
     gap: var(--spacing-700);
     padding: 0px var(--spacing-400);
-    min-width: var(--Global-Device-Widths-device-min-width, 600px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+    min-width: var(--Global-Device-Widths-device-min-width, 600px);
+    /* stylelint-disable-line declaration-property-value-disallowed-list */
     margin: auto;
     max-width: var(--block-lg-max-width);
   }
@@ -1965,6 +1972,7 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   height: 40px;
   padding-bottom: 0;
 }
+
 @media screen and (max-width: 1200px) {
   main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
     padding-top: 10px;
@@ -2010,9 +2018,9 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
     gap: var(--spacing-700);
   }
 
-   .section.ax-max-entitled .ax-columns > div {
-    gap:var(--spacing-500);
-   }
+  .section.ax-max-entitled .ax-columns>div {
+    gap: 0;
+  }
 
 
   .section .ax-columns .column {
