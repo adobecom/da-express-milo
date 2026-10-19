@@ -1892,7 +1892,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .section.ax-max-entitled:has(.ax-columns)>.ax-columns p.button-container {
     margin-top: var(--spacing-600);
   }
-
   .section:not(:first-child).ax-max-entitled:has(.ax-columns) .column {
     width: 50%;
   }
@@ -2010,6 +2009,11 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
     padding-bottom: 0;
     gap: var(--spacing-700);
   }
+
+   .section.ax-max-entitled .ax-columns > div {
+    gap:var(--spacing-500);
+   }
+
 
   .section .ax-columns .column {
     padding-left: 0;
