@@ -429,6 +429,42 @@ async function buildRuleDropdown(context) {
   return picker.element;
 }
 
+function onSameLine(elA, elB) {
+  const a = elA.getBoundingClientRect();
+  const b = elB.getBoundingClientRect();
+  return a.top < b.bottom && b.top < a.bottom;
+}
+
+function isTextWrapped(el) {
+  const wrappedHeight = el.getBoundingClientRect().height;
+  const { whiteSpace } = el.style;
+  el.style.whiteSpace = 'nowrap';
+  const singleLineHeight = el.getBoundingClientRect().height;
+  el.style.whiteSpace = whiteSpace;
+  return wrappedHeight > singleLineHeight + 1;
+}
+
+const MOBILE_ROW_QUERY = '(max-width: 599px)';
+
+function checkActionsRowWrap(row, dropdownGroup, actionsGroup) {
+  if (row.clientWidth === 0) return;
+  row.classList.remove('is-stacked', 'cta-wraps');
+  const isStacked = !onSameLine(dropdownGroup, actionsGroup);
+  row.classList.toggle('is-stacked', isStacked);
+  if (isStacked && window.matchMedia?.(MOBILE_ROW_QUERY)?.matches) {
+    const buildLink = actionsGroup.querySelector('.color-seo-hero-build-link');
+    row.classList.toggle('cta-wraps', isTextWrapped(buildLink));
+  }
+}
+
+function watchActionsRowWrap(row, dropdownGroup, actionsGroup) {
+  const target = row.parentElement || row;
+  const recheck = () => checkActionsRowWrap(row, dropdownGroup, actionsGroup);
+  const observer = new ResizeObserver(recheck);
+  observer.observe(target);
+  return recheck;
+}
+
 async function buildPreview(context) {
   const { strings } = context;
 
@@ -460,6 +496,12 @@ async function buildPreview(context) {
 
   const actionsRow = createTag('div', { class: 'color-seo-hero-actions-row' });
   actionsRow.append(dropdownGroup, actionsGroup);
+  const recheckActionsRowWrap = watchActionsRowWrap(actionsRow, dropdownGroup, actionsGroup);
+  const recheckAfterPaint = () => {
+    requestAnimationFrame(() => requestAnimationFrame(recheckActionsRowWrap));
+  };
+  context.rulePicker?.waitForReady?.().catch(() => {}).finally(recheckAfterPaint);
+  document.fonts?.ready?.then(recheckAfterPaint);
 
   preview.append(canvas, stripHost, actionsRow);
   return preview;

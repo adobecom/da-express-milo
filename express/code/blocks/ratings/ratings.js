@@ -1,4 +1,4 @@
-import { getLibs, getLottie, lazyLoadLottiePlayer, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import { getLibs, getFixedTopOffset, getLottie, lazyLoadLottiePlayer, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
 import { splitAndAddVariantsWithDash } from '../../scripts/utils/decorate.js';
 import {
   createStarRating,
@@ -341,7 +341,9 @@ export default async function decorate(block) {
         <p>${submissionText}</p>
       </div>`;
       block.classList.add('submitted');
-      if (window.scrollY > section.offsetTop) window.scrollTo(0, section.offsetTop - 64);
+      if (window.scrollY > section.offsetTop) {
+        window.scrollTo(0, section.offsetTop - getFixedTopOffset());
+      }
     });
     sliderFunctionality();
   }
