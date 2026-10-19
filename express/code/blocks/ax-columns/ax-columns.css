@@ -1157,6 +1157,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns:not(.marquee) .column:first-child:not(.column-picture):not(.hero-animation-overlay):not(.text) {
     padding-right: var(--spacing-300);
+    padding-left: var(--spacing-300);
   }
 
   .ax-columns .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay):not(.text) {
