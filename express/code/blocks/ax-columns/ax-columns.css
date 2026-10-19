@@ -819,7 +819,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 .ax-columns.fullsize .hero-animation-overlay {
   padding-top: 4px;
   padding-bottom: 4px;
-  min-height: var(--hero-animation-overlay-video-height);
+  /* min-height: var(--hero-animation-overlay-video-height); */
 }
 
 .ax-columns.fullsize .hero-animation-overlay video {
