@@ -15,6 +15,7 @@ import createDropdown from '../../scripts/color-shared/components/dropdown/dropd
 const instances = new WeakMap();
 let nextId = 0;
 const HISTORY_KEY = 'colorImageContrastChecker';
+const MIN_FILL_SCALE = 1.5;
 
 function label(tag, className, value, attributes = {}) {
   const element = createTag(tag, { class: className, ...attributes });
@@ -197,6 +198,7 @@ function createView(content, strings, id, onColorChange) {
     canvas,
     original,
     analysisFrame,
+    originalFrame,
     dialog,
     tips,
   };
@@ -280,23 +282,28 @@ export default async function decorate(block) {
     const width = analysisFrame.clientWidth;
     const fullHeight = analysisFrame.clientHeight + extraPadding;
     if (!width || fullHeight <= 0) return;
-    const fullScale = (mode === 'fit' ? Math.min : Math.max)(width / source.width, fullHeight / source.height);
+    const imageScale = (height) => (mode === 'fit'
+      ? Math.min(width / source.width, height / source.height)
+      : Math.max(MIN_FILL_SCALE, width / source.width, height / source.height));
+    const fullScale = imageScale(fullHeight);
     const imageLeft = frame.left + Math.max(0, (width - source.width * fullScale) / 2);
     const imageTop = frame.top - extraPadding
       + Math.max(0, (fullHeight - source.height * fullScale) / 2);
-    const overlaps = imageLeft < toolbar.right
-      && imageLeft + Math.min(width, source.width * fullScale) > toolbar.left
-      && imageTop < toolbar.bottom
-      && imageTop + Math.min(fullHeight, source.height * fullScale) > toolbar.top;
-    const topInset = toolbar.bottom - comparisonRow.getBoundingClientRect().top + 8;
-    // Reserve vertical space only for a collision, without narrowing the images.
+    const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
+    const clearance = mode === 'fill' ? toolbarGap : 0;
+    const overlaps = imageLeft < toolbar.right + clearance
+      && imageLeft + Math.min(width, source.width * fullScale) > toolbar.left - clearance
+      && imageTop < toolbar.bottom + clearance
+      && imageTop + Math.min(fullHeight, source.height * fullScale) > toolbar.top - clearance;
+    const topInset = toolbar.bottom - comparisonRow.getBoundingClientRect().top + toolbarGap;
+    // Reserve toolbar clearance only where needed, without narrowing the images.
     if (overlaps && fullHeight - (topInset - basePadding) >= view.fit.offsetHeight) {
       comparisonRow.style.setProperty('--icc-image-top-inset', `${topInset}px`);
     } else {
       comparisonRow.style.removeProperty('--icc-image-top-inset');
     }
     const height = analysisFrame.clientHeight;
-    const scale = (mode === 'fit' ? Math.min : Math.max)(width / source.width, height / source.height);
+    const scale = imageScale(height);
     view.panel.style.setProperty('--icc-image-width', `${source.width * scale}px`);
     view.panel.style.setProperty('--icc-image-height', `${source.height * scale}px`);
   };
@@ -555,6 +562,14 @@ export default async function decorate(block) {
       resizeFrame = requestAnimationFrame(resize);
     });
     resizeObserver.observe(view.analysisFrame);
+    const frames = [view.analysisFrame, view.originalFrame];
+    frames.forEach((frame, index) => {
+      frame.addEventListener('scroll', () => {
+        const other = frames[1 - index];
+        if (other.scrollLeft !== frame.scrollLeft) other.scrollLeft = frame.scrollLeft;
+        if (other.scrollTop !== frame.scrollTop) other.scrollTop = frame.scrollTop;
+      }, { passive: true, signal });
+    });
     media.addEventListener('change', arrange, { signal });
     window.addEventListener('popstate', () => {
       if (window.history.state?.[HISTORY_KEY] !== id) landing();
@@ -585,6 +600,12 @@ export default async function decorate(block) {
           control.tabIndex = selected ? 0 : -1;
         });
         resize();
+        if (mode === 'fit') {
+          frames.forEach((frame) => {
+            frame.scrollTop = 0;
+            frame.scrollLeft = 0;
+          });
+        }
       }
       if (action === 'save' && ready && !view.save.disabled) {
         try {

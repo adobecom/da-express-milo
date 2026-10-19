@@ -10,6 +10,12 @@ The upload area automatically uses Color Extract's subtle checkerboard pattern
 behind the upload controls without affecting file/drop handling or overlays;
 no background image or additional authoring is required.
 
+The authored upload file guidance remains visible on mobile, tablet and desktop.
+The drag prompt is desktop-only, visible from 1200px and hidden on mobile and
+tablet. At 600px and below, the upload box retains its 200px minimum height and
+grows as needed for longer or localized guidance.
+This override is checker-only and does not change shared uploader consumers.
+
 The upload section follows Color Extract's 800px minimum and vertical centering
 from 600px wide. This is a minimum, not a fixed height: long authored or localized
 copy can grow naturally. Below 600px the section remains content-sized, including
@@ -306,12 +312,21 @@ and padding, with the compact legend above Save PNG on mobile.
 
 Image panes retain their full width: when the floating view toolbar would cover
 image pixels, the comparison reserves space above the images instead of a side
-gutter. Existing empty space is used without changing the layout. If the viewport
+gutter. Fill also reserves an 8px token-based clearance from the toolbar.
+Existing empty space is used without changing the layout. If the viewport
 cannot fit that extra space and at least one control-height of image content,
 the toolbar remains layered above the images so Fit/Fill stays usable.
 
 Fit is still the initial selection. Fit/Fill retain state across expansion and
-responsive changes. Zoom has one tab stop with arrow/Home/End navigation.
+responsive changes. Fit contains the entire image. Fill starts at 150% of the
+image's native pixel dimensions and scales further only if needed to cover the
+available comparison width and height, preserving aspect ratio. The comparison
+area does not grow to browser-screen height in the normal view; expansion uses
+the available screen height. This is display-only zoom, not resampling: analysis
+and PNG exports retain the original resolution.
+Zoom has one tab stop with arrow/Home/End navigation.
+The contrast and original image panes scroll together horizontally and vertically:
+scrolling either pane updates the other, in both normal and expanded views.
 Desktop/tablet/mobile controls follow
 the annotated DOM focus order; the native modal shows the compact legend, contains
 focus, dismisses an open tooltip before closing on Escape, and restores focus
@@ -320,8 +335,9 @@ to Expand.
 The full legend uses one white bordered surface with Green/Passes,
 Blue/Partial, and Dark/Fails rows, decorative swatches and status icons.
 Threshold labels remain localized, with inline tooltip labels and values.
-It sits beside the image at the existing 900px desktop breakpoint, below it
-in three columns at 700–899px, and stacks vertically on narrower screens.
+It sits beside the image from 1200px, below it in three columns at 700–1199px,
+and stacks vertically on narrower screens. Image controls and the expanded
+view retain their existing responsive breakpoints.
 The authored accuracy note is a separate gray information card below the legend.
 Expanded views show only the compact swatch/status legend, without threshold
 tooltip tab stops or the accuracy note. Long localized copy can wrap; legend

@@ -26,6 +26,7 @@ async function checkVisualLayout(block, width, expanded = false) {
       };
     };
     return {
+      gap: parseFloat(getComputedStyle(panel).rowGap),
       card: measure('.icc-workspace'),
       surface: measure('.icc-comparison-row'),
       zoom: measure('.icc-zoom'),
@@ -53,7 +54,8 @@ async function checkVisualLayout(block, width, expanded = false) {
     expect(layout.card.shadow).toContain('0px 2px 8px');
     expect(layout.surface.width).toBeCloseTo(layout.card.width - 2 * layout.card.padding, 1);
     expect(layout.legend.outline).toBe('rgb(233, 233, 233)');
-    if (width >= 900) expect(layout.legend.top).toBeCloseTo(layout.card.top, 1);
+    if (width >= 1200) expect(layout.legend.top).toBeCloseTo(layout.card.top, 1);
+    else expect(layout.legend.top).toBeCloseTo(layout.card.bottom + layout.gap, 1);
   } else {
     expect(layout.card.shadow).toBe('none');
     if (width < 600) {
@@ -70,6 +72,8 @@ async function checkToolbarClearance(block) {
     const surfaceStyle = getComputedStyle(surface);
     const zoom = panel.querySelector('.icc-zoom');
     const toolbar = zoom.getBoundingClientRect();
+    const clearance = panel.querySelector('[data-action="fill"]').getAttribute('aria-pressed') === 'true'
+      ? parseFloat(surfaceStyle.getPropertyValue('--spacing-100')) : 0;
     const comparison = panel.querySelector('.icc-comparison');
     const gap = parseFloat(getComputedStyle(comparison).gap);
     const expectedWidth = (surfaceBox.width - parseFloat(surfaceStyle.paddingLeft)
@@ -79,10 +83,10 @@ async function checkToolbarClearance(block) {
     return [...comparison.children].every((pane) => {
       const clip = pane.getBoundingClientRect();
       const image = pane.firstElementChild.getBoundingClientRect();
-      const overlaps = Math.max(image.left, clip.left) < toolbar.right
-        && Math.min(image.right, clip.right) > toolbar.left
-        && Math.max(image.top, clip.top) < toolbar.bottom
-        && Math.min(image.bottom, clip.bottom) > toolbar.top;
+      const overlaps = Math.max(image.left, clip.left) < toolbar.right + clearance
+        && Math.min(image.right, clip.right) > toolbar.left - clearance
+        && Math.max(image.top, clip.top) < toolbar.bottom + clearance
+        && Math.min(image.bottom, clip.bottom) > toolbar.top - clearance;
       return Math.abs(clip.width - expectedWidth) <= 1
         && (!overlaps || (!canReserve
           && Number(getComputedStyle(zoom).zIndex) > Number(getComputedStyle(comparison).zIndex)));
@@ -144,6 +148,17 @@ test.describe('ColorImageContrastCheckerBlock Test Suite', () => {
         await expect(block.block).toHaveAttribute('data-block-status', 'loaded');
         await expect(block.headline).toBeVisible();
         await expect(block.upload).toBeVisible();
+        const uploadHint = block.upload.locator('.image-upload-dropzone-subtitle');
+        await expect(uploadHint).toBeVisible();
+        await expect(uploadHint).toHaveText(/\S/);
+        const dragPrompt = block.upload.locator('.image-upload-dropzone-title');
+        if (feature.viewport.width < 1200) await expect(dragPrompt).toBeHidden();
+        else await expect(dragPrompt).toBeVisible();
+        const hintBounds = await uploadHint.boundingBox();
+        const uploadBounds = await block.upload.locator('.image-upload-dropzone-container').boundingBox();
+        expect(hintBounds.x).toBeGreaterThanOrEqual(uploadBounds.x);
+        expect(hintBounds.x + hintBounds.width).toBeLessThanOrEqual(uploadBounds.x + uploadBounds.width);
+        expect(hintBounds.y + hintBounds.height).toBeLessThanOrEqual(uploadBounds.y + uploadBounds.height);
         for (const text of feature.data.semantic.texts) {
           await expect(block.block.locator(text.selector).nth(text.nth || 0))
             .toContainText(text.text);
@@ -234,12 +249,7 @@ test.describe('ColorImageContrastCheckerBlock Test Suite', () => {
           .toHaveAttribute('aria-pressed', 'true');
         await block.block.locator('[data-action="fill"]').hover();
         await checkToolbarClearance(block);
-        await block.panel.locator('.icc-frame').evaluateAll((panes) => {
-          panes.forEach((pane) => {
-            pane.scrollTop = pane.scrollHeight;
-            pane.scrollLeft = pane.scrollWidth;
-          });
-        });
+        await block.checkSynchronizedScroll();
         await checkToolbarClearance(block);
         await expect(block.block.locator('[data-action="fill"]'))
           .toHaveCSS('background-color', 'rgb(0, 0, 0)');
@@ -271,6 +281,9 @@ test.describe('ColorImageContrastCheckerBlock Test Suite', () => {
         await expect(block.dialog).toBeVisible();
         await checkVisualLayout(block, feature.viewport.width, true);
         await checkToolbarClearance(block);
+        await block.block.locator('[data-action="fill"]').click();
+        await block.checkSynchronizedScroll();
+        await block.block.locator('[data-action="fit"]').click();
         await expect(block.dialog.locator('.icc-dimensions')).toHaveCount(0);
         await expect(block.dialog.locator('.icc-legend-full')).toBeHidden();
         await expect(block.dialog.locator('.icc-accuracy')).toBeHidden();

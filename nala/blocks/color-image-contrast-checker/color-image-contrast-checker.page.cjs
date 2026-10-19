@@ -1,4 +1,5 @@
 const path = require('path');
+const { expect } = require('@playwright/test');
 
 class ColorImageContrastCheckerBlock {
   constructor(page, selector = 'div.color-image-contrast-checker', nth = 0) {
@@ -23,6 +24,27 @@ class ColorImageContrastCheckerBlock {
   async chooseColorSpace(space) {
     await this.block.locator('.color-dropdown-trigger').click();
     await this.block.locator(`.color-dropdown-option[data-value="${space}"]`).click();
+  }
+
+  async checkSynchronizedScroll() {
+    const panes = this.panel.locator('.icc-frame');
+    await panes.nth(0).evaluate((pane) => {
+      pane.scrollTop = pane.scrollHeight;
+      pane.scrollLeft = pane.scrollWidth;
+    });
+    await expect.poll(() => panes.evaluateAll((frames) => (
+      frames[0].scrollTop === frames[1].scrollTop
+      && frames[0].scrollLeft === frames[1].scrollLeft
+    ))).toBe(true);
+    expect(await panes.nth(0).evaluate((pane) => pane.scrollTop + pane.scrollLeft))
+      .toBeGreaterThan(0);
+    await panes.nth(1).evaluate((pane) => {
+      pane.scrollTop = 0;
+      pane.scrollLeft = 0;
+    });
+    await expect.poll(() => panes.nth(0).evaluate((pane) => (
+      pane.scrollTop + pane.scrollLeft
+    ))).toBe(0);
   }
 
   async focusOrder() {
