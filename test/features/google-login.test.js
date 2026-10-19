@@ -68,20 +68,19 @@ describe('Google login', () => {
     expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
   });
 
-  it('does not change the iPhone experience', async () => {
+  it('initializes One Tap on iPhone', async () => {
     Object.defineProperty(navigator, 'userAgent', {
       value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
       configurable: true,
     });
 
-    document.body.classList.add('google-login-prompt-pending');
     await initGoogleLogin(loadIms, getMetadata, loadScript);
 
-    expect(loadIms.notCalled).to.be.true;
-    expect(loadScript.notCalled).to.be.true;
-    expect(initialize.notCalled).to.be.true;
-    expect(prompt.notCalled).to.be.true;
-    expect(document.body.classList.contains('google-login-prompt-pending')).to.be.false;
+    expect(loadIms.calledOnce).to.be.true;
+    expect(loadScript.calledOnceWithExactly('https://accounts.google.com/gsi/client')).to.be.true;
+    expect(initialize.calledOnce).to.be.true;
+    expect(initialize.firstCall.args[0]).to.include({ itp_support: true });
+    expect(prompt.calledOnce).to.be.true;
   });
 
   it('initializes One Tap in the profile container', async () => {
