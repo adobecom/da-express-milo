@@ -1281,8 +1281,12 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   }
 
   .section div.ax-columns>div>div {
-    width: 50%;
+    max-width: 50%;
     box-sizing: border-box;
+  }
+
+  .section div .ax-columns.width-2-columns .columns-video .column-video {
+    
   }
 
   .section div.ax-columns>div>div:only-child {
@@ -1577,7 +1581,9 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.fullsize .column.hero-animation-overlay {
     position: relative;
-    padding-left: 0;
+        padding-left: 0;
+        padding-right: 0px;
+        max-width: 60%;
   }
 
   .ax-columns.fullsize .column.columns-picture>p,
