@@ -1285,8 +1285,10 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     box-sizing: border-box;
   }
 
-  .section div .ax-columns.width-2-columns .columns-video .column-video {
-    
+  .section .ax-columns .columns-video .column{ 
+    flex-grow: 1;
+    max-width: 50%;
+    box-sizing: border-box;
   }
 
   .section div.ax-columns>div>div:only-child {
