@@ -88,10 +88,10 @@ main .section .ax-columns.enterprise .column h2 {
   opacity: 0.5;
 }
 
-.section:not(:has(> .ax-columns:not(.centered)))>.ax-columns.centered {
+/* .section:not(:has(> .ax-columns:not(.centered)))>.ax-columns.centered {
   padding-left: 0;
   padding-right: 0;
-}
+} */
 
 .section:has(.ax-columns.enterprise) .content h2 {
   margin-top: 0;
@@ -797,11 +797,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   margin: 0;
 }
 
-.ax-columns.fullsize .column {
+/* .ax-columns.fullsize .column {
   padding-left: var(--spacing-400);
   padding-right: var(--spacing-400);
   width: calc(100% - 48px);
-}
+} */
 
 .ax-columns .column.column-picture {
   padding-left: var(--spacing-100);
