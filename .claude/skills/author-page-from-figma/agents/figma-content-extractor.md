@@ -29,10 +29,9 @@ Scan the design context for all text elements. For each, determine:
    `references/token-mapping.md`. Support both legacy SOT and S2A designs.
    S2A variables are in
    `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`, not necessarily
-   in Express `styles.css`. When Figma provides no token name, match its
-   exact value to a CSS custom property; if none has that value, hardcode
-   the exact Figma value. Use visual cues to classify semantic roles, not
-   to approximate typography values.
+   in Express `styles.css`. If Figma specifies a hardcoded value instead
+   of a token, use that exact value in code. Use visual cues to classify
+   semantic roles, not to approximate typography values.
 3. **Position**: vertical position within the frame determines order
    (top to bottom).
 

@@ -8,13 +8,12 @@ designs, including legacy SOT and newer S2A typography.
 For each typography property, use this order:
 
 1. If Figma exposes a CSS custom-property name, use that exact variable.
-2. If Figma exposes only a resolved value, find a CSS custom property with
-   the same exact value. Check the variables available to Express and the
-   S2A stylesheet at
-   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`; S2A variables are
-   external and may not appear in Express `styles.css`.
-3. If no variable has the exact value, hardcode the exact value from
-   Figma rather than substituting an approximate token.
+2. If Figma specifies a hardcoded value instead of a token, use that exact
+   value in code.
+
+Check S2A variables in the stylesheet at
+`https://www.adobe.com/libs/c2/styles/s2a-tokens.css`; these variables are
+external and may not appear in Express `styles.css`.
 
 Use visual cues to identify a text element's semantic role when needed;
 do not use them to approximate or round its typography value.
