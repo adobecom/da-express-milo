@@ -30,7 +30,6 @@ const RULES = [
 describe('color harmony modal content', () => {
   let view;
   let confirmed;
-  let selected;
   let style;
 
   before(async () => {
@@ -46,16 +45,11 @@ describe('color harmony modal content', () => {
 
   beforeEach(() => {
     confirmed = [];
-    selected = [];
     view = createHarmonyModalContent({
       rules: RULES,
       selectedValue: 'ANALOGOUS',
       paletteColors: ['#112233', '#445566', '#778899', '#AABBCC', '#DDEEFF'],
       strings: { title: 'Learn about color harmonies', confirm: 'Apply Harmony' },
-      onSelect: (value) => {
-        selected.push(value);
-        return ['#AABBCC', '#DDEEFF', '#123456', '#789ABC', '#FEDCBA'];
-      },
       onConfirm: (value) => confirmed.push(value),
     });
     document.body.appendChild(view.element);
@@ -89,7 +83,7 @@ describe('color harmony modal content', () => {
     expect(view.element.querySelector('.color-harmony-modal-confirm').textContent).to.equal('Apply Harmony');
   });
 
-  it('applies a card selection immediately and still confirms it', () => {
+  it('previews a card selection and applies it only on confirmation', () => {
     const triad = view.element.querySelector('[data-harmony-value="TRIAD"]');
     triad.click();
 
@@ -97,10 +91,16 @@ describe('color harmony modal content', () => {
     expect(triad.getAttribute('aria-checked')).to.equal('true');
     expect(confirmed).to.deep.equal([]);
     expect(view.element.querySelector('.color-harmony-modal-summary-name').textContent).to.equal('Triad');
-    expect(selected).to.deep.equal(['TRIAD']);
     const configuredPalette = view.element.querySelector('.color-harmony-modal-palette-strip .ax-swatch-strip');
-    expect(configuredPalette.querySelectorAll('.ax-swatch')).to.have.length(5);
-    expect(configuredPalette.getAttribute('aria-label')).to.equal('5 colors in palette');
+    const previewColors = [...configuredPalette.querySelectorAll('.ax-swatch')]
+      .map((swatch) => swatch.style.backgroundColor);
+    expect(previewColors).to.deep.equal([
+      'rgb(25, 0, 171)',
+      'rgb(60, 0, 255)',
+      'rgb(0, 255, 14)',
+      'rgb(170, 110, 57)',
+      'rgb(79, 64, 128)',
+    ]);
 
     view.element.querySelector('.color-harmony-modal-confirm').click();
     expect(confirmed).to.deep.equal(['TRIAD']);

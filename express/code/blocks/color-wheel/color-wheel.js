@@ -422,10 +422,6 @@ async function buildHarmonySelector(controller, strings = {}) {
         title: strings.harmonyModalTitle,
         confirm: strings.confirmHarmony,
       },
-      onSelect: (value) => {
-        selectHarmony(value);
-        return controller.getState().swatches.map((swatch) => swatch.hex);
-      },
       onConfirm: (value) => {
         selectHarmony(value);
         harmonyModalManager.close();
