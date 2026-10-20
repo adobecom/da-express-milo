@@ -136,7 +136,7 @@ main .section .gen-template-text > p {
 .gen-template-prompt-form:has(.gen-template-prompt-input:focus-visible) {
   border-radius: var(--corner-radius-80);
   outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: var(--spacing-50);
+  outline-offset: 0px;
 }
 
 .gen-template-prompt-submit {
@@ -353,23 +353,23 @@ main .section .gen-template-suggestions-label {
   }
 
   .gen-template-prompt-field {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
+    flex-flow: row wrap;
     align-items: end;
     padding: var(--spacing-300);
   }
 
   .gen-template-prompt-label {
-    grid-column: 1 / -1;
+    flex: 0 0 100%;
   }
 
   .gen-template-prompt-input {
+    flex: 1 1 0;
+    min-width: 0;
     min-height: var(--spacing-325);
   }
 
   .gen-template-prompt-submit {
-    grid-column: 2;
-    grid-row: 2;
     align-self: end;
     width: auto;
   }
