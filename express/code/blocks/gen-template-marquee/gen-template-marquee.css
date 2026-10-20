@@ -154,7 +154,7 @@ main .section .gen-template-text > p {
   box-sizing: border-box;
   width: 100%;
   min-width: 90px;
-  min-height: 36px;
+  min-height: 38px;
   margin: 0;
   padding: 5px 1.2em var(--spacing-80);
   border: 2px solid var(--color-info-primary);
