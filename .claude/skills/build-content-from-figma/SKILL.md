@@ -34,10 +34,10 @@ Authoring) for publishing via Adobe EDS.
 > - Link URLs use `https://www.adobe.com/` as a placeholder.
 >   Link display text must match Figma.
 > - Typography guidance supports both legacy SOT and newer S2A designs.
->   Match an exact CSS custom property exposed by Figma first. S2A
->   variables are in
->   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`, not necessarily
->   in Express `styles.css`. If Figma specifies a hardcoded value instead
+>   Match an exact CSS custom property exposed by Figma first. SOT tokens
+>   are in Express `styles.css`; S2A tokens are in
+>   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Check the
+>   relevant stylesheet for the token. If Figma specifies a hardcoded value instead
 >   of a token, use that exact value in code. Use visual cues only to
 >   classify the text's semantic role when needed.
 

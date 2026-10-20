@@ -11,9 +11,9 @@ For each typography property, use this order:
 2. If Figma specifies a hardcoded value instead of a token, use that exact
    value in code.
 
-Check S2A variables in the stylesheet at
-`https://www.adobe.com/libs/c2/styles/s2a-tokens.css`; these variables are
-external and may not appear in Express `styles.css`.
+SOT tokens are in Express `styles.css`; S2A tokens are in
+`https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Check the relevant
+stylesheet for the token.
 
 Use visual cues to identify a text element's semantic role when needed;
 do not use them to approximate or round its typography value.

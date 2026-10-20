@@ -27,9 +27,9 @@ Scan the design context for all text elements. For each, determine:
 2. **Classification and typography**: inspect the Figma data for the exact
    CSS custom property and resolved value, then follow
    `references/token-mapping.md`. Support both legacy SOT and S2A designs.
-   S2A variables are in
-   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`, not necessarily
-   in Express `styles.css`. If Figma specifies a hardcoded value instead
+   SOT tokens are in Express `styles.css`; S2A tokens are in
+   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Check the
+   relevant stylesheet for the token. If Figma specifies a hardcoded value instead
    of a token, use that exact value in code. Use visual cues to classify
    semantic roles, not to approximate typography values.
 3. **Position**: vertical position within the frame determines order
