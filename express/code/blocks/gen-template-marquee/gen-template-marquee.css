@@ -353,9 +353,6 @@ main .section .gen-template-suggestions-label {
   }
 
   .gen-template-prompt-field {
-    display: flex;
-    flex-flow: row wrap;
-    align-items: end;
     padding: var(--spacing-300);
   }
 
