@@ -159,7 +159,7 @@ main .section .gen-template-text > p {
   padding: 5px 1.2em var(--spacing-80);
   border: 2px solid var(--color-info-primary);
   border-radius: 18px;
-  background: var(--color-info-primary);
+  background:  #292929;
   color: var(--color-white);
   cursor: pointer;
   font-family: var(--body-font-family);
@@ -171,18 +171,18 @@ main .section .gen-template-text > p {
 
 .gen-template-prompt-submit:hover {
   border-color: var(--color-info-primary-hover);
-  background: var(--color-info-primary-hover);
+  background: #131313
 }
 
 .gen-template-prompt-submit:active {
   border-color: var(--color-info-primary-down);
-  background: var(--color-info-primary-down);
+  background: #131313 
 }
 
 .gen-template-prompt-submit:focus-visible {
   border-color: var(--color-info-primary-hover);
   outline: none;
-  background: var(--color-info-primary-hover);
+  background: #131313;
   box-shadow: 0 0 0 2px var(--color-white),
     0 0 0 4px var(--color-info-accent-hover);
 }
