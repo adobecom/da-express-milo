@@ -29,7 +29,7 @@ function createHarmonyModalContent({
   onConfirm = () => {},
 } = {}) {
   const title = strings.title || 'Learn about color harmonies';
-  const confirmLabel = strings.confirm || 'Apply Harmony';
+  const confirmLabel = strings.confirm || 'Apply harmony';
   const uid = `color-harmony-modal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const titleId = `${uid}-title`;
   const element = createTag('div', { class: 'color-harmony-modal' });

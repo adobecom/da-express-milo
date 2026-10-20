@@ -49,7 +49,7 @@ describe('color harmony modal content', () => {
       rules: RULES,
       selectedValue: 'ANALOGOUS',
       paletteColors: ['#112233', '#445566', '#778899', '#AABBCC', '#DDEEFF'],
-      strings: { title: 'Learn about color harmonies', confirm: 'Apply Harmony' },
+      strings: { title: 'Learn about color harmonies', confirm: 'Apply harmony' },
       onConfirm: (value) => confirmed.push(value),
     });
     document.body.appendChild(view.element);
@@ -80,7 +80,7 @@ describe('color harmony modal content', () => {
     const footerContent = view.element.querySelector('.color-harmony-modal-footer-content');
     expect(footerContent.contains(view.element.querySelector('.color-harmony-modal-summary'))).to.equal(true);
     expect(footerContent.contains(view.element.querySelector('.color-harmony-modal-confirm'))).to.equal(true);
-    expect(view.element.querySelector('.color-harmony-modal-confirm').textContent).to.equal('Apply Harmony');
+    expect(view.element.querySelector('.color-harmony-modal-confirm').textContent).to.equal('Apply harmony');
   });
 
   it('previews a card selection and applies it only on confirmation', () => {

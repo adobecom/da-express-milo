@@ -587,7 +587,9 @@ color-wheel-express {
   width: 124px;
   height: 24px;
   overflow: hidden;
-  border: 1px solid rgb(31 31 31 / 10%);
+  border: 0;
+  outline: 1px solid rgb(31 31 31 / 10%);
+  outline-offset: -1px;
   border-radius: 6px;
   box-sizing: border-box;
 }

@@ -175,7 +175,7 @@ async function loadPlaceholders() {
     markerAriaTemplate: v(26, '{hex}, use arrow keys to move'),
     learnMore: v(28, 'Learn More'),
     harmonyModalTitle: v(29, 'Learn about color harmonies'),
-    confirmHarmony: v(30, 'Apply Harmony'),
+    confirmHarmony: v(30, 'Apply harmony'),
     harmonyDescriptions: {
       CUSTOM: v(31, 'Randomly selects a color combination scheme.'),
       ANALOGOUS: v(32, 'Uses colors that sit next to each other on the color wheel, creating a harmonious and natural look.'),
