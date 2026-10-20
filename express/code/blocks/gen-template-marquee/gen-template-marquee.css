@@ -312,6 +312,30 @@ main .section .gen-template-suggestions-label {
 
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
+    .gen-template-marquee {
+      view-timeline: --gen-template-marquee block;
+    }
+
+    /* Content pins below the nav and fades/lifts while the gallery scrolls over it. */
+    .gen-template-content {
+      --gen-template-content-lift: 64px;
+      position: sticky;
+      top: calc(var(--feds-height-nav, 64px) + var(--gen-template-padding-top));
+      z-index: 0;
+      animation: gen-template-content-fade linear both;
+      animation-timeline: --gen-template-marquee;
+      animation-range: contain 0px contain 360px;
+    }
+
+    /* Gallery rides over the pinned content; columns tighten to 24px. */
+    .gen-template-gallery {
+      position: relative;
+      z-index: 1;
+      animation: gen-template-gallery-gap-shrink ease-out both;
+      animation-timeline: --gen-template-marquee;
+      animation-range: contain 0% contain 60%;
+    }
+
     .gen-template-column:nth-child(odd) {
       animation: gen-template-column-rise linear both;
       animation-timeline: view();
@@ -323,6 +347,20 @@ main .section .gen-template-suggestions-label {
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
     }
+  }
+}
+
+@keyframes gen-template-content-fade {
+  to {
+    visibility: hidden;
+    opacity: 0;
+    translate: 0 calc(-1 * var(--gen-template-content-lift));
+  }
+}
+
+@keyframes gen-template-gallery-gap-shrink {
+  to {
+    gap: 24px;
   }
 }
 
