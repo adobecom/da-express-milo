@@ -456,6 +456,7 @@ color-wheel-express {
 .ax-color-modal-container:has(.color-harmony-modal) {
   background: var(--color-white);
   border-radius: 16px;
+  gap: 0;
 }
 
 .ax-color-modal-container:has(.color-harmony-modal) .ax-color-modal-content {
