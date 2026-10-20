@@ -58,13 +58,10 @@ set, then pour the Figma content into it.
 >   URLs (dot-prefixed shadow folder convention).
 > - Link URLs use `https://www.adobe.com/` as a placeholder. Link
 >   display text must match Figma.
-> - Typography guidance supports both legacy SOT and newer S2A designs.
->   Match an exact CSS custom property exposed by Figma first. SOT tokens
->   are in Express `styles.css`; S2A tokens are in
->   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Check the
->   relevant stylesheet for the token. If Figma specifies a hardcoded value instead
->   of a token, use that exact value in code. Use visual cues only to
->   classify the text's semantic role when needed.
+> - Use Figma's content hierarchy to choose semantic headings and any
+>   supported authored text-size variant. This skill authors DA content,
+>   not CSS; leave typography styling and token selection to block
+>   development.
 
 ## Bundled resources
 
@@ -76,7 +73,7 @@ read when it becomes relevant.
 |------|---------|
 | `block-name-matching.md` | Fuzzy-matches a Figma frame/component name to a real block folder in `express/code/blocks/`. |
 | `variant-matching.md` | How to match a Figma frame's visual style against a block's known variant registry without inventing class names. |
-| `token-mapping.md` | Visual heuristics for classifying Figma text elements (heading level, body size, eyebrow, CTA style). |
+| `content-semantics.md` | Guidance for classifying Figma text elements into authored headings, body sizes, eyebrows, and CTA styles. |
 | `placeholder-detection.md` | Detects text this block sources from `/express/placeholders.json` instead of authored DOM content, so it isn't mistakenly re-authored. |
 | `metadata-conventions.md` | Distinguishes page-wide `metadata` from per-section `section-metadata`, and documents the `style` key's spacing/comma-delimited conventions. |
 
@@ -144,7 +141,7 @@ visible Figma text should **not** be authored.
 
 ## Phase 3 — Extract content from Figma
 
-**Load `references/token-mapping.md` now.**
+**Load `references/content-semantics.md` now.**
 
 For each provided Figma frame, **load
 `agents/figma-content-extractor.md`** and follow its procedure.

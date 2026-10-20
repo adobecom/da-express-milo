@@ -33,13 +33,10 @@ Authoring) for publishing via Adobe EDS.
 >   as CSS reference, not authored separately.
 > - Link URLs use `https://www.adobe.com/` as a placeholder.
 >   Link display text must match Figma.
-> - Typography guidance supports both legacy SOT and newer S2A designs.
->   Match an exact CSS custom property exposed by Figma first. SOT tokens
->   are in Express `styles.css`; S2A tokens are in
->   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Check the
->   relevant stylesheet for the token. If Figma specifies a hardcoded value instead
->   of a token, use that exact value in code. Use visual cues only to
->   classify the text's semantic role when needed.
+> - Use Figma's content hierarchy to choose semantic headings and any
+>   supported authored text-size variant. This skill authors DA content,
+>   not CSS; leave typography styling and token selection to block
+>   development.
 
 ## Bundled resources
 
@@ -50,7 +47,7 @@ read when it becomes relevant.
 | File | Purpose |
 |------|---------|
 | `authoring-pattern.md` | HTML structure for DA block authoring: document skeleton, content rows, media placement, complete examples. |
-| `token-mapping.md` | Visual heuristics for classifying Figma text elements (heading level, body size, eyebrow, CTA style). |
+| `content-semantics.md` | Guidance for classifying Figma text elements into authored headings, body sizes, eyebrows, and CTA styles. |
 
 ### agents/
 | File | Purpose |
@@ -134,7 +131,7 @@ Wait for user confirmation.
 
 ## Phase 2 — Extract content from Figma
 
-**Load `references/token-mapping.md` now.**
+**Load `references/content-semantics.md` now.**
 
 For each provided Figma frame, **load `agents/figma-content-extractor.md`**
 and follow its procedure.
@@ -295,7 +292,7 @@ CSS-driven responsive behaviour.
 **Left column text cell**:
 1. Icon (SVG): `<p><a href="<aem.page-url>"><aem.page-url></a></p>` (if present)
 2. Eyebrow: `<p>eyebrow text</p>` (if present)
-3. Heading: `<hN>text</hN>` where N is from the token mapping heuristic
+3. Heading: `<hN>text</hN>` where N follows the content semantics
 4. Body: `<p>text</p>`
 5. Links:
    - Primary CTA: `<strong><a href="https://www.adobe.com/">text</a></strong>`

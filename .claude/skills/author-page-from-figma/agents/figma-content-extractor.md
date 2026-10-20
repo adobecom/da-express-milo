@@ -24,14 +24,11 @@ Also use `get_screenshot` to capture a visual reference.
 Scan the design context for all text elements. For each, determine:
 
 1. **Content**: the visible text string.
-2. **Classification and typography**: inspect the Figma data for the exact
-   CSS custom property and resolved value, then follow
-   `references/token-mapping.md`. Support both legacy SOT and S2A designs.
-   SOT tokens are in Express `styles.css`; S2A tokens are in
-   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Check the
-   relevant stylesheet for the token. If Figma specifies a hardcoded value instead
-   of a token, use that exact value in code. Use visual cues to classify
-   semantic roles, not to approximate typography values.
+2. **Semantic structure**: use Figma's content hierarchy to distinguish
+   headings, body text, eyebrows, and links/CTAs. Follow
+   `references/content-semantics.md` when choosing authored heading levels
+   or supported text-size variants. This skill authors DA content, not CSS;
+   leave typography styling and token selection to block development.
 3. **Position**: vertical position within the frame determines order
    (top to bottom).
 
@@ -40,7 +37,7 @@ Classify each text element as:
 - **Eyebrow**: small text (10–13px), often uppercase or letter-spaced,
   appearing above the heading.
 - **Heading**: largest bold text. Note the font size and map to a
-  heading level using the token-mapping reference.
+  heading level using the content-semantics reference.
 - **Body**: medium text below the heading. Note font size for size class.
 - **Link / CTA**: text inside button-shaped elements or underlined
   interactive text. Record display text and CTA style:

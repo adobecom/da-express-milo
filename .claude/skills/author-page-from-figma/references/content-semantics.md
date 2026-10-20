@@ -1,30 +1,16 @@
-# Token Mapping Reference
+# Figma Content Semantics Reference
 
-Guidance for classifying Figma text and interactive elements in Express
-designs, including legacy SOT and newer S2A typography.
-
-## Matching typography tokens and values
-
-For each typography property, use this order:
-
-1. If Figma exposes a CSS custom-property name, use that exact variable.
-2. If Figma specifies a hardcoded value instead of a token, use that exact
-   value in code.
-
-SOT tokens are in Express `styles.css`; S2A tokens are in
-`https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Check the relevant
-stylesheet for the token.
-
-Use visual cues to identify a text element's semantic role when needed;
-do not use them to approximate or round its typography value.
+Use this reference to translate Figma's text hierarchy into DA-authored
+content. It guides semantic markup and supported content variants, not CSS
+implementation or design-token selection.
 
 ---
 
 ## Heading level
 
-Determine heading level from the Figma typography semantics when available.
-Otherwise use font size and visual weight only to classify the semantic
-heading level:
+Determine heading level from the content hierarchy in Figma. Use relative
+font size and visual weight as visual cues to classify semantic heading
+levels, not to reproduce CSS styling:
 
 | Visual cue | Heading level |
 |---|---|
@@ -36,18 +22,6 @@ heading level:
 When in doubt, default to `<h2>` for hero/marquee blocks and `<h3>` for
 card/detail blocks. Document any fallback used.
 
-Express font size tokens for reference:
-```
---heading-font-size-xxxl: 5rem    (80px)
---heading-font-size-xxl:  3.75rem (60px)
---heading-font-size-xl:   2.8125rem (45px)
---heading-font-size-l:    2.25rem (36px)
---heading-font-size-ml:   2rem    (32px)
---heading-font-size-m:    1.75rem (28px)
---heading-font-size-s:    1.375rem (22px)
---heading-font-size-xs:   1.25rem (20px)
-```
-
 ---
 
 ## Body size class
@@ -57,16 +31,6 @@ Express font size tokens for reference:
 | 18px+ | `body-lg` |
 | 14–17px | `body-md` (default) |
 | 12–13px | `body-sm` |
-
-Express font size tokens for reference:
-```
---body-font-size-xxl: 1.5rem   (24px)
---body-font-size-xl:  1.25rem  (20px)
---body-font-size-l:   1.125rem (18px)
---body-font-size-m:   1rem     (16px)  ← default body
---body-font-size-s:   0.875rem (14px)
---body-font-size-xs:  0.75rem  (12px)
-```
 
 `body-md` is the default and needs no class override. Only emit `body-lg`
 or `body-sm` as a block variant when the design explicitly uses a
