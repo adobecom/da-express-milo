@@ -132,15 +132,23 @@ function buildPromptForm(suggestionsRow, strings) {
   form.append(field);
 
   suggestionsLabel.textContent = strings.suggestionsLabel;
-  const authoredSuggestions = getCellText(suggestionsRow?.firstElementChild)
-    .split(',')
-    .map((prompt) => prompt.trim())
-    .filter(Boolean);
-  authoredSuggestions.forEach((prompt) => {
+  // Column 1: chip labels. Column 2 (optional): prompt inserted on click, paired by position.
+  const [labelCell, promptCell] = suggestionsRow?.children ?? [];
+  // One <p> per item, or a single comma-separated line; trailing commas are dropped.
+  const parseList = (cell) => {
+    const paragraphs = [...(cell?.querySelectorAll(':scope > p') ?? [])];
+    const items = paragraphs.length > 1
+      ? paragraphs.map((p) => p.textContent)
+      : getCellText(cell).split(',');
+    return items.map((item) => item.trim().replace(/,$/, '').trim());
+  };
+  const prompts = parseList(promptCell);
+  parseList(labelCell).forEach((text, index) => {
+    if (!text) return;
     const button = createElement('button', 'gen-template-suggestion');
     button.type = 'button';
-    button.dataset.prompt = prompt;
-    button.textContent = prompt;
+    button.dataset.prompt = prompts[index] || text;
+    button.textContent = text;
     suggestionList.append(button);
   });
 
