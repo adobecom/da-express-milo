@@ -504,12 +504,13 @@ color-wheel-express {
 
 .color-harmony-card {
   display: flex;
+  box-sizing: border-box;
   gap: var(--spacing-200);
   align-items: flex-start;
   min-width: 0;
   padding: var(--spacing-200);
   overflow: hidden;
-  border: 1px solid var(--color-gray-300-variant);
+  border: 1px solid var(--color-light-gray);
   border-radius: var(--Corner-radius-corner-radius-100);
   background: var(--color-white);
   color: inherit;
@@ -524,8 +525,8 @@ color-wheel-express {
 }
 
 .color-harmony-card:hover {
-  border-color: var(--color-gray-700);
-  box-shadow: inset 0 0 0 1px var(--color-gray-700);
+  padding: calc(var(--spacing-200) - 1px);
+  border: 2px solid var(--color-gray-250);
 }
 
 .color-harmony-card[aria-checked='true']:hover {
@@ -534,7 +535,7 @@ color-wheel-express {
 }
 
 .color-harmony-card:focus-visible {
-  outline: 2px solid var(--color-blue-800);
+  outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
 }
 
