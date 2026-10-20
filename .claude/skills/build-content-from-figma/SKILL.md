@@ -33,10 +33,9 @@ Authoring) for publishing via Adobe EDS.
 >   as CSS reference, not authored separately.
 > - Link URLs use `https://www.adobe.com/` as a placeholder.
 >   Link display text must match Figma.
-> - Use Figma's content hierarchy to choose semantic headings and any
->   supported authored text-size variant. This skill authors DA content,
->   not CSS; leave typography styling and token selection to block
->   development.
+> - Use Figma typography tokens and text-style names to classify headings,
+>   body sizes, and eyebrows. Support both SOT and S2A designs; use visual
+>   heuristics only when the design provides no usable classification.
 
 ## Bundled resources
 
@@ -47,7 +46,7 @@ read when it becomes relevant.
 | File | Purpose |
 |------|---------|
 | `authoring-pattern.md` | HTML structure for DA block authoring: document skeleton, content rows, media placement, complete examples. |
-| `content-semantics.md` | Guidance for classifying Figma text elements into authored headings, body sizes, eyebrows, and CTA styles. |
+| `token-mapping.md` | Maps Figma typography tokens and text styles to authored headings, body sizes, and eyebrows, with visual fallbacks for SOT and S2A designs. |
 
 ### agents/
 | File | Purpose |
@@ -131,7 +130,7 @@ Wait for user confirmation.
 
 ## Phase 2 — Extract content from Figma
 
-**Load `references/content-semantics.md` now.**
+**Load `references/token-mapping.md` now.**
 
 For each provided Figma frame, **load `agents/figma-content-extractor.md`**
 and follow its procedure.
@@ -139,13 +138,15 @@ and follow its procedure.
 Each extraction returns:
 - Icon (Figma asset URL + node ID + alt text, if present)
 - Eyebrow text (if present)
-- Heading text + level (h1–h4)
-- Body text + size class (body-lg, body-md, body-sm)
+- Heading text + level (h1–h4) + source typography token/style, if present
+- Body text + design size + supported authored size variant, if any,
+  with the source typography token/style when present
 - Links (display text + CTA style: primary/secondary/plain)
 - Background (color string, or Figma asset URL + node ID if image)
 - Foreground image (Figma asset URL + node ID, if present)
 - Additional media (if present)
 - Fallback classifications (elements where heuristics were used)
+- Implementation notes (unsupported text sizes or conflicting classifications)
 
 ---
 
@@ -292,7 +293,7 @@ CSS-driven responsive behaviour.
 **Left column text cell**:
 1. Icon (SVG): `<p><a href="<aem.page-url>"><aem.page-url></a></p>` (if present)
 2. Eyebrow: `<p>eyebrow text</p>` (if present)
-3. Heading: `<hN>text</hN>` where N follows the content semantics
+3. Heading: `<hN>text</hN>` where N follows the token-mapping reference
 4. Body: `<p>text</p>`
 5. Links:
    - Primary CTA: `<strong><a href="https://www.adobe.com/">text</a></strong>`

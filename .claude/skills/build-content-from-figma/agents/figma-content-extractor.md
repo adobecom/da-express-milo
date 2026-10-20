@@ -24,28 +24,31 @@ Also use `get_screenshot` to capture a visual reference.
 Scan the design context for all text elements. For each, determine:
 
 1. **Content**: the visible text string.
-2. **Semantic structure**: use Figma's content hierarchy to distinguish
-   headings, body text, eyebrows, and links/CTAs. Follow
-   `references/content-semantics.md` when choosing authored heading levels
-   or supported text-size variants. This skill authors DA content, not CSS;
-   leave typography styling and token selection to block development.
+2. **Typography token or text style**: inspect the design context for
+   bound SOT or S2A typography variables, CSS variable references, and
+   text-style names. Follow `references/token-mapping.md` to classify
+   headings, body sizes, and eyebrows. If the context omits variable names,
+   use Figma MCP `get_variable_defs` when available. Record the source
+   token/style alongside the classification.
 3. **Position**: vertical position within the frame determines order
    (top to bottom).
 
 Classify each text element as:
 
-- **Eyebrow**: small text (10–13px), often uppercase or letter-spaced,
-  appearing above the heading.
-- **Heading**: largest bold text. Note the font size and map to a
-  heading level using the content-semantics reference.
-- **Body**: medium text below the heading. Note font size for size class.
+- **Eyebrow**: an eyebrow token or text style, such as
+  `--s2a-typography-font-size-eyebrow`.
+- **Heading**: a title token or text style. Use the token-mapping reference
+  to determine the heading level.
+- **Body**: a body token or text style. Record its size and check whether
+  the block supports the corresponding authored size variant.
 - **Link / CTA**: text inside button-shaped elements or underlined
   interactive text. Record display text and CTA style:
   - **Primary** (filled button) → `<strong><a>`
   - **Secondary** (outline button) → `<em><a>`
   - **Plain** (text link) → bare `<a>`
 
-Document any elements where heuristics were needed.
+For missing, ambiguous, or unrecognized tokens/styles, use the visual
+fallbacks in `references/token-mapping.md` and document the classification.
 
 ### Step 3 — Identify media elements
 
@@ -80,9 +83,11 @@ Icon:
 Eyebrow:
   present: true/false
   text: "<text>"
+  typography_token_or_style: "<source name, if available>"
 
 Heading:
   text: "<text>"
+  typography_token_or_style: "<source name, if available>"
   approx_font_size: <px>
   weight: bold/regular
   inferred_level: <1-4>
@@ -90,8 +95,10 @@ Heading:
 
 Body:
   text: "<text>"
+  typography_token_or_style: "<source name, if available>"
   approx_font_size: <px>
-  inferred_size_class: <lg|md|sm>
+  inferred_size_class: <lg|md|sm|xs>
+  authored_size_variant: "<supported block variant, or none>"
 
 Links:
   count: <N>
@@ -116,15 +123,18 @@ Additional_media:
 
 Fallback_classifications:
   - "<element>: <reason heuristic was used>"
+
+Implementation_notes:
+  - "<unsupported text size or conflicting token/style classification>"
 ```
 
 ---
 
 ## Error handling
 
-- If `get_design_context` returns limited styling info, rely on
-  `get_screenshot` and visual heuristics. Document which elements
-  required it.
+- If `get_design_context` omits token/style information and variable
+  definitions are unavailable, rely on `get_screenshot` and visual
+  heuristics. Document which elements required it.
 - If a media element cannot be captured, flag it for manual handling.
 - For complex frames, focus on top-level content elements visible
   to the end user.
