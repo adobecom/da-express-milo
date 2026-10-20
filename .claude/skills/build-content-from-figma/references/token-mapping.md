@@ -1,15 +1,31 @@
 # Token Mapping Reference
 
-Visual heuristics for classifying Figma text and interactive elements
-in Express designs. Express Figma files do not use `--s2a-typography-*`
-tokens, so classification relies on font size, weight, position, and
-visual style.
+Guidance for classifying Figma text and interactive elements in Express
+designs, including legacy SOT and newer S2A typography.
+
+## Matching typography tokens and values
+
+For each typography property, use this order:
+
+1. If Figma exposes a CSS custom-property name, use that exact variable.
+2. If Figma exposes only a resolved value, find a CSS custom property with
+   the same exact value. Check the variables available to Express and the
+   S2A stylesheet at
+   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`; S2A variables are
+   external and may not appear in Express `styles.css`.
+3. If no variable has the exact value, hardcode the exact value from
+   Figma rather than substituting an approximate token.
+
+Use visual cues to identify a text element's semantic role when needed;
+do not use them to approximate or round its typography value.
 
 ---
 
 ## Heading level
 
-Determine heading level from font size and visual weight:
+Determine heading level from the Figma typography semantics when available.
+Otherwise use font size and visual weight only to classify the semantic
+heading level:
 
 | Visual cue | Heading level |
 |---|---|

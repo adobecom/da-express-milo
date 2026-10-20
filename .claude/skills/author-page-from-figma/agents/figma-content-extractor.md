@@ -24,9 +24,15 @@ Also use `get_screenshot` to capture a visual reference.
 Scan the design context for all text elements. For each, determine:
 
 1. **Content**: the visible text string.
-2. **Classification**: use visual heuristics from `references/token-mapping.md`.
-   Express Figma files do not expose `--s2a-typography-*` tokens —
-   classify by font size, weight, and position.
+2. **Classification and typography**: inspect the Figma data for the exact
+   CSS custom property and resolved value, then follow
+   `references/token-mapping.md`. Support both legacy SOT and S2A designs.
+   S2A variables are in
+   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`, not necessarily
+   in Express `styles.css`. When Figma provides no token name, match its
+   exact value to a CSS custom property; if none has that value, hardcode
+   the exact Figma value. Use visual cues to classify semantic roles, not
+   to approximate typography values.
 3. **Position**: vertical position within the frame determines order
    (top to bottom).
 

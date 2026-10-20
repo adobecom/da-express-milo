@@ -58,9 +58,14 @@ set, then pour the Figma content into it.
 >   URLs (dot-prefixed shadow folder convention).
 > - Link URLs use `https://www.adobe.com/` as a placeholder. Link
 >   display text must match Figma.
-> - Heading levels and body sizes are determined by visual heuristics
->   since Express Figma designs do not use `--s2a-typography-*`
->   tokens.
+> - Typography guidance supports both legacy SOT and newer S2A designs.
+>   Match an exact CSS custom property exposed by Figma first; if only a
+>   value is available, find a custom property with that exact value. S2A
+>   variables are in
+>   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`, not necessarily
+>   in Express `styles.css`. If no variable matches, hardcode the exact
+>   Figma value rather than approximating it visually. Use visual cues only to
+>   classify the text's semantic role when needed.
 
 ## Bundled resources
 
