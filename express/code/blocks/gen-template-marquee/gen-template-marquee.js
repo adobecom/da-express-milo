@@ -112,7 +112,7 @@ function buildPromptForm(suggestionsRow, strings) {
   instanceId += 1;
   textarea.id = `gen-template-prompt-${instanceId}`;
   textarea.name = 'prompt';
-  textarea.rows = 2;
+  textarea.rows = 1;
   textarea.placeholder = strings.input;
   textarea.enterKeyHint = 'go';
 
@@ -120,7 +120,8 @@ function buildPromptForm(suggestionsRow, strings) {
   label.textContent = strings.label;
 
   submit.type = 'submit';
-  const icon = getIconElementDeprecated('AX_AIGenerate_18_N', 22, '');
+  submit.classList.add('button', 'primary');
+  const icon = getIconElementDeprecated('AX_AIGenerate_18_N', 18, '');
   icon.setAttribute('aria-hidden', 'true');
   buttonText.textContent = strings.submit;
   submit.append(icon, buttonText);

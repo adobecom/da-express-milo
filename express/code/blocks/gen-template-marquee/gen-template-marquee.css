@@ -133,7 +133,7 @@ main .section .gen-template-text > p {
   opacity: 1;
 }
 
-.gen-template-prompt-field:has(.gen-template-prompt-input:focus-visible) {
+.gen-template-prompt-form:has(.gen-template-prompt-input:focus-visible) {
   border-radius: var(--corner-radius-80);
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: var(--spacing-50);
@@ -147,28 +147,49 @@ main .section .gen-template-text > p {
   box-sizing: border-box;
   width: 100%;
   min-width: 90px;
-  min-height: var(--spacing-700);
+  min-height: 36px;
   margin: 0;
-  padding: var(--spacing-100) var(--spacing-350) var(--spacing-100) var(--spacing-325);
-  border: 0;
-  border-radius: var(--spacing-400);
-  background: var(--Background-Primary-Default);
+  padding: 5px 1.2em var(--spacing-80);
+  border: 2px solid var(--color-info-primary);
+  border-radius: 18px;
+  background: var(--color-info-primary);
   color: var(--color-white);
   cursor: pointer;
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-m);
-  font-weight: var(--subheading-font-weight);
-  line-height: var(--spacing-350);
+  font-size: var(--body-font-size-s);
+  font-weight: 600;
+  line-height: var(--body-line-height);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.gen-template-prompt-submit:hover {
+  border-color: var(--color-info-primary-hover);
+  background: var(--color-info-primary-hover);
+}
+
+.gen-template-prompt-submit:active {
+  border-color: var(--color-info-primary-down);
+  background: var(--color-info-primary-down);
 }
 
 .gen-template-prompt-submit:focus-visible {
-  outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: var(--spacing-50);
+  border-color: var(--color-info-primary-hover);
+  outline: none;
+  background: var(--color-info-primary-hover);
+  box-shadow: 0 0 0 2px var(--color-white),
+    0 0 0 4px var(--color-info-accent-hover);
+}
+
+.gen-template-prompt-submit:disabled {
+  border-color: var(--color-gray-200);
+  background: var(--color-gray-200);
+  color: var(--color-gray-500);
+  cursor: not-allowed;
 }
 
 .gen-template-prompt-submit .icon {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   margin: 0;
   filter: brightness(0) invert(1);
 }
@@ -176,13 +197,11 @@ main .section .gen-template-text > p {
 .gen-template-suggestions {
   align-items: center;
   gap: var(--spacing-200);
-  /* overflow: hidden; */
 }
 
 .gen-template-suggestion:hover {
-   border-radius: 6px;
- 
-background: var(--s2a-color-control-button-background-solid-hover, #DADADA);
+  border-radius: var(--spacing-80);
+  background: var(--color-gray-300-variant);
 }
 
 main .section .gen-template-suggestions-label {
@@ -199,6 +218,8 @@ main .section .gen-template-suggestions-label {
   width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
 }
 
 .gen-template-suggestion-list::after {
@@ -231,6 +252,7 @@ main .section .gen-template-suggestions-label {
   font-weight: var(--subheading-font-weight);
   line-height: var(--spacing-325);
   white-space: nowrap; 
+  scroll-snap-align: start;
   background: #F8F8F8;
 }
 
@@ -331,21 +353,30 @@ main .section .gen-template-suggestions-label {
   }
 
   .gen-template-prompt-field {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
     padding: var(--spacing-300);
   }
 
+  .gen-template-prompt-label {
+    grid-column: 1 / -1;
+  }
+
+  .gen-template-prompt-input {
+    min-height: var(--spacing-325);
+  }
+
   .gen-template-prompt-submit {
-    align-self: flex-end;
+    grid-column: 2;
+    grid-row: 2;
+    align-self: end;
     width: auto;
   }
 
   .gen-template-suggestion-list {
-    justify-content: center;
-    overflow: visible;
-  }
-
-  .gen-template-suggestion-list::after {
-    content: none;
+    justify-content: flex-start;
+    overflow-x: auto;
   }
 
   .gen-template-column-edge {
@@ -387,6 +418,14 @@ main .section .gen-template-suggestions-label {
     font-size: 56px;
     line-height: var(--gen-template-heading-line-height);
     letter-spacing: -1.68px;
+  }
+  .gen-template-suggestion-list {
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .gen-template-suggestion-list::after {
+    content: none;
   }
 }
 
