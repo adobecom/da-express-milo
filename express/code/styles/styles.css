@@ -49,6 +49,17 @@
   src: local('Arial'), local('Helvetica');
 }
 
+/* Adobe Clean Display Fallback */
+@font-face {
+  font-family: 'Arial Bold Adjusted';
+  font-weight: 900;
+  size-adjust: 93%;
+  ascent-override: 91%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('ArialBold');
+}
+
 :root {
   --color-white: #fff;
 
@@ -116,7 +127,7 @@
 
   /* font families */
   --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
-  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --heading-font-family: "Adobe Clean Display Black", var(--s2a-font-family-heading), adobe-clean-display, "Arial Bold Adjusted", sans-serif;
 
   /* body */
   --body-background-color: var(--color-white);
@@ -878,15 +889,15 @@ main .dark a.con-button.outline:any-link:focus {
    `.button`s). Colors follow the Express SoT Background/Primary tokens. Only
    color changes; each block keeps its own button geometry.
    Whitelisted blocks only — add a block to every `:is()` list below to opt in:
-   ax-columns, blog-columns, font-bento, comparison-table-v2. */
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+   ax-columns, blog-columns, font-bento, comparison-table-v2, palette-columns. */
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill:any-link {
   color: var(--color-white);
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
 }
 
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible) {
   color: var(--color-white);
   background-color: var(--Background-Primary-Hover);
@@ -896,11 +907,11 @@ main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
 /* On dark surfaces the fill inverts to white. Covers a `.dark` section
    ancestor, a `.dark` block/inner wrapper, and the button-level `.dark` class. */
 main :is(
-  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2),
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2).dark,
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2) .dark
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns) .dark
 ) a:is(.con-button, .button).fill:any-link,
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill.dark:any-link {
   color: var(--Background-Primary-Default);
   background-color: var(--color-white);
@@ -908,11 +919,11 @@ main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
 }
 
 main :is(
-  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2),
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2).dark,
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2) .dark
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns) .dark
 ) a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible),
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill.dark:any-link:is(:hover, :active, :focus-visible) {
   color: var(--Background-Primary-Hover);
   background-color: var(--color-gray-100);
