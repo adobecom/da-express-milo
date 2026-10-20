@@ -319,9 +319,12 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   [...block.classList].filter((c) => c === 'closed').forEach((c) => floatButtonWrapper.classList.add(c));
   const floatButtonInnerWrapper = createTag('div', { class: 'floating-button-inner-wrapper' });
 
-  // Apply initial suppression before insertion so the CTA cannot animate out from a visible state.
+  // Keep the CTA hidden before insertion so it cannot animate from a visible state.
+  // Extract pages use the upload marquee as the reveal threshold.
+  const delayUntilViewportPassed = data.delayUntilViewportPassed
+    || document.querySelector('.color-extract-marquee-wrapper, .color-extract');
   const miniEditor = document.querySelector('.mini-editor');
-  const shouldDelayFloatingCta = audience === 'mobile' || !!data.delayUntilViewportPassed;
+  const shouldDelayFloatingCta = audience === 'mobile' || !!delayUntilViewportPassed;
   if (audience === 'mobile' && data.enableSuppressGating
     && document.querySelector('.suppress-until-not-visible')) {
     floatButtonWrapper.classList.add('floating-button--suppressed');
@@ -329,7 +332,7 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   if (shouldDelayFloatingCta && miniEditor) {
     floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
   }
-  if (shouldDelayFloatingCta && data.delayUntilViewportPassed) {
+  if (shouldDelayFloatingCta && delayUntilViewportPassed) {
     floatButtonWrapper.classList.add('floating-button--hero-suppressed');
   }
 
@@ -399,7 +402,7 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
     delayFloatingCtaUntilViewportPassed(
       floatButtonWrapper,
       floatButton,
-      data.delayUntilViewportPassed,
+      delayUntilViewportPassed,
       restoreButtonPosition,
     );
   }

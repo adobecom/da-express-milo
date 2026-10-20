@@ -90,6 +90,32 @@ describe('Floating Button', () => {
     }
   });
 
+  it('suppresses the floating CTA on extract pages until the upload marquee passes', async () => {
+    document.body.innerHTML = `<main>
+      <div class="color-extract-marquee-wrapper"></div>
+      <div class="section">
+        <div class="floating-button meta-powered"><div>desktop</div></div>
+      </div>
+    </main>`;
+    const uploadMarquee = document.querySelector('.color-extract-marquee-wrapper');
+    uploadMarquee.getBoundingClientRect = () => ({ bottom: 500 });
+    const main = document.querySelector('main');
+    const append = main.append.bind(main);
+    let suppressedWhenInserted = false;
+    main.append = (...nodes) => {
+      const wrapper = nodes.find((node) => node.classList?.contains('floating-button-wrapper'));
+      if (wrapper) suppressedWhenInserted = wrapper.classList.contains('floating-button--hero-suppressed');
+      append(...nodes);
+    };
+
+    await decorate(document.querySelector('.floating-button'));
+    const wrapper = document.querySelector('.floating-button-wrapper[data-audience="desktop"]');
+
+    expect(suppressedWhenInserted).to.be.true;
+    expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.true;
+    expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
+  });
+
   it('Floating Button has the right elements and if mobile, .section should be removed', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     const floatingButton = document.querySelector('.floating-button');
