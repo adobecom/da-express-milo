@@ -521,7 +521,7 @@ color-wheel-express {
 
 .color-harmony-card[aria-checked='true'] {
   padding: calc(var(--spacing-200) - 1px);
-  border: 2px solid var(--color-black);
+  border: 2px solid var(--color-gray-250);
 }
 
 .color-harmony-card:hover {
@@ -530,7 +530,7 @@ color-wheel-express {
 }
 
 .color-harmony-card[aria-checked='true']:hover {
-  border-color: var(--color-black);
+  border-color: var(--color-gray-250);
   box-shadow: none;
 }
 
