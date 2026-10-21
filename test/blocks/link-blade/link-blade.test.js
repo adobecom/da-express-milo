@@ -37,6 +37,20 @@ describe('Link Blade', () => {
     expect(linksContainer.querySelectorAll('a').length).to.equal(16);
   });
 
+  it('does not apply carousel ARIA attributes to the generic links row', () => {
+    const linksRow = block.querySelector('.link-blade-link-row');
+    expect(linksRow.hasAttribute('aria-orientation')).to.be.false;
+    expect(linksRow.hasAttribute('aria-controls')).to.be.false;
+  });
+
+  it('labels the link navigation with an existing heading', () => {
+    const header = block.querySelector('.link-blade-header');
+    const labelId = linksContainer.getAttribute('aria-labelledby');
+    expect(linksContainer.getAttribute('role')).to.equal('navigation');
+    expect(labelId).to.equal(header.id);
+    expect(document.getElementById(labelId)).to.equal(header);
+  });
+
   it('should not build carousel before ResizeObserver fires with real dimensions', () => {
     // Immediately after decorate(), ResizeObserver has not yet fired.
     // With jsdom/zero dimensions, no chevrons should be in the DOM.
