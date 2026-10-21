@@ -83,13 +83,6 @@ function loadVideo(block, payload) {
   const inlinePlayerDuration = block.querySelector('.video-player-inline-player-duration');
   const currentVideo = payload.sessions[payload.sessionIndex].videos[payload.videoIndex];
   const videoButton = block.querySelectorAll('.video-button')[payload.videoIndex];
-  const previousSessionIndex = (payload.sessionIndex + payload.sessions.length - 1)
-    % payload.sessions.length;
-  const previousSessionVideos = payload.sessions[previousSessionIndex].videos;
-  const previousVideo = payload.videoIndex > 0
-    ? payload.sessions[payload.sessionIndex].videos[payload.videoIndex - 1]
-    : previousSessionVideos[previousSessionVideos.length - 1];
-  block.querySelector('.video-player-button-previous').setAttribute('aria-label', previousVideo.title);
 
   if (inlinePlayer) {
     inlinePlayer.innerHTML = '';
@@ -288,7 +281,7 @@ function decorateVideoPlayerMenu(block, payload) {
   const videoPlayerMenu = createTag('div', { class: 'video-player-menu' });
   const videoTitle = createTag('h3', { class: 'video-player-video-title' });
   const navButtons = createTag('div', { class: 'video-player-buttons' });
-  const buttonPrevious = createTag('a', { class: 'video-player-button-previous', href: '#' });
+  const buttonPrevious = createTag('a', { class: 'video-player-button-previous', href: '#', 'aria-label': 'Previous clip' });
   const buttonPreviousImg = createTag('img', { class: 'video-player-button-previous-img', src: '/express/code/icons/adobe-express-video-previous.svg', alt: '' });
   const buttonNext = createTag('a', { class: 'video-player-button-next button accent', href: '#' });
   const videoListWrapper = createTag('div', { class: 'video-player-video-list-wrapper' });

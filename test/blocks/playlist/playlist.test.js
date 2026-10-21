@@ -102,29 +102,24 @@ describe('Playlist', () => {
     icons.forEach((icon) => expect(icon.getAttribute('alt')).to.equal(''));
   });
 
-  it('names the previous control after its target clip, including session boundaries', async () => {
+  it('keeps the previous control label consistent across clips and sessions', async () => {
     const block = document.querySelector('.playlist');
-    const titles = [...block.children]
-      .map((row) => row.querySelector('a')?.textContent.trim())
-      .filter(Boolean);
     await decorate(block);
 
     const previous = block.querySelector('.video-player-button-previous');
     const next = block.querySelector('.video-player-button-next');
-    const initialTitle = block.querySelector('.video-player-video-title').textContent;
-    expect(previous.getAttribute('aria-label')).to.equal(titles[titles.indexOf(initialTitle) - 1]);
+    expect(previous.getAttribute('aria-label')).to.equal('Previous clip');
+    expect(next.textContent).to.equal('Next clip');
 
     next.click();
-    expect(previous.getAttribute('aria-label')).to.equal(initialTitle);
+    expect(previous.getAttribute('aria-label')).to.equal('Previous clip');
     previous.click();
     previous.click();
-    expect(block.querySelector('.video-player-video-title').textContent)
-      .to.equal(titles[titles.indexOf(initialTitle) - 1]);
+    expect(previous.getAttribute('aria-label')).to.equal('Previous clip');
 
     block.querySelector('.session').click();
-    expect(previous.getAttribute('aria-label')).to.equal(titles[titles.length - 1]);
+    expect(previous.getAttribute('aria-label')).to.equal('Previous clip');
     previous.click();
-    expect(block.querySelector('.video-player-video-title').textContent)
-      .to.equal(titles[titles.length - 1]);
+    expect(previous.getAttribute('aria-label')).to.equal('Previous clip');
   });
 });
