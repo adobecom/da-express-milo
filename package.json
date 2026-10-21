@@ -5,11 +5,13 @@
   "version": "1.0.0",
   "description": "Website foundation technology.",
   "scripts": {
+    "up:color": "aem up --url https://main--express-color--adobecom.aem.page",
     "lint:css-vars": "node scripts/lint-css-vars.js",
     "lint:css-vars:fix": "node scripts/lint-css-vars.js --fix",
     "test": "wtr \"./test/**/*.test.js\" --node-resolve --port=2000 --coverage",
     "test:watch": "npm test -- --watch",
     "nala": "node nala/utils/nala.run.cjs",
+    "nala:login": "node nala/utils/nala-login.cjs",
     "a11y": "node nala/utils/nala.cli.cjs a11y",
     "nala-test-gen": "node nala/utils/test-gen/index.cjs",
     "lint": "npm run lint:js && npm run lint:css",

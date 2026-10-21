@@ -19,10 +19,15 @@ describe('Color SEO Hero', () => {
 
   beforeEach(async function beforeEachHook() {
     this.timeout(15000);
+    setConfig({ placeholders: { 'color-edit-title': 'Modifier la couleur' } });
     document.body.innerHTML = await readFile({ path: './mocks/basic.html' });
     block = document.querySelector('.color-seo-hero');
     decorate(block);
     await waitFor(() => block.classList.contains('is-ready'), 10000);
+  });
+
+  afterEach(() => {
+    setConfig({ placeholders: undefined });
   });
 
   it('builds the interactive preview from the authored color row', async () => {
@@ -46,6 +51,10 @@ describe('Color SEO Hero', () => {
 
     expect(block.querySelector('.color-seo-hero-editor-popover').hidden).to.be.false;
     expect(editButton.getAttribute('aria-expanded')).to.equal('true');
+    const colorEdit = block.querySelector('color-edit');
+    await colorEdit.updateComplete;
+    expect(colorEdit.shadowRoot.querySelector('.ce-title').textContent)
+      .to.equal('Modifier la couleur');
   });
 
   it('recomputes the swatch strip when a different harmony rule is selected', async () => {
@@ -119,5 +128,11 @@ describe('Color SEO Hero', () => {
       .map((item) => item.getAttribute('value'));
 
     expect(values).to.include.members(['JPEG', 'ASE']);
+  });
+
+  it('gives the hero CTA an explicit aria-label matching its visible text', () => {
+    const cta = block.querySelector('.color-seo-hero-cta');
+    expect(cta).to.exist;
+    expect(cta.getAttribute('aria-label')).to.equal(cta.textContent.trim());
   });
 });

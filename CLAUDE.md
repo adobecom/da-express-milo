@@ -14,6 +14,7 @@ adobe.com/express — AEM Edge Delivery Services + Milo. Vanilla JS, Lit/Spectru
 - No hardcoded text in blocks — all text (including a11y) must come from authored DOM content or placeholders via `replaceKey`/`replaceKeyArray`
 - `scripts.js` loads on every page — changes require high scrutiny
 - `color.adobe.com` shares this codebase; its blocks are: `color-blindness`, `color-contrast-checker`, `color-explore`, `color-extract`, `color-headline`, `color-wheel`; shared code in `/libs/color-components/` and `/scripts/color-shared/`
+- To run the local dev server against color content (so `color.adobe.com` blocks render real data), use `npm run up:color` instead of plain `aem up`
 
 ## Linting
 - Don't add `stylelint-disable`/`eslint-disable` comments unless it's a last resort (e.g. suppressing a pre-existing violation to avoid an unrelated regression-testing pass). Fix the underlying violation instead.

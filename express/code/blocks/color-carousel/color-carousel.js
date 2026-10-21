@@ -7,6 +7,7 @@ const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
 
 let createTag;
 let getConfig;
+let getMetadata;
 let replaceKey;
 
 function watchForOverflow(row, onOverflow) {
@@ -75,10 +76,16 @@ async function getCkgColors() {
   if (!pills?.length) return [];
 
   const { prefix } = getConfig().locale;
+  const isColorChildPage = getMetadata('pagetype')?.toLowerCase() === 'color';
 
   return pills.map(({ canonicalName, metadata: { link, hexCode } = {} }) => {
     if (!canonicalName || !link || !hexCode) return null;
-    const href = link.startsWith('/') ? `${prefix}${link}` : link;
+    let href = link.startsWith('/') ? `${prefix}${link}` : link;
+    if (isColorChildPage && link.startsWith('/')) {
+      // Workaround until CKG updates its index to return /meanings paths for these pages.
+      const slug = link.split('/').filter(Boolean).pop();
+      if (slug) href = `${prefix}/meanings/${slug}`;
+    }
     return { name: titleCase(canonicalName), hex: hexCode, href };
   }).filter((color) => color && HEX_PATTERN.test(color.hex));
 }
@@ -114,7 +121,7 @@ export default async function decorate(block) {
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
   ]);
-  ({ createTag, getConfig } = utils);
+  ({ createTag, getConfig, getMetadata } = utils);
   ({ replaceKey } = placeholders);
 
   const rows = [...block.querySelectorAll(':scope > div')];

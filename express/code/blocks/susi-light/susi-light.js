@@ -2,6 +2,7 @@
 /* eslint-disable camelcase */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { getTrackingAppendedURL } from '../../scripts/branchlinks.js';
+import { transformLinkToAnimation } from '../../scripts/utils/media.js';
 
 let createTag; let loadScript;
 let getConfig; let isStage;
@@ -23,6 +24,16 @@ export const DCTX_ID_MAP = {
 };
 
 const usp = new URLSearchParams(window.location.search);
+
+// English "Not ready to Sign in? Continue as a guest" is 41 characters and stays inline;
+// longer localized copy (e.g. French, 76 characters) stacks the prompt above the link.
+export const SUSI_BANNER_STACK_THRESHOLD = 50;
+
+export function decorateSusiBanner(footer) {
+  footer.classList.add('footer', 'susi-banner');
+  const { length } = footer.textContent.replace(/\s+/g, ' ').trim();
+  footer.classList.toggle('stacked', length > SUSI_BANNER_STACK_THRESHOLD);
+}
 
 const onRedirect = (e) => {
   // eslint-disable-next-line no-console
@@ -269,7 +280,7 @@ async function buildB2B(el, locale, imsClientId, noRedirect) {
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
   const footer = rows[3];
-  footer?.classList.add('footer', 'susi-banner');
+  if (footer) decorateSusiBanner(footer);
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
   const susiConfigs = {
@@ -300,7 +311,7 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
   const title = rows[2]?.textContent?.trim();
   const studentCheckText = rows[3]?.textContent?.trim();
   const footer = rows[4];
-  footer?.classList.add('footer', 'susi-banner');
+  if (footer) decorateSusiBanner(footer);
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
   if (checked) {
@@ -496,9 +507,8 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     susiScriptReady.then(() => susiWrapper.append(createSUSIComponent(option)));
 
     if (footer) {
-      footer.classList.add('footer');
       if (footer.querySelector('h2')) {
-        footer.classList.add('susi-bubbles');
+        footer.classList.add('footer', 'susi-bubbles');
         const bubbleContainer = createTag('div', { class: 'susi-bubble-container' });
         [...footer.querySelectorAll('p')].forEach((p) => {
           p.classList.add('susi-bubble');
@@ -506,7 +516,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
         });
         footer.append(bubbleContainer);
       } else {
-        footer.classList.add('susi-banner');
+        decorateSusiBanner(footer);
       }
       panel.append(footer);
     }
@@ -536,6 +546,48 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
   return layout;
 }
 
+/**
+ * Waits for `.modal-curtain` to satisfy `predicate`, then calls `callback`
+ * with it — immediately if already satisfied, otherwise via a one-shot
+ * MutationObserver. Shared by blurModalCurtain and the video autoplay retry,
+ * since both just need to react to the curtain's open state.
+ */
+function onModalCurtainMatch(predicate, callback) {
+  const curtain = document.querySelector('.modal-curtain');
+  if (curtain && predicate(curtain)) {
+    callback(curtain);
+    return;
+  }
+  const observer = new MutationObserver(() => {
+    const c = document.querySelector('.modal-curtain');
+    if (c && predicate(c)) {
+      callback(c);
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+}
+
+function playSusiVideoOnModalOpen(video) {
+  onModalCurtainMatch(
+    (curtain) => curtain.classList.contains('is-open'),
+    () => video.play().catch(() => { /* ignore — may still be blocked */ }),
+  );
+}
+
+function buildSusiMedia(row) {
+  const videoLink = row?.querySelector('a[href$=".mp4"]');
+  if (!videoLink) return null;
+  transformLinkToAnimation(videoLink);
+  const video = row.querySelector('video');
+  if (!video) return row;
+  video.classList.add('susi-image');
+  video.setAttribute('disablepictureinpicture', '');
+  video.play().catch(() => { /* ignore — autoplay may be blocked until visible */ });
+  playSusiVideoOnModalOpen(video);
+  return row;
+}
+
 async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const rows = el.querySelectorAll(':scope > div > div');
   const isColor = el.classList.contains('color');
@@ -552,6 +604,9 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
 
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
+  const mobileTitle = isColor ? rows[3]?.textContent?.trim() : undefined;
+  const isDesktopViewport = window.matchMedia('(min-width: 1200px)').matches;
+  const media = (isColor && isDesktopViewport) ? buildSusiMedia(rows[4]) : null;
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
@@ -589,36 +644,38 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
     ...params,
     onSuccessfulToken: () => window.location.assign(destURL.toString()),
   }));
-  const layout = createTag('div', { class: 'susi-layout' }, [createLogo(), titleDiv, susiWrapper]);
+  if (mobileTitle) {
+    titleDiv.classList.add('desktop-only');
+  }
+  const mobileTitleDiv = mobileTitle
+    ? createTag('div', { class: 'title mobile-only' }, mobileTitle)
+    : null;
+  if (media && isColor) {
+    el.classList.add('has-media');
+    const mediaPane = media;
+    mediaPane.classList.add('susi-media');
+    const formPaneChildren = [createLogo(), titleDiv];
+    if (mobileTitleDiv) {
+      formPaneChildren.push(mobileTitleDiv);
+    }
+    formPaneChildren.push(susiWrapper);
+    const formPane = createTag('div', { class: 'susi-form-pane' }, formPaneChildren);
+    return createTag('div', { class: 'susi-layout' }, [mediaPane, formPane]);
+  }
+  const layoutChildren = [createLogo(), titleDiv];
+  if (mobileTitleDiv) {
+    layoutChildren.push(mobileTitleDiv);
+  }
+  layoutChildren.push(susiWrapper);
+  const layout = createTag('div', { class: 'susi-layout' }, layoutChildren);
   return layout;
 }
 
 function blurModalCurtain() {
-  const updateBlurState = () => {
-    const modalCurtain = document.querySelector('.modal-curtain');
-    const dialogModal = document.querySelector('.dialog-modal');
-    if (modalCurtain && dialogModal) {
-      if (modalCurtain.classList.contains('is-open')) {
-        modalCurtain.classList.add('blurred');
-      } else if (!modalCurtain.classList.contains('is-open')) {
-        modalCurtain.classList.remove('blurred');
-      }
-    }
-  };
-
-  const modalCurtain = document.querySelector('.modal-curtain');
-  if (modalCurtain) {
-    updateBlurState();
-  } else {
-    const observer = new MutationObserver(() => {
-      const curtain = document.querySelector('.modal-curtain');
-      if (curtain) {
-        updateBlurState();
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
+  onModalCurtainMatch(() => true, (modalCurtain) => {
+    if (!document.querySelector('.dialog-modal')) return;
+    modalCurtain.classList.toggle('blurred', modalCurtain.classList.contains('is-open'));
+  });
 }
 
 export default async function init(el) {

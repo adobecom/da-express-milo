@@ -38,6 +38,7 @@ const TOOLBAR_I18N_MAP = {
   deleteTheme: 'color-toolbar-delete-theme',
   deleteThemeAria: 'color-toolbar-delete-theme-aria',
   saving: 'color-toolbar-saving',
+  downloadAsFormat: 'download-as-format',
 };
 
 const DRAWER_I18N_MAP = {
@@ -296,6 +297,7 @@ export async function initFloatingToolbar(container, options = {}) {
     i18n: { ...toolbarI18n, ...i18nOverrides },
     drawerI18n,
     onCTA,
+    inModal,
     onEditClick,
     showEditLabel,
     actionButtons,
