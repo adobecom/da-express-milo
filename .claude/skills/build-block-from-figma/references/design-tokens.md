@@ -101,31 +101,29 @@ normalization rules above.
 This is a required deliverable, folded into the Phase 9 summary. Its
 purpose is to make every non-obvious token decision auditable.
 
-Produce a table covering **every named Figma variable that did not resolve
-to an exact CSS custom property** and every hardcoded Figma value. Exact
-matches are the happy path and only need to be counted:
+Produce a table covering **only named Figma variables that did not resolve
+to an exact CSS custom property**. Exact matches are the happy path and
+only need to be counted. Hardcoded Figma values are used as-is and are not
+listed in this report:
 
 ```
 Figma variable            | Raw value | CSS property      | Resolution                              | Needs decision?
 ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
-Palette/gray-100              | #E9E9E9  | color             | exact match → --Palette-gray-100        | no
-(unnamed)                   | 6px      | border-radius     | hardcoded exact Figma value             | no
 Heading/size-display        | 64px     | font-size         | no match in either stylesheet           | YES — review missing variable
 ```
 
 Columns:
-- **Figma variable** — the name from `get_variable_defs`, or `(unnamed)` if
-  the layer used a raw value.
+- **Figma variable** — the name from `get_variable_defs`.
 - **Raw value** — from `get_design_context`.
 - **CSS property** — what you were styling.
-- **Resolution** — one of: `exact match → --token`, `hardcoded exact Figma
-  value`, `NEW TOKEN proposed: --token`, or `missing named variable`.
+- **Resolution** — `missing named variable` or
+  `NEW TOKEN proposed: --token`.
 - **Needs decision?** — `YES` for a missing named variable or proposed new
-  Express token; `no` for exact matches and hardcoded Figma values.
+  Express token.
 
 Anything marked `YES` must be raised with the user **before** it ships,
-since it either changes the global stylesheet or leaves a named design
-variable unresolved.
+since it leaves a named design variable unresolved or proposes a new
+global token.
 
 ---
 
@@ -172,23 +170,23 @@ Heading: `--heading-font-size-xxxl` (5rem) → `--heading-font-size-xs`
 `--ax-detail-weight` (700).
 
 ### Font family / weight
-`--body-font-family` (Adobe Clean — use for body **and** headings),
+`--body-font-family` (body text),
+`--heading-font-family` (heading text, with its configured fallback stack),
 `--body-serif-font-family`, `--heading-font-weight` (800),
 `--heading-font-weight-extra` (900), `--heading-font-weight-medium` (700),
 `--heading-font-weight-regular` (400), `--body-font-weight` (normal),
 `--subheading-font-weight` (700), `--font-weight-medium` (500).
 
-Headings have **no** dedicated font-family token — they use
-`--body-font-family` with a heavier `--heading-font-weight*`.
+Map S2A font-family variables to the Express variables that preserve the
+correct fonts and fallback stacks:
 
-> **Known exception — do not flag the font family.** Figma's design system
-> uses **Adobe Clean Spectrum VF** (the Spectrum 2 variable font), which has
-> no matching token; the codebase uses `--body-font-family` ('adobe-clean').
-> This is a **known, intentional** difference between design and dev that we
-> are not addressing yet. When Figma reports a Spectrum VF font family
-> (`Family/font-family-*`, `Font family/Sans serif`, etc.), silently map it
-> to `--body-font-family` and **omit it from the token-mapping report** — do
-> not raise it as a gap or a decision.
+| Figma variable | Express CSS variable |
+|---|---|
+| `--s2a-font-family-heading` | `--heading-font-family` |
+| `--s2a-font-family-body` | `--body-font-family` |
+
+Do not use the raw S2A font-family variable directly or map headings to
+`--body-font-family`.
 
 S2A custom properties use the `--s2a-*` prefix. Consult the external S2A
 stylesheet for their exact names and values; this inventory does not
@@ -225,6 +223,6 @@ breakpoint:
 - [ ] Every named variable resolved by exact name in Express `styles.css` or the external S2A stylesheet; unmatched names are flagged.
 - [ ] Hardcoded Figma values are used exactly, without substituting a same-valued variable.
 - [ ] Colours use the named Figma variable where available or the exact hardcoded Figma value.
-- [ ] Font families and weights use the exact named Express or S2A variable when Figma provides one; otherwise follow the documented hardcoded-value guidance and known font-family exception.
+- [ ] `--s2a-font-family-heading` maps to `--heading-font-family`, and `--s2a-font-family-body` maps to `--body-font-family`, preserving Express fallback fonts.
 - [ ] Any new `:root` token was confirmed with the user before commit and added at the bottom of `:root`.
-- [ ] Token-mapping report compiled for the Phase 9 summary, with every `YES`/`review` row called out.
+- [ ] Token-mapping report compiled for the Phase 9 summary, containing only named Figma variables not found in either stylesheet.

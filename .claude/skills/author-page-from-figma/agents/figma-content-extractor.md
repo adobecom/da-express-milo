@@ -26,9 +26,9 @@ Scan the design context for all text elements. For each, determine:
 1. **Content**: the visible text string.
 2. **Semantic structure**: use Figma's content hierarchy to distinguish
    headings, body text, eyebrows, and links/CTAs. Follow
-   `references/content-semantics.md` when choosing authored heading levels
-   or supported text-size variants. This skill authors DA content, not CSS;
-   leave typography styling and token selection to block development.
+   `references/content-semantics.md` when choosing authored heading levels.
+   Note observed body size for the block developer; do not add a body-size
+   class to the authored content.
 3. **Position**: vertical position within the frame determines order
    (top to bottom).
 
@@ -38,7 +38,8 @@ Classify each text element as:
   appearing above the heading.
 - **Heading**: largest bold text. Note the font size and map to a
   heading level using the content-semantics reference.
-- **Body**: medium text below the heading. Note font size for size class.
+- **Body**: text below the heading. Note its observed size for the block
+  developer's reference; body-size styling is not an authored content class.
 - **Link / CTA**: text inside button-shaped elements or underlined
   interactive text. Record display text and CTA style:
   - **Primary** (filled button) → `<strong><a>`
@@ -98,7 +99,7 @@ Heading:
 Body:
   text: "<text>"
   approx_font_size: <px>
-  inferred_size_class: <lg|md|sm>
+  observed_size: <approximate px size or design label>
 
 Links:
   count: <N>

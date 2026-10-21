@@ -39,8 +39,8 @@ Classify each text element as:
   `--s2a-typography-font-size-eyebrow`.
 - **Heading**: a title token or text style. Use the token-mapping reference
   to determine the heading level.
-- **Body**: a body token or text style. Record its size and check whether
-  the block supports the corresponding authored size variant.
+- **Body**: a body token or text style. Record its size for the block
+  developer; do not add a body-size class to the authored content.
 - **Link / CTA**: text inside button-shaped elements or underlined
   interactive text. Record display text and CTA style:
   - **Primary** (filled button) → `<strong><a>`
@@ -97,8 +97,7 @@ Body:
   text: "<text>"
   typography_token_or_style: "<source name, if available>"
   approx_font_size: <px>
-  inferred_size_class: <lg|md|sm|xs>
-  authored_size_variant: "<supported block variant, or none>"
+  inferred_body_size: <large|medium|small|extra-small, for developer handoff only>
 
 Links:
   count: <N>

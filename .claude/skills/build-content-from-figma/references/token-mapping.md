@@ -41,10 +41,10 @@ If these disagree, prefer the font-size token and flag the discrepancy.
 Recognizable text styles such as "Title 3", "Body MD", or "Eyebrow" provide
 the same classification when a direct token reference is unavailable.
 
-Only emit text-size variants the Express block supports. Express uses a
-single set of authored content, not viewport-specific rows. Record
-unsupported sizes as implementation notes instead of inventing an authored
-variant.
+Express does not define generic `body-lg`/`body-md`/`body-sm` authored
+class overrides. Record the body token/size as a handoff note for the
+block developer; do not add a body-size class to DA content. Express uses
+a single set of authored content, not viewport-specific rows.
 
 ---
 
@@ -61,22 +61,17 @@ to classify semantic heading levels, not to reproduce CSS styling:
 | Medium bold text, section title — typically 18–24px | `<h3>` |
 | Smaller bold text, sub-heading — typically 14–18px | `<h4>` |
 
-When in doubt, default to `<h2>` for hero/marquee blocks and `<h3>` for
-card/detail blocks. Document any fallback used.
+When Figma does not establish the heading level, default to `<h1>` for
+hero/marquee blocks, `<h3>` for card blocks, and `<h2>` for other blocks.
+Document any fallback used.
 
 ---
 
 ## Body size fallback
 
-| Font size (approx) | Class |
-|---|---|
-| 18px+ | `body-lg` |
-| 14–17px | `body-md` (default) |
-| 12–13px | `body-sm` |
-
-`body-md` is the default and needs no class override. Only emit `body-lg`
-or `body-sm` as a block variant when the design explicitly uses a
-non-default size.
+When a body token/style is unavailable, note the observed text size for
+the block developer. Author body text as paragraphs; do not add generic
+body-size classes to DA content.
 
 ---
 
@@ -106,8 +101,8 @@ Multiple CTAs in the same paragraph are space-separated inside a single `<p>`:
 
 | Visual cue | Classification |
 |---|---|
-| Largest, boldest text near top | Heading (`<h2>` default) |
-| Medium text below heading | Body (`body-md` default) |
+| Heading fallback by block type | Hero/marquee `<h1>`, card `<h3>`, other `<h2>` |
+| Text below heading | Body paragraph |
 | Small uppercase above heading | Eyebrow |
 | Text in filled/pill button | Primary CTA |
 | Text in outlined button | Secondary CTA |

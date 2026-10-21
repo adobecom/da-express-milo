@@ -139,14 +139,14 @@ Each extraction returns:
 - Icon (Figma asset URL + node ID + alt text, if present)
 - Eyebrow text (if present)
 - Heading text + level (h1–h4) + source typography token/style, if present
-- Body text + design size + supported authored size variant, if any,
-  with the source typography token/style when present
+- Body text + design size for the block developer's reference, with the
+  source typography token/style when present
 - Links (display text + CTA style: primary/secondary/plain)
 - Background (color string, or Figma asset URL + node ID if image)
 - Foreground image (Figma asset URL + node ID, if present)
 - Additional media (if present)
 - Fallback classifications (elements where heuristics were used)
-- Implementation notes (unsupported text sizes or conflicting classifications)
+- Implementation notes (body-size handoff details or conflicting classifications)
 
 ---
 

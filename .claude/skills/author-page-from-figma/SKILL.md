@@ -58,10 +58,8 @@ set, then pour the Figma content into it.
 >   URLs (dot-prefixed shadow folder convention).
 > - Link URLs use `https://www.adobe.com/` as a placeholder. Link
 >   display text must match Figma.
-> - Use Figma's content hierarchy to choose semantic headings and any
->   supported authored text-size variant. This skill authors DA content,
->   not CSS; leave typography styling and token selection to block
->   development.
+> - Use Figma's content hierarchy to choose semantic heading levels and
+>   author body text as paragraphs.
 
 ## Bundled resources
 
@@ -150,7 +148,7 @@ Each extraction returns:
 - Icon (Figma asset URL + node ID + alt text, if present)
 - Eyebrow text (if present)
 - Heading text + level (h1–h4)
-- Body text + size class (body-lg, body-md, body-sm)
+- Body text and observed size for the block developer's reference
 - Links (display text + CTA style: primary/secondary/plain)
 - Background (color string, or Figma asset URL + node ID if image)
 - Foreground image (Figma asset URL + node ID, if present)

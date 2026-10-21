@@ -287,7 +287,6 @@ Carry forward in particular:
 - Any named Figma variable that has no matching custom property in either
   source — raise it for user review rather than silently inventing a
   substitute or duplicating an S2A variable in Express.
-- Any value you had to **hardcode** (record the exact Figma value).
 
 ---
 
@@ -626,14 +625,12 @@ Output:
 3. **Breakpoints implemented** and which Figma frames they correspond to.
 4. **Token-mapping report** — the table defined in
    `references/design-tokens.md`. Note the count of exact-name matches,
-   then list every named Figma variable that had no exact CSS custom
-   property match and every hardcoded Figma value, with: Figma variable
-   name, raw value, CSS property, resolution, and whether the user needs
-   to decide anything.
-5. **New tokens & hardcoded values** — list any unmatched named Figma
-   variable that needs a token decision and any exact hardcoded Figma
-   values. Do not duplicate S2A variables in Express; get user confirmation
-   before adding a new Express `:root` token.
+   then list only named Figma variables that had no exact CSS custom
+   property match, with their raw value, CSS property, and whether a token
+   decision is needed.
+5. **New tokens** — list any unmatched named Figma variables and any
+   proposed Express `:root` token. Do not duplicate S2A variables in
+   Express; get user confirmation before adding a new Express token.
 6. **Acceptance criteria checklist** — confirm each criterion from
    Phase 4 passes (or note exceptions with reasoning).
 7. **Unit test results** — number of tests, pass/fail, any skipped.
