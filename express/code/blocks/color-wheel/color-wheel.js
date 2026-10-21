@@ -412,6 +412,7 @@ async function buildHarmonySelector(controller, strings = {}) {
         label: getHarmonyLabel(rule.value),
         description: getHarmonyDescription(rule.value),
         imageSrc: `${HARMONY_THUMB_BASE}/${rule.thumb}`,
+        summaryImageSrc: `${HARMONY_THUMB_BASE}/summary/${rule.thumb}`,
       }));
     const rules = withHarmonyPreviewColors(ColorThemeExpressController, initialState, modalRules);
     const contentView = contentModule.default({

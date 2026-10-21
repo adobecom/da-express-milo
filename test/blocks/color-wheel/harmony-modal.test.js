@@ -9,6 +9,7 @@ const RULES = [
     label: 'Custom',
     description: 'Random colors.',
     imageSrc: '/express/code/blocks/color-wheel/harmony-thumbnails/custom.png',
+    summaryImageSrc: '/express/code/blocks/color-wheel/harmony-thumbnails/summary/custom.png',
     previewColors: ['#1900AB', '#6BB1FF', '#FF7500', '#FFFDEB', '#0076FF'],
   },
   {
@@ -16,6 +17,7 @@ const RULES = [
     label: 'Analogous',
     description: 'Neighboring colors.',
     imageSrc: '/express/code/blocks/color-wheel/harmony-thumbnails/analogous.png',
+    summaryImageSrc: '/express/code/blocks/color-wheel/harmony-thumbnails/summary/analogous.png',
     previewColors: ['#1900AB', '#DB8B69', '#FFA000', '#FF1F02', '#FFBE00'],
   },
   {
@@ -23,6 +25,7 @@ const RULES = [
     label: 'Triad',
     description: 'Evenly spaced colors.',
     imageSrc: '/express/code/blocks/color-wheel/harmony-thumbnails/triad.png',
+    summaryImageSrc: '/express/code/blocks/color-wheel/harmony-thumbnails/summary/triad.png',
     previewColors: ['#1900AB', '#3C00FF', '#00FF0E', '#AA6E39', '#4F4080'],
   },
 ];
@@ -81,6 +84,7 @@ describe('color harmony modal content', () => {
     expect(footerContent.contains(view.element.querySelector('.color-harmony-modal-summary'))).to.equal(true);
     expect(footerContent.contains(view.element.querySelector('.color-harmony-modal-confirm'))).to.equal(true);
     expect(view.element.querySelector('.color-harmony-modal-confirm').textContent).to.equal('Apply harmony');
+    expect(view.element.querySelector('.color-harmony-modal-summary-image').src).to.contain('/harmony-thumbnails/summary/analogous.png');
   });
 
   it('previews a card selection and applies it only on confirmation', () => {

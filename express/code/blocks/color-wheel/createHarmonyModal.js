@@ -71,7 +71,7 @@ function createHarmonyModalContent({
 
   function updateSummary(rule) {
     if (!rule) return;
-    summaryImage.src = rule.imageSrc;
+    summaryImage.src = rule.summaryImageSrc || rule.imageSrc;
     summaryName.textContent = rule.label;
   }
 
