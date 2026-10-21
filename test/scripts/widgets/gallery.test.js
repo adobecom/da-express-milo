@@ -16,7 +16,7 @@ describe('shared gallery direction', () => {
       const root = document.createElement('div');
       root.dir = direction;
       const container = document.createElement('div');
-      container.style.cssText = 'width: 300px; height: 100px; padding: 0; gap: 0;';
+      container.style.cssText = 'display: flex; flex-wrap: nowrap; overflow-x: auto; width: 300px; height: 100px; padding: 0; gap: 0;';
       const items = Array.from({ length: 5 }, () => {
         const item = document.createElement('div');
         item.style.cssText = 'flex: 0 0 200px; height: 100px;';
