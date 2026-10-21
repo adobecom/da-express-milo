@@ -887,6 +887,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   text-align: start;
 }
 
+/* Milo sets word-break: keep-all on :root:lang(ko), so spaceless Korean copy cannot wrap. */
+:lang(ko) .ax-columns.color :is(h2, p) {
+  overflow-wrap: anywhere;
+}
+
 .ax-columns.color h2 {
   font-size: var(--heading-font-size-l);
 }
