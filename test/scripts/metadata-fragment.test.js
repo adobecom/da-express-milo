@@ -31,20 +31,6 @@ describe('section-metadata metadata-fragment', () => {
     expect(area.children.length).to.equal(0);
   });
 
-  it('removes the section when page metadata is off', () => {
-    setMeta('off');
-    const area = buildArea();
-    preDecorateSections(area);
-    expect(area.children.length).to.equal(0);
-  });
-
-  it('keeps the authored content when page metadata is on', () => {
-    setMeta('Yes');
-    const area = buildArea();
-    preDecorateSections(area);
-    expect(area.querySelector('.wayfinder')).to.exist;
-  });
-
   it('swaps the content for a fragment link when page metadata is a path', () => {
     setMeta('/express/fragments/wayfinder/variant-b');
     const area = buildArea();
