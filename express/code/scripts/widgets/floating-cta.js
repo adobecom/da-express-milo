@@ -320,9 +320,9 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   const floatButtonInnerWrapper = createTag('div', { class: 'floating-button-inner-wrapper' });
 
   // Keep the CTA hidden before insertion so it cannot animate from a visible state.
-  // Extract pages use the upload marquee as the reveal threshold.
+  // Blocks opt in as the reveal threshold via the data-floating-cta-reveal-after attribute.
   const delayUntilViewportPassed = data.delayUntilViewportPassed
-    || document.querySelector('.color-extract-marquee-wrapper, .color-extract');
+    || document.querySelector('[data-floating-cta-reveal-after]');
   const miniEditor = document.querySelector('.mini-editor');
   const shouldDelayFloatingCta = audience === 'mobile' || !!delayUntilViewportPassed;
   if (audience === 'mobile' && data.enableSuppressGating

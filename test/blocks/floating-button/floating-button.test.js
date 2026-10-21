@@ -90,14 +90,14 @@ describe('Floating Button', () => {
     }
   });
 
-  it('suppresses the floating CTA on extract pages until the upload marquee passes', async () => {
+  it('suppresses the floating CTA until an opted-in reveal threshold passes', async () => {
     document.body.innerHTML = `<main>
-      <div class="color-extract-marquee-wrapper"></div>
+      <div class="section" data-floating-cta-reveal-after></div>
       <div class="section">
         <div class="floating-button meta-powered"><div>desktop</div></div>
       </div>
     </main>`;
-    const uploadMarquee = document.querySelector('.color-extract-marquee-wrapper');
+    const uploadMarquee = document.querySelector('[data-floating-cta-reveal-after]');
     uploadMarquee.getBoundingClientRect = () => ({ bottom: 500 });
     const main = document.querySelector('main');
     const append = main.append.bind(main);
