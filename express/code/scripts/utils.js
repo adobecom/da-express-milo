@@ -851,7 +851,7 @@ export function decorateArea(area = document) {
 
   cleanupBrackets(area);
   splitSections(area, selector);
-  area.querySelectorAll('a[href^="https://spark.adobe.com/"]').forEach((a) => { a.href = 'https://new.express.adobe.com'; });
+  area.querySelectorAll('a[href^="https://spark.adobe.com/"]').forEach((a) => { a.href = 'https://express.adobe.com'; });
 
   fragmentBlocksToLinks(area);
   renameConflictingBlocks(area, selector);
