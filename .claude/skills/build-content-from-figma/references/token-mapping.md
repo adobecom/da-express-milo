@@ -25,16 +25,18 @@ numeric value.
 
 | Figma token | Authored classification |
 |---|---|
-| `--s2a-typography-font-size-title-1` | Heading `<h1>` |
-| `--s2a-typography-font-size-title-2` | Heading `<h2>` |
-| `--s2a-typography-font-size-title-3` | Heading `<h3>` |
-| `--s2a-typography-font-size-title-4` | Heading `<h4>` |
+| `--s2a-typography-font-size-heading-1` | Heading `<h1>` |
+| `--s2a-typography-font-size-heading-2` | Heading `<h2>` |
+| `--s2a-typography-font-size-heading-3` | Heading `<h3>` |
+| `--s2a-typography-font-size-heading-4` | Heading `<h4>` |
+| `--s2a-typography-font-size-heading-5` | Heading `<h5>` |
+| `--s2a-typography-font-size-heading-6` | Heading `<h6>` |
 | `--s2a-typography-font-size-eyebrow` | Eyebrow `<p>` above the heading |
 
 Matching `--s2a-typography-line-height-*`, `--s2a-typography-letter-spacing-*`,
 and `--s2a-typography-font-weight-*` tokens corroborate the classification.
 If these disagree, prefer the font-size token and flag the discrepancy.
-Recognizable text styles such as "Title 3", "Body", or "Eyebrow" provide
+Recognizable text styles such as "Heading 3", "Body", or "Eyebrow" provide
 the same classification when a direct token reference is unavailable.
 
 Express uses a single set of authored content, not viewport-specific rows.

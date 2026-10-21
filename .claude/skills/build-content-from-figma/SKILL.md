@@ -138,7 +138,7 @@ and follow its procedure.
 Each extraction returns:
 - Icon (Figma asset URL + node ID + alt text, if present)
 - Eyebrow text (if present)
-- Heading text + level (h1–h4) + source typography token/style, if present
+- Heading text + level (h1–h6) + source typography token/style, if present
 - Body text
 - Links (display text + CTA style: primary/secondary/plain)
 - Background (color string, or Figma asset URL + node ID if image)

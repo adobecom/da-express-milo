@@ -37,7 +37,7 @@ Classify each text element as:
 
 - **Eyebrow**: an eyebrow token or text style, such as
   `--s2a-typography-font-size-eyebrow`.
-- **Heading**: a title token or text style. Use the token-mapping reference
+- **Heading**: a heading token or text style. Use the token-mapping reference
   to determine the heading level.
 - **Body**: a body token or text style, authored as paragraphs.
 - **Link / CTA**: text inside button-shaped elements or underlined
@@ -89,7 +89,7 @@ Heading:
   typography_token_or_style: "<source name, if available>"
   approx_font_size: <px>
   weight: bold/regular
-  inferred_level: <1-4>
+  inferred_level: <1-6>
   has_bold_formatting: true/false
 
 Body:
