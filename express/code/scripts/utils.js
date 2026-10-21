@@ -492,6 +492,33 @@ export function preDecorateSections(area) {
         if (['fqa-off', 'fqa-on', 'fqa-non-qualified', 'fqa-qualified-mobile', 'fqa-qualified-desktop', 'fqa-qualified-ios', 'fqa-qualified-android'].includes(showwith)) hideQuickActionsOnDevices(navigator.userAgent);
         sectionRemove = showWithSearchParam !== null ? showWithSearchParam !== 'on' : getMetadata(showwith) !== 'on';
       }
+      // section toggled or swapped for a fragment via page metadata, e.g.
+      // `metadata-fragment: wayfinder-promo` → page metadata value of
+      // empty/off removes the section, yes/on keeps the authored content,
+      // and a path replaces the content with that fragment.
+      const fragmentKey = sectionMeta['metadata-fragment']?.trim().toLowerCase();
+      if (!sectionRemove && fragmentKey) {
+        const value = getMetadata(fragmentKey)?.trim();
+        if (!value || ['no', 'n', 'off', 'false'].includes(value.toLowerCase())) {
+          sectionRemove = true;
+        } else if (!['yes', 'y', 'on', 'true'].includes(value.toLowerCase())) {
+          let href = null;
+          try {
+            href = new URL(value, window.location.origin).href;
+          } catch (error) {
+            window.lana?.log(`metadata-fragment: invalid path "${value}"`, { tags: 'utils', severity: 'error' });
+          }
+          if (href) {
+            const link = createTag('a', { href }, href);
+            [...section.children].forEach((child) => {
+              if (child !== sectionMetaBlock) child.remove();
+            });
+            sectionMetaBlock.before(createTag('p', {}, link));
+          } else {
+            sectionRemove = true;
+          }
+        }
+      }
       if (sectionRemove) section.remove();
       else if (sectionMeta.anchor) section.id = sectionMeta.anchor;
       else if (sectionMeta.padding) section.setAttribute('data-padding', 'none');
