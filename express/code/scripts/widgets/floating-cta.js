@@ -7,7 +7,11 @@ const ACCESSIBILITY_HIDDEN_CLASSES = [
   'floating-button--suppressed',
   'floating-button--hero-suppressed',
   'floating-button--mini-editor-suppressed',
+  'floating-button--short-viewport-suppressed',
 ];
+
+// WCAG 1.4.10 Reflow: 256 CSS px tall is the floor; leave headroom for the taller C2 nav.
+export const SHORT_VIEWPORT_QUERY = '(max-height: 480px)';
 
 const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]';
 const legacyTabIndexes = new WeakMap();
@@ -63,6 +67,20 @@ export function syncFloatingCtaAccessibility(floatButtonWrapper) {
     floatButtonWrapper.removeAttribute('inert');
     restoreLegacyFocusableElements(floatButtonWrapper);
   }
+}
+
+export function initShortViewportSuppression(floatButtonWrapper, sameCtas = []) {
+  if (!window.matchMedia) return null;
+  const mql = window.matchMedia(SHORT_VIEWPORT_QUERY);
+  const update = () => {
+    const suppress = mql.matches && document.body.dataset.device === 'desktop';
+    floatButtonWrapper.classList.toggle('floating-button--short-viewport-suppressed', suppress);
+    sameCtas.forEach((cta) => cta.classList.toggle('same-fcta', !suppress));
+    syncFloatingCtaAccessibility(floatButtonWrapper);
+  };
+  mql.addEventListener('change', update);
+  update();
+  return mql;
 }
 
 export const hideScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
@@ -530,6 +548,7 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   }
 
   decorateLinks(floatButtonWrapper);
+  initShortViewportSuppression(floatButtonWrapper, sameUrlCTAs);
   return floatButtonWrapper;
 }
 
