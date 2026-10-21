@@ -92,4 +92,39 @@ describe('Playlist', () => {
     expect(videoPlayer.querySelector('source')?.src === currentVideo).to.be.false;
     expect(block.querySelectorAll('.session')?.[4].classList.contains('active')).to.be.true;
   });
+
+  it('marks the player icons as decorative', async () => {
+    const block = document.querySelector('.playlist');
+    await decorate(block);
+
+    const icons = block.querySelectorAll('.video-player-inline-player-play-icon, .video-player-button-previous-img');
+    expect(icons.length).to.equal(2);
+    icons.forEach((icon) => expect(icon.getAttribute('alt')).to.equal(''));
+  });
+
+  it('names the previous control after its target clip, including session boundaries', async () => {
+    const block = document.querySelector('.playlist');
+    const titles = [...block.children]
+      .map((row) => row.querySelector('a')?.textContent.trim())
+      .filter(Boolean);
+    await decorate(block);
+
+    const previous = block.querySelector('.video-player-button-previous');
+    const next = block.querySelector('.video-player-button-next');
+    const initialTitle = block.querySelector('.video-player-video-title').textContent;
+    expect(previous.getAttribute('aria-label')).to.equal(titles[titles.indexOf(initialTitle) - 1]);
+
+    next.click();
+    expect(previous.getAttribute('aria-label')).to.equal(initialTitle);
+    previous.click();
+    previous.click();
+    expect(block.querySelector('.video-player-video-title').textContent)
+      .to.equal(titles[titles.indexOf(initialTitle) - 1]);
+
+    block.querySelector('.session').click();
+    expect(previous.getAttribute('aria-label')).to.equal(titles[titles.length - 1]);
+    previous.click();
+    expect(block.querySelector('.video-player-video-title').textContent)
+      .to.equal(titles[titles.length - 1]);
+  });
 });
