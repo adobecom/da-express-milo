@@ -71,7 +71,7 @@ read when it becomes relevant.
 |------|---------|
 | `block-name-matching.md` | Fuzzy-matches a Figma frame/component name to a real block folder in `express/code/blocks/`. |
 | `variant-matching.md` | How to match a Figma frame's visual style against a block's known variant registry without inventing class names. |
-| `content-semantics.md` | Guidance for classifying Figma text elements into authored headings, body sizes, eyebrows, and CTA styles. |
+| `content-semantics.md` | Guidance for classifying Figma text elements into authored headings, body text, eyebrows, and CTA styles. |
 | `placeholder-detection.md` | Detects text this block sources from `/express/placeholders.json` instead of authored DOM content, so it isn't mistakenly re-authored. |
 | `metadata-conventions.md` | Distinguishes page-wide `metadata` from per-section `section-metadata`, and documents the `style` key's spacing/comma-delimited conventions. |
 
@@ -148,7 +148,7 @@ Each extraction returns:
 - Icon (Figma asset URL + node ID + alt text, if present)
 - Eyebrow text (if present)
 - Heading text + level (h1–h4)
-- Body text and observed size for the block developer's reference
+- Body text
 - Links (display text + CTA style: primary/secondary/plain)
 - Background (color string, or Figma asset URL + node ID if image)
 - Foreground image (Figma asset URL + node ID, if present)
@@ -521,7 +521,7 @@ Upload complete. Delete /tmp/da-upload/ and /tmp/figma-media/ ? (y/n)
    — and confidence level. If code inference was used, call this out
    prominently as needing extra scrutiny.
 3. **Confirmed variants**, and any candidates considered but ruled out.
-4. **Content structure**: icon, eyebrow, heading level, body size,
+4. **Content structure**: icon, eyebrow, heading level, body text,
    link count.
 5. **Responsive notes**: what differs across viewports (for CSS
    implementation).

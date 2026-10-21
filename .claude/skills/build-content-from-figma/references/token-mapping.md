@@ -1,7 +1,7 @@
 # Token Mapping Reference
 
 Map Figma typography tokens and text styles to DA-authored headings, body
-size variants, and eyebrows. Tokens are classification evidence, not CSS
+text, and eyebrows. Tokens are classification evidence, not CSS
 to add to the authored HTML.
 
 ## Detect typography tokens and styles
@@ -29,22 +29,15 @@ numeric value.
 | `--s2a-typography-font-size-title-2` | Heading `<h2>` |
 | `--s2a-typography-font-size-title-3` | Heading `<h3>` |
 | `--s2a-typography-font-size-title-4` | Heading `<h4>` |
-| `--s2a-typography-font-size-body-lg` | Body, large |
-| `--s2a-typography-font-size-body-md` | Body, medium (default) |
-| `--s2a-typography-font-size-body-sm` | Body, small |
-| `--s2a-typography-font-size-body-xs` | Body, extra-small; record for the block developer if unsupported |
 | `--s2a-typography-font-size-eyebrow` | Eyebrow `<p>` above the heading |
 
 Matching `--s2a-typography-line-height-*`, `--s2a-typography-letter-spacing-*`,
 and `--s2a-typography-font-weight-*` tokens corroborate the classification.
 If these disagree, prefer the font-size token and flag the discrepancy.
-Recognizable text styles such as "Title 3", "Body MD", or "Eyebrow" provide
+Recognizable text styles such as "Title 3", "Body", or "Eyebrow" provide
 the same classification when a direct token reference is unavailable.
 
-Express does not define generic `body-lg`/`body-md`/`body-sm` authored
-class overrides. Record the body token/size as a handoff note for the
-block developer; do not add a body-size class to DA content. Express uses
-a single set of authored content, not viewport-specific rows.
+Express uses a single set of authored content, not viewport-specific rows.
 
 ---
 
@@ -67,11 +60,9 @@ Document any fallback used.
 
 ---
 
-## Body size fallback
+## Body text
 
-When a body token/style is unavailable, note the observed text size for
-the block developer. Author body text as paragraphs; do not add generic
-body-size classes to DA content.
+Author body text as paragraphs.
 
 ---
 

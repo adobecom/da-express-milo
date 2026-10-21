@@ -34,7 +34,7 @@ Authoring) for publishing via Adobe EDS.
 > - Link URLs use `https://www.adobe.com/` as a placeholder.
 >   Link display text must match Figma.
 > - Use Figma typography tokens and text-style names to classify headings,
->   body sizes, and eyebrows. Support both SOT and S2A designs; use visual
+>   body text, and eyebrows. Support both SOT and S2A designs; use visual
 >   heuristics only when the design provides no usable classification.
 
 ## Bundled resources
@@ -46,7 +46,7 @@ read when it becomes relevant.
 | File | Purpose |
 |------|---------|
 | `authoring-pattern.md` | HTML structure for DA block authoring: document skeleton, content rows, media placement, complete examples. |
-| `token-mapping.md` | Maps Figma typography tokens and text styles to authored headings, body sizes, and eyebrows, with visual fallbacks for SOT and S2A designs. |
+| `token-mapping.md` | Maps Figma typography tokens and text styles to authored headings, body text, and eyebrows, with visual fallbacks for SOT and S2A designs. |
 
 ### agents/
 | File | Purpose |
@@ -139,14 +139,13 @@ Each extraction returns:
 - Icon (Figma asset URL + node ID + alt text, if present)
 - Eyebrow text (if present)
 - Heading text + level (h1–h4) + source typography token/style, if present
-- Body text + design size for the block developer's reference, with the
-  source typography token/style when present
+- Body text
 - Links (display text + CTA style: primary/secondary/plain)
 - Background (color string, or Figma asset URL + node ID if image)
 - Foreground image (Figma asset URL + node ID, if present)
 - Additional media (if present)
 - Fallback classifications (elements where heuristics were used)
-- Implementation notes (body-size handoff details or conflicting classifications)
+- Implementation notes (conflicting classifications)
 
 ---
 
@@ -450,7 +449,7 @@ Upload complete. Delete /tmp/da-upload/ and /tmp/figma-media/ ? (y/n)
 ## Phase 9 — Summary
 
 1. **Block name** and DA file path.
-2. **Content structure**: icon, eyebrow, heading level, body size, link count.
+2. **Content structure**: icon, eyebrow, heading level, body text, link count.
 3. **Responsive notes**: what differs across viewports (for CSS implementation).
 4. **Placeholder links**: remind the user to replace `https://www.adobe.com/` URLs.
 5. **Fallback classifications**: elements where visual heuristics were used.

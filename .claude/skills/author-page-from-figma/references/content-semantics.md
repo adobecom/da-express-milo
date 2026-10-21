@@ -25,10 +25,7 @@ Document any fallback used.
 
 ## Body text
 
-Author body copy as paragraphs; Express does not define generic
-`body-lg`/`body-md`/`body-sm` authored class overrides. Note the observed
-size for the block developer's reference, but do not add a size class to
-the DA content.
+Author body copy as paragraphs.
 
 ---
 

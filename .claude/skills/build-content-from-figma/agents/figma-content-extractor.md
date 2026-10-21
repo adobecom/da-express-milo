@@ -27,7 +27,7 @@ Scan the design context for all text elements. For each, determine:
 2. **Typography token or text style**: inspect the design context for
    bound SOT or S2A typography variables, CSS variable references, and
    text-style names. Follow `references/token-mapping.md` to classify
-   headings, body sizes, and eyebrows. If the context omits variable names,
+   headings, body text, and eyebrows. If the context omits variable names,
    use Figma MCP `get_variable_defs` when available. Record the source
    token/style alongside the classification.
 3. **Position**: vertical position within the frame determines order
@@ -39,8 +39,7 @@ Classify each text element as:
   `--s2a-typography-font-size-eyebrow`.
 - **Heading**: a title token or text style. Use the token-mapping reference
   to determine the heading level.
-- **Body**: a body token or text style. Record its size for the block
-  developer; do not add a body-size class to the authored content.
+- **Body**: a body token or text style, authored as paragraphs.
 - **Link / CTA**: text inside button-shaped elements or underlined
   interactive text. Record display text and CTA style:
   - **Primary** (filled button) → `<strong><a>`
@@ -95,9 +94,6 @@ Heading:
 
 Body:
   text: "<text>"
-  typography_token_or_style: "<source name, if available>"
-  approx_font_size: <px>
-  inferred_body_size: <large|medium|small|extra-small, for developer handoff only>
 
 Links:
   count: <N>
@@ -124,7 +120,7 @@ Fallback_classifications:
   - "<element>: <reason heuristic was used>"
 
 Implementation_notes:
-  - "<unsupported text size or conflicting token/style classification>"
+  - "<conflicting token/style classification>"
 ```
 
 ---
