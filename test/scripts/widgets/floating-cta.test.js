@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import {
   delayFloatingCtaUntilMiniEditorPassed,
   delayFloatingCtaUntilViewportPassed,
+  initShortViewportInline,
   syncFloatingCtaAccessibility,
 } from '../../../express/code/scripts/widgets/floating-cta.js';
 
@@ -230,5 +231,76 @@ describe('Floating CTA hero delay', () => {
     delayFloatingCtaUntilViewportPassed(wrapper, button, null, () => {});
 
     expect(wrapper.classList.contains('floating-button--hero-suppressed')).to.be.false;
+  });
+});
+
+describe('Floating CTA short viewport suppression', () => {
+  let listeners;
+  let matches;
+  let wrapper;
+  let inlineCta;
+  let main;
+
+  beforeEach(() => {
+    listeners = [];
+    matches = false;
+    sinon.stub(window, 'matchMedia').callsFake(() => ({
+      get matches() { return matches; },
+      addEventListener: (_, cb) => listeners.push(cb),
+    }));
+    document.body.dataset.device = 'desktop';
+    main = document.createElement('main');
+    document.body.append(main);
+    wrapper = document.createElement('div');
+    wrapper.innerHTML = '<a href="/x">Go</a>';
+    inlineCta = document.createElement('a');
+    inlineCta.className = 'same-fcta';
+    main.append(wrapper, document.createElement('div'));
+  });
+
+  afterEach(() => {
+    window.matchMedia.restore();
+    main.remove();
+    delete document.body.dataset.device;
+  });
+
+  const setMatches = (value) => {
+    matches = value;
+    listeners.forEach((cb) => cb());
+  };
+
+  it('renders inline above the footer and restores same-fcta on short viewports', () => {
+    initShortViewportInline(wrapper, [inlineCta]);
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.false;
+    expect(inlineCta.classList.contains('same-fcta')).to.be.true;
+
+    setMatches(true);
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.true;
+    expect(wrapper.hasAttribute('inert')).to.be.false;
+    expect(wrapper.getAttribute('aria-hidden')).to.be.null;
+    expect(document.querySelector('main').lastElementChild).to.equal(wrapper);
+    expect(inlineCta.classList.contains('same-fcta')).to.be.false;
+
+    setMatches(false);
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.false;
+    expect(wrapper.hasAttribute('inert')).to.be.false;
+    expect(inlineCta.classList.contains('same-fcta')).to.be.true;
+  });
+
+  it('applies on initial short load and keeps other suppression intact', () => {
+    matches = true;
+    wrapper.classList.add('floating-button--hidden');
+    initShortViewportInline(wrapper, [inlineCta]);
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.true;
+    expect(wrapper.hasAttribute('inert')).to.be.false;
+    setMatches(false);
+    expect(wrapper.hasAttribute('inert')).to.be.true;
+  });
+
+  it('does nothing on non-desktop devices', () => {
+    document.body.dataset.device = 'mobile';
+    matches = true;
+    initShortViewportInline(wrapper, [inlineCta]);
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.false;
   });
 });
