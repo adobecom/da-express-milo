@@ -187,6 +187,7 @@ async function loadPlaceholders() {
       SHADES: v(38, 'Uses lighter and darker variations of one hue for a cohesive palette.'),
       MONOCHROMATIC: v(39, 'Uses one hue in varying tones for a cohesive look.'),
     },
+    newRandomPaletteGenerated: v(28, 'New random palette generated'),
     baseColorStrings,
     colorEditStrings,
     imageUploadStrings,
@@ -253,6 +254,7 @@ async function buildDefaultActionMenuConfig(strings) {
     id: ACTION_MENU_ID,
     activeId: 'palette',
     daaLh: 'color-wheel',
+    randomPaletteAnnouncement: strings.newRandomPaletteGenerated,
     navLinks: [
       { id: 'palette', label: strings.createPalette, href: `${locale.contentRoot}/create/color-wheel` },
       { id: 'contrast', label: strings.contrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
