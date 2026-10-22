@@ -356,6 +356,13 @@ export function getIconElementDeprecated(icons, size, alt, additionalClassName, 
   return icon;
 }
 
+export function getBrandingLogoElement(name, size, alt, additionalClassName) {
+  const isRTL = getComputedStyle(document.documentElement).direction === 'rtl';
+  const brandingName = name ?? 'adobe-express-logo';
+  const logoName = brandingName === 'adobe-express-logo' && isRTL ? 'adobe-express-logo-rtl' : brandingName;
+  return getIconElementDeprecated(logoName, size, alt, additionalClassName);
+}
+
 export async function fixIcons(el = document) {
   /* backwards compatible icon handling, deprecated */
   el.querySelectorAll('svg use[href^="./_icons_"]').forEach(($use) => {

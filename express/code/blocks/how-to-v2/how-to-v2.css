@@ -55,6 +55,7 @@ main .section:not([data-padding='none']):has(.how-to-v2.no-background-image) > .
 .how-to-v2 ol li .step-content {
   padding: var(--spacing-100) 26px;
   margin: 0;
+  text-align: start;
 }
 
 .how-to-v2 ol li .step-content:has(.milo-video) {
@@ -66,7 +67,7 @@ main .section:not([data-padding='none']):has(.how-to-v2.no-background-image) > .
 }
 
 .how-to-v2 ol li h3 {
-  text-align: left;
+  text-align: start;
   font-size: var(--body-font-size-l);
   line-height: 130%;
   font-weight: var(--subheading-font-weight);
@@ -323,7 +324,7 @@ main:has(.how-to-v2.no-background-image) .content {
   }
 
   .how-to-v2 .steps-content .steps {
-    padding-left: var(--spacing-400);
+    padding-inline-start: var(--spacing-400);
   }
 
   .how-to-v2 .steps-content .media-container::before {
