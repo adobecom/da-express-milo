@@ -18,7 +18,8 @@ permissions:
 jobs:
   run-nala-tests:
     name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
-    runs-on: ubuntu-latest
+    # Playwright 1.52 supports Ubuntu 24.04, not 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       # Don't cancel the other lanes when one fails — we want the full picture.
