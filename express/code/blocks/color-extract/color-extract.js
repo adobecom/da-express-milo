@@ -1356,8 +1356,6 @@ export default async function decorate(block) {
   const contentRows = getContentRows(rows);
 
   block.classList.add(CSS_CLASSES.BLOCK);
-  // Hold the floating CTA until the upload hero section scrolls past.
-  (block.closest('.section') || block).dataset.floatingCtaRevealAfter = '';
 
   const inferredVariant = block.classList.contains(VARIANTS.GRADIENT)
     ? VARIANTS.GRADIENT

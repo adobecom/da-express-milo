@@ -9,6 +9,16 @@ const ACCESSIBILITY_HIDDEN_CLASSES = [
   'floating-button--mini-editor-suppressed',
 ];
 
+// Blocks whose section holds the floating CTA back until it has scrolled past.
+// Matched by authored block class, so it doesn't depend on block decoration order.
+const REVEAL_AFTER_BLOCKS = ['color-extract'];
+const REVEAL_AFTER_SELECTOR = REVEAL_AFTER_BLOCKS.map((name) => `.${name}`).join(', ');
+
+function getRevealAfterTarget() {
+  const block = document.querySelector(REVEAL_AFTER_SELECTOR);
+  return block?.closest('.section') || block;
+}
+
 const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]';
 const legacyTabIndexes = new WeakMap();
 
@@ -320,9 +330,7 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   const floatButtonInnerWrapper = createTag('div', { class: 'floating-button-inner-wrapper' });
 
   // Keep the CTA hidden before insertion so it cannot animate from a visible state.
-  // Blocks opt in as the reveal threshold via the data-floating-cta-reveal-after attribute.
-  const delayUntilViewportPassed = data.delayUntilViewportPassed
-    || document.querySelector('[data-floating-cta-reveal-after]');
+  const delayUntilViewportPassed = data.delayUntilViewportPassed || getRevealAfterTarget();
   const miniEditor = document.querySelector('.mini-editor');
   const shouldDelayFloatingCta = audience === 'mobile' || !!delayUntilViewportPassed;
   if (audience === 'mobile' && data.enableSuppressGating

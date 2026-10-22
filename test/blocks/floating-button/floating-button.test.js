@@ -90,15 +90,15 @@ describe('Floating Button', () => {
     }
   });
 
-  it('suppresses the floating CTA until an opted-in reveal threshold passes', async () => {
+  it('suppresses the floating CTA until a listed reveal-after block section passes', async () => {
     document.body.innerHTML = `<main>
-      <div class="section" data-floating-cta-reveal-after></div>
+      <div class="section"><div class="color-extract"></div></div>
       <div class="section">
         <div class="floating-button meta-powered"><div>desktop</div></div>
       </div>
     </main>`;
-    const uploadMarquee = document.querySelector('[data-floating-cta-reveal-after]');
-    uploadMarquee.getBoundingClientRect = () => ({ bottom: 500 });
+    const uploadSection = document.querySelector('.color-extract').closest('.section');
+    uploadSection.getBoundingClientRect = () => ({ bottom: 500 });
     const main = document.querySelector('main');
     const append = main.append.bind(main);
     let suppressedWhenInserted = false;
