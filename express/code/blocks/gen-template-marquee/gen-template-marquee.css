@@ -97,10 +97,15 @@ main .section .gen-template-text > p {
   transition: box-shadow 0.2s ease;
 }
 
-/* Figma states: hover and active (prompt has text) lift the box; focus on an empty prompt rings the field. */
+/* Figma states: hover and active (prompt has text) lift the box; active also darkens the stroke.
+   Focus on an empty prompt rings the field. */
 .gen-template-prompt-form:hover,
 .gen-template-prompt-form:has(.gen-template-prompt-input:not(:placeholder-shown)) {
   box-shadow: var(--gen-template-prompt-shadow);
+}
+
+.gen-template-prompt-form:has(.gen-template-prompt-input:not(:placeholder-shown)) {
+  border-color: #131313;
 }
 
 .gen-template-prompt-field:has(.gen-template-prompt-input:focus-visible:placeholder-shown) {
@@ -125,10 +130,13 @@ main .section .gen-template-text > p {
   line-height: var(--spacing-325);
 }
 
+/* Grows with its content (see resizePrompt) up to 3 lines, then scrolls. */
 .gen-template-prompt-input {
   box-sizing: border-box;
   width: 100%;
   min-height: 36px;
+  max-height: calc(3 * var(--spacing-325));
+  overflow-y: auto;
   margin: 0;
   padding: 0;
   resize: none;
@@ -219,10 +227,13 @@ main .section .gen-template-suggestions-label {
   text-align: center;
 }
 
+/* Trailing padding lets the last chip scroll clear of the fade overlay. */
 .gen-template-suggestion-list {
   display: flex;
   gap: var(--spacing-200);
+  box-sizing: border-box;
   width: 100%;
+  padding-inline-end: var(--spacing-600);
   overflow-x: auto;
   scrollbar-width: none;
   scroll-behavior: smooth;
@@ -406,8 +417,6 @@ main .section .gen-template-suggestions-label {
   }
 
   .gen-template-prompt-input {
-    flex: 1 1 0;
-    min-width: 0;
     min-height: var(--spacing-325);
   }
 
@@ -463,6 +472,7 @@ main .section .gen-template-suggestions-label {
   }
   .gen-template-suggestion-list {
     justify-content: center;
+    padding-inline-end: 0;
     overflow: visible;
   }
 
