@@ -135,7 +135,7 @@ async function loadPlaceholders() {
     'analogous-harmony-description', 'complementary-harmony-description',
     'split-complementary-harmony-description', 'triad-harmony-description',
     'square-harmony-description', 'compound-harmony-description', 'shades-harmony-description',
-    'monochromatic-harmony-description',
+    'monochromatic-harmony-description', 'new-random-palette-generated',
   ];
   const values = await replaceKeyArray(KEYS, getConfig());
   const v = (i, fallback) => {
@@ -187,7 +187,7 @@ async function loadPlaceholders() {
       SHADES: v(38, 'Uses lighter and darker variations of one hue for a cohesive palette.'),
       MONOCHROMATIC: v(39, 'Uses one hue in varying tones for a cohesive look.'),
     },
-    newRandomPaletteGenerated: v(28, 'New random palette generated'),
+    newRandomPaletteGenerated: v(40, 'New random palette generated'),
     baseColorStrings,
     colorEditStrings,
     imageUploadStrings,
