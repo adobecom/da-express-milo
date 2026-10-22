@@ -27,9 +27,6 @@ own — everything Express-specific lives here.
 - **block-structure** — `node .pinata/scripts/check-block-structure.mjs {changed_files}`:
   every changed `express/code/blocks/<name>/` must contain both `<name>.js` and
   `<name>.css`.
-- **visual** — advisory: captures the ticket's targets (or a declared surface
-  in `preview.yaml`) at 375 and 1200 px from a local dev server and asks the
-  vision judge; its verdict is recorded but never blocks.
 - **adversary** — independent-model review, required by the acom floor; a
   rejection sends the change through a bounded producer rebuild
   (`regeneration.max_candidates: 5`, the floor's ceiling).
@@ -40,21 +37,6 @@ Not declared, and why, is written at the top of `gates.yaml`: no `lint:css-vars`
 The full unit suite on `stage` is not entirely green on every machine (a few
 timing-sensitive color-shared and comparison-table cases). The harness forgives
 a failure the base commit shares, so those do not block unrelated changes.
-
-## Preview
-
-`preview.yaml` serves the diff-applied worktree with the AEM CLI on port 3456,
-proxying content from the public `main--da-express-milo--adobecom.aem.live`
-host, so the advisory `visual` gate needs no credential for published pages.
-URLs pasted from `*--da-express-milo--*` or `www.adobe.com` are rendered by
-that local server by path.
-
-The `.aem.page` preview host is auth-gated. Draft pages that exist only there
-need a site token: a site administrator creates one once (config service,
-`POST admin.hlx.page/config/adobecom/sites/da-express-milo/secrets.json`) and
-the platform team sets it as `AEM_SITE_TOKEN_DA_EXPRESS_MILO` in the engine
-environment. The IMS automation account (`pinata+masautomation@adobetest.com`,
-password from the engine's `IMS_PASS`) is declared but dormant.
 
 ## Checking the contract
 

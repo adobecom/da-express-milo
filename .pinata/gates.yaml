@@ -11,10 +11,6 @@
 # Every command below was run against a clean `stage` checkout after `npm ci`,
 # and each lint gate was also shown to fail on a deliberately broken file.
 #
-# The visual gate captures through .pinata/preview.yaml's local dev server
-# (diff-applied code + public .aem.live content), because the .aem.page
-# preview host is auth-gated.
-#
 # Deliberately NOT declared:
 #
 # - lint:css-vars (scripts/lint-css-vars.js): only inspects files staged in
@@ -106,31 +102,6 @@ gates:
 
   # Keep the independent merge gate last so it reviews the code together with
   # the results of every deterministic gate.
-  visual:
-    template: visual
-    name: Visual evidence (ticket targets or a declared surface)
-    # ADVISORY to start (same posture as milo-pinata and adobecom/mas#1263):
-    # the gate still captures stills and a clip for the PR and the dashboard
-    # and still asks the vision judge, but its verdict does not stop a run,
-    # park it on a person, or spend producer candidates. Re-tighten
-    # (on_missing_target: escalate, blocking: true, failure_route: regenerate)
-    # once captures are proven reliable on Express pages.
-    # No default page: the surface is the ticket's visual_targets, else one of
-    # preview.yaml's surfaces. A change no surface covers is skipped instead
-    # of parking the run on a human; the gate never invents a URL.
-    on_missing_target: skip
-    breakpoints: [375, 1200]
-    video: true
-    criteria: >-
-      The page renders without layout breakage or overlapping elements at each
-      breakpoint, and any changed block matches the intended design (correct
-      spacing, colors, and typography). No visible error or empty states, and
-      no raw placeholder keys or unstyled block markup.
-    require_human: false
-    blocking: false
-
-  # Keep the independent merge gate last so it reviews the code together with
-  # the results of every deterministic and visual gate.
   adversary:
     template: adversary
     name: Adversarial review — independent merge gate (INV-4)

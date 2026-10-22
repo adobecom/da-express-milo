@@ -13,12 +13,11 @@ branch_pattern: ['{issue_key}', '{title_slug}']
 page: /express/
 fallbacks:
   issue_key: 'Resolves: <!-- link the Jira ticket, e.g. [MWPW-0000](…) -->'
-  # No visual evidence this run (gate skipped or nothing capturable): keep the
-  # template's Before/After shape with an honest placeholder instead of a
-  # guessed pair that nobody verified.
+  # Keep the template's Before/After shape; the After link is the PR branch's
+  # preview, which the author fills in.
   test_urls: |-
     - Before: https://stage--da-express-milo--adobecom.aem.page/express/?martech=off
-    - After: <!-- https://<branch>--da-express-milo--adobecom.aem.page/express/?martech=off — no verified visual evidence this run -->
+    - After: <!-- https://<branch>--da-express-milo--adobecom.aem.page/express/?martech=off -->
 template: |
   ## Summary
 
@@ -42,8 +41,7 @@ template: |
 
   Verified by the harness before opening this PR: ESLint, browser-compat
   ESLint, Stylelint on the changed files, Web Test Runner unit tests for the
-  affected suites, the block-structure check, visual evidence (advisory), and
-  an independent review.
+  affected suites, the block-structure check, and an independent review.
 
   ---
 
