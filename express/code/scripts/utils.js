@@ -494,24 +494,27 @@ export function preDecorateSections(area) {
       }
       // section swapped for a fragment via page metadata, e.g.
       // `metadata-fragment: wayfinder-promo` → the page metadata value is the
-      // fragment path; a missing or invalid value removes the section.
-      const fragmentKey = sectionMeta['metadata-fragment']?.trim().toLowerCase();
+      // fragment path; a missing or non-fragment value removes the section.
+      const fragmentKey = toClassName(sectionMeta['metadata-fragment']);
       if (!sectionRemove && fragmentKey) {
         const value = getMetadata(fragmentKey)?.trim();
         let href = null;
-        if (value) {
-          try {
-            href = new URL(value, window.location.origin).href;
-          } catch (error) {
-            window.lana?.log(`metadata-fragment: invalid path "${value}"`, { tags: 'utils', severity: 'error' });
+        try {
+          const url = value && new URL(value, window.location.origin);
+          // Runs before Milo localizes metadata, so authored aem.page/live links
+          // still point at the (auth-gated) preview host: re-root them on this origin.
+          const isAemHost = url && /\.(aem|hlx)\.(page|live)$/.test(url.hostname);
+          if (url?.pathname.includes('/fragments/')) {
+            href = isAemHost ? `${window.location.origin}${url.pathname}${url.search}${url.hash}` : url.href;
           }
-        }
+        } catch { /* reported below */ }
         if (href) {
           [...section.children].forEach((child) => {
             if (child !== sectionMetaBlock) child.remove();
           });
           sectionMetaBlock.before(createTag('p', {}, createTag('a', { href }, href)));
         } else {
+          if (value) window.lana?.log(`metadata-fragment: not a fragment path "${value}"`, { tags: 'utils', severity: 'error' });
           sectionRemove = true;
         }
       }
