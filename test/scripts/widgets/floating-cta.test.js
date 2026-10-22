@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import {
   delayFloatingCtaUntilMiniEditorPassed,
   delayFloatingCtaUntilViewportPassed,
-  initShortViewportSuppression,
+  initShortViewportInline,
   syncFloatingCtaAccessibility,
 } from '../../../express/code/scripts/widgets/floating-cta.js';
 
@@ -239,6 +239,7 @@ describe('Floating CTA short viewport suppression', () => {
   let matches;
   let wrapper;
   let inlineCta;
+  let main;
 
   beforeEach(() => {
     listeners = [];
@@ -248,16 +249,18 @@ describe('Floating CTA short viewport suppression', () => {
       addEventListener: (_, cb) => listeners.push(cb),
     }));
     document.body.dataset.device = 'desktop';
+    main = document.createElement('main');
+    document.body.append(main);
     wrapper = document.createElement('div');
     wrapper.innerHTML = '<a href="/x">Go</a>';
     inlineCta = document.createElement('a');
     inlineCta.className = 'same-fcta';
-    document.body.append(wrapper);
+    main.append(wrapper, document.createElement('div'));
   });
 
   afterEach(() => {
     window.matchMedia.restore();
-    wrapper.remove();
+    main.remove();
     delete document.body.dataset.device;
   });
 
@@ -266,19 +269,20 @@ describe('Floating CTA short viewport suppression', () => {
     listeners.forEach((cb) => cb());
   };
 
-  it('suppresses, hides from AT and restores same-fcta on short viewports', () => {
-    initShortViewportSuppression(wrapper, [inlineCta]);
-    expect(wrapper.classList.contains('floating-button--short-viewport-suppressed')).to.be.false;
+  it('renders inline above the footer and restores same-fcta on short viewports', () => {
+    initShortViewportInline(wrapper, [inlineCta]);
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.false;
     expect(inlineCta.classList.contains('same-fcta')).to.be.true;
 
     setMatches(true);
-    expect(wrapper.classList.contains('floating-button--short-viewport-suppressed')).to.be.true;
-    expect(wrapper.hasAttribute('inert')).to.be.true;
-    expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.true;
+    expect(wrapper.hasAttribute('inert')).to.be.false;
+    expect(wrapper.getAttribute('aria-hidden')).to.be.null;
+    expect(document.querySelector('main').lastElementChild).to.equal(wrapper);
     expect(inlineCta.classList.contains('same-fcta')).to.be.false;
 
     setMatches(false);
-    expect(wrapper.classList.contains('floating-button--short-viewport-suppressed')).to.be.false;
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.false;
     expect(wrapper.hasAttribute('inert')).to.be.false;
     expect(inlineCta.classList.contains('same-fcta')).to.be.true;
   });
@@ -286,8 +290,9 @@ describe('Floating CTA short viewport suppression', () => {
   it('applies on initial short load and keeps other suppression intact', () => {
     matches = true;
     wrapper.classList.add('floating-button--hidden');
-    initShortViewportSuppression(wrapper, [inlineCta]);
-    expect(wrapper.classList.contains('floating-button--short-viewport-suppressed')).to.be.true;
+    initShortViewportInline(wrapper, [inlineCta]);
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.true;
+    expect(wrapper.hasAttribute('inert')).to.be.false;
     setMatches(false);
     expect(wrapper.hasAttribute('inert')).to.be.true;
   });
@@ -295,7 +300,7 @@ describe('Floating CTA short viewport suppression', () => {
   it('does nothing on non-desktop devices', () => {
     document.body.dataset.device = 'mobile';
     matches = true;
-    initShortViewportSuppression(wrapper, [inlineCta]);
-    expect(wrapper.classList.contains('floating-button--short-viewport-suppressed')).to.be.false;
+    initShortViewportInline(wrapper, [inlineCta]);
+    expect(wrapper.classList.contains('floating-button--short-viewport-inline')).to.be.false;
   });
 });

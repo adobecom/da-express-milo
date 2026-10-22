@@ -169,9 +169,16 @@ body[data-device="desktop"] .floating-button-wrapper[data-audience="desktop"][da
     position: fixed;
 }
 
-/* Short viewports (e.g. 400% zoom): fixed CTA would cover the content (WCAG 1.4.10) */
-body[data-device="desktop"] main .floating-button-wrapper.floating-button--short-viewport-suppressed.floating-button--short-viewport-suppressed.floating-button--short-viewport-suppressed[data-section-status="loaded"][data-audience] {
-    display: none;
+/* Short viewports (e.g. 400% zoom): fixed CTA would cover the content (WCAG 1.4.10).
+   Render it in flow, above the footer, instead. */
+body[data-device="desktop"] main .floating-button-wrapper.floating-button--short-viewport-inline[data-section-status="loaded"][data-audience] {
+    display: flex;
+    position: static;
+    height: auto;
+    opacity: 1;
+    background: none;
+    padding: 24px 6px 0;
+    transition: none;
 }
 
 body[data-suppressfloatingcta="true"] main .floating-button-wrapper[data-audience="desktop"][data-section-status="loaded"],
