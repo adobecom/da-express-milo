@@ -95,14 +95,14 @@
 }
 
 .ax-panels [role='tab']:nth-last-of-type(2) {
-  margin-right: var(--spacing-75);
+  margin-inline-end: var(--spacing-75);
 }
 
 .ax-panels [role='tab']:last-of-type:before {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: calc(-1 * var(--spacing-80));
+  inset-inline-start: calc(-1 * var(--spacing-80));
   width: var(--spacing-50);
   content: "";
   background-color: var(--white-background);

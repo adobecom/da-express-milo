@@ -15,11 +15,11 @@
 .prompt-marquee-input-wrapper::before {
   content: attr(data-placeholder);
   position: absolute;
-  left: var(--spacing-300);
+  inset-inline-start: var(--spacing-300);
+  inset-inline-end: var(--spacing-250);
   color: var(--text-color-secondary);
   pointer-events: none;
   transition: all 150ms ease-out;
-  right: var(--spacing-250);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -29,11 +29,12 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: var(--body-font-size-m);
-  text-align: left;
+  text-align: start;
 }
 
 .prompt-marquee-input-wrapper:has(.prompt-marquee-input:placeholder-shown) .prompt-marquee-input {
-  padding: 0 0 0 var(--spacing-250);
+  padding-block: 0;
+  padding-inline: var(--spacing-250) 0;
   box-sizing: border-box;
 }
 
@@ -42,12 +43,12 @@
   transform: none;
   font-size: var(--spacing-200);
   line-height: 14px;
-  text-align: left;
+  text-align: start;
 }
 
 .prompt-marquee-input-wrapper:not(:has(.prompt-marquee-input:placeholder-shown)) .prompt-marquee-input {
   padding-top: var(--spacing-350);
-  padding-left: var(--spacing-250);
+  padding-inline-start: var(--spacing-250);
 }
 
 .prompt-marquee-input::placeholder {
@@ -88,7 +89,7 @@
 .prompt-marquee-input-wrapper:has(.prompt-marquee-input:focus) .prompt-marquee-input,
 .prompt-marquee-input-wrapper:has(.prompt-marquee-input:focus-visible) .prompt-marquee-input {
   padding-top: var(--spacing-350);
-  padding-left: var(--spacing-250);
+  padding-inline-start: var(--spacing-250);
   overflow: auto;
 }
 
