@@ -97,14 +97,19 @@ main .section .gen-template-text > p {
   transition: box-shadow 0.2s ease;
 }
 
-/* Figma states: hover and active (focused or has text) lift the outer box;
-   active draws a 2px stroke around the inner field. */
+/* Figma states: hover and active (focused or has text) lift the outer box.
+   Inner field: blue focus ring while empty, 2px #131313 active stroke once text is entered. */
 .gen-template-prompt-form:hover,
 .gen-template-prompt-form:has(.gen-template-prompt-input:is(:focus, :not(:placeholder-shown))) {
   box-shadow: var(--gen-template-prompt-shadow);
 }
 
-.gen-template-prompt-field:has(.gen-template-prompt-input:is(:focus, :not(:placeholder-shown))) {
+.gen-template-prompt-field:has(.gen-template-prompt-input:focus-visible:placeholder-shown) {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 0;
+}
+
+.gen-template-prompt-field:has(.gen-template-prompt-input:not(:placeholder-shown)) {
   outline: 2px solid #131313;
   outline-offset: 0;
 }
