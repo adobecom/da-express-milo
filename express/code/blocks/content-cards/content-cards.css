@@ -77,14 +77,12 @@ main .content-cards .carousel-container a.button.carousel-arrow {
 
 main .content-cards .carousel-container a.button.carousel-arrow::before {
   --carousel-arrow-size: 7px;
-  border-top: solid 3px var(--color-gray-700);
-  border-right: solid 3px var(--color-gray-700);
+  --carousel-arrow-stroke-ratio: calc(3 / 7);
 }
 
 main .content-cards .carousel-container .carousel-fader-left.arrow-hidden a.button.carousel-arrow::before,
 main .content-cards .carousel-container .carousel-fader-right.arrow-hidden a.button.carousel-arrow::before {
-  border-top: solid 3px var(--color-gray-400);
-  border-right: solid 3px var(--color-gray-400);
+  border-color: var(--color-gray-400);
 }
 
 main .content-cards .carousel-container .carousel-platform.left-fader:not(.right-fader) {

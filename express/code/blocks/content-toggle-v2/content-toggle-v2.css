@@ -132,8 +132,6 @@ main .content-toggle-v2 .carousel-container.circleless-button a.button.carousel-
     position: absolute;
     background: none;
     border-radius: 2px;
-    border-top: solid 3px var(--color-gray-700);
-    border-right: solid 3px var(--color-gray-700);
 }
 
 @media screen and (min-width: 768px) {

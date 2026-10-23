@@ -35,8 +35,8 @@ function expectOpticallyCenteredChevron(arrow) {
   const centerX = parseFloat(style.left) + width / 2 + area.x / (3 * area.twiceArea);
   const centerY = parseFloat(style.top) + height / 2 + area.y / (3 * area.twiceArea);
 
-  expect(centerX).to.be.closeTo(arrow.clientWidth / 2, 0.25);
-  expect(centerY).to.be.closeTo(arrow.clientHeight / 2, 0.25);
+  expect(centerX).to.be.closeTo(arrow.clientWidth / 2, 0.02);
+  expect(centerY).to.be.closeTo(arrow.clientHeight / 2, 0.02);
 }
 
 describe('Shared carousel arrows', () => {
@@ -47,8 +47,8 @@ describe('Shared carousel arrows', () => {
     stylesheet = document.createElement('style');
     stylesheet.textContent = [
       `:root {
-        --spacing-200: 16px;
-        --spacing-400: 32px;
+        --spacing-200: 12px;
+        --spacing-400: 24px;
         --color-white: #fff;
         --color-gray-700: #505050;
         --color-gray-400: #b6b6b6;
@@ -110,5 +110,27 @@ describe('Shared carousel arrows', () => {
         });
       });
     });
+  });
+
+  it('keeps smaller and larger chevrons centered as their strokes scale', () => {
+    const scaledStyles = document.createElement('style');
+    document.head.append(scaledStyles);
+    try {
+      [4, 8, 12, 16].forEach((size) => {
+        scaledStyles.textContent = `
+          main .default .carousel-container a.button.carousel-arrow::before {
+            --carousel-arrow-size: ${size}px;
+          }
+        `;
+        main.querySelectorAll('.default .carousel-arrow').forEach((arrow) => {
+          const style = getComputedStyle(arrow, '::before');
+          expect(parseFloat(style.width)).to.equal(size);
+          expect(parseFloat(style.borderTopWidth)).to.equal(size / 4);
+          expectOpticallyCenteredChevron(arrow);
+        });
+      });
+    } finally {
+      scaledStyles.remove();
+    }
   });
 });
