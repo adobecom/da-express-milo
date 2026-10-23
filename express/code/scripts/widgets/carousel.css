@@ -112,8 +112,8 @@ main .carousel-container a.button.carousel-arrow::before {
 }
 
 main .carousel-container a.button.carousel-arrow-left::before {
-  /* A rotated chevron's visible center is offset by its size / (2 * sqrt(2)). */
-  left: calc(50% + var(--carousel-arrow-size) * 0.353553);
+  /* Center the chevron's bounds, then shift outward for optical balance. */
+  left: calc(50% + var(--carousel-arrow-size) * 0.353553 - 0.5px);
   transform: translate(-50%, -50%) rotate(-135deg);
 }
 
@@ -122,7 +122,7 @@ main .carousel-container a.button.carousel-arrow-right {
 }
 
 main .carousel-container a.button.carousel-arrow-right::before {
-  left: calc(50% - var(--carousel-arrow-size) * 0.353553);
+  left: calc(50% - var(--carousel-arrow-size) * 0.353553 + 0.5px);
   transform: translate(-50%, -50%) rotate(45deg);
 }
 

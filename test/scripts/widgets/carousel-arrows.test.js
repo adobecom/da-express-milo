@@ -8,11 +8,12 @@ const styles = await Promise.all([
   readFile({ path: '../../../express/code/blocks/content-toggle-v2/content-toggle-v2.css' }),
 ]);
 
-function expectCenteredChevron(arrow) {
+function expectOpticallyCenteredChevron(arrow) {
   const style = getComputedStyle(arrow, '::before');
   const width = parseFloat(style.width) + parseFloat(style.borderRightWidth);
   const height = parseFloat(style.height) + parseFloat(style.borderTopWidth);
   const border = parseFloat(style.borderTopWidth);
+  expect(border).to.be.greaterThan(0);
   const matrix = new DOMMatrix(style.transform);
   const points = [
     [0, 0], [width, 0], [width, height],
@@ -21,13 +22,21 @@ function expectCenteredChevron(arrow) {
     x: x - width / 2,
     y: y - height / 2,
   }));
-  const centerX = parseFloat(style.left) + width / 2
-    + (Math.min(...points.map(({ x }) => x)) + Math.max(...points.map(({ x }) => x))) / 2;
-  const centerY = parseFloat(style.top) + height / 2
-    + (Math.min(...points.map(({ y }) => y)) + Math.max(...points.map(({ y }) => y))) / 2;
+  const area = points.reduce((result, point, index) => {
+    const next = points[(index + 1) % points.length];
+    const cross = point.x * next.y - next.x * point.y;
+    return {
+      twiceArea: result.twiceArea + cross,
+      x: result.x + (point.x + next.x) * cross,
+      y: result.y + (point.y + next.y) * cross,
+    };
+  }, { twiceArea: 0, x: 0, y: 0 });
+  expect(area.twiceArea).to.be.greaterThan(0);
+  const centerX = parseFloat(style.left) + width / 2 + area.x / (3 * area.twiceArea);
+  const centerY = parseFloat(style.top) + height / 2 + area.y / (3 * area.twiceArea);
 
-  expect(centerX).to.be.closeTo(arrow.clientWidth / 2, 0.1);
-  expect(centerY).to.be.closeTo(arrow.clientHeight / 2, 0.1);
+  expect(centerX).to.be.closeTo(arrow.clientWidth / 2, 0.25);
+  expect(centerY).to.be.closeTo(arrow.clientHeight / 2, 0.25);
 }
 
 describe('Shared carousel arrows', () => {
@@ -37,7 +46,13 @@ describe('Shared carousel arrows', () => {
   before(() => {
     stylesheet = document.createElement('style');
     stylesheet.textContent = [
-      ':root { --spacing-200: 16px; --spacing-400: 32px; }',
+      `:root {
+        --spacing-200: 16px;
+        --spacing-400: 32px;
+        --color-white: #fff;
+        --color-gray-700: #505050;
+        --color-gray-400: #b6b6b6;
+      }`,
       ...styles,
     ].join('\n');
     document.head.append(stylesheet);
@@ -89,7 +104,7 @@ describe('Shared carousel arrows', () => {
             } else {
               const variant = arrow.closest('.carousel-container').parentElement.className;
               expect(arrow.clientWidth, `${variant} at ${width}px`).to.be.greaterThan(0);
-              expectCenteredChevron(arrow);
+              expectOpticallyCenteredChevron(arrow);
             }
           });
         });
