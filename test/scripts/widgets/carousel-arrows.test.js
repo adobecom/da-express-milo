@@ -4,6 +4,8 @@ import { expect } from '@esm-bundle/chai';
 const styles = await Promise.all([
   readFile({ path: '../../../express/code/scripts/widgets/carousel.css' }),
   readFile({ path: '../../../express/code/blocks/gen-ai-cards/gen-ai-cards.css' }),
+  readFile({ path: '../../../express/code/blocks/content-cards/content-cards.css' }),
+  readFile({ path: '../../../express/code/blocks/content-toggle-v2/content-toggle-v2.css' }),
 ]);
 
 function expectCenteredChevron(arrow) {
@@ -28,29 +30,40 @@ function expectCenteredChevron(arrow) {
   expect(centerY).to.be.closeTo(arrow.clientHeight / 2, 0.1);
 }
 
-describe('Gen AI Cards homepage arrows', () => {
+describe('Shared carousel arrows', () => {
   let main;
   let stylesheet;
 
   before(() => {
     stylesheet = document.createElement('style');
-    stylesheet.textContent = styles.join('\n');
+    stylesheet.textContent = [
+      ':root { --spacing-200: 16px; --spacing-400: 32px; }',
+      ...styles,
+    ].join('\n');
     document.head.append(stylesheet);
     main = document.createElement('main');
-    const block = document.createElement('div');
-    block.className = 'gen-ai-cards homepage';
-    const carousel = document.createElement('div');
-    carousel.className = 'carousel-container';
-    ['left', 'right'].forEach((direction) => {
-      const fader = document.createElement('div');
-      fader.className = `carousel-fader-${direction}`;
-      const arrow = document.createElement('a');
-      arrow.className = `button carousel-arrow carousel-arrow-${direction}`;
-      fader.append(arrow);
-      carousel.append(fader);
+    [
+      'default',
+      'gen-ai-cards homepage',
+      'gen-ai-cards homepage spotlight',
+      'content-cards',
+      'content-toggle-v2',
+    ].forEach((variant) => {
+      const block = document.createElement('div');
+      block.className = variant;
+      const carousel = document.createElement('div');
+      carousel.className = 'carousel-container circleless-button';
+      ['left', 'right'].forEach((direction) => {
+        const fader = document.createElement('div');
+        fader.className = `carousel-fader-${direction}`;
+        const arrow = document.createElement('a');
+        arrow.className = `button carousel-arrow carousel-arrow-${direction}`;
+        fader.append(arrow);
+        carousel.append(fader);
+      });
+      block.append(carousel);
+      main.append(block);
     });
-    block.append(carousel);
-    main.append(block);
     document.body.append(main);
   });
 
@@ -60,7 +73,7 @@ describe('Gen AI Cards homepage arrows', () => {
     document.documentElement.removeAttribute('dir');
   });
 
-  [390, 768].forEach((width) => {
+  [390, 768, 1280].forEach((width) => {
     ['ltr', 'rtl'].forEach((direction) => {
       it(`centers both chevrons at ${width}px in ${direction}, including disabled controls`, async () => {
         await setViewport({ width, height: 900 });
@@ -69,7 +82,15 @@ describe('Gen AI Cards homepage arrows', () => {
         [false, true].forEach((disabled) => {
           arrows.forEach((arrow) => {
             arrow.parentElement.classList.toggle('arrow-hidden', disabled);
-            expectCenteredChevron(arrow);
+            const hiddenAtDesktop = (width >= 935 && arrow.closest('.gen-ai-cards.homepage:not(.spotlight)'))
+              || (width >= 900 && arrow.closest('.content-cards'));
+            if (hiddenAtDesktop) {
+              expect(getComputedStyle(arrow.parentElement).display).to.equal('none');
+            } else {
+              const variant = arrow.closest('.carousel-container').parentElement.className;
+              expect(arrow.clientWidth, `${variant} at ${width}px`).to.be.greaterThan(0);
+              expectCenteredChevron(arrow);
+            }
           });
         });
       });

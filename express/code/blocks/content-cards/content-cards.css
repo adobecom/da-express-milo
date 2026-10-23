@@ -76,8 +76,7 @@ main .content-cards .carousel-container a.button.carousel-arrow {
 }
 
 main .content-cards .carousel-container a.button.carousel-arrow::before {
-  width: 7px;
-  height: 7px;
+  --carousel-arrow-size: 7px;
   border-top: solid 3px var(--color-gray-700);
   border-right: solid 3px var(--color-gray-700);
 }

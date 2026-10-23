@@ -230,19 +230,9 @@ main .gen-ai-cards.homepage .carousel-container a.button.carousel-arrow {
 }
 
 main .gen-ai-cards.homepage .carousel-container a.button.carousel-arrow::before {
-  width: 7px;
-  height: 7px;
+  --carousel-arrow-size: 7px;
   border-top: solid 3px var(--color-gray-700);
   border-right: solid 3px var(--color-gray-700);
-}
-
-/* Center the visible chevron, not the rotated square that forms its borders. */
-main .gen-ai-cards.homepage .carousel-container a.button.carousel-arrow-left::before {
-  left: calc(50% + 2.5px);
-}
-
-main .gen-ai-cards.homepage .carousel-container a.button.carousel-arrow-right::before {
-  left: calc(50% - 2.5px);
 }
 
 main .gen-ai-cards.homepage .carousel-container .carousel-fader-left.arrow-hidden a.button.carousel-arrow::before,
