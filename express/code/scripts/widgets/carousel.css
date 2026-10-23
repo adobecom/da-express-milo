@@ -68,6 +68,7 @@ main .carousel-container .carousel-fader-right {
 }
 
 main .carousel-container a.button.carousel-arrow {
+  position: relative;
   cursor: pointer;
   display: block;
   float: left;
@@ -99,16 +100,18 @@ main .carousel-container .carousel-fader-right.arrow-hidden a.button.carousel-ar
 main .carousel-container a.button.carousel-arrow::before {
   content: '';
   position: absolute;
-  margin-top: 11px;
+  top: 50%;
+  left: 50%;
+  margin: 0;
   width: 8px;
   height: 8px;
   border-top: solid 2px var(--color-gray-700);
   border-right: solid 2px var(--color-gray-700);
+  transform: translate(-50%, -50%);
 }
 
 main .carousel-container a.button.carousel-arrow-left::before {
-  margin-left: 13px;
-  transform: rotate(-135deg);
+  transform: translate(-50%, -50%) rotate(-135deg);
 }
 
 main .carousel-container a.button.carousel-arrow-right {
@@ -116,8 +119,7 @@ main .carousel-container a.button.carousel-arrow-right {
 }
 
 main .carousel-container a.button.carousel-arrow-right::before {
-  margin-left: 9px;
-  transform: rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 /* Remove snapping in mobile-breakpoint if they scrolled using drag */

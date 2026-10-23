@@ -2287,8 +2287,7 @@
     background: transparent;
     position: absolute;
     left: 0;
-    /* top: 64px; */
-    height: calc(100% - var(--global-height-nav));
+    height: calc(100% - var(--express-fixed-top-height));
     max-height: unset;
     overflow: hidden;
     min-width: unset;
