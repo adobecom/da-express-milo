@@ -294,10 +294,6 @@ main .section .gen-template-suggestions-label {
   width: var(--gen-template-card-width);
 }
 
-.gen-template-column-edge {
-  display: none;
-}
-
 .gen-template-column:nth-child(3) {
   padding-top: 85px;
 }
@@ -365,6 +361,26 @@ main .section .gen-template-suggestions-label {
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
     }
+
+    /* Mobile: side columns fan outward while the block scrolls away, fully off-screen by exit. */
+    @media (max-width: 599px) {
+      .gen-template-column:is(:nth-child(1), :nth-child(2), :nth-child(4), :nth-child(5)) {
+        animation: gen-template-column-spread linear both;
+        animation-timeline: --gen-template-marquee;
+        animation-range: contain 0% exit 100%;
+      }
+
+      .gen-template-column:nth-child(1) { --gen-template-spread: -75vw; }
+      .gen-template-column:nth-child(2) { --gen-template-spread: -50vw; }
+      .gen-template-column:nth-child(4) { --gen-template-spread: 50vw; }
+      .gen-template-column:nth-child(5) { --gen-template-spread: 75vw; }
+    }
+  }
+}
+
+@keyframes gen-template-column-spread {
+  to {
+    translate: var(--gen-template-spread) 0;
   }
 }
 
@@ -428,10 +444,6 @@ main .section .gen-template-suggestions-label {
   .gen-template-suggestion-list {
     justify-content: flex-start;
     overflow-x: auto;
-  }
-
-  .gen-template-column-edge {
-    display: flex;
   }
 
   .gen-template-column:nth-child(1),
