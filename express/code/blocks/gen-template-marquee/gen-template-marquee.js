@@ -230,6 +230,16 @@ function resizePrompt(textarea) {
   textarea.style.height = `${textarea.scrollHeight}px`;
 }
 
+function trackScrollEnd(list) {
+  const update = () => {
+    // Math.abs: RTL scrollLeft runs negative.
+    const remaining = list.scrollWidth - list.clientWidth - Math.abs(list.scrollLeft);
+    list.classList.toggle('is-scroll-end', remaining <= 1);
+  };
+  list.addEventListener('scroll', update, { passive: true });
+  new ResizeObserver(update).observe(list);
+}
+
 function addInteractions(block) {
   block.addEventListener('input', (event) => {
     const textarea = event.target.closest('.gen-template-prompt-input');
@@ -283,5 +293,6 @@ export default async function decorate(block) {
 
   block.replaceChildren(content, gallery);
   addInteractions(block);
+  trackScrollEnd(block.querySelector('.gen-template-suggestion-list'));
   resizePrompt(block.querySelector('.gen-template-prompt-input'));
 }

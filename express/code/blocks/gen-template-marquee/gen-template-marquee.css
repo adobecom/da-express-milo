@@ -97,19 +97,15 @@ main .section .gen-template-text > p {
   transition: box-shadow 0.2s ease;
 }
 
-/* Figma states: hover and active (prompt has text) lift the box; active also darkens the stroke.
-   Focus on an empty prompt rings the field. */
+/* Figma states: hover and active (focused or has text) lift the outer box;
+   active draws a 2px stroke around the inner field. */
 .gen-template-prompt-form:hover,
-.gen-template-prompt-form:has(.gen-template-prompt-input:not(:placeholder-shown)) {
+.gen-template-prompt-form:has(.gen-template-prompt-input:is(:focus, :not(:placeholder-shown))) {
   box-shadow: var(--gen-template-prompt-shadow);
 }
 
-.gen-template-prompt-form:has(.gen-template-prompt-input:not(:placeholder-shown)) {
-  border-color: #131313;
-}
-
-.gen-template-prompt-field:has(.gen-template-prompt-input:focus-visible:placeholder-shown) {
-  outline: 2px solid var(--color-focus-ring-strong);
+.gen-template-prompt-field:has(.gen-template-prompt-input:is(:focus, :not(:placeholder-shown))) {
+  outline: 2px solid #131313;
   outline-offset: 0;
 }
 
@@ -227,13 +223,12 @@ main .section .gen-template-suggestions-label {
   text-align: center;
 }
 
-/* Trailing padding lets the last chip scroll clear of the fade overlay. */
+/* Last chip ends flush with the prompt box; the fade hides once scrolled to the end. */
 .gen-template-suggestion-list {
   display: flex;
   gap: var(--spacing-200);
   box-sizing: border-box;
   width: 100%;
-  padding-inline-end: var(--spacing-600);
   overflow-x: auto;
   scrollbar-width: none;
   scroll-behavior: smooth;
@@ -248,6 +243,11 @@ main .section .gen-template-suggestions-label {
   background: linear-gradient(to left, var(--color-white) 26%, transparent);
   content: '';
   pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.gen-template-suggestion-list.is-scroll-end::after {
+  opacity: 0;
 }
 
 [dir="rtl"] .gen-template-suggestion-list::after {
@@ -484,7 +484,6 @@ main .section .gen-template-suggestions-label {
   }
   .gen-template-suggestion-list {
     justify-content: center;
-    padding-inline-end: 0;
     overflow: visible;
   }
 
