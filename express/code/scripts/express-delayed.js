@@ -36,6 +36,7 @@ function preloadSUSILight() {
 
 // userAgentData exists only in Chromium; allowlist desktop platforms so tablets never qualify.
 function isDesktopChromium() {
+  // eslint-disable-next-line compat/compat
   const uaData = navigator.userAgentData;
   return !!uaData?.brands?.some(({ brand }) => brand === 'Chromium')
     && !uaData.mobile && DESKTOP_PLATFORMS.includes(uaData.platform);
