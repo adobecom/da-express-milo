@@ -183,43 +183,62 @@ function buildContent(textRow, suggestionsRow, strings) {
   return content;
 }
 
-function buildGallery(templates) {
-  const gallery = createElement('div', 'gen-template-gallery');
-  gallery.setAttribute('aria-hidden', 'true');
+function getTemplateColumns(templates) {
   let templateIndex = 0;
-
-  COLUMN_CARD_COUNTS.forEach((cardCount, columnIndex) => {
-    const column = createElement('div', 'gen-template-column');
-    if (columnIndex === 0 || columnIndex === COLUMN_CARD_COUNTS.length - 1) {
-      column.classList.add('gen-template-column-edge');
-    }
-
-    templates.slice(templateIndex, templateIndex + cardCount).forEach((template, cardIndex) => {
+  return COLUMN_CARD_COUNTS.map((cardCount) => {
+    const column = templates.slice(templateIndex, templateIndex + cardCount).map((template) => {
       const page = template.pages?.[0];
       const thumbnail = page?.rendition?.image?.thumbnail;
-      const imageUrl = getImageThumbnailSrc(
+      const src = getImageThumbnailSrc(
         extractRenditionLinkHref(template),
         extractComponentLinkHref(template),
         page,
       );
-      if (!imageUrl) return;
-
-      const card = createElement('div', 'gen-template-card');
-      const isSquare = thumbnail?.width && thumbnail?.height
-        && thumbnail.width / thumbnail.height >= 0.85;
-      card.classList.add(`gen-template-card-${isSquare ? 'square' : 'portrait'}`);
-      const picture = createElement('picture');
-      const image = createElement('img');
-      image.src = imageUrl;
-      image.alt = '';
-      image.decoding = 'async';
-      image.loading = columnIndex === 2 && cardIndex === 0 ? 'eager' : 'lazy';
-      if (columnIndex === 2 && cardIndex === 0) image.fetchPriority = 'high';
-      picture.append(image);
-      card.append(picture);
-      column.append(card);
-    });
+      return src && { src, width: thumbnail?.width, height: thumbnail?.height };
+    }).filter(Boolean);
     templateIndex += cardCount;
+    return column;
+  });
+}
+
+// hardcoded-templates: one cell per column, each holding that column's authored images.
+function getAuthoredColumns(row) {
+  return [...(row?.children || [])].map((cell) => [...cell.querySelectorAll('img')].map((img) => ({
+    picture: img.closest('picture'),
+    src: img.src,
+    width: Number(img.getAttribute('width')),
+    height: Number(img.getAttribute('height')),
+  })));
+}
+
+function buildCard({ picture: authoredPicture, src, width, height }, isLcp) {
+  const card = createElement('div', 'gen-template-card');
+  const isSquare = width && height && width / height >= 0.85;
+  card.classList.add(`gen-template-card-${isSquare ? 'square' : 'portrait'}`);
+  const picture = authoredPicture || createElement('picture');
+  const image = picture.querySelector('img') || createElement('img');
+  if (!image.src) image.src = src;
+  image.alt = '';
+  image.decoding = 'async';
+  image.loading = isLcp ? 'eager' : 'lazy';
+  if (isLcp) image.fetchPriority = 'high';
+  picture.append(image);
+  card.append(picture);
+  return card;
+}
+
+function buildGallery(columns) {
+  const gallery = createElement('div', 'gen-template-gallery');
+  gallery.setAttribute('aria-hidden', 'true');
+
+  columns.forEach((items, columnIndex) => {
+    const column = createElement('div', 'gen-template-column');
+    if (columnIndex === 0 || columnIndex === columns.length - 1) {
+      column.classList.add('gen-template-column-edge');
+    }
+    items.forEach((item, cardIndex) => {
+      column.append(buildCard(item, columnIndex === 2 && cardIndex === 0));
+    });
     if (column.children.length) gallery.append(column);
   });
   return gallery;
@@ -283,13 +302,16 @@ function addInteractions(block) {
 
 export default async function decorate(block) {
   const rows = [...block.children];
-  const [textRow, suggestionsRow, templateSourceRow] = rows;
-  const [strings, templates] = await Promise.all([
+  const [textRow, suggestionsRow, galleryRow] = rows;
+  const isHardcoded = block.classList.contains('hardcoded-templates');
+  const [strings, columns] = await Promise.all([
     loadPlaceholders(),
-    loadTemplates(templateSourceRow),
+    isHardcoded
+      ? getAuthoredColumns(galleryRow)
+      : loadTemplates(galleryRow).then(getTemplateColumns),
   ]);
   const content = buildContent(textRow, suggestionsRow, strings);
-  const gallery = buildGallery(templates);
+  const gallery = buildGallery(columns);
 
   block.replaceChildren(content, gallery);
   addInteractions(block);

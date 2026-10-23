@@ -209,4 +209,28 @@ describe('gen-template-marquee', () => {
     expect(routedUrl.pathname).to.equal('/neural-pixel-editor');
     expect(routedUrl.searchParams.get('prompt')).to.equal('A + B & #1');
   });
+
+  it('hardcoded-templates builds columns from authored images without fetching', async () => {
+    document.body.innerHTML = fixture;
+    const block = document.querySelector('.gen-template-marquee');
+    block.classList.add('hardcoded-templates');
+    const img = (w, h) => `<picture><img src="/a-${w}x${h}.png" width="${w}" height="${h}"></picture>`;
+    block.children[2].innerHTML = [
+      `<div>${img(1024, 1536)}${img(4096, 4096)}</div>`,
+      `<div>${img(1024, 1536)}</div>`,
+      `<div>${img(4096, 4096)}${img(1024, 1536)}</div>`,
+      '<div></div>',
+      `<div>${img(1024, 1536)}</div>`,
+    ].join('');
+    await decorate(block);
+
+    expect(fetchedUrl).to.equal('');
+    const columns = [...block.querySelectorAll('.gen-template-column')];
+    expect(columns.map((c) => c.children.length)).to.deep.equal([2, 1, 2, 1]);
+    expect(columns[0].lastElementChild.classList.contains('gen-template-card-square')).to.be.true;
+    expect(columns[0].firstElementChild.classList.contains('gen-template-card-portrait')).to.be.true;
+    const lcp = columns[2].querySelector('img');
+    expect(lcp.loading).to.equal('eager');
+    expect(lcp.getAttribute('src')).to.equal('/a-4096x4096.png');
+  });
 });
