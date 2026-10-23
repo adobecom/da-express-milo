@@ -6,6 +6,7 @@ on:
       - '**.js'
       - '**.cjs'
       - '**.css'
+      - 'BLOCK-STATUS.md'
 
 jobs:
   run-lint:
@@ -49,3 +50,6 @@ jobs:
       - name: Run stylelint on changed files
         if: steps.changed-css.outputs.has_css_files == 'true'
         run: cat changed-css-files.txt | xargs npx stylelint --
+
+      - name: Check BLOCK-STATUS.md lists only existing blocks
+        run: npm run lint:block-status
