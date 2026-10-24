@@ -3,7 +3,11 @@ import { expect } from '@esm-bundle/chai';
 // Set before importing scripts.js so its module-scope loadPage() bails out;
 // a static import would be hoisted above this flag.
 window.isTestEnv = true;
-const { decorateAreaWithLCP } = await import('../../express/code/scripts/scripts.js');
+const {
+  decorateAreaWithLCP,
+  preloadCriticalResources,
+  preloadPersonalization,
+} = await import('../../express/code/scripts/scripts.js');
 
 describe('LCP Image Optimization', () => {
   beforeEach(() => {
@@ -282,5 +286,123 @@ describe('decorateAreaWithLCP (MEP fragment LCP preload)', () => {
 
     expect(getPreloadLinks().length).to.equal(0);
     expect(fragmentDoc.querySelector('img').getAttribute('fetchpriority')).to.be.null;
+  });
+});
+
+describe('preloadCriticalResources', () => {
+  const originalUrl = window.location.href;
+  const hints = () => [...document.head.querySelectorAll('link[rel="modulepreload"], link[rel="preload"]')]
+    .filter((l) => l.as !== 'image')
+    .map((l) => `${l.rel}|${l.getAttribute('as') || ''}|${l.getAttribute('href')}`);
+  const clear = () => document.head
+    .querySelectorAll('link[rel="modulepreload"], link[rel="preload"]')
+    .forEach((l) => l.remove());
+
+  beforeEach(() => {
+    clear();
+    window.history.replaceState({}, '', '/express/');
+  });
+
+  afterEach(() => {
+    clear();
+    document.body.innerHTML = '';
+    window.history.replaceState({}, '', originalUrl);
+  });
+
+  it('preloads JS and CSS for Express hero blocks in the first section only', () => {
+    document.body.innerHTML = `<main>
+      <div><div class="grid-marquee ratings"></div><div class="marquee"></div></div>
+      <div><div class="banner"></div></div>
+    </main>`;
+    preloadCriticalResources();
+    expect(hints()).to.deep.equal([
+      'modulepreload||/express/code/blocks/grid-marquee/grid-marquee.js',
+      'preload|style|/express/code/blocks/grid-marquee/grid-marquee.css',
+    ]);
+  });
+
+  it('preloads same-locale fragments as the URL Milo will fetch, skipping modals and other locales', () => {
+    const { origin } = window.location;
+    document.body.innerHTML = `<main><div>
+      <a href="${origin}/express/fragments/pricing">a</a>
+      <a href="https://www.adobe.com/express/fragments/logo-row#_dnt">b</a>
+      <a href="${origin}/express/fragments/modal#signup">c</a>
+      <a href="${origin}/de/express/fragments/other">d</a>
+      <a href="https://example.com/express/fragments/x">e</a>
+    </div></main>`;
+    preloadCriticalResources();
+    expect(hints()).to.deep.equal([
+      `preload|fetch|${origin}/express/fragments/pricing.plain.html`,
+      `preload|fetch|${origin}/express/fragments/logo-row.plain.html`,
+    ]);
+    const link = document.head.querySelector('link[as="fetch"]');
+    expect(link.getAttribute('crossorigin')).to.equal('anonymous');
+    expect(link.getAttribute('fetchpriority')).to.equal('low');
+  });
+
+  it('uses the page locale prefix and does not duplicate hints', () => {
+    window.history.replaceState({}, '', '/de/express/');
+    const { origin } = window.location;
+    document.body.innerHTML = `<main><div>
+      <a href="${origin}/de/express/fragments/pricing">a</a>
+      <a href="${origin}/express/fragments/pricing">b</a>
+    </div></main>`;
+    preloadCriticalResources();
+    preloadCriticalResources();
+    expect(hints()).to.deep.equal([`preload|fetch|${origin}/de/express/fragments/pricing.plain.html`]);
+  });
+
+  it('skips fragment preloads when ?cache=off changes the fetch cache mode', () => {
+    window.history.replaceState({}, '', '/express/?cache=off');
+    document.body.innerHTML = '<main><div><a href="/express/fragments/pricing">a</a></div></main>';
+    preloadCriticalResources();
+    expect(hints()).to.deep.equal([]);
+  });
+});
+
+describe('preloadPersonalization', () => {
+  const originalUrl = window.location.href;
+  let meta;
+  const fetchHints = () => [...document.head.querySelectorAll('link[rel="preload"][as="fetch"]')]
+    .map((l) => l.getAttribute('href'));
+  const clear = () => document.head
+    .querySelectorAll('link[rel="modulepreload"], link[rel="preload"]')
+    .forEach((l) => l.remove());
+
+  beforeEach(() => {
+    clear();
+    meta = document.createElement('meta');
+    meta.name = 'personalization';
+    meta.content = 'https://main--da-express-milo--adobecom.aem.page/express/personalization/a.json,  /express/personalization/b.json?v=2, https://example.com/c.json';
+    document.head.append(meta);
+  });
+
+  afterEach(() => {
+    clear();
+    meta.remove();
+    window.history.replaceState({}, '', originalUrl);
+  });
+
+  it('preloads manifests as the same-origin paths Milo requests, plus personalization.js', () => {
+    preloadPersonalization();
+    expect(fetchHints()).to.deep.equal([
+      '/express/personalization/a.json',
+      '/express/personalization/b.json?v=2',
+    ]);
+    const mod = document.head.querySelector('link[rel="modulepreload"]');
+    expect(mod.getAttribute('href')).to.match(/\/features\/personalization\/personalization\.js$/);
+    expect(mod.getAttribute('crossorigin')).to.equal('anonymous');
+  });
+
+  it('does nothing without personalization metadata or with ?mep=off', () => {
+    window.history.replaceState({}, '', '/express/?mep=off');
+    preloadPersonalization();
+    expect(fetchHints()).to.deep.equal([]);
+
+    window.history.replaceState({}, '', originalUrl);
+    meta.remove();
+    preloadPersonalization();
+    expect(fetchHints()).to.deep.equal([]);
+    expect(document.head.querySelector('link[rel="modulepreload"]')).to.equal(null);
   });
 });
