@@ -813,7 +813,7 @@
 }
 
 /* V2 variant styles */
-.faqv2.expandable:not(.longform),
+.section:not(.has-background) .faqv2.expandable:not(.longform),
 .faqv2.no-background {
   padding-inline: var(--spacing-300);
 }
@@ -829,7 +829,7 @@
 }
 
 @media (min-width: 600px) {
-  .faqv2.expandable:not(.longform),
+  .section:not(.has-background) .faqv2.expandable:not(.longform),
   .faqv2.no-background {
     padding-inline: var(--spacing-500);
   }
@@ -846,7 +846,7 @@
 }
 
 @media (min-width: 900px) {
-  .faqv2.expandable:not(.longform),
+  .section:not(.has-background) .faqv2.expandable:not(.longform),
   .faqv2.no-background {
     padding-inline: var(--spacing-600);
   }
