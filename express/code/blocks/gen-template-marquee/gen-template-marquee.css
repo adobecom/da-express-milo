@@ -290,7 +290,7 @@ main .section .gen-template-suggestions-label {
   gap: var(--gen-template-column-gap);
   width: max-content;
   margin-top: 40px;
-  max-height: 800px;;
+  max-height: 760px;
 }
 
 .gen-template-column {
