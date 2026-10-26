@@ -83,8 +83,10 @@ gates:
     # also guards against un-mocked external fetches; node-resolve; port 2000)
     # minus --coverage, which codecov owns. Keep --port=2000: suites and mocks
     # assume the localhost:2000 origin, and an auto-selected port creates
-    # false failures.
-    cmd: npx wtr {test_files} --node-resolve --port=2000
+    # false failures. The harness runs as root, where Chrome will not start
+    # with its sandbox on; .pinata/web-test-runner.config.mjs is the repo
+    # config with the sandbox turned off.
+    cmd: npx wtr {test_files} --config .pinata/web-test-runner.config.mjs --node-resolve --port=2000
     timeout_s: 900
     blocking: true
     failure_route: repair_loop
