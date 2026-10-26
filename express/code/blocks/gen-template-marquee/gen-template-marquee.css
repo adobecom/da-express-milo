@@ -300,7 +300,7 @@ main .section .gen-template-suggestions-label {
 }
 
 .gen-template-column:nth-child(3) {
-  padding-top: 85px;
+  padding-top: 45px;
 }
 
 .gen-template-card {
