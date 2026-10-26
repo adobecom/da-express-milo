@@ -290,7 +290,6 @@ main .section .gen-template-suggestions-label {
   gap: var(--gen-template-column-gap);
   width: max-content;
   margin-top: 40px;
-  max-height: 760px;
 }
 
 .gen-template-column {
@@ -430,7 +429,6 @@ main .section .gen-template-suggestions-label {
   }
 
     .gen-template-gallery {
- max-height: unset;
   margin-top : 60px;
 }
 
