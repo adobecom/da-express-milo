@@ -24,9 +24,9 @@ Also use `get_screenshot` to capture a visual reference.
 Scan the design context for all text elements. For each, determine:
 
 1. **Content**: the visible text string.
-2. **Classification**: use visual heuristics from `references/token-mapping.md`.
-   Express Figma files do not expose `--s2a-typography-*` tokens —
-   classify by font size, weight, and position.
+2. **Semantic structure**: use Figma's content hierarchy to distinguish
+   headings, body text, eyebrows, and links/CTAs. Follow
+   `references/content-semantics.md` when choosing authored heading levels.
 3. **Position**: vertical position within the frame determines order
    (top to bottom).
 
@@ -35,8 +35,8 @@ Classify each text element as:
 - **Eyebrow**: small text (10–13px), often uppercase or letter-spaced,
   appearing above the heading.
 - **Heading**: largest bold text. Note the font size and map to a
-  heading level using the token-mapping reference.
-- **Body**: medium text below the heading. Note font size for size class.
+  heading level using the content-semantics reference.
+- **Body**: text below the heading, authored as paragraphs.
 - **Link / CTA**: text inside button-shaped elements or underlined
   interactive text. Record display text and CTA style:
   - **Primary** (filled button) → `<strong><a>`
@@ -95,8 +95,6 @@ Heading:
 
 Body:
   text: "<text>"
-  approx_font_size: <px>
-  inferred_size_class: <lg|md|sm>
 
 Links:
   count: <N>
