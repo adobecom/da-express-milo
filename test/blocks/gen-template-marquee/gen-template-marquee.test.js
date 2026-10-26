@@ -110,18 +110,40 @@ describe('gen-template-marquee', () => {
       'gen-template-prompt-label': 'Your prompt',
       'gen-template-prompt-placeholder': 'Describe your design',
       'gen-template-prompt-submit': 'Create',
-      'gen-template-desktop-destination': 'https://example.com/desktop',
-      'gen-template-mobile-destination': 'https://example.com/mobile',
       'gen-template-suggestions-label': 'Try an example',
     });
-    const form = block.querySelector('.gen-template-prompt-form');
 
     expect(block.querySelector('.gen-template-prompt-label').textContent).to.equal('Your prompt');
     expect(block.querySelector('.gen-template-prompt-input').placeholder).to.equal('Describe your design');
     expect(block.querySelector('.gen-template-prompt-submit').textContent).to.contain('Create');
+    expect(block.querySelector('.gen-template-suggestions-label').textContent).to.equal('Try an example');
+  });
+
+  it('routes to authored destination links and keeps placeholder button copy', async () => {
+    document.body.innerHTML = fixture;
+    const block = document.querySelector('.gen-template-marquee');
+    const row = document.createElement('div');
+    row.innerHTML = '<div><a href="https://example.com/desktop">Go</a></div><div><a href="https://example.com/mobile">Go</a></div>';
+    block.append(row);
+    await decorate(block);
+    const form = block.querySelector('.gen-template-prompt-form');
+
     expect(form.dataset.desktopHref).to.equal('https://example.com/desktop');
     expect(form.dataset.mobileHref).to.equal('https://example.com/mobile');
-    expect(block.querySelector('.gen-template-suggestions-label').textContent).to.equal('Try an example');
+    expect(block.querySelector('.gen-template-prompt-submit').textContent).to.equal('Generate');
+  });
+
+  it('uses a single authored destination for both breakpoints', async () => {
+    document.body.innerHTML = fixture;
+    const block = document.querySelector('.gen-template-marquee');
+    const row = document.createElement('div');
+    row.innerHTML = '<div><a href="https://example.com/only">Go</a></div>';
+    block.append(row);
+    await decorate(block);
+    const form = block.querySelector('.gen-template-prompt-form');
+
+    expect(form.dataset.desktopHref).to.equal('https://example.com/only');
+    expect(form.dataset.mobileHref).to.equal('https://example.com/only');
   });
 
   it('grows and shrinks the prompt to fit its lines', async () => {

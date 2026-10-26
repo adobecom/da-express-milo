@@ -342,7 +342,10 @@ main .section .gen-template-suggestions-label {
       view-timeline: --gen-template-marquee block;
     }
 
-    /* Content pins below the nav and fades/lifts while the gallery scrolls over it. */
+    /* Content pins below the nav and fades/lifts once the block's top reaches the viewport top.
+       `exit-crossing` rather than `contain`: when the block is shorter than the viewport
+       (e.g. zoomed far out) the `contain` range has already passed at scroll 0, which left
+       the content faded out on load. */
     .gen-template-content {
       --gen-template-content-lift: 64px;
       position: sticky;
@@ -350,7 +353,7 @@ main .section .gen-template-suggestions-label {
       z-index: 0;
       animation: gen-template-content-fade linear both;
       animation-timeline: --gen-template-marquee;
-      animation-range: contain 0px contain 360px;
+      animation-range: exit-crossing 0px exit-crossing 360px;
     }
 
     /* Gallery rides over the pinned content; columns tighten to 24px. */

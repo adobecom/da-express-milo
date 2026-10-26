@@ -15,9 +15,11 @@ const PLACEHOLDERS = {
   label: ['gen-template-prompt-label', 'Prompt'],
   input: ['gen-template-prompt-placeholder', 'Describe what template you want to make'],
   submit: ['gen-template-prompt-submit', 'Generate'],
-  desktopHref: ['gen-template-desktop-destination', 'https://new.express.adobe.com/neural-pixel-editor?entry=create-menu'],
-  mobileHref: ['gen-template-mobile-destination', 'https://new.express.adobe.com/new?category=templates&height=1080&width=1080&unit=px&action=text+to+template'],
   suggestionsLabel: ['gen-template-suggestions-label', 'Get started with an example prompt'],
+};
+const DEFAULT_DESTINATIONS = {
+  desktop: 'https://new.express.adobe.com/neural-pixel-editor?entry=create-menu',
+  mobile: 'https://new.express.adobe.com/new?category=templates&height=1080&width=1080&unit=px&action=text+to+template',
 };
 let instanceId = 0;
 
@@ -126,8 +128,6 @@ function buildPromptForm(suggestionsRow, strings) {
   buttonText.textContent = strings.submit;
   submit.append(icon, buttonText);
 
-  form.dataset.desktopHref = strings.desktopHref;
-  form.dataset.mobileHref = strings.mobileHref;
   field.append(label, textarea, submit);
   form.append(field);
 
@@ -181,6 +181,18 @@ function buildContent(textRow, suggestionsRow, strings) {
   text.append(logoAndHeading, ...body);
   content.append(text, buildPromptForm(suggestionsRow, strings));
   return content;
+}
+
+// Optional 4th row: desktop link in the first cell, mobile link in the second.
+// A single authored link serves both; the link text is ignored (button copy is a placeholder).
+function getDestinations(row) {
+  const [desktopCell, mobileCell] = row?.children ?? [];
+  const desktop = desktopCell?.querySelector('a')?.href;
+  const mobile = mobileCell?.querySelector('a')?.href;
+  return {
+    desktop: desktop || mobile || DEFAULT_DESTINATIONS.desktop,
+    mobile: mobile || desktop || DEFAULT_DESTINATIONS.mobile,
+  };
 }
 
 function getTemplateColumns(templates) {
@@ -300,7 +312,7 @@ function addInteractions(block) {
 
 export default async function decorate(block) {
   const rows = [...block.children];
-  const [textRow, suggestionsRow, galleryRow] = rows;
+  const [textRow, suggestionsRow, galleryRow, destinationsRow] = rows;
   const isHardcoded = block.classList.contains('hardcoded-templates');
   const [strings, columns] = await Promise.all([
     loadPlaceholders(),
@@ -309,6 +321,10 @@ export default async function decorate(block) {
       : loadTemplates(galleryRow).then(getTemplateColumns),
   ]);
   const content = buildContent(textRow, suggestionsRow, strings);
+  const form = content.querySelector('.gen-template-prompt-form');
+  const destinations = getDestinations(destinationsRow);
+  form.dataset.desktopHref = destinations.desktop;
+  form.dataset.mobileHref = destinations.mobile;
   const gallery = buildGallery(columns);
 
   block.replaceChildren(content, gallery);
