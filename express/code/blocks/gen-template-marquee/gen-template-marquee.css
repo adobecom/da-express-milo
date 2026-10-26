@@ -290,6 +290,7 @@ main .section .gen-template-suggestions-label {
   gap: var(--gen-template-column-gap);
   width: max-content;
   margin-top: 40px;
+  max-height: 800px;;
 }
 
 .gen-template-column {
@@ -422,12 +423,14 @@ main .section .gen-template-suggestions-label {
     --gen-template-card-width: 291px;
     --gen-template-column-gap: 69px;
     --gen-template-card-gap: 100px;
+
     --gen-template-gallery-bottom-padding: 64px;
     padding-inline: var(--spacing-500);
+
   }
 
     .gen-template-gallery {
- 
+ max-height: unset;
   margin-top : 60px;
 }
 
