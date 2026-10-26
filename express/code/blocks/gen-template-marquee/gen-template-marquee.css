@@ -329,6 +329,17 @@ main .section .gen-template-suggestions-label {
   object-fit: cover;
 }
 
+/* hardcoded-templates: the image's own proportions set the card height. */
+.gen-template-card-authored {
+  aspect-ratio: auto;
+}
+
+.gen-template-card-authored picture,
+.gen-template-card-authored img {
+  position: static;
+  height: auto;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     .gen-template-marquee {

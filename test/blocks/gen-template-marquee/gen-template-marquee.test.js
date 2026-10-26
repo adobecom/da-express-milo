@@ -227,8 +227,9 @@ describe('gen-template-marquee', () => {
     expect(fetchedUrl).to.equal('');
     const columns = [...block.querySelectorAll('.gen-template-column')];
     expect(columns.map((c) => c.children.length)).to.deep.equal([2, 1, 2, 1]);
-    expect(columns[0].lastElementChild.classList.contains('gen-template-card-square')).to.be.true;
-    expect(columns[0].firstElementChild.classList.contains('gen-template-card-portrait')).to.be.true;
+    const cards = [...block.querySelectorAll('.gen-template-card')];
+    expect(cards.every((card) => card.classList.contains('gen-template-card-authored'))).to.be.true;
+    expect(block.querySelector('.gen-template-card-portrait, .gen-template-card-square')).to.be.null;
     const lcp = columns[2].querySelector('img');
     expect(lcp.loading).to.equal('eager');
     expect(lcp.getAttribute('src')).to.equal('/a-4096x4096.png');

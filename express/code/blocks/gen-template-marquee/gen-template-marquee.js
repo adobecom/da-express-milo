@@ -206,15 +206,16 @@ function getAuthoredColumns(row) {
   return [...(row?.children || [])].map((cell) => [...cell.querySelectorAll('img')].map((img) => ({
     picture: img.closest('picture'),
     src: img.src,
-    width: Number(img.getAttribute('width')),
-    height: Number(img.getAttribute('height')),
   })));
 }
 
 function buildCard({ picture: authoredPicture, src, width, height }, isLcp) {
   const card = createElement('div', 'gen-template-card');
+  // Authored images size the card themselves (EDS drops width/height), so nothing is cropped.
   const isSquare = width && height && width / height >= 0.85;
-  card.classList.add(`gen-template-card-${isSquare ? 'square' : 'portrait'}`);
+  card.classList.add(authoredPicture
+    ? 'gen-template-card-authored'
+    : `gen-template-card-${isSquare ? 'square' : 'portrait'}`);
   const picture = authoredPicture || createElement('picture');
   const image = picture.querySelector('img') || createElement('img');
   if (!image.src) image.src = src;
