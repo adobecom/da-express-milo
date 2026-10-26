@@ -8,6 +8,10 @@ const ACCESSIBILITY_HIDDEN_CLASSES = [
   'floating-button--hero-suppressed',
   'floating-button--mini-editor-suppressed',
 ];
+const INLINE_CLASS = 'floating-button--short-viewport-inline';
+
+// WCAG 1.4.10 Reflow: 256 CSS px tall is the floor; leave headroom for the taller C2 nav.
+export const SHORT_VIEWPORT_QUERY = '(max-height: 480px)';
 
 const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]';
 const legacyTabIndexes = new WeakMap();
@@ -50,8 +54,10 @@ function trackViewportChanges(update) {
 }
 
 export function syncFloatingCtaAccessibility(floatButtonWrapper) {
-  const isHidden = ACCESSIBILITY_HIDDEN_CLASSES
-    .some((className) => floatButtonWrapper.classList.contains(className));
+  // Inline (static) CTAs are always visible, regardless of other suppression states.
+  const isHidden = !floatButtonWrapper.classList.contains(INLINE_CLASS)
+    && ACCESSIBILITY_HIDDEN_CLASSES
+      .some((className) => floatButtonWrapper.classList.contains(className));
 
   if (isHidden) {
     if (floatButtonWrapper.contains(document.activeElement)) document.activeElement.blur();
@@ -63,6 +69,25 @@ export function syncFloatingCtaAccessibility(floatButtonWrapper) {
     floatButtonWrapper.removeAttribute('inert');
     restoreLegacyFocusableElements(floatButtonWrapper);
   }
+}
+
+export function initShortViewportInline(floatButtonWrapper, sameCtas = []) {
+  if (!window.matchMedia) return null;
+  const mql = window.matchMedia(SHORT_VIEWPORT_QUERY);
+  const update = () => {
+    const inline = mql.matches && document.body.dataset.device === 'desktop';
+    floatButtonWrapper.classList.toggle(INLINE_CLASS, inline);
+    sameCtas.forEach((cta) => cta.classList.toggle('same-fcta', !inline));
+    // main's last child sits directly above the footer
+    const main = document.querySelector('main');
+    if (inline && main && main.lastElementChild !== floatButtonWrapper) {
+      main.append(floatButtonWrapper);
+    }
+    syncFloatingCtaAccessibility(floatButtonWrapper);
+  };
+  mql.addEventListener('change', update);
+  update();
+  return mql;
 }
 
 export const hideScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
@@ -530,6 +555,7 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   }
 
   decorateLinks(floatButtonWrapper);
+  initShortViewportInline(floatButtonWrapper, sameUrlCTAs);
   return floatButtonWrapper;
 }
 

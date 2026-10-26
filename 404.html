@@ -163,7 +163,13 @@
           [_, userLocale] = pathname.split('/');
           valueInMap = redirectMap.get(userLocale);
           if (isColor) {
-            valueInMap ? win.location.replace( href.replace(`/${userLocale}`, valueInMap)) : noop;
+            if (valueInMap) {
+              const redirect = new URL(href);
+              const mappedPrefix = valueInMap === '/' ? '' : valueInMap.replace(/\/+$/, '');
+              const localizedPath = pathname.slice(`/${userLocale}`.length);
+              redirect.pathname = `${mappedPrefix}${localizedPath || (mappedPrefix ? '/' : '')}` || '/';
+              win.location.replace(redirect.href);
+            }
           } else {
             valueInMap ? win.location.replace( href.replace(`/${userLocale}/`, valueInMap)) : noop;
           }
