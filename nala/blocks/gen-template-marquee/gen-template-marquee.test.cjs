@@ -24,14 +24,17 @@ test.describe('GenTemplateMarqueeBlock Test Suite', () => {
       await expect(block.heading).toHaveText('Generate templates with AI.');
       await expect(block.body).toContainText('Create a fully editable template');
       await expect(block.prompt).toHaveAttribute('placeholder', 'Describe what template you want to make');
-      await expect(block.generate).toContainText('Generate');
+      await expect(block.generate).toHaveText('Generate');
+      // Host is environment-dependent (Milo rewrites new.express.adobe.com to stage off-prod).
+      await expect(block.form).toHaveAttribute('data-href', /\/neural-pixel-editor\?entry=create-menu$/);
+      await expect(block.block.locator('.gen-template-text a')).toHaveCount(0);
       await expect(block.suggestionsLabel).toHaveText('Get started with an example prompt');
       await expect(block.suggestions).toHaveCount(4);
     });
 
     await test.step('step-3: Fill the prompt from a suggestion', async () => {
       await block.suggestions.first().click();
-      await expect(block.prompt).toHaveValue('Dog trainer advertisement');
+      await expect(block.prompt).toHaveValue('Blue and orange dog trainer advertisement flyer with a bold font and playful design');
     });
 
     await test.step('step-4: Verify gallery media', async () => {

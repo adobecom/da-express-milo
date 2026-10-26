@@ -5,6 +5,7 @@ class GenTemplateMarqueeBlock {
     this.logo = this.block.locator('.gen-template-logo');
     this.heading = this.block.locator('h1, h2, h3, h4, h5, h6').first();
     this.body = this.block.locator('.gen-template-text > p').first();
+    this.form = this.block.locator('.gen-template-prompt-form');
     this.prompt = this.block.locator('.gen-template-prompt-input');
     this.generate = this.block.locator('.gen-template-prompt-submit');
     this.suggestionsLabel = this.block.locator('.gen-template-suggestions-label');
