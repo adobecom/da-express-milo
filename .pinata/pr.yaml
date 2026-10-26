@@ -1,0 +1,51 @@
+# How the harness renders this repo's PR body. Placeholders are substituted by
+# the harness; a line whose placeholder cannot be resolved is replaced by its
+# declared fallback, keeping the shape of .github/pull_request_template.md
+# (Summary / Jira Ticket "Resolves:" / Test URLs / Verification Steps /
+# Potential Regressions).
+issue_key_pattern: '[A-Z][A-Z0-9]+-\d+'
+# Branch naming for harness-authored branches, in order of preference: the
+# Jira key alone (e.g. mwpw-198875); when intake carries no Jira key (a plain
+# Slack ask), a kebab slug of the title. The harness lowercases,
+# kebab-sanitizes, and length-caps the result so the aem.page preview
+# hostname always resolves.
+branch_pattern: ['{issue_key}', '{title_slug}']
+page: /express/
+fallbacks:
+  issue_key: 'Resolves: <!-- link the Jira ticket, e.g. [MWPW-0000](…) -->'
+  # Keep the template's Before/After shape; the After link is the PR branch's
+  # preview, which the author fills in.
+  test_urls: |-
+    - Before: https://stage--da-express-milo--adobecom.aem.page/express/?martech=off
+    - After: <!-- https://<branch>--da-express-milo--adobecom.aem.page/express/?martech=off -->
+template: |
+  ## Summary
+
+  {summary_bullets}
+
+  ---
+
+  ## Jira Ticket
+
+  Resolves: [{issue_key}](https://jira.corp.adobe.com/browse/{issue_key})
+
+  ---
+
+  ## Test URLs
+
+  {test_urls}
+
+  ---
+
+  ## Verification Steps
+
+  Verified by the harness before opening this PR: ESLint, browser-compat
+  ESLint, Stylelint on the changed files, Web Test Runner unit tests for the
+  affected suites, the block-structure check, and an independent review.
+
+  ---
+
+  ## Potential Regressions
+
+  Changed files:
+  {files_changed}

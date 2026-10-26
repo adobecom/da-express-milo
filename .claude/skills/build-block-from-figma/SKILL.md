@@ -25,7 +25,9 @@ exported as the module default — you never add self-initialisation logic.
 >   `fixIcons`, `toClassName`) and from milo loaded lazily via `getLibs()`
 >   (`createTag` from `${getLibs()}/utils/utils.js`).
 >   Re-use these; do not duplicate their logic.
-> - Design tokens live in `express/code/styles/styles.css`.
+> - Express design tokens are in `express/code/styles/styles.css`; S2A
+>   tokens are in the external stylesheet
+>   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`.
 > - **Never use `.innerHTML`** — it destroys Preact/Lit components.
 >   Use `.append()`, `cloneNode`, or `createTag` instead.
 > - The platform is **Adobe EDS**.  Use the **Fluffyjaws MCP** to look
@@ -39,7 +41,7 @@ to read at the point it becomes relevant.
 ### references/
 | File | Purpose |
 |------|---------|
-| `design-tokens.md` | Express token system + the Figma→token **mapping algorithm** (exact name match → in-category value match → new token / hardcoded), semantic-category guardrails, and the token-mapping report format. |
+| `design-tokens.md` | Express and S2A token sources, Figma-to-CSS-variable matching rules, and the token-mapping report format. |
 | `grid-system.md` | Breakpoints, column counts, container variants, n-up layouts. |
 | `eds-patterns.md` | EDS block anatomy, Express utilities, CTA patterns, icon helpers, placeholder text. |
 | `acceptance-criteria.md` | JS/CSS rules, quality checklists, media-query syntax, token usage. |
@@ -148,9 +150,10 @@ Before writing any code:
    - CSS class namespacing conventions
 2. **Load `references/eds-patterns.md` now** — it covers EDS block
    anatomy, Express utilities, CTA patterns, and icon helpers.
-3. Read `express/code/styles/styles.css` and note all CSS custom
-   properties — `--color-*`, `--spacing-*`, `--body-font-size-*`,
-   `--heading-font-size-*`, `--body-font-family`, `--heading-font-weight`, etc.
+3. Read `express/code/styles/styles.css` and note its CSS custom
+   properties. When the design uses S2A variables, also consult
+   `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`; S2A variables
+   are provided externally, not defined in Express `styles.css`.
    **Load `references/design-tokens.md` now** for the full mapping rules.
 4. Read `express/code/scripts/utils.js` to understand the available
    utilities: `getLibs`, `decorateButtonsDeprecated`, `getIconElementDeprecated`,
@@ -173,15 +176,15 @@ For each provided frame URL, call **all three** tools:
 3. **`get_variable_defs`** — returns the **named design-system variables**
    Figma bound to each layer (e.g. `Palette/gray-100 → #E9E9E9`,
    `Corner-radius/corner-radius-100 → 8px`). The variable **name** is what
-   lets you match against Express tokens by name rather than guessing from
-   the raw value. `get_design_context` gives value + property;
-   `get_variable_defs` gives the name — you need both to map tokens.
+   lets you match against the corresponding CSS custom property by name.
+   Check Express `styles.css` for Express variables and the external S2A
+   stylesheet for S2A variables. `get_design_context` gives value +
+   property; `get_variable_defs` gives the name.
 
 > **Do not skip `get_design_context` or `get_variable_defs`.** Visual
 > estimation from screenshots is the leading cause of incorrect padding,
-> wrong breakpoints, wrong aspect-ratios, and mismatched max-widths. Mapping
-> from raw values without the Figma variable names is the leading cause of
-> picking the wrong same-valued token (e.g. a spacing token on a radius).
+> wrong breakpoints, wrong aspect-ratios, and mismatched max-widths. Do not
+> guess which variable a hardcoded value represents; use the exact value.
 
 ### Figma tool error fallbacks
 
@@ -221,9 +224,10 @@ From `get_design_context` for each frame, extract and record:
 - Typography (font-size, weight, line-height), colours, spacing, and
   radius — for each, capture **both** the Figma variable name (from
   `get_variable_defs`) and the raw value (from `get_design_context`), then
-  resolve to an Express token using the mapping algorithm in
-  `references/design-tokens.md` (exact name match → in-category value match
-  → new token / hardcoded). Always prefer a token over a hardcoded value.
+  resolve a named variable to an exact CSS custom property using the
+  sources and rules in `references/design-tokens.md`. If Figma specifies
+  a hardcoded value, use that exact value in CSS; do not substitute a
+  different variable just because it has the same value.
 
 If multiple frames are provided, explicitly note layout differences
 between breakpoints — these drive your CSS overrides. Pay particular
@@ -271,20 +275,18 @@ breakpoint exactly.
 ### Build the token-mapping table
 
 Using the Figma variable names (`get_variable_defs`) and raw values
-(`get_design_context`) gathered above, resolve every styled value to an
-Express token **now**, following the algorithm in
-`references/design-tokens.md`. Read `express/code/styles/styles.css` first
-if you have not already (Phase 2 step 3).
+(`get_design_context`) gathered above, resolve each named variable to an
+exact Express or S2A CSS custom property, following
+`references/design-tokens.md`. Use hardcoded Figma values directly.
+Consult `express/code/styles/styles.css` for Express variables and the
+external S2A stylesheet for S2A variables (Phase 2 step 3).
 
 Record each resolution so the Phase 9 token-mapping report writes itself.
 Carry forward in particular:
 
-- Every value that did **not** resolve via an exact name match.
-- Any proposed **new `:root` token** — these require user confirmation
-  before commit; raise them as soon as the table is built rather than at the
-  end.
-- Any value you had to **hardcode**, or any value-match you are unsure is
-  semantically correct (mark `review`).
+- Any named Figma variable that has no matching custom property in either
+  source — raise it for user review rather than silently inventing a
+  substitute or duplicating an S2A variable in Express.
 
 ---
 
@@ -622,16 +624,13 @@ Output:
    and number of commits pushed.
 3. **Breakpoints implemented** and which Figma frames they correspond to.
 4. **Token-mapping report** — the table defined in
-   `references/design-tokens.md`. Note the count of clean exact-name
-   matches, then list every Figma variable/value that did **not** resolve
-   via an exact name match, with: Figma variable name, raw value, CSS
-   property, resolution (value-match → which token / new token / hardcoded),
-   and a **Needs decision?** column. Call out every `YES` and `review` row
-   explicitly — these are the items the user must adjudicate.
-5. **New tokens & hardcoded values** — any `:root` token you propose to add
-   (with name, value, and where added) and any Figma value left hardcoded
-   (with the explanatory CSS comment). New `:root` tokens must have been
-   confirmed with the user before commit.
+   `references/design-tokens.md`. Note the count of exact-name matches,
+   then list only named Figma variables that had no exact CSS custom
+   property match, with their raw value, CSS property, and whether a token
+   decision is needed.
+5. **New tokens** — list any unmatched named Figma variables and any
+   proposed Express `:root` token. Do not duplicate S2A variables in
+   Express; get user confirmation before adding a new Express token.
 6. **Acceptance criteria checklist** — confirm each criterion from
    Phase 4 passes (or note exceptions with reasoning).
 7. **Unit test results** — number of tests, pass/fail, any skipped.

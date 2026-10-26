@@ -342,7 +342,7 @@ main .section .discover-cards {
     stroke: var(--color-gray-300);
 }
 
-html[dir="rtl"] .discover-cards .gallery-control button {
+.discover-cards:dir(rtl) .gallery-control button svg {
   transform: scaleX(-1);
 }
 
@@ -364,7 +364,7 @@ html[dir="rtl"] .discover-cards .gallery-control button {
 .discover-cards.flip .flip-card-front,
 .discover-cards.flip .flip-card-back {
   font-size: var(--heading-font-size-s);
-  text-align: left;
+  text-align: start;
   width: 100%;
   height: 100%;
   -webkit-backface-visibility: hidden;
@@ -428,7 +428,7 @@ html[dir="rtl"] .discover-cards .gallery-control button {
 .discover-cards.flip .minus-icon-wrapper {
   position: absolute;
   bottom: var(--spacing-300);
-  right: var(--spacing-300);
+  inset-inline-end: var(--spacing-300);
   width: var(--spacing-400);
   height: var(--spacing-400);
   background-color: var(--color-black);
@@ -447,7 +447,7 @@ html[dir="rtl"] .discover-cards .gallery-control button {
 .discover-cards.flip .minus-icon-wrapper {
   position: absolute;
   bottom: var(--spacing-300);
-  right: var(--spacing-300);
+  inset-inline-end: var(--spacing-300);
   width: var(--spacing-400);
   height: var(--spacing-400);
   background-color: var(--color-black);

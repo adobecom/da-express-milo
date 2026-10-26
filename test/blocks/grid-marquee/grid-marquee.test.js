@@ -34,6 +34,19 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     window.requestAnimationFrame = originalRAF;
   });
 
+  it('Legacy mode selects the RTL logo without branding metadata', async () => {
+    const originalDirection = document.documentElement.dir;
+    document.documentElement.dir = 'rtl';
+    try {
+      document.body.innerHTML = oldAuthoring;
+      const block = document.querySelector('.grid-marquee');
+      await decorateGrid(block);
+      expect(block.querySelector('.express-logo').getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo-rtl.svg');
+    } finally {
+      document.documentElement.dir = originalDirection;
+    }
+  });
+
   it('Legacy mode (h1 inside grid-marquee) decorates headline and CTAs', async () => {
     document.body.innerHTML = oldAuthoring;
     const gm = document.querySelector('.grid-marquee');
