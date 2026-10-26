@@ -284,6 +284,12 @@ describe('Susi-light', async () => {
       const component = blockWithEduContext.querySelector('susi-sentry-light');
       expect(component.authParams.dctx_id).to.equal(DCTX_ID_MAP['context-edu'].stage);
     });
+    it('has stage and prod ids for every context', () => {
+      Object.entries(DCTX_ID_MAP).forEach(([context, ids]) => {
+        expect(ids.stage, `${context} stage`).to.match(/^v:2,/);
+        expect(ids.prod, `${context} prod`).to.match(/^v:2,/);
+      });
+    });
   });
 
   describe('susi-light simplified color variant', () => {
