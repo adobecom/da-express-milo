@@ -18,7 +18,8 @@ permissions:
 jobs:
   run-nala-tests:
     name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
-    runs-on: ubuntu-latest
+    # Playwright 1.52 supports Ubuntu 24.04, not 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       # Don't cancel the other lanes when one fails — we want the full picture.
@@ -36,19 +37,34 @@ jobs:
           - { lane_id: shard3, node: 24.x, shard: '3/4', exclude: '@color', grep: '', workers: '' }
           - { lane_id: shard4, node: 24.x, shard: '4/4', exclude: '@color', grep: '', workers: '' }
           - { lane_id: color, node: 24.x, shard: '', exclude: '', grep: '@color', workers: '1' }
+          # Signed-in (IMS) tests: one unsharded lane so the user signs in once.
+          # grep '@login' overrides PR-label tags so the auth setup always runs.
+          # Runs only on the release PR (stage -> main), against its own
+          # stage-- host; skipped on every other PR/event (see NALA_SKIP_LANE).
+          - { lane_id: login, node: 24.x, shard: '', exclude: '', grep: '@login', workers: '1', projects: '--project=express-login-chromium', release_only: true }
+
+    env:
+      NALA_SKIP_LANE: ${{ matrix.release_only == true && !(github.base_ref == 'main' && github.head_ref == 'stage') }}
 
     steps:
+      - name: Skip release-only lane
+        if: env.NALA_SKIP_LANE == 'true'
+        run: echo "::notice title=Nala ${{ matrix.lane_id }} lane skipped::The ${{ matrix.lane_id }} lane only runs on the stage -> main release PR."
+
       - name: Checkout repository
+        if: env.NALA_SKIP_LANE != 'true'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 2
 
       - name: Set up Node.js ${{ matrix.node }}
+        if: env.NALA_SKIP_LANE != 'true'
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
         with:
           node-version: ${{ matrix.node }}
 
       - name: Cache node_modules
+        if: env.NALA_SKIP_LANE != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -57,15 +73,18 @@ jobs:
           key: npm-${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/package-lock.json') }}
 
       - name: Cache Playwright browsers
+        if: env.NALA_SKIP_LANE != 'true'
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: ms-playwright-${{ runner.os }}-${{ matrix.node }}-chromium
 
       - name: Install dependencies
+        if: env.NALA_SKIP_LANE != 'true'
         run: npm ci --no-fund --prefer-offline
 
       - name: Install Playwright (all browsers)
+        if: env.NALA_SKIP_LANE != 'true'
         # Normally ~40s, but a slow Ubuntu package mirror (via --with-deps) has
         # been observed dragging this to ~7min while still succeeding. A truly
         # hung mirror would otherwise stall until the 30-min job timeout,
@@ -75,14 +94,16 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Set execute permission for pr.run.sh
+        if: env.NALA_SKIP_LANE != 'true'
         run: chmod +x ./nala/utils/pr.run.sh
 
       - name: Run Nala Tests
+        if: env.NALA_SKIP_LANE != 'true'
         run: ./nala/utils/pr.run.sh
         env:
           # PR gate: full cross-browser matrix, sharded across parallel jobs
           # so wall-clock stays low even with all three browsers.
-          NALA_PROJECTS: --project=express-live-chromium --project=express-live-firefox --project=express-live-webkit
+          NALA_PROJECTS: ${{ matrix.projects || '--project=express-live-chromium --project=express-live-firefox --project=express-live-webkit' }}
           # Sharded lanes: SHARD set + exclude @color. Color lane: no shard,
           # grep only @color, workers=1 (serial).
           SHARD: ${{ matrix.shard }}
@@ -102,7 +123,7 @@ jobs:
           IMS_PASS: ${{ secrets.IMS_PASS }}
 
       - name: Upload test results and screenshots
-        if: always()
+        if: always() && env.NALA_SKIP_LANE != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: nala-test-results-${{ github.run_number }}-${{ matrix.lane_id }}
