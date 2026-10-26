@@ -322,6 +322,23 @@ window.addEventListener('unhandledrejection', (event) => {
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
 preDecorateSections(document);
 
+// Milo's decorateHeader only runs after personalization, so a hero shown before it would be
+// pushed down when the nav reserves its height. Mirror its className (Milo overwrites it with
+// the same value) and its localnav check (isLocalNav; Express defaults gnav-source to
+// localnav-express).
+function reserveGnavSpace() {
+  const header = document.querySelector('body > header');
+  const headerMeta = getMetadata('header');
+  if (!header || header.className || headerMeta === 'off') return;
+  header.className = headerMeta || 'global-navigation';
+  const gnavSource = getMetadata('gnav-source') || 'localnav-express';
+  const newNav = new URLSearchParams(window.location.search).get('newNav');
+  const newNavEnabled = newNav ? newNav !== 'false' : getMetadata('mobile-gnav-v2') !== 'off';
+  if (newNavEnabled && gnavSource.split('/').pop().startsWith('localnav-')) {
+    header.dataset.reserveLocalnav = '';
+  }
+}
+
 // Tier 1e: paint an opted-in hero block from authored content before Milo's section
 // pipeline runs. Milo's loadBlock later reuses the same module + stylesheet and calls
 // init(), which skips the already-rendered markup and only runs the async enhancements.
@@ -356,7 +373,10 @@ const FAST_HERO_BLOCKS = new Set(['grid-marquee']);
   });
   Promise.all([import(`${base}.js`), cssLoaded]).then(([mod]) => {
     if (!hero.isConnected || !mod.renderCritical?.(hero)) return;
+    // Block CSS is scoped to `main .section`; Milo sets the same className later.
+    section.classList.add('section');
     section.dataset.heroFast = '';
+    reserveGnavSpace();
   }).catch((e) => {
     window.lana?.log(`Fast hero render failed: ${e?.message || e}`, { tags: 'hero-fast', severity: 'error' });
   });
@@ -453,7 +473,8 @@ CONFIG.decorateArea = decorateAreaWithLCP;
   }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
-    const existing = document.querySelector(`link[href="${path}"]`);
+    // Match rel=stylesheet only: head.html may <link rel="preload"> the same href.
+    const existing = document.querySelector(`link[rel="stylesheet"][href="${path}"]`);
     if (existing) return;
 
     const link = document.createElement('link');

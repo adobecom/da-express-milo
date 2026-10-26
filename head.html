@@ -114,6 +114,40 @@
     }
   })();
 
+  // Hero critical path: scripts.js -> utils.js -> styles -> hero block are otherwise
+  // discovered one after another. Start them all now. Hrefs must match what
+  // scripts.js / Milo request: libs mirrors setLibs() in express/code/scripts/utils.js.
+  (function preloadCriticalPath() {
+    if (headAlreadyLoaded) return;
+    const preload = (href, rel, as) => {
+      const link = document.createElement('link');
+      link.rel = rel;
+      link.href = href;
+      if (as) link.as = as;
+      document.head.append(link);
+    };
+    const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content.trim().toLowerCase();
+    const { hostname, search, origin } = window.location;
+    let libs = '/libs';
+    if (['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) {
+      const branch = new URLSearchParams(search).get('milolibs') || 'main';
+      if (!/^[a-zA-Z0-9_-]+$/.test(branch)) return;
+      if (branch === 'local') libs = 'http://localhost:6456/libs';
+      else if (!(branch === 'main' && hostname.includes('.stage.'))) {
+        libs = branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
+      }
+    }
+    preload('/express/code/scripts/utils.js', 'modulepreload');
+    preload(`${libs}/styles/styles.css`, 'preload', 'style');
+    if (meta('theme') !== 'doodlebug') preload('/express/code/styles/styles.css', 'preload', 'style');
+    // Only grid-marquee opts into hero-fast (FAST_HERO_BLOCKS in scripts.js).
+    if (['on', 'force'].includes(meta('hero-fast'))) {
+      const base = `${origin}/express/code/blocks/grid-marquee/grid-marquee`;
+      preload(`${base}.css`, 'preload', 'style');
+      preload(`${base}.js`, 'modulepreload');
+    }
+  })();
+
   flagMeta.content = 'true';
 </script>
 <script src="/express/code/scripts/fallback.js" nomodule></script>

@@ -1212,6 +1212,14 @@ main > div[data-hero-fast][data-hero-fast] {
   position: relative;
 }
 
+/* hero-fast: hold the localnav's height until Milo inserts .feds-localnav after the header
+   (shown below 900px, see Milo styles.css), so the early hero isn't pushed down. */
+@media (max-width: 899px) {
+  header[data-reserve-localnav]:not(:has(+ .feds-localnav)) {
+    margin-bottom: var(--feds-localnav-height);
+  }
+}
+
 /* jank protection for async blocks/sections */
 main .pricing,
 main .hero-animation {

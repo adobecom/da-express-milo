@@ -144,6 +144,12 @@ main .section .grid-marquee h1 {
   width: var(--m-img-w);
 }
 
+/* Authored card images often lack width/height, so the cards would grow as each image
+   arrives. Hold the usual 4:3 box until the real ratio is known (auto takes over on load). */
+.grid-marquee .face img:not([height]) {
+  aspect-ratio: auto 4 / 3;
+}
+
 .grid-marquee .drawer {
   z-index: 3;
   display: flex;
