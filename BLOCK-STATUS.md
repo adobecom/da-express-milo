@@ -11,7 +11,7 @@ Background: [Express block deprecation proposal](https://wiki.corp.adobe.com/x/R
 - **Deprecated**: Critical fixes only. Authors and developers are warned not to use it. Needs a migration plan attached. After migration, the code is removed.
 - **Removed**: The code is gone. When you delete a block's code, delete its row here too.
 
-Authors see a "Deprecated" label on these blocks in preview, driven by the DA sheet `/express/consonant.json`. Keep that sheet in sync with the Deprecated table.
+Authors see a "Deprecated" label on these blocks in preview, driven by the DA sheet `/consonant.json`. Keep that sheet in sync with the Deprecated table.
 
 ## Deprecated
 
