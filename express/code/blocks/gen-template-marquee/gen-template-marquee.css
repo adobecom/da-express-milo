@@ -290,6 +290,12 @@ main .section .gen-template-suggestions-label {
   gap: var(--gen-template-column-gap);
   width: max-content;
   margin-top: 40px;
+  /* The gallery is wider than the viewport by design. Safari keeps overflowing
+     grid items start-aligned (safe alignment), so center explicitly: pin the
+     left edge to the track midpoint, then pull back by half our own width. */
+  justify-self: left;
+  margin-left: 50%;
+  translate: -50% 0;
 }
 
 .gen-template-column {
