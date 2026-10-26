@@ -13,6 +13,8 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
   --gen-template-heading-line-height: 32px;
   --gen-template-body-subtle: rgb(0 0 0 / 64%);
   position: relative; 
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   box-sizing: border-box;
   overflow: clip;
   padding: var(--gen-template-padding-top) var(--spacing-300) var(--gen-template-gallery-bottom-padding);
@@ -346,7 +348,7 @@ main .section .gen-template-suggestions-label {
     .gen-template-content {
       --gen-template-content-lift: 64px;
       position: sticky;
-      top: calc(var(--feds-height-nav, 64px) + var(--gen-template-padding-top));
+      inset-block-start: calc(var(--feds-height-nav, var(--spacing-800)) + var(--gen-template-padding-top)); /* stylelint-disable-line declaration-property-value-disallowed-list -- FEDS token is optional */
       z-index: 0;
       animation: gen-template-content-fade linear both;
       animation-timeline: --gen-template-marquee;
@@ -361,6 +363,12 @@ main .section .gen-template-suggestions-label {
       animation-timeline: --gen-template-marquee;
       animation-range: contain 0% contain 60%;
     }
+    .gen-template-marquee.scroll-animation-disabled .gen-template-content,
+    .gen-template-marquee.scroll-animation-disabled .gen-template-gallery,
+    .gen-template-marquee.scroll-animation-disabled .gen-template-column {
+      animation: none;
+    }
+
 
 
     /* Mobile: side columns fan outward while the block scrolls away, fully off-screen by exit. */
