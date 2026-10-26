@@ -68,7 +68,7 @@ async function getDestURL(url) {
     destURL = new URL(appended);
   } catch (error) {
     window.lana?.log(`invalid redirect uri for susi-light: ${url}: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-invalid-redirect-uri', severity: 'error' });
-    destURL = new URL('https://new.express.adobe.com');
+    destURL = new URL('https://express.adobe.com');
   }
   if (isStage) {
     if (['new.express.adobe.com', 'express.adobe.com'].includes(destURL.hostname)) {
