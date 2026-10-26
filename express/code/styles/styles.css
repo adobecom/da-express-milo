@@ -1204,6 +1204,14 @@ main .section #hero {
   color: initial;
 }
 
+/* hero-fast: scripts.js rendered the hero block early; show its section before Milo
+   clears data-status. The doubled attribute outranks Milo's
+   `main .section:is([data-status='decorated'], [data-status='pending'])`. */
+main > div[data-hero-fast][data-hero-fast] {
+  display: block;
+  position: relative;
+}
+
 /* jank protection for async blocks/sections */
 main .pricing,
 main .hero-animation {

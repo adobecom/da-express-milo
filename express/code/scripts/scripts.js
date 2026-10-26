@@ -321,6 +321,47 @@ window.addEventListener('unhandledrejection', (event) => {
 
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
 preDecorateSections(document);
+
+// Tier 1e: paint an opted-in hero block from authored content before Milo's section
+// pipeline runs. Milo's loadBlock later reuses the same module + stylesheet and calls
+// init(), which skips the already-rendered markup and only runs the async enhancements.
+const FAST_HERO_BLOCKS = new Set(['grid-marquee']);
+(function renderFastHero() {
+  if (window.isTestEnv) return;
+  const heroFast = getMetadata('hero-fast')?.trim().toLowerCase();
+  if (heroFast !== 'on' && heroFast !== 'force') return;
+  if (heroFast === 'on') {
+    // Blocking Target or an MEP preview may rewrite section 1: keep today's behavior.
+    if (getMetadata('target')?.trim().toLowerCase() === 'on') return;
+    if (new URLSearchParams(window.location.search).has('mep')) return;
+  }
+  const section = document.querySelector('body > main > div:first-child');
+  const hero = section?.querySelector(':scope > div[class]');
+  const name = hero?.classList[0];
+  if (!FAST_HERO_BLOCKS.has(name)) return;
+  // Revealing the section early is only safe when nothing else in it is still undecorated.
+  const others = [...section.children].filter((el) => el !== hero && !el.matches('.section-metadata'));
+  if (others.length) return;
+
+  // Same absolute URLs Milo's loadBlock uses (config.codeRoot is origin-prefixed), so its
+  // loadStyle dedupes the stylesheet and its import() hits the same module instance.
+  const base = `${window.location.origin}/express/code/blocks/${name}/${name}`;
+  const cssLoaded = new Promise((resolve) => {
+    const link = document.createElement('link');
+    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('href', `${base}.css`);
+    link.onload = resolve;
+    link.onerror = resolve;
+    document.head.append(link);
+  });
+  Promise.all([import(`${base}.js`), cssLoaded]).then(([mod]) => {
+    if (!hero.isConnected || !mod.renderCritical?.(hero)) return;
+    section.dataset.heroFast = '';
+  }).catch((e) => {
+    window.lana?.log(`Fast hero render failed: ${e?.message || e}`, { tags: 'hero-fast', severity: 'error' });
+  });
+}());
+
 // LCP image decoration
 const eagerLoad = (img) => {
   img?.setAttribute('loading', 'eager');
@@ -517,10 +558,45 @@ const listenAlloy = () => {
   }, 3000);
 };
 
+const CONTENT_REPLACE_MARKERS = /\{\{|%7B%7B|default-create-link|Default template (title|text)|Default top templates/;
+// content-replace.js awaits placeholders before decoration. Under /express/templates/ only run
+// it when the page actually has something for it to replace (see content-replace.js).
+function needsContentReplace(main) {
+  if (getMetadata('sheet-powered') === 'Y') return true;
+  if (!window.location.href.includes('/express/templates/')) return false;
+  if (getMetadata('template-search-page') || getMetadata('live') === 'N') return true;
+  if (window.location.pathname.endsWith('/express/templates/default')) return true;
+  if (!main || document.title.includes('{{')) return true;
+  if (main.querySelector('.browse-by-category')) return true;
+  const hashLinkToMetadata = [...main.querySelectorAll('a[href*="#"]')]
+    .some((a) => a.hash.length > 1 && getMetadata(a.hash.slice(1)));
+  return hashLinkToMetadata || CONTENT_REPLACE_MARKERS.test(main.innerHTML);
+}
+
+// Tier 1b: hero OST links were neutralized in decorateArea so Milo's preloadLcpCodeFiles
+// doesn't pull merch/commerce into the critical path. Hand them to Milo's merch block now.
+function loadDeferredMerch(loadBlock) {
+  document.querySelectorAll('a[data-deferred-merch]').forEach(async (a) => {
+    // The hero block decorated this link (button, primaryCTA, ...). On the eager path merch
+    // swapped the link first and the block decorated the replacement; replay that here.
+    const heroClasses = [...a.classList];
+    const { parentNode } = a;
+    const index = [...parentNode.childNodes].indexOf(a);
+    a.href = a.dataset.deferredMerch;
+    delete a.dataset.deferredMerch;
+    // Same shape decorateAutoBlock gives it: Milo derives the block name from classList[0].
+    a.className = 'merch link-block';
+    await loadBlock(a);
+    const cta = parentNode.childNodes[index];
+    if (cta !== a && heroClasses.length && cta?.classList) cta.classList.add(...heroClasses);
+  });
+}
+
 async function loadPage() {
   if (window.isTestEnv) return;
   const {
     loadArea,
+    loadBlock,
     loadStyle,
     setConfig,
     loadLana,
@@ -558,7 +634,7 @@ async function loadPage() {
   // TODO remove metadata after we go live
   getMetadata('gnav-source') || document.head.append(createTag('meta', { name: 'gnav-source', content: `${config.locale.prefix}/express/localnav-express` }));
 
-  if (getMetadata('sheet-powered') === 'Y' || window.location.href.includes('/express/templates/')) {
+  if (needsContentReplace(document.querySelector('main'))) {
     const { default: replaceContent } = await import('./utils/content-replace.js');
     await replaceContent(document.querySelector('main'));
   }
@@ -579,9 +655,12 @@ async function loadPage() {
   buildAutoBlocks();
   decorateHeroLCP(loadStyle, config, createTag, getMetadata);
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('martech') !== 'off' && getMetadata('martech') !== 'off') {
-    import('./instrument.js').then((mod) => { mod.default(); });
-  }
+  const martechOn = urlParams.get('martech') !== 'off' && getMetadata('martech') !== 'off';
+  const loadInstrument = () => import('./instrument.js').then((mod) => { mod.default(); });
+  // Tier 1a (opt-in): keep analytics wiring off the critical path. Opt-in until analytics
+  // owners confirm nothing in instrument.js must be set before Milo's page-view event.
+  const deferInstrument = getMetadata('defer-instrument')?.trim().toLowerCase() === 'on';
+  if (martechOn && !deferInstrument) loadInstrument();
 
   /* region based redirect to CN homepage */
   const isAdobeOrigin = /^(www|color)\.(stage\.)?adobe\.com$/.test(window.location.hostname);
@@ -604,6 +683,8 @@ async function loadPage() {
   await loadArea();
   stopFixedTopOffsetTracking?.();
   stopFixedTopOffsetTracking = await trackFixedTopOffset(config);
+  loadDeferredMerch(loadBlock);
+  if (martechOn && deferInstrument) loadInstrument();
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
