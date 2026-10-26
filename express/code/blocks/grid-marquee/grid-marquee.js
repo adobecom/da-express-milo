@@ -444,6 +444,19 @@ export default async function init(el) {
       const logo = el.querySelector(':scope > .foreground > .express-logo');
       const fresh = makeBrandingLogo();
       if (logo && logo.getAttribute('src') !== fresh.getAttribute('src')) logo.replaceWith(fresh);
+      // Milo's merch block swaps OST links for a fresh checkout-link element (merch.js
+      // el.replaceWith), dropping the button classes renderCritical applied. On the normal path
+      // the swap happens before this block decorates; here it happens after, so re-apply them.
+      const ctas = el.querySelector(':scope > .foreground > .headline .ctas');
+      if (ctas) {
+        const redecorate = () => {
+          const links = [...ctas.querySelectorAll(':scope > a')];
+          links.forEach((a) => a.classList.add('button'));
+          links[0]?.classList.add('primaryCTA');
+        };
+        redecorate();
+        new MutationObserver(redecorate).observe(ctas, { childList: true });
+      }
     }
     const ratingsPlaceholder = el.querySelector(':scope > .foreground > .ratings');
     if (ratingsPlaceholder) await loadRatings(ratingsPlaceholder);
