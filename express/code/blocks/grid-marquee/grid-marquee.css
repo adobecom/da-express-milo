@@ -50,6 +50,12 @@ main .section .grid-marquee h1 {
   display: none;
 }
 
+/* hero-fast: Milo hasn't swapped in the checkout link yet (see decorateLegacyHeadline).
+   Hidden, not removed, so the decorated sibling buttons keep the row's height. */
+.grid-marquee .headline .ctas.merch-pending {
+  visibility: hidden;
+}
+
 .grid-marquee .headline a:not(.primaryCTA) {
   background-color: var(--color-black);
   border-color: var(--color-black);

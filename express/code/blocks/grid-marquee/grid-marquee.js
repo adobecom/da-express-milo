@@ -319,8 +319,14 @@ function decorateLegacyHeadline(headline) {
     return headline;
   }
   ctas[0].parentElement.classList.add('ctas');
+  // OST links still here mean the early (hero-fast) render: Milo's merch block will rewrite and
+  // then replace them, so styling them now only makes the button resize twice. Leave them alone
+  // and keep the row hidden (its other buttons still reserve the height) until the swap is done.
+  const isPendingMerch = (a) => a.href.includes('/tools/ost?');
+  if ([...ctas].some(isPendingMerch)) ctas[0].parentElement.classList.add('merch-pending');
   const heading = headline.querySelector('h1, h2, h3, h4, h5, h6');
   ctas.forEach((cta) => {
+    if (isPendingMerch(cta)) return;
     cta.classList.add('button');
     if (cta.querySelector('.icon')) return;
     const icon = cta.parentElement?.querySelector(':scope > .icon');
@@ -337,7 +343,7 @@ function decorateLegacyHeadline(headline) {
       cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
     }
   });
-  ctas[0].classList.add('primaryCTA');
+  if (!isPendingMerch(ctas[0])) ctas[0].classList.add('primaryCTA');
   // Defer pricing formatting to idle time
   // eslint-disable-next-line compat/compat
   const idleCb = (cb) => (window.requestIdleCallback
@@ -445,17 +451,33 @@ export default async function init(el) {
       const fresh = makeBrandingLogo();
       if (logo && logo.getAttribute('src') !== fresh.getAttribute('src')) logo.replaceWith(fresh);
       // Milo's merch block swaps OST links for a fresh checkout-link element (merch.js
-      // el.replaceWith), dropping the button classes renderCritical applied. On the normal path
-      // the swap happens before this block decorates; here it happens after, so re-apply them.
-      const ctas = el.querySelector(':scope > .foreground > .headline .ctas');
+      // el.replaceWith). On the normal path that happens before this block decorates; here it
+      // happens after, so decorate the replacement and reveal the row once nothing is pending.
+      const ctas = el.querySelector(':scope > .foreground > .headline .ctas.merch-pending');
       if (ctas) {
-        const redecorate = () => {
+        const heading = el.querySelector('.headline h1, .headline h2, .headline h3');
+        const settle = () => {
           const links = [...ctas.querySelectorAll(':scope > a')];
-          links.forEach((a) => a.classList.add('button'));
+          if (links.some((a) => a.href.includes('/tools/ost?'))) return false;
+          links.forEach((a) => {
+            a.classList.add('button');
+            if (!a.getAttribute('aria-label') && heading) {
+              a.setAttribute('aria-label', `${a.textContent.trim()} ${heading.textContent.trim()}`);
+            }
+          });
           links[0]?.classList.add('primaryCTA');
+          ctas.classList.remove('merch-pending');
+          return true;
         };
-        redecorate();
-        new MutationObserver(redecorate).observe(ctas, { childList: true });
+        if (!settle()) {
+          const observer = new MutationObserver(() => settle() && observer.disconnect());
+          observer.observe(ctas, { childList: true });
+          // Never leave the CTAs hidden if commerce fails to load.
+          setTimeout(() => {
+            observer.disconnect();
+            ctas.classList.remove('merch-pending');
+          }, 10000);
+        }
       }
     }
     const ratingsPlaceholder = el.querySelector(':scope > .foreground > .ratings');
