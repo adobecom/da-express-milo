@@ -38,10 +38,11 @@ after release.
 - **Problem:** an OST link (`/tools/ost?…`) in section 1 makes Milo's `preloadLcpCodeFiles` import
   `merch.js` and `commerce.js` (~230 KB) before the hero can paint.
 - **Fix:**
-  - **Gate:** deferral only happens when the page is mobile (`body[data-device="mobile"]`, from the
-    user agent) **and** the page has `show-floating-cta` set to `yes`/`y`/`true`/`on`. There the
-    floating CTA stands in for the hero trial link, so a late checkout href costs nothing. On desktop,
-    or on pages with no floating CTA, Milo's eager behavior is unchanged.
+  - **Gate:** deferral only happens on a **portrait phone** (`body[data-device="mobile"]` from the
+    user agent, and `(orientation: portrait) and (max-width: 767px)` at load) **and** when the page
+    has `show-floating-cta` set to `yes`/`y`/`true`/`on`. There `grid-marquee` hides the hero CTAs
+    and the floating CTA stands in for them, so a late checkout href costs nothing. Landscape
+    phones, tablets, desktop, and pages without a floating CTA keep Milo's eager behavior.
   - In `decorateArea` (document only), section 1 OST links not marked `#_dnb` get their href moved to
     `data-deferred-merch` and replaced with `#`, so Milo never sees commerce in section 1.
   - When section 1 finishes loading (Milo removes `data-status`), each parked link is restored and
@@ -54,12 +55,9 @@ after release.
 - **Opt-out:** metadata `defer-hero-commerce: off`.
 - **Known limit:** on mobile, Milo's global navigation still imports `merch.js`/`commerce.js`
   (`global-navigation.js:63`). The hero no longer needs them, but they still download.
-- **Trade-off (mobile only):** until merch loads, the hero trial link's href is `#`.
-  - Portrait phones: `grid-marquee` hides the hero CTAs below 768 px, so the link is never shown and
-    never built.
-  - Landscape phones and tablets (UA reports "Mobile", width ≥ 768 px): the link is visible next to
-    the floating CTA and becomes a working checkout link about 10 s after the hero shows on Slow 4G.
-  - Desktop no longer has this trade-off: the link is ready as soon as Milo resolves it, as on `main`.
+- **Trade-off:** none visible. The parked link is hidden on portrait phones, so it's never built.
+  If the phone rotates to a width ≥ 768 px, the link appears with `href="#"` and becomes a
+  working checkout link once merch loads (about 10 s on Slow 4G).
 
 ### 2. The templates placeholder pass is gated (Tier 1c)
 **File:** `express/code/scripts/scripts.js` (`needsContentReplace`)
@@ -157,7 +155,7 @@ All 13 tests pass. ESLint and Stylelint are clean.
 | Key | Values | Default | Effect |
 |---|---|---|---|
 | `hero-fast` | `on` / `force` / absent | absent (off) | Early `grid-marquee` render plus block preloads. `on` steps aside for `target: on` or `?mep`. |
-| `defer-hero-commerce` | `off` | deferred on mobile when `show-floating-cta` is on | `off` restores Milo's eager merch for section 1 OST links. Desktop and pages without a floating CTA are never deferred. |
+| `defer-hero-commerce` | `off` | deferred on portrait phones when `show-floating-cta` is on | `off` restores Milo's eager merch for section 1 OST links. Landscape phones, tablets, desktop and pages without a floating CTA are never deferred. |
 | `defer-instrument` | `on` | off | Loads `instrument.js` after `loadArea()`. |
 | `target` | `on` / `postLCP` / `off` | page-defined | Milo-native. `postLCP` moves Target after LCP (Tier 0). |
 
@@ -230,10 +228,10 @@ sign-off.
    The page must not stay blank (that would be a `loadStyles` regression).
 3. **Deferred commerce.**
    - Desktop: no `data-deferred-merch`; the trial CTA resolves eagerly as on `main`.
-   - Mobile without `show-floating-cta`: same as desktop.
-   - Mobile with `show-floating-cta: yes`: the link is parked (`data-deferred-merch`, `href="#"`)
-     and becomes a `checkout-link` to `commerce.adobe.com/store/segmentation…` once section 1 loads
-     and the link is visible. Portrait phones never convert the hidden CTA.
+   - Landscape phone, tablet, or any mobile page without `show-floating-cta`: same as desktop.
+   - Portrait phone with `show-floating-cta: yes`: the link is parked (`data-deferred-merch`,
+     `href="#"`, hidden by the hero CSS) and never converted unless it becomes visible (rotation),
+     then it becomes a `checkout-link` to `commerce.adobe.com/store/segmentation…`.
    - With `defer-hero-commerce: off`: Milo's eager behavior on every device.
 4. **No layout shift.** Use a Performance trace or the `layout-shift` observer. Expect CLS < 0.01.
    The hero must not jump when the nav or localnav appears or when the card images load.
@@ -257,7 +255,7 @@ sign-off.
 | `head.html` copy of `setLibs()` drifts | Comment in both places; any `setLibs` change must update `head.html` |
 | `renderCritical` and `init` drift apart | Unit tests in place; add Nala coverage for the two-phase render |
 | Milo changes its section CSS or `decorateHeader` | Flags fall back to today's behavior; ask Milo for a supported early-reveal hook |
-| Late checkout href on landscape phones and tablets | Only where a floating CTA is present; option: build the segmentation URL in Express (needs MAS sign-off), or ask MAS for a checkout-only build |
+| Rotating a portrait phone to ≥ 768 px wide shows a late checkout href | Rare; link converts once visible. Option: build the segmentation URL in Express (needs MAS sign-off), or ask MAS for a checkout-only build |
 | `merch.js`/`commerce.js` still load on mobile via the gnav | Milo-owned; raise with the Milo team |
 | Homepage manifests and IMS still on the critical path | Tier 2: ask Milo for an opt-in `personalization: postLCP` |
 
