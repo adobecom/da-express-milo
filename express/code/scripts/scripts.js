@@ -573,22 +573,56 @@ function needsContentReplace(main) {
   return hashLinkToMetadata || CONTENT_REPLACE_MARKERS.test(main.innerHTML);
 }
 
+// Runs cb once Milo has finished section 1 (processSection deletes data-status after all its
+// blocks load), i.e. right at LCP rather than after loadArea has processed every section.
+function onFirstSectionLoaded(cb) {
+  const section = document.querySelector('body > main > div');
+  if (!section) return;
+  const done = () => section.classList.contains('section') && !section.dataset.status;
+  const observer = new MutationObserver(() => {
+    if (!done()) return;
+    observer.disconnect();
+    cb();
+  });
+  observer.observe(section, { attributes: true, attributeFilter: ['class', 'data-status'] });
+}
+
+// Calls cb once el has a layout box. Hero CTAs can be display:none at some breakpoints
+// (grid-marquee hides .ctas below 768px, where the floating CTA takes over); there's no
+// point paying for merch + commerce for a link nobody can see.
+function whenRendered(el, cb) {
+  if (el.getClientRects().length) {
+    cb();
+    return;
+  }
+  const observer = new ResizeObserver(() => {
+    if (!el.getClientRects().length) return;
+    observer.disconnect();
+    cb();
+  });
+  observer.observe(el);
+}
+
 // Tier 1b: hero OST links were neutralized in decorateArea so Milo's preloadLcpCodeFiles
 // doesn't pull merch/commerce into the critical path. Hand them to Milo's merch block now.
 function loadDeferredMerch(loadBlock) {
-  document.querySelectorAll('a[data-deferred-merch]').forEach(async (a) => {
-    // The hero block decorated this link (button, primaryCTA, ...). On the eager path merch
-    // swapped the link first and the block decorated the replacement; replay that here.
-    const heroClasses = [...a.classList];
-    const { parentNode } = a;
-    const index = [...parentNode.childNodes].indexOf(a);
-    a.href = a.dataset.deferredMerch;
-    delete a.dataset.deferredMerch;
-    // Same shape decorateAutoBlock gives it: Milo derives the block name from classList[0].
-    a.className = 'merch link-block';
-    await loadBlock(a);
-    const cta = parentNode.childNodes[index];
-    if (cta !== a && heroClasses.length && cta?.classList) cta.classList.add(...heroClasses);
+  document.querySelectorAll('a[data-deferred-merch]:not([data-merch-queued])').forEach((a) => {
+    a.dataset.merchQueued = '';
+    whenRendered(a, async () => {
+      // The hero block decorated this link (button, primaryCTA, ...). On the eager path merch
+      // swapped the link first and the block decorated the replacement; replay that here.
+      const heroClasses = [...a.classList];
+      const { parentNode } = a;
+      const index = [...parentNode.childNodes].indexOf(a);
+      a.href = a.dataset.deferredMerch;
+      delete a.dataset.deferredMerch;
+      delete a.dataset.merchQueued;
+      // Same shape decorateAutoBlock gives it: Milo derives the block name from classList[0].
+      a.className = 'merch link-block';
+      await loadBlock(a);
+      const cta = parentNode.childNodes[index];
+      if (cta !== a && heroClasses.length && cta?.classList) cta.classList.add(...heroClasses);
+    });
   });
 }
 
@@ -680,9 +714,13 @@ async function loadPage() {
     icon.dataset.svgInjected = 'true';
   });
 
+  if (document.querySelector('a[data-deferred-merch]')) {
+    onFirstSectionLoaded(() => loadDeferredMerch(loadBlock));
+  }
   await loadArea();
   stopFixedTopOffsetTracking?.();
   stopFixedTopOffsetTracking = await trackFixedTopOffset(config);
+  // Fallback if section 1 was replaced before it finished (e.g. MEP); no-op once handled.
   loadDeferredMerch(loadBlock);
   if (martechOn && deferInstrument) loadInstrument();
 
