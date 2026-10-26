@@ -349,7 +349,7 @@ main .section .gen-template-suggestions-label {
     .gen-template-content {
       --gen-template-content-lift: 64px;
       position: sticky;
-      top: calc(var(--feds-height-nav, 64px) + var(--gen-template-padding-top));
+      top: calc(var(--feds-height-nav) + var(--gen-template-padding-top));
       z-index: 0;
       animation: gen-template-content-fade linear both;
       animation-timeline: --gen-template-marquee;
