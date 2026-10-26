@@ -257,17 +257,6 @@ function trackScrollEnd(list) {
   new ResizeObserver(update).observe(list);
 }
 
-function manageScrollAnimation(block) {
-  const update = () => {
-    block.classList.toggle('scroll-animation-disabled', block.scrollHeight <= window.innerHeight);
-  };
-  const observer = new ResizeObserver(update);
-  update();
-  observer.observe(block);
-  observer.observe(document.documentElement);
-  block.addEventListener('block-unload', () => observer.disconnect(), { once: true });
-}
-
 function addInteractions(block) {
   block.addEventListener('input', (event) => {
     const textarea = event.target.closest('.gen-template-prompt-input');
@@ -323,7 +312,6 @@ export default async function decorate(block) {
   const gallery = buildGallery(columns);
 
   block.replaceChildren(content, gallery);
-  manageScrollAnimation(block);
   addInteractions(block);
   trackScrollEnd(block.querySelector('.gen-template-suggestion-list'));
   resizePrompt(block.querySelector('.gen-template-prompt-input'));

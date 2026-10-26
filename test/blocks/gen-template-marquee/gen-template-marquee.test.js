@@ -72,8 +72,6 @@ describe('gen-template-marquee', () => {
 
   afterEach(() => {
     window.fetch = originalFetch;
-    document.querySelectorAll('.gen-template-marquee')
-      .forEach((block) => block.dispatchEvent(new Event('block-unload')));
     document.body.replaceChildren();
     document.head.querySelectorAll('meta[data-gen-template-test]').forEach((meta) => meta.remove());
   });
@@ -92,16 +90,6 @@ describe('gen-template-marquee', () => {
     expect(form.dataset.mobileHref).to.equal('https://new.express.adobe.com/new?category=templates&height=1080&width=1080&unit=px&action=text+to+template');
     expect(block.querySelector('.gen-template-suggestions-label').textContent)
       .to.equal('Get started with an example prompt');
-  });
-
-  it('disables scroll animations when the block fits inside the viewport', async () => {
-    document.body.innerHTML = fixture;
-    const block = document.querySelector('.gen-template-marquee');
-    Object.defineProperty(block, 'scrollHeight', { value: window.innerHeight });
-
-    await decorate(block);
-
-    expect(block.classList.contains('scroll-animation-disabled')).to.be.true;
   });
 
   it('only injects the authored branding logo', async () => {
