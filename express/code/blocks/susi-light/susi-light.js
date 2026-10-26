@@ -21,10 +21,9 @@ export const DCTX_ID_MAP = {
     stage: 'v:2,s,bg:CCEX2026,fc1e76f0-9167-11f1-a9b0-29d697c01ae6',
     prod: 'v:2,s,bg:CCEX2026,ea8e92e0-9166-11f1-a9b9-d34066769dc6',
   },
-  // TODO: fill in prod once registered via dctx-generator (needs a prod-scoped token).
   'context-color-palette': {
     stage: 'v:2,s,bg:colorSUSI,ac006510-c872-11f1-bbd0-c169ec4f4554',
-    prod: '',
+    prod: 'v:2,s,bg:colorSUSI,f30b9580-d144-11f1-b05d-b5538e129034',
   },
 };
 
