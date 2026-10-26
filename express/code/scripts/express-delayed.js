@@ -64,8 +64,7 @@ async function addJapaneseSectionHeaderSizing() {
 }
 
 // Labels Deprecated blocks for authors on preview and local, like Milo's "Obsolete" labels.
-// Milo's helper reads <base>/consonant.json, so the Express list is the DA sheet
-// /consonant.json. Milo already loads the label CSS on these hosts.
+// Deprecated blocks are listed in the DA sheet /consonant.json.
 async function loadBlockNotifications() {
   const { env } = getConfig();
   if (env.name !== 'local' && !window.location.host.includes('.page')) return;
