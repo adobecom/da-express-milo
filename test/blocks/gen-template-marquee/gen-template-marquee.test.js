@@ -86,8 +86,7 @@ describe('gen-template-marquee', () => {
     expect(block.querySelector('label').textContent).to.equal('Prompt');
     expect(block.querySelector('label').htmlFor).to.equal(input.id);
     expect(block.querySelector('.gen-template-prompt-submit').textContent).to.contain('Generate');
-    expect(form.dataset.desktopHref).to.equal('https://new.express.adobe.com/neural-pixel-editor?entry=create-menu');
-    expect(form.dataset.mobileHref).to.equal('https://new.express.adobe.com/new?category=templates&height=1080&width=1080&unit=px&action=text+to+template');
+    expect(form.dataset.href).to.equal('https://new.express.adobe.com/neural-pixel-editor?entry=create-menu');
     expect(block.querySelector('.gen-template-suggestions-label').textContent)
       .to.equal('Get started with an example prompt');
   });
@@ -119,31 +118,24 @@ describe('gen-template-marquee', () => {
     expect(block.querySelector('.gen-template-suggestions-label').textContent).to.equal('Try an example');
   });
 
-  it('routes to authored destination links and keeps placeholder button copy', async () => {
-    document.body.innerHTML = fixture;
-    const block = document.querySelector('.gen-template-marquee');
-    const row = document.createElement('div');
-    row.innerHTML = '<div><a href="https://example.com/desktop">Go</a></div><div><a href="https://example.com/mobile">Go</a></div>';
-    block.append(row);
-    await decorate(block);
-    const form = block.querySelector('.gen-template-prompt-form');
+  it('uses the trailing first-row link as the destination, not as body copy', async () => {
+    const block = await prepareBlock();
+    const text = block.querySelector('.gen-template-text');
 
-    expect(form.dataset.desktopHref).to.equal('https://example.com/desktop');
-    expect(form.dataset.mobileHref).to.equal('https://example.com/mobile');
+    expect(text.querySelector('a')).to.be.null;
+    expect(text.querySelectorAll(':scope > p')).to.have.length(1);
     expect(block.querySelector('.gen-template-prompt-submit').textContent).to.equal('Generate');
   });
 
-  it('uses a single authored destination for both breakpoints', async () => {
+  it('does not route without an authored destination', async () => {
     document.body.innerHTML = fixture;
     const block = document.querySelector('.gen-template-marquee');
-    const row = document.createElement('div');
-    row.innerHTML = '<div><a href="https://example.com/only">Go</a></div>';
-    block.append(row);
+    block.querySelector('a').closest('p').remove();
     await decorate(block);
-    const form = block.querySelector('.gen-template-prompt-form');
 
-    expect(form.dataset.desktopHref).to.equal('https://example.com/only');
-    expect(form.dataset.mobileHref).to.equal('https://example.com/only');
+    expect(block.querySelector('.gen-template-prompt-form').dataset.href).to.be.undefined;
+    expect(block.querySelector('.gen-template-text > p').textContent)
+      .to.equal('Create a fully editable template from a single prompt in minutes.');
   });
 
   it('grows and shrinks the prompt to fit its lines', async () => {
@@ -208,14 +200,12 @@ describe('gen-template-marquee', () => {
     expect(document.activeElement).to.equal(input);
   });
 
-  it('preserves reserved characters in the routed desktop prompt', async () => {
+  it('preserves reserved characters in the routed prompt', async () => {
     const block = await prepareBlock();
     const form = block.querySelector('.gen-template-prompt-form');
     const input = block.querySelector('.gen-template-prompt-input');
-    const originalMatchMedia = window.matchMedia;
     const originalLocationAssign = window.t_locationAssign;
     const originalTrackingAppender = window.t_getTrackingAppendedURL;
-    window.matchMedia = () => ({ matches: true });
     window.t_getTrackingAppendedURL = (url) => Promise.resolve(url);
 
     const redirectPromise = new Promise((resolve) => {
@@ -225,10 +215,10 @@ describe('gen-template-marquee', () => {
     form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
     const routedUrl = new URL(await redirectPromise);
 
-    window.matchMedia = originalMatchMedia;
     window.t_locationAssign = originalLocationAssign;
     window.t_getTrackingAppendedURL = originalTrackingAppender;
     expect(routedUrl.pathname).to.equal('/neural-pixel-editor');
+    expect(routedUrl.searchParams.get('entry')).to.equal('create-menu');
     expect(routedUrl.searchParams.get('prompt')).to.equal('A + B & #1');
   });
 

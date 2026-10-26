@@ -7,7 +7,6 @@ import {
   isValidTemplate,
 } from '../../scripts/template-utils.js';
 
-const DESKTOP_QUERY = '(min-width: 1200px)';
 const TEMPLATE_DISPLAY_LIMIT = 14;
 const TEMPLATE_FETCH_LIMIT = 23;
 const COLUMN_CARD_COUNTS = [3, 3, 2, 3, 3];
@@ -16,10 +15,6 @@ const PLACEHOLDERS = {
   input: ['gen-template-prompt-placeholder', 'Describe what template you want to make'],
   submit: ['gen-template-prompt-submit', 'Generate'],
   suggestionsLabel: ['gen-template-suggestions-label', 'Get started with an example prompt'],
-};
-const DEFAULT_DESTINATIONS = {
-  desktop: 'https://new.express.adobe.com/neural-pixel-editor?entry=create-menu',
-  mobile: 'https://new.express.adobe.com/new?category=templates&height=1080&width=1080&unit=px&action=text+to+template',
 };
 let instanceId = 0;
 
@@ -172,27 +167,22 @@ function buildContent(textRow, suggestionsRow, strings) {
   const text = createElement('div', 'gen-template-text');
   const logoAndHeading = createElement('div', 'gen-template-logo-heading');
   const textCell = textRow?.firstElementChild;
+  // Convention: the destination link is authored as the last element of the first row.
+  // Only its href is used; the button copy comes from the placeholder.
+  const linkContainer = textCell?.lastElementChild;
+  const destination = linkContainer?.querySelector('a')?.href;
+  if (destination) linkContainer.remove();
   const heading = textCell?.querySelector('h1, h2, h3, h4, h5, h6');
   const body = [...(textCell?.children || [])].filter((child) => child !== heading);
   const logo = getBrandingLogo();
+  const prompt = buildPromptForm(suggestionsRow, strings);
+  if (destination) prompt.querySelector('.gen-template-prompt-form').dataset.href = destination;
 
   if (logo) logoAndHeading.append(logo);
   if (heading) logoAndHeading.append(heading);
   text.append(logoAndHeading, ...body);
-  content.append(text, buildPromptForm(suggestionsRow, strings));
+  content.append(text, prompt);
   return content;
-}
-
-// Optional 4th row: desktop link in the first cell, mobile link in the second.
-// A single authored link serves both; the link text is ignored (button copy is a placeholder).
-function getDestinations(row) {
-  const [desktopCell, mobileCell] = row?.children ?? [];
-  const desktop = desktopCell?.querySelector('a')?.href;
-  const mobile = mobileCell?.querySelector('a')?.href;
-  return {
-    desktop: desktop || mobile || DEFAULT_DESTINATIONS.desktop,
-    mobile: mobile || desktop || DEFAULT_DESTINATIONS.mobile,
-  };
 }
 
 function getTemplateColumns(templates) {
@@ -297,9 +287,7 @@ function addInteractions(block) {
       return;
     }
 
-    const destination = window.matchMedia(DESKTOP_QUERY).matches
-      ? form.dataset.desktopHref
-      : form.dataset.mobileHref;
+    const destination = form.dataset.href;
     if (!destination) return;
 
     const trackedDestination = await appendTracking(destination);
@@ -312,7 +300,7 @@ function addInteractions(block) {
 
 export default async function decorate(block) {
   const rows = [...block.children];
-  const [textRow, suggestionsRow, galleryRow, destinationsRow] = rows;
+  const [textRow, suggestionsRow, galleryRow] = rows;
   const isHardcoded = block.classList.contains('hardcoded-templates');
   const [strings, columns] = await Promise.all([
     loadPlaceholders(),
@@ -321,10 +309,6 @@ export default async function decorate(block) {
       : loadTemplates(galleryRow).then(getTemplateColumns),
   ]);
   const content = buildContent(textRow, suggestionsRow, strings);
-  const form = content.querySelector('.gen-template-prompt-form');
-  const destinations = getDestinations(destinationsRow);
-  form.dataset.desktopHref = destinations.desktop;
-  form.dataset.mobileHref = destinations.mobile;
   const gallery = buildGallery(columns);
 
   block.replaceChildren(content, gallery);
