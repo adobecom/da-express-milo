@@ -234,6 +234,9 @@ function buildGallery(columns) {
 
   columns.forEach((items, columnIndex) => {
     const column = createElement('div', 'gen-template-column');
+    if (columnIndex === 0 || columnIndex === columns.length - 1) {
+      column.classList.add('gen-template-column-edge');
+    }
     items.forEach((item, cardIndex) => {
       column.append(buildCard(item, columnIndex === 2 && cardIndex === 0));
     });
