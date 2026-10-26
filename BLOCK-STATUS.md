@@ -11,10 +11,11 @@ Every block in `express/code/blocks/` is **Active** unless it's listed below. Ch
 
 ## Process
 
-1. **Propose:** Design archives a block or variant in the [Figma block archive](https://www.figma.com/design/CVKL1UgmhqbW7VdECOREJU/-express-block-archive). Check its usage with the `affected-pages` skill and the [Block Index tool](https://da.live/app/maxn-adobe/da-tools/block-index/dist/index). Low usage goes to Deprecated, wide usage to Maintenance.
-2. **Mark:** Add it to the table below. For Deprecated, also add a row to the DA sheet `/consonant.json` (Block, Variant, Decision `Deprecated`, Documentation) and preview the sheet. Authors then see a "Deprecated" label on the block in preview.
-3. **Migrate:** For each Deprecated block with live pages, create an authoring ticket listing every page to update or delete.
-4. **Remove:** Once no live pages use it, delete the code and its rows.
+1. **Evaluate:** When Design archives a block or variant in the [Figma block archive](https://www.figma.com/design/CVKL1UgmhqbW7VdECOREJU/-express-block-archive), check its usage with the `affected-pages` skill and the [Block Index tool](https://da.live/app/maxn-adobe/da-tools/block-index/dist/index). Low usage makes it a Deprecated candidate. Wide usage makes it a Maintenance candidate.
+2. **Approve:** Get team approval for the status. For Deprecated, create a Jira ticket that lists every live page to update or delete.
+3. **Mark:** Add it to the table below with its ticket. For Deprecated, also add a row to the DA sheet `/consonant.json` (Block, Variant, Decision `Deprecated`, Documentation) and preview the sheet. Authors then see a "Deprecated" label on the block in preview.
+4. **Migrate:** Authors update or delete the pages listed in the ticket.
+5. **Remove:** Once no live pages use it, delete the code and its rows.
 
 ## Deprecated
 
