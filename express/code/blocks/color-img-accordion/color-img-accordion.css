@@ -145,6 +145,8 @@
   width: 100%;
   overflow: hidden;
   border-radius: var(--Corner-radius-corner-radius-200);
+  /* Palette height scales with photo width so image + palette keep one aspect ratio. */
+  container-type: inline-size;
 }
 
 .color-img-accordion .color-img-accordion-photo > picture {
@@ -165,7 +167,8 @@
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   width: 100%;
-  height: 48px;
+  /* 48px at the 327px mobile frame width. */
+  height: calc(100cqw * 48 / 327);
   margin-top: -1px;
   overflow: hidden;
   background: var(--Palette-gray-200);
@@ -193,6 +196,8 @@
   }
 
   .color-img-accordion .color-img-accordion-media {
+    display: flex;
+    align-items: center;
     order: 2;
     align-self: stretch;
   }
@@ -221,7 +226,8 @@
   }
 
   .color-img-accordion .color-img-accordion-palette {
-    height: 56px;
+    /* 56px at the 340px tablet frame width. */
+    height: calc(100cqw * 56 / 340);
   }
 }
 
@@ -242,7 +248,8 @@
   }
 
   .color-img-accordion .color-img-accordion-palette {
-    height: 88px;
+    /* 88px at the 548px desktop frame width. */
+    height: calc(100cqw * 88 / 548);
   }
 }
 
@@ -255,7 +262,8 @@
     min-height: 443.25px;
   }
   .color-img-accordion .color-img-accordion-palette {
-    height: 102px;
+    /* 102px at the 788px widescreen frame width. */
+    height: calc(100cqw * 102 / 788);
   }
 }
 
