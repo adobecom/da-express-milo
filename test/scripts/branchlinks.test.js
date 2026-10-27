@@ -14,9 +14,69 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig(conf);
   createTag = mod.createTag;
 });
-const { default: trackBranchParameters, getTrackingAppendedURL } = await import('../../express/code/scripts/branchlinks.js');
+const {
+  appendEventIntent,
+  default: trackBranchParameters,
+  getTrackingAppendedURL,
+} = await import('../../express/code/scripts/branchlinks.js');
 
 document.body.innerHTML = await readFile({ path: './mocks/branchlinks.html' });
+
+describe('branchlinks appendEventIntent', () => {
+  const eventPaths = [
+    '/express/templates/program/event',
+    '/express/create/poster/event',
+    '/express/create/flyer/event',
+  ];
+
+  eventPaths.forEach((pathname) => {
+    it(`adds eventIntent=true on ${pathname}`, () => {
+      const url = appendEventIntent('https://example.com/template', pathname);
+
+      expect(new URL(url).searchParams.get('eventIntent')).to.equal('true');
+    });
+  });
+
+  [
+    '/express/templates/invitation',
+    '/express/create/poster',
+    '/express/create/flyer/event/other',
+    '/express/templates/program/event-other',
+    '/fr/express/templates/program/event',
+  ].forEach((pathname) => {
+    it(`leaves the destination unchanged on ${pathname}`, () => {
+      const destination = 'https://example.com/template?source=listing#preview';
+
+      expect(appendEventIntent(destination, pathname)).to.equal(destination);
+    });
+  });
+
+  it('uses the current page pathname by default', () => {
+    const originalUrl = window.location.href;
+    try {
+      window.history.replaceState(null, '', eventPaths[0]);
+      const url = appendEventIntent('https://example.com/template');
+      expect(new URL(url).searchParams.get('eventIntent')).to.equal('true');
+    } finally {
+      window.history.replaceState(null, '', originalUrl);
+    }
+  });
+
+  it('adds eventIntent=true while preserving existing query parameters and fragments', () => {
+    const url = appendEventIntent('https://example.com/template?source=listing#preview', eventPaths[0]);
+    const parsedUrl = new URL(url);
+
+    expect(parsedUrl.searchParams.get('source')).to.equal('listing');
+    expect(parsedUrl.searchParams.get('eventIntent')).to.equal('true');
+    expect(parsedUrl.hash).to.equal('#preview');
+  });
+
+  it('sets eventIntent to true when the URL already has the parameter', () => {
+    const url = appendEventIntent('https://example.com/template?eventIntent=false', eventPaths[0]);
+
+    expect(new URL(url).searchParams.getAll('eventIntent')).to.deep.equal(['true']);
+  });
+});
 
 function setMeta(name, content) {
   document.head.append(createTag('meta', { name, content }));
