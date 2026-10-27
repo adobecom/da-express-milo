@@ -167,11 +167,9 @@ main .section .ax-columns.enterprise .column h2 {
   border-radius: 16px;
 }
 
-/* stylelint-disable-next-line no-duplicate-selectors */
 .ax-columns.top.center,
 .ax-columns.fullsize.center,
-.ax-columns.light,
-.ax-columns.fullsize.center {
+.ax-columns.light {
   max-width: var(--block-sm-max-width);
   padding-left: 0;
   padding-right: 0;
@@ -314,7 +312,7 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns.marquee .column {
   padding-left: 0;
   padding-right: 0;
-  text-align: left;
+  text-align: start;
 }
 
 .ax-columns.marquee .column-picture:not(.column-picture-mobile) {
@@ -359,7 +357,7 @@ main .section .ax-columns.enterprise .column h2 {
 .section .ax-columns.marquee .column,
 .section .ax-columns.marquee .column h1,
 .section .ax-columns.marquee .column p {
-  text-align: left;
+  text-align: start;
 }
 
 .section .ax-columns.marquee .column p {
@@ -488,6 +486,10 @@ main .section .ax-columns.enterprise .column h2 {
   height: 24px;
   margin-right: var(--spacing-200);
   float: left;
+}
+
+.ax-columns .icon.icon-adobe-express-logo-rtl {
+  margin-right: 0;
 }
 
 .ax-columns .brand.icon {
@@ -940,7 +942,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .ax-columns.marquee .button-container.free-plan-container .free-plan-widget {
   font-size: var(--body-font-size-s);
-  margin-left: 15px;
+  margin-inline-start: 15px;
 }
 
 .ax-columns.marquee .button-container.free-plan-container .free-plan-widget.plan-widget-tag {
@@ -999,6 +1001,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .ax-columns.marquee .button-container.free-plan-container {
   display: none;
+  justify-content: flex-start;
 }
 
 .section .ax-columns.marquee {
@@ -1007,10 +1010,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .column-picture .corner-overlay {
   display: none;
-}
-
-.section .ax-columns.marquee h1.columns-heading-long { /* stylelint-disable-line no-duplicate-selectors */
-  font-size: var(--heading-font-size-m);
 }
 
 .ax-columns.fullsize .button-container.two-ctas {
@@ -1239,10 +1238,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     top: unset;
     left: unset;
     transform: unset;
-  }
-
-  .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon { /* stylelint-disable-line no-duplicate-selectors */
-    padding-left: 0;
   }
 
   .ax-columns .has-brand {
@@ -1547,7 +1542,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.marquee .button-container.free-plan-container {
     display: flex;
-    align-items: start;
+    align-items: center;
+    margin-top: var(--spacing-200);
   }
 
   .section:has(.ax-columns.marquee) {
@@ -1704,11 +1700,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .ax-columns.marquee .button-container.free-plan-container .free-plan-widget {
     margin-top: unset;
     padding-left: unset;
-  }
-
-  .ax-columns.marquee .button-container.free-plan-container { /* stylelint-disable-line no-duplicate-selectors */
-    align-items: center;
-    margin-top: var(--spacing-200);
   }
 
   .ax-columns.marquee .column-picture::before {
@@ -1920,7 +1911,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     display: flex;
     min-width: 600px;
     max-width: 1199px;
-    padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+    padding: var(--spacing-600) var(--spacing-500);
     flex-direction: column;
     align-items: center;
     gap: 10px;
@@ -1957,7 +1948,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .section.ax-max-entitled:has(.ax-columns) div.ax-columns>div {
     gap: var(--spacing-700);
     padding: 0px var(--spacing-400);
-    min-width: var(--Global-Device-Widths-device-min-width, 600px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+    min-width: 600px;
     margin: auto;
     max-width: var(--block-lg-max-width);
   }
