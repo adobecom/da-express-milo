@@ -1,25 +1,25 @@
-main .section:has(.generate-hero-v2) > div:has(> .generate-hero-v2) {
+main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
   max-width: none;
   padding: 0;
 }
 
-.generate-hero-v2 {
-  --generate-hero-padding-top: var(--spacing-500);
-  --generate-hero-card-width: 250px;
-  --generate-hero-column-gap: var(--spacing-600);
-  --generate-hero-card-gap: 52px;
-  --generate-hero-gallery-bottom-padding: 40px;
-  --generate-hero-heading-line-height: 32px;
-  --generate-hero-body-subtle: rgb(0 0 0 / 64%);
+.gen-template-marquee {
+  --gen-template-padding-top: var(--spacing-500);
+  --gen-template-card-width: 250px;
+  --gen-template-column-gap: var(--spacing-600);
+  --gen-template-card-gap: 52px;
+  --gen-template-gallery-bottom-padding: 40px;
+  --gen-template-heading-line-height: 32px;
+  --gen-template-body-subtle: rgb(0 0 0 / 64%);
   position: relative;
   box-sizing: border-box;
   overflow: clip;
-  padding: var(--generate-hero-padding-top) var(--spacing-300) var(--generate-hero-gallery-bottom-padding);
+  padding: var(--gen-template-padding-top) var(--spacing-300) var(--gen-template-gallery-bottom-padding);
   background: var(--color-white);
   color: var(--Alias-content-typography-Heading);
 }
 
-.generate-hero-content {
+.gen-template-content {
   position: relative;
   z-index: 1;
   display: flex;
@@ -31,25 +31,25 @@ main .section:has(.generate-hero-v2) > div:has(> .generate-hero-v2) {
   margin: 0 auto;
 }
 
-.generate-hero-text,
-.generate-hero-logo-heading,
-.generate-hero-prompt,
-.generate-hero-prompt-form,
-.generate-hero-prompt-field,
-.generate-hero-suggestions {
+.gen-template-text,
+.gen-template-logo-heading,
+.gen-template-prompt,
+.gen-template-prompt-form,
+.gen-template-prompt-field,
+.gen-template-suggestions {
   display: flex;
   flex-direction: column;
   width: 100%;
 }
 
-.generate-hero-text,
-.generate-hero-logo-heading {
+.gen-template-text,
+.gen-template-logo-heading {
   align-items: center;
   gap: var(--spacing-100);
   text-align: center;
 }
 
-.generate-hero-v2 .generate-hero-logo.icon {
+.gen-template-marquee .gen-template-logo.icon {
   display: block;
   width: 124px;
   height: 16px;
@@ -57,32 +57,32 @@ main .section:has(.generate-hero-v2) > div:has(> .generate-hero-v2) {
   padding: 0;
 }
 
-.generate-hero-v2 .generate-hero-logo-heading :is(h1, h2, h3, h4, h5, h6) {
+.gen-template-marquee .gen-template-logo-heading :is(h1, h2, h3, h4, h5, h6) {
   margin: 0; 
   font-size: var(--heading-font-size-l);
   font-weight: var(--heading-font-weight-extra);
-  line-height: var(--generate-hero-heading-line-height);
+  line-height: var(--gen-template-heading-line-height);
   letter-spacing: -1px;
   text-wrap: balance;
 }
 
-main .section .generate-hero-text > p {
+main .section .gen-template-text > p {
   width: 100%;
   margin: 0;
-  color: var(--generate-hero-body-subtle);
+  color: var(--gen-template-body-subtle);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-m);
   line-height: var(--spacing-350);
   text-wrap: pretty;
 }
 
-.generate-hero-prompt {
+.gen-template-prompt {
   align-items: center;
   gap: var(--spacing-300);
 }
 
-.generate-hero-prompt-form {
-  --generate-hero-prompt-shadow: 0 0 2px rgb(0 0 0 / 12%), 0 2px 6px rgb(0 0 0 / 4%), 0 4px 12px rgb(0 0 0 / 8%);
+.gen-template-prompt-form {
+  --gen-template-prompt-shadow: 0 0 2px rgb(0 0 0 / 12%), 0 2px 6px rgb(0 0 0 / 4%), 0 4px 12px rgb(0 0 0 / 8%);
   box-sizing: border-box;
   padding: var(--spacing-100);
   border: 1px solid var(--color-gray-300-variant);
@@ -93,22 +93,22 @@ main .section .generate-hero-text > p {
 
 /* Figma states: hover and active (focused or has text) lift the outer box.
    Inner field: blue focus ring while empty, 2px #131313 active stroke once text is entered. */
-.generate-hero-prompt-form:hover,
-.generate-hero-prompt-form:has(.generate-hero-prompt-input:is(:focus, :not(:placeholder-shown))) {
-  box-shadow: var(--generate-hero-prompt-shadow);
+.gen-template-prompt-form:hover,
+.gen-template-prompt-form:has(.gen-template-prompt-input:is(:focus, :not(:placeholder-shown))) {
+  box-shadow: var(--gen-template-prompt-shadow);
 }
 
-.generate-hero-prompt-field:has(.generate-hero-prompt-input:focus-visible:placeholder-shown) {
+.gen-template-prompt-field:has(.gen-template-prompt-input:focus-visible:placeholder-shown) {
   outline: 2px solid #131313;
   outline-offset: 0;
 }
 
-.generate-hero-prompt-field:has(.generate-hero-prompt-input:not(:placeholder-shown)) {
+.gen-template-prompt-field:has(.gen-template-prompt-input:not(:placeholder-shown)) {
   outline: 2px solid #131313;
   outline-offset: 0;
 }
 
-.generate-hero-prompt-field {
+.gen-template-prompt-field {
   box-sizing: border-box;
   align-items: stretch;
   gap: var(--spacing-200);
@@ -117,8 +117,8 @@ main .section .generate-hero-text > p {
   background: var(--color-gray-100);
 }
 
-.generate-hero-prompt-label {
-  color: var(--generate-hero-body-subtle);
+.gen-template-prompt-label {
+  color: var(--gen-template-body-subtle);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-s);
   font-weight: var(--subheading-font-weight);
@@ -126,7 +126,7 @@ main .section .generate-hero-text > p {
 }
 
 /* Grows with its content (see resizePrompt) up to 3 lines, then scrolls. */
-.generate-hero-prompt-input {
+.gen-template-prompt-input {
   box-sizing: border-box;
   width: 100%;
   min-height: 36px;
@@ -144,12 +144,12 @@ main .section .generate-hero-text > p {
   line-height: var(--spacing-325);
 }
 
-.generate-hero-prompt-input::placeholder {
-  color: var(--generate-hero-body-subtle);
+.gen-template-prompt-input::placeholder {
+  color: var(--gen-template-body-subtle);
   opacity: 1;
 }
 
-.generate-hero-prompt-submit {
+.gen-template-prompt-submit {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -172,17 +172,17 @@ main .section .generate-hero-text > p {
   transition: background-color 0.3s, border-color 0.3s;
 }
 
-.generate-hero-prompt-submit:hover {
+.gen-template-prompt-submit:hover {
   border-color: var(--color-info-primary-hover);
   background: #131313
 }
 
-.generate-hero-prompt-submit:active {
+.gen-template-prompt-submit:active {
   border-color: var(--color-info-primary-down);
   background: #131313 
 }
 
-.generate-hero-prompt-submit:focus-visible {
+.gen-template-prompt-submit:focus-visible {
   border-color: var(--color-info-primary-hover);
   outline: none;
   background: #131313;
@@ -190,40 +190,40 @@ main .section .generate-hero-text > p {
     0 0 0 4px var(--color-info-accent-hover);
 }
 
-.generate-hero-prompt-submit:disabled {
+.gen-template-prompt-submit:disabled {
   border-color: var(--color-gray-200);
   background: var(--color-gray-200);
   color: var(--color-gray-500);
   cursor: not-allowed;
 }
 
-.generate-hero-prompt-submit .icon {
+.gen-template-prompt-submit .icon {
   width: 18px;
   height: 18px;
   margin: 0;
   filter: brightness(0) invert(1);
 }
 
-.generate-hero-suggestions {
+.gen-template-suggestions {
   align-items: center;
   gap: var(--spacing-200);
 }
 
-.generate-hero-suggestion:hover {
+.gen-template-suggestion:hover {
   border-radius: var(--spacing-80);
   background: var(--color-gray-300-variant);
 }
 
-main .section .generate-hero-suggestions-label {
+main .section .gen-template-suggestions-label {
   margin: 0;
-  color: var(--generate-hero-body-subtle);
+  color: var(--gen-template-body-subtle);
   font-size: var(--body-font-size-s);
   line-height: var(--spacing-325);
   text-align: center;
 }
 
 /* Last chip ends flush with the prompt box; the fade hides once scrolled to the end. */
-.generate-hero-suggestion-list {
+.gen-template-suggestion-list {
   display: flex;
   gap: var(--spacing-200);
   box-sizing: border-box;
@@ -234,7 +234,7 @@ main .section .generate-hero-suggestions-label {
   scroll-snap-type: x proximity;
 }
 
-.generate-hero-suggestion-list::after {
+.gen-template-suggestion-list::after {
   position: absolute;
   inset-inline-end: 0;
   width: var(--spacing-600);
@@ -245,16 +245,16 @@ main .section .generate-hero-suggestions-label {
   transition: opacity 0.2s ease;
 }
 
-.generate-hero-suggestion-list.is-scroll-end::after {
+.gen-template-suggestion-list.is-scroll-end::after {
   opacity: 0;
 }
 
-[dir="rtl"] .generate-hero-suggestion-list::after {
+[dir="rtl"] .gen-template-suggestion-list::after {
   background: linear-gradient(to right, var(--color-white) 26%, transparent);
 }
 
 
-.generate-hero-suggestion {
+.gen-template-suggestion {
   flex: none;
   box-sizing: border-box;
   margin: 0;
@@ -273,14 +273,14 @@ main .section .generate-hero-suggestions-label {
   background: #F8F8F8;
 }
 
-.generate-hero-suggestion:focus-visible {
+.gen-template-suggestion:focus-visible {
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: -2px;
 }
 
-.generate-hero-gallery {
+.gen-template-gallery {
   display: flex;
-  gap: var(--generate-hero-column-gap);
+  gap: var(--gen-template-column-gap);
   width: max-content;
   margin-top: 40px;
   /* Wider than the viewport by design: center on the middle column. */
@@ -288,18 +288,18 @@ main .section .generate-hero-suggestions-label {
   translate: -50% 0;
 }
 
-.generate-hero-column {
+.gen-template-column {
   display: flex;
   flex-direction: column;
-  gap: var(--generate-hero-card-gap);
-  width: var(--generate-hero-card-width);
+  gap: var(--gen-template-card-gap);
+  width: var(--gen-template-card-width);
 }
 
-.generate-hero-column:nth-child(3) {
+.gen-template-column:nth-child(3) {
   padding-top: 45px;
 }
 
-.generate-hero-card {
+.gen-template-card {
   position: relative;
   flex: none;
   width: 100%;
@@ -308,12 +308,12 @@ main .section .generate-hero-suggestions-label {
   border-radius: var(--Corner-radius-corner-radius-200);
 }
 
-.generate-hero-card-square {
+.gen-template-card-square {
   aspect-ratio: 1;
 }
 
-.generate-hero-card picture,
-.generate-hero-card img {
+.gen-template-card picture,
+.gen-template-card img {
   position: absolute;
   inset: 0;
   display: block;
@@ -321,174 +321,174 @@ main .section .generate-hero-suggestions-label {
   height: 100%;
 }
 
-.generate-hero-card img {
+.gen-template-card img {
   object-fit: cover;
 }
 
 /* hardcoded-templates: the image's own proportions set the card height. */
-.generate-hero-card-authored {
+.gen-template-card-authored {
   aspect-ratio: auto;
 }
 
-.generate-hero-card-authored picture,
-.generate-hero-card-authored img {
+.gen-template-card-authored picture,
+.gen-template-card-authored img {
   position: static;
   height: auto;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .generate-hero-v2 {
-      view-timeline: --generate-hero-v2 block;
+    .gen-template-marquee {
+      view-timeline: --gen-template-marquee block;
     }
 
     /* Content pins below the nav and fades/lifts once the block's top reaches the viewport top.
        `exit-crossing` rather than `contain`: when the block is shorter than the viewport
        (e.g. zoomed far out) the `contain` range has already passed at scroll 0, which left
        the content faded out on load. */
-    .generate-hero-content {
-      --generate-hero-content-lift: 64px;
+    .gen-template-content {
+      --gen-template-content-lift: 64px;
       position: sticky;
-      top: calc(var(--feds-height-nav) + var(--generate-hero-padding-top));
+      top: calc(var(--feds-height-nav) + var(--gen-template-padding-top));
       z-index: 0;
-      animation: generate-hero-content-fade linear both;
-      animation-timeline: --generate-hero-v2;
+      animation: gen-template-content-fade linear both;
+      animation-timeline: --gen-template-marquee;
       animation-range: exit-crossing 0px exit-crossing 360px;
     }
 
     /* Gallery rides over the pinned content; columns tighten to 24px. */
-    .generate-hero-gallery {
+    .gen-template-gallery {
       position: relative;
       z-index: 1;
-      animation: generate-hero-gallery-gap-shrink ease-out both;
-      animation-timeline: --generate-hero-v2;
+      animation: gen-template-gallery-gap-shrink ease-out both;
+      animation-timeline: --gen-template-marquee;
       animation-range: contain 0% contain 60%;
     }
 
-    .generate-hero-column:nth-child(odd) {
-      animation: generate-hero-column-rise linear both;
+    .gen-template-column:nth-child(odd) {
+      animation: gen-template-column-rise linear both;
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
     }
 
-    .generate-hero-column:nth-child(even) {
-      animation: generate-hero-column-fall linear both;
+    .gen-template-column:nth-child(even) {
+      animation: gen-template-column-fall linear both;
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
     }
 
     /* Mobile: side columns fan outward while the block scrolls away, fully off-screen by exit. */
     @media (max-width: 599px) {
-      .generate-hero-column:is(:nth-child(1), :nth-child(2), :nth-child(4), :nth-child(5)) {
-        animation: generate-hero-column-spread linear both;
-        animation-timeline: --generate-hero-v2;
+      .gen-template-column:is(:nth-child(1), :nth-child(2), :nth-child(4), :nth-child(5)) {
+        animation: gen-template-column-spread linear both;
+        animation-timeline: --gen-template-marquee;
         animation-range: contain 0% exit 100%;
       }
 
-      .generate-hero-column:nth-child(1) { --generate-hero-spread: -75vw; }
-      .generate-hero-column:nth-child(2) { --generate-hero-spread: -50vw; }
-      .generate-hero-column:nth-child(4) { --generate-hero-spread: 50vw; }
-      .generate-hero-column:nth-child(5) { --generate-hero-spread: 75vw; }
+      .gen-template-column:nth-child(1) { --gen-template-spread: -75vw; }
+      .gen-template-column:nth-child(2) { --gen-template-spread: -50vw; }
+      .gen-template-column:nth-child(4) { --gen-template-spread: 50vw; }
+      .gen-template-column:nth-child(5) { --gen-template-spread: 75vw; }
     }
   }
 }
 
-@keyframes generate-hero-column-spread {
+@keyframes gen-template-column-spread {
   to {
-    translate: var(--generate-hero-spread) 0;
+    translate: var(--gen-template-spread) 0;
   }
 }
 
-@keyframes generate-hero-content-fade {
+@keyframes gen-template-content-fade {
   to {
     visibility: hidden;
     opacity: 0;
-    translate: 0 calc(-1 * var(--generate-hero-content-lift));
+    translate: 0 calc(-1 * var(--gen-template-content-lift));
   }
 }
 
-@keyframes generate-hero-gallery-gap-shrink {
+@keyframes gen-template-gallery-gap-shrink {
   to {
     gap: 24px;
   }
 }
 
 @media (min-width: 600px) {
-  .generate-hero-v2 {
-    --generate-hero-padding-top: var(--spacing-700);
-    --generate-hero-card-width: 291px;
-    --generate-hero-column-gap: 69px;
-    --generate-hero-card-gap: 100px;
-    --generate-hero-gallery-bottom-padding: 64px;
+  .gen-template-marquee {
+    --gen-template-padding-top: var(--spacing-700);
+    --gen-template-card-width: 291px;
+    --gen-template-column-gap: 69px;
+    --gen-template-card-gap: 100px;
+    --gen-template-gallery-bottom-padding: 64px;
     padding-inline: var(--spacing-500);
   }
 
-  .generate-hero-gallery {
+  .gen-template-gallery {
     margin-top: 60px;
   }
 
-  .generate-hero-prompt-form {
+  .gen-template-prompt-form {
     padding: var(--spacing-200);
   }
 
-  .generate-hero-prompt-field {
+  .gen-template-prompt-field {
     padding: var(--spacing-300);
   }
 
-  .generate-hero-prompt-label {
+  .gen-template-prompt-label {
     flex: 0 0 100%;
   }
 
-  .generate-hero-prompt-input {
+  .gen-template-prompt-input {
     min-height: var(--spacing-325);
   }
 
-  .generate-hero-prompt-submit {
+  .gen-template-prompt-submit {
     align-self: end;
     width: auto;
   }
 
-  .generate-hero-column:nth-child(1),
-  .generate-hero-column:nth-child(5) {
+  .gen-template-column:nth-child(1),
+  .gen-template-column:nth-child(5) {
     margin-top: -176px;
   }
 
-  .generate-hero-column:nth-child(3) {
+  .gen-template-column:nth-child(3) {
     padding-top: 105px;
   }
 }
 
 @media (min-width: 1200px) {
-  .generate-hero-v2 {
+  .gen-template-marquee {
     /* Exact desktop spacing from Figma frame 363:71100. */
-    --generate-hero-padding-top: var(--spacing-800);
-    --generate-hero-heading-line-height: 56px;
-    --generate-hero-gallery-bottom-padding: 80px;
+    --gen-template-padding-top: var(--spacing-800);
+    --gen-template-heading-line-height: 56px;
+    --gen-template-gallery-bottom-padding: 80px;
   }
 
-  .generate-hero-v2 .generate-hero-logo.icon {
+  .gen-template-marquee .gen-template-logo.icon {
     width: 181px;
     height: var(--spacing-400);
   }
 
-  .generate-hero-v2 .generate-hero-logo-heading :is(h1, h2, h3, h4, h5, h6) {
+  .gen-template-marquee .gen-template-logo-heading :is(h1, h2, h3, h4, h5, h6) {
     font-size: 56px;
-    line-height: var(--generate-hero-heading-line-height);
+    line-height: var(--gen-template-heading-line-height);
     letter-spacing: -1.68px;
   }
-  .generate-hero-suggestion-list {
+  .gen-template-suggestion-list {
     justify-content: center;
     overflow: visible;
   }
 
-  .generate-hero-suggestion-list::after {
+  .gen-template-suggestion-list::after {
     content: none;
   }
 }
 
 @media (min-width: 1680px) {
-  .generate-hero-v2 {
+  .gen-template-marquee {
     /* Exact widescreen spacing from Figma frame 363:70836. */
-    --generate-hero-card-width: 308px;
+    --gen-template-card-width: 308px;
   }
 }

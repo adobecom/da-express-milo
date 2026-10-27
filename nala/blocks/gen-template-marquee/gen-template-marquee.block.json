@@ -1,10 +1,10 @@
 {
-  "block": "generate-hero-v2",
+  "block": "gen-template-marquee",
   "variants": [
     {
       "tcid": "0",
-      "name": "@generate-hero-v2-default",
-      "selector": "div.generate-hero-v2",
+      "name": "@gen-template-marquee-default",
+      "selector": "div.gen-template-marquee",
       "path": "/drafts/echen/mwpw-210024-gen-template-marquee-copy",
       "data": {
         "semantic": {
@@ -17,14 +17,14 @@
               "markup": null
             },
             {
-              "selector": ".generate-hero-text > p",
+              "selector": ".gen-template-text > p",
               "nth": 0,
               "tag": "p",
               "text": "Create a fully editable template from a single prompt in minutes.",
               "markup": null
             },
             {
-              "selector": ".generate-hero-suggestions-label",
+              "selector": ".gen-template-suggestions-label",
               "nth": 0,
               "tag": "p",
               "text": "Get started with an example prompt",
@@ -33,14 +33,14 @@
           ],
           "media": [
             {
-              "selector": ".generate-hero-logo",
+              "selector": ".gen-template-logo",
               "nth": 0,
               "tag": "img",
               "src": "/express/code/icons/adobe-express-logo.svg",
               "alt": ""
             },
             {
-              "selector": ".generate-hero-card picture",
+              "selector": ".gen-template-card picture",
               "nth": 0,
               "tag": "picture",
               "src": null,
@@ -50,7 +50,7 @@
           "interactives": [
             {
               "type": "textbox",
-              "selector": ".generate-hero-prompt-input",
+              "selector": ".gen-template-prompt-input",
               "nth": 0,
               "text": null,
               "href": null,
@@ -61,7 +61,7 @@
             },
             {
               "type": "button",
-              "selector": ".generate-hero-prompt-submit",
+              "selector": ".gen-template-prompt-submit",
               "nth": 0,
               "text": "Generate",
               "href": null,
@@ -72,7 +72,7 @@
             },
             {
               "type": "button",
-              "selector": ".generate-hero-suggestion",
+              "selector": ".gen-template-suggestion",
               "nth": 0,
               "text": "Dog trainer advertisement",
               "href": null,
@@ -85,7 +85,7 @@
         }
       },
       "tags": [
-        "@generate-hero-v2",
+        "@gen-template-marquee",
         "@default",
         "@express",
         "@smoke",

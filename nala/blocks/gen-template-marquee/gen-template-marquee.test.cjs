@@ -1,16 +1,16 @@
 const { test, expect } = require('../../utils/test.cjs');
-const { features } = require('./generate-hero-v2.spec.cjs');
-const GenerateHeroV2Block = require('./generate-hero-v2.page.cjs');
+const { features } = require('./gen-template-marquee.spec.cjs');
+const GenTemplateMarqueeBlock = require('./gen-template-marquee.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
 const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe('GenerateHeroV2Block Test Suite', () => {
-  // Test Id : 0 : @generate-hero-v2-default
+test.describe('GenTemplateMarqueeBlock Test Suite', () => {
+  // Test Id : 0 : @gen-template-marquee-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
-    const block = new GenerateHeroV2Block(page, features[0].selector);
+    const block = new GenTemplateMarqueeBlock(page, features[0].selector);
 
     await test.step('step-1: Navigate to page', async () => {
       await page.goto(testUrl);
@@ -27,7 +27,7 @@ test.describe('GenerateHeroV2Block Test Suite', () => {
       await expect(block.generate).toHaveText('Generate');
       // Host is environment-dependent (Milo rewrites new.express.adobe.com to stage off-prod).
       await expect(block.form).toHaveAttribute('data-href', /\/neural-pixel-editor\?entry=create-menu$/);
-      await expect(block.block.locator('.generate-hero-text a')).toHaveCount(0);
+      await expect(block.block.locator('.gen-template-text a')).toHaveCount(0);
       await expect(block.suggestionsLabel).toHaveText('Get started with an example prompt');
       await expect(block.suggestions).toHaveCount(4);
     });

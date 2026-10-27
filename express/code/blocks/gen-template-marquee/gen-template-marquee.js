@@ -11,10 +11,10 @@ const TEMPLATE_DISPLAY_LIMIT = 14;
 const TEMPLATE_FETCH_LIMIT = 23;
 const COLUMN_CARD_COUNTS = [3, 3, 2, 3, 3];
 const PLACEHOLDERS = {
-  label: ['generate-hero-prompt-label', 'Prompt'],
-  input: ['generate-hero-prompt-placeholder', 'Describe what template you want to make'],
-  submit: ['generate-hero-prompt-submit', 'Generate'],
-  suggestionsLabel: ['generate-hero-suggestions-label', 'Get started with an example prompt'],
+  label: ['gen-template-prompt-label', 'Prompt'],
+  input: ['gen-template-prompt-placeholder', 'Describe what template you want to make'],
+  submit: ['gen-template-prompt-submit', 'Generate'],
+  suggestionsLabel: ['gen-template-suggestions-label', 'Get started with an example prompt'],
 };
 let instanceId = 0;
 
@@ -70,8 +70,8 @@ async function loadTemplates(sourceRow) {
       .filter((template) => isValidTemplate(template))
       .slice(0, TEMPLATE_DISPLAY_LIMIT);
   } catch (error) {
-    window.lana?.log(`Error loading generate-hero-v2 templates: ${error?.message || error}`, {
-      tags: 'generate-hero-v2',
+    window.lana?.log(`Error loading gen-template-marquee templates: ${error?.message || error}`, {
+      tags: 'gen-template-marquee',
       severity: 'error',
     });
     return [];
@@ -91,23 +91,23 @@ async function appendTracking(destination) {
     return window.t_getTrackingAppendedURL(destination);
   }
   const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
-  return getTrackingAppendedURL(destination, { placement: 'generate-hero-v2' });
+  return getTrackingAppendedURL(destination, { placement: 'gen-template-marquee' });
 }
 
 function buildPromptForm(suggestionsRow, strings) {
-  const wrapper = createElement('div', 'generate-hero-prompt');
-  const form = createElement('form', 'generate-hero-prompt-form');
-  const field = createElement('div', 'generate-hero-prompt-field');
-  const label = createElement('label', 'generate-hero-prompt-label');
-  const textarea = createElement('textarea', 'generate-hero-prompt-input');
-  const submit = createElement('button', 'generate-hero-prompt-submit');
-  const buttonText = createElement('span', 'generate-hero-prompt-submit-text');
-  const suggestions = createElement('div', 'generate-hero-suggestions');
-  const suggestionsLabel = createElement('p', 'generate-hero-suggestions-label');
-  const suggestionList = createElement('div', 'generate-hero-suggestion-list');
+  const wrapper = createElement('div', 'gen-template-prompt');
+  const form = createElement('form', 'gen-template-prompt-form');
+  const field = createElement('div', 'gen-template-prompt-field');
+  const label = createElement('label', 'gen-template-prompt-label');
+  const textarea = createElement('textarea', 'gen-template-prompt-input');
+  const submit = createElement('button', 'gen-template-prompt-submit');
+  const buttonText = createElement('span', 'gen-template-prompt-submit-text');
+  const suggestions = createElement('div', 'gen-template-suggestions');
+  const suggestionsLabel = createElement('p', 'gen-template-suggestions-label');
+  const suggestionList = createElement('div', 'gen-template-suggestion-list');
 
   instanceId += 1;
-  textarea.id = `generate-hero-prompt-${instanceId}`;
+  textarea.id = `gen-template-prompt-${instanceId}`;
   textarea.name = 'prompt';
   textarea.rows = 1;
   textarea.placeholder = strings.input;
@@ -140,7 +140,7 @@ function buildPromptForm(suggestionsRow, strings) {
   const prompts = parseList(promptCell);
   parseList(labelCell).forEach((text, index) => {
     if (!text) return;
-    const button = createElement('button', 'generate-hero-suggestion');
+    const button = createElement('button', 'gen-template-suggestion');
     button.type = 'button';
     button.dataset.prompt = prompts[index] || text;
     button.textContent = text;
@@ -157,15 +157,15 @@ function getBrandingLogo() {
   if (!brandingLogoName) return null;
 
   const logo = getIconElementDeprecated(brandingLogoName);
-  logo.classList.add('generate-hero-logo');
+  logo.classList.add('gen-template-logo');
   logo.setAttribute('aria-hidden', 'true');
   return logo;
 }
 
 function buildContent(textRow, suggestionsRow, strings) {
-  const content = createElement('div', 'generate-hero-content');
-  const text = createElement('div', 'generate-hero-text');
-  const logoAndHeading = createElement('div', 'generate-hero-logo-heading');
+  const content = createElement('div', 'gen-template-content');
+  const text = createElement('div', 'gen-template-text');
+  const logoAndHeading = createElement('div', 'gen-template-logo-heading');
   const textCell = textRow?.firstElementChild;
   // Convention: the destination link is authored as the last element of the first row.
   // Only its href is used; the button copy comes from the placeholder.
@@ -176,7 +176,7 @@ function buildContent(textRow, suggestionsRow, strings) {
   const body = [...(textCell?.children || [])].filter((child) => child !== heading);
   const logo = getBrandingLogo();
   const prompt = buildPromptForm(suggestionsRow, strings);
-  if (destination) prompt.querySelector('.generate-hero-prompt-form').dataset.href = destination;
+  if (destination) prompt.querySelector('.gen-template-prompt-form').dataset.href = destination;
 
   if (logo) logoAndHeading.append(logo);
   if (heading) logoAndHeading.append(heading);
@@ -212,12 +212,12 @@ function getAuthoredColumns(row) {
 }
 
 function buildCard({ picture: authoredPicture, src, width, height }, isLcp) {
-  const card = createElement('div', 'generate-hero-card');
+  const card = createElement('div', 'gen-template-card');
   // Authored images size the card themselves (EDS drops width/height), so nothing is cropped.
   const isSquare = width && height && width / height >= 0.85;
   card.classList.add(authoredPicture
-    ? 'generate-hero-card-authored'
-    : `generate-hero-card-${isSquare ? 'square' : 'portrait'}`);
+    ? 'gen-template-card-authored'
+    : `gen-template-card-${isSquare ? 'square' : 'portrait'}`);
   const picture = authoredPicture || createElement('picture');
   const image = picture.querySelector('img') || createElement('img');
   if (!image.src) image.src = src;
@@ -231,11 +231,11 @@ function buildCard({ picture: authoredPicture, src, width, height }, isLcp) {
 }
 
 function buildGallery(columns) {
-  const gallery = createElement('div', 'generate-hero-gallery');
+  const gallery = createElement('div', 'gen-template-gallery');
   gallery.setAttribute('aria-hidden', 'true');
 
   columns.forEach((items, columnIndex) => {
-    const column = createElement('div', 'generate-hero-column');
+    const column = createElement('div', 'gen-template-column');
     items.forEach((item, cardIndex) => {
       column.append(buildCard(item, columnIndex === 2 && cardIndex === 0));
     });
@@ -261,26 +261,26 @@ function trackScrollEnd(list) {
 
 function addInteractions(block) {
   block.addEventListener('input', (event) => {
-    const textarea = event.target.closest('.generate-hero-prompt-input');
+    const textarea = event.target.closest('.gen-template-prompt-input');
     if (!textarea || !block.contains(textarea)) return;
     resizePrompt(textarea);
   });
 
   block.addEventListener('click', (event) => {
-    const suggestion = event.target.closest('.generate-hero-suggestion');
+    const suggestion = event.target.closest('.gen-template-suggestion');
     if (!suggestion || !block.contains(suggestion)) return;
-    const textarea = block.querySelector('.generate-hero-prompt-input');
+    const textarea = block.querySelector('.gen-template-prompt-input');
     textarea.value = suggestion.dataset.prompt;
     textarea.dispatchEvent(new Event('input', { bubbles: true }));
     textarea.focus();
   });
 
   block.addEventListener('submit', async (event) => {
-    const form = event.target.closest('.generate-hero-prompt-form');
+    const form = event.target.closest('.gen-template-prompt-form');
     if (!form || !block.contains(form)) return;
     event.preventDefault();
 
-    const textarea = form.querySelector('.generate-hero-prompt-input');
+    const textarea = form.querySelector('.gen-template-prompt-input');
     const prompt = textarea.value.trim();
     if (!prompt) {
       textarea.focus();
@@ -313,6 +313,6 @@ export default async function decorate(block) {
 
   block.replaceChildren(content, gallery);
   addInteractions(block);
-  trackScrollEnd(block.querySelector('.generate-hero-suggestion-list'));
-  resizePrompt(block.querySelector('.generate-hero-prompt-input'));
+  trackScrollEnd(block.querySelector('.gen-template-suggestion-list'));
+  resizePrompt(block.querySelector('.gen-template-prompt-input'));
 }
