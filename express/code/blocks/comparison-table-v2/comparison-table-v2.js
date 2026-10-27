@@ -640,8 +640,8 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
       const openingEndHeight = measureExpandedTableHeight(table);
       const currentAnchorTop = anchorTarget.getBoundingClientRect().top + startScroll;
       const closesAbove = closingContainer
-        && closingContainer !== container
-        && Boolean(closingContainer.compareDocumentPosition(container) & Node.DOCUMENT_POSITION_FOLLOWING);
+        ? tableContainers.indexOf(closingContainer) < tableContainers.indexOf(container)
+        : false;
       const finalAnchorTop = currentAnchorTop - (closesAbove ? closingStartHeight : 0);
       const finalDocumentHeight = document.documentElement.scrollHeight
         + openingEndHeight - closingStartHeight;
