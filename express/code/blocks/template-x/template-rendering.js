@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { trackSearch, updateImpressionCache } from '../../scripts/template-search-api-v3.js';
-import { getTrackingAppendedURL } from '../../scripts/branchlinks.js';
+import { appendEventIntent, getTrackingAppendedURL } from '../../scripts/branchlinks.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 
 let createTag; let getConfig;
@@ -318,7 +318,7 @@ function renderCTA(branchUrl, template, customUrlConfig = null) {
 
   // Use custom URL if available, otherwise construct default URL
   const customUrl = constructCustomURL(template, customUrlConfig);
-  const href = customUrl || `${branchUrl}${mv}${sdid}${source}${action}`;
+  const href = appendEventIntent(customUrl || `${branchUrl}${mv}${sdid}${source}${action}`);
 
   const btnEl = createTag('a', {
     href,
@@ -334,7 +334,7 @@ function renderCTALink(branchUrl, template, customUrlConfig = null) {
 
   // Use custom URL if available, otherwise construct default URL
   const customUrl = constructCustomURL(template, customUrlConfig);
-  const href = customUrl || `${branchUrl}${mv}${sdid}${source}${action}`;
+  const href = appendEventIntent(customUrl || `${branchUrl}${mv}${sdid}${source}${action}`);
 
   const linkEl = createTag('a', {
     href,
