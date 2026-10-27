@@ -84,9 +84,11 @@ token rules and `references/grid-system.md` for the grid/container system.
   @media (min-width: 1680px) { /* wide */ }
   ```
 - Only include breakpoints for which a Figma frame was provided.
-- Use Express tokens for everything — `--color-*`, `--spacing-*`,
-  `--body-font-size-*`, `--heading-font-size-*`, `--body-font-family`,
-  `--heading-font-weight`.  See `references/design-tokens.md`.
+- Use a matching CSS custom property for design-system values — this may
+  be an Express variable from `styles.css` or an S2A variable from
+  `https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Use hardcoded
+  Figma values exactly when the design specifies a value rather than a
+  variable. See `references/design-tokens.md`.
 - Add breakpoint-specific token overrides whenever Figma shows
   different sizes at different viewports (tokens do not auto-switch
   in Express — you must override per breakpoint).

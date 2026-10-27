@@ -6,6 +6,14 @@ Official repo for adobe.com/express
 1. Run `aem up` this repo's folder. (opens your browser at `http://localhost:3000`)
 1. Open this repo's folder in your favorite editor and start coding.
 
+### Color Wheel responsive layout
+
+The Color Wheel initializes its layout, tabs, controller, and image panel once.
+CSS switches between persistent desktop controls and canvas controls at 1200px;
+both control sets share the same action-menu history. Breakpoint changes only
+reset the desktop expanded view, preserving the palette, harmony, selected tab,
+uploaded image, and undo/redo history without rebuilding the block.
+
 ## Testing
 ```sh
 npm run test
@@ -15,6 +23,12 @@ or:
 npm run test:watch
 ```
 This will give you several options to debug tests. Note: coverage may not be accurate.
+
+### Table of Contents Placement
+The `toc-seo` block renders at its authored location on mobile and tablet, independently
+of preceding highlight or blog marquee blocks and their audience visibility settings.
+On desktop, its fixed position is calculated from the first `long-form` section,
+with clearance for sticky navigation and the configured stop element.
 
 ### Running a Single Test File
 To run a specific test file with debugging enabled:

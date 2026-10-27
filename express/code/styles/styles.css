@@ -49,7 +49,20 @@
   src: local('Arial'), local('Helvetica');
 }
 
+/* Adobe Clean Display Fallback */
+@font-face {
+  font-family: 'Arial Bold Adjusted';
+  font-weight: 900;
+  size-adjust: 93%;
+  ascent-override: 91%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('ArialBold');
+}
+
 :root {
+  --express-fixed-top-height: var(--global-height-nav, 0px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+
   --color-white: #fff;
 
   --color-light-gray: #E9E9E9;
@@ -116,7 +129,7 @@
 
   /* font families */
   --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
-  --s2a-font-family-heading: 'adobe-clean-display', 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
+  --heading-font-family: "Adobe Clean Display Black", var(--s2a-font-family-heading), adobe-clean-display, "Arial Bold Adjusted", sans-serif;
 
   /* body */
   --body-background-color: var(--color-white);
@@ -878,15 +891,15 @@ main .dark a.con-button.outline:any-link:focus {
    `.button`s). Colors follow the Express SoT Background/Primary tokens. Only
    color changes; each block keeps its own button geometry.
    Whitelisted blocks only — add a block to every `:is()` list below to opt in:
-   ax-columns, blog-columns, font-bento, comparison-table-v2. */
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+   ax-columns, blog-columns, font-bento, comparison-table-v2, palette-columns. */
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill:any-link {
   color: var(--color-white);
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
 }
 
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible) {
   color: var(--color-white);
   background-color: var(--Background-Primary-Hover);
@@ -896,11 +909,11 @@ main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
 /* On dark surfaces the fill inverts to white. Covers a `.dark` section
    ancestor, a `.dark` block/inner wrapper, and the button-level `.dark` class. */
 main :is(
-  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2),
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2).dark,
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2) .dark
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns) .dark
 ) a:is(.con-button, .button).fill:any-link,
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill.dark:any-link {
   color: var(--Background-Primary-Default);
   background-color: var(--color-white);
@@ -908,11 +921,11 @@ main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
 }
 
 main :is(
-  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2),
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2).dark,
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2) .dark
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns) .dark
 ) a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible),
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill.dark:any-link:is(:hover, :active, :focus-visible) {
   color: var(--Background-Primary-Hover);
   background-color: var(--color-gray-100);
@@ -1631,7 +1644,7 @@ main .section.long-form.long-form-blog .content :is(h3, h4, h5, h6) {
 
 main .section.long-form .content,
 main .section.long-form .content :is(p:not(.button-container, :has(.con-button)), h1, h2, h3, h4, h5, h6) {
-  text-align: left;
+  text-align: start;
 }
 
 main .section.long-form .content,
@@ -1925,7 +1938,8 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   right: 15px;
 }
 
-.icon.icon-adobe-express-logo {
+.icon.icon-adobe-express-logo,
+.icon.icon-adobe-express-logo-rtl {
   width: initial;
   height: 30px;
   padding: 1rem 0 1rem;

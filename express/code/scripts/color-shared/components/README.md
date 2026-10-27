@@ -1,5 +1,12 @@
 # Color Shared Components
 
+## Action menu icons
+
+`actionMenuIcons.js` supplies inline SVGs for `createActionMenuComponent`. Icons
+must render independently of other menu instances, including hidden responsive
+menus. The Undo arrow uses a directly filled path rather than a document-scoped
+SVG mask so desktop and mobile menus can coexist without ID collisions.
+
 ## `createLoadingScreenComponent` contract and API
 
 Shared skeleton loader used by color surfaces (for example, Color Explore) while data and cards are still loading.

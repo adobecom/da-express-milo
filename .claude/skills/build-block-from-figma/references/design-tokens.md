@@ -1,14 +1,15 @@
 # Design Tokens Reference
 
 Express design tokens live in `express/code/styles/styles.css`, defined as
-CSS custom properties on `:root`. They are the **single source of truth**
-for the design system, and most of them mirror the variables in the Figma
-design system.
+CSS custom properties on `:root`. S2A tokens are provided separately by
+`https://www.adobe.com/libs/c2/styles/s2a-tokens.css`. Use the stylesheet
+that defines the exact Figma variable; `styles.css` is not the source for
+S2A definitions.
 
-## Two generations of tokens coexist
+## Express token generations and external S2A tokens
 
-The `:root` block has accreted over time and contains **two naming
-generations** that you must recognize:
+The Express `:root` block contains **two naming generations** that you
+must recognize:
 
 - **Older, kebab-case tokens** near the **top** of `:root` —
   `--color-gray-100`, `--spacing-300`, `--heading-font-size-l`,
@@ -18,21 +19,24 @@ generations** that you must recognize:
   `--Alias-content-typography-Body`, `--Global-Typography-Size-Headings-Heading-L`.
   These are named to match Figma variables almost character-for-character.
 
-**Ordering convention: newest at the bottom, oldest at the top.** When two
-candidate tokens are otherwise equally valid, prefer the **newer (lower)**
-one — it reflects the current Figma naming and is less likely to be
-deprecated. If you add a token, add it at the **bottom** of `:root`.
+**Ordering convention applies only within Express `styles.css`: newest at
+the bottom, oldest at the top.** When two Express candidates are otherwise
+equally valid, prefer the **newer (lower)** one. If you add a new Express
+token, add it at the **bottom** of `:root`. S2A variables are external and
+must be looked up in the S2A stylesheet, not copied into `styles.css`.
 
-Because Figma names map directly onto the newer tokens, your first move is
-always to match by **name**, not by value.
+For either source, first match Figma variables by **exact name**, not by
+value.
 
 ---
 
 ## Token mapping algorithm
 
 For **every** variable/value Figma reports for a property you are styling,
-work through these steps **in order** and stop at the first that succeeds.
-Record the outcome of each one for the token-mapping report (see below).
+match named variables exactly. When Figma supplies a hardcoded value
+without a variable, use that exact value in CSS rather than searching for
+a different variable with an equal or similar value. Record the outcome
+for the token-mapping report (see below).
 
 ### Step 0 — Get the Figma variable names
 
@@ -52,12 +56,14 @@ the raw value and the CSS property it applies to; `get_variable_defs` gives
 you the name. You need both.
 
 > If `get_variable_defs` returns nothing for a node (some layers use raw
-> values with no bound variable), skip to Step 2 and match by value.
+> values with no bound variable), use the exact raw Figma value in CSS.
 
 ### Step 1 — Exact name match (case-insensitive)
 
 Normalize the Figma variable name and look for an identical CSS custom
-property in `:root`:
+property in the relevant source: Express `:root` in
+`express/code/styles/styles.css` or the S2A stylesheet at
+`https://www.adobe.com/libs/c2/styles/s2a-tokens.css`.
 
 1. Replace `/` and spaces with `-`.
 2. Prepend `--`.
@@ -69,68 +75,24 @@ Examples:
 | `Palette/gray-100` | `--Palette-gray-100` | ✅ exact |
 | `Corner-radius/corner-radius-100` | `--Corner-radius-corner-radius-100` | ✅ exact |
 | `Alias/content-typography-Body` | `--Alias-content-typography-Body` | ✅ exact |
-| `spacing/spacing-300` | `--spacing-spacing-300` | only `--spacing-300` / `--Spacing-spacing-300` exist → not exact, go to Step 2 |
+| `spacing/spacing-300` | `--spacing-spacing-300` | `--Spacing-spacing-300` is an exact case-insensitive match in Express |
 
 If you find a case-insensitive exact match, **use it** and record it as an
-exact-name match. This is the strongly preferred outcome.
+exact-name match. This is the strongly preferred outcome. Look up S2A
+variables in the external stylesheet using their Figma names and the
+normalization rules above.
 
-### Step 2 — Value match within the correct semantic category
+### Step 2 — Use a hardcoded Figma value or flag an unmatched variable
 
-No exact name match. Search `:root` for a token whose **value** equals (or
-is within ~1px / a rounding hair of) the Figma raw value — **but only among
-tokens whose semantic category fits the CSS property** you are setting.
-
-This guardrail is critical: many tokens share a value. `16px` is the value
-of `--spacing-300`, `--Corner-radius-corner-radius-200`, and
-`--Global-Typography-Size-Body-Body-M` all at once. Picking the wrong one
-is a real bug even though the rendered pixels match.
-
-**Semantic category → allowed CSS properties:**
-
-| Category | Token families (examples) | Use for | Never use for |
-|---|---|---|---|
-| **Spacing** | `--spacing-*`, `--Spacing-*`, `--ax-grid-margin/-gutter` | `padding`, `margin`, `gap`, `row-gap`, `column-gap`, `inset`/`top/left/...` offsets | width, height, border-radius, border-width, font-size, line-height |
-| **Radius** | `--Corner-radius-*`, `--corner-radius-*`, `--Radius-*`, `--border-radius-*`, `--corner-radius-80` | `border-radius` only | spacing, size |
-| **Color** | `--color-*`, `--Palette-*`, `--palette-*`, `--Alias-content-*`, `--Background-*`, `--Buttons-*`, `--text-color-*`, `--gradient-*`, `--S2-Buttons-*`, `--transparent-*` | `color`, `background`/`-color`, `border-color`, `fill`, `stroke` | any non-color property |
-| **Font size** | `--body-font-size-*`, `--heading-font-size-*`, `--ax-*-size`, `--typography-*`, `--Global-Typography-Size-*` | `font-size` only | line-height, spacing |
-| **Line height** | `--ax-*-lh`, `--*-line-height-*`, `--Global-Typography-Line-height-*`, `--heading-line-height`, `--body-line-height` | `line-height` only | font-size |
-| **Font weight** | `--heading-font-weight*`, `--body-font-weight`, `--subheading-font-weight`, `--font-weight-medium`, `--ax-*-weight` | `font-weight` only | — |
-| **Width / max-width** | `--block-*-max-width`, `--ax-grid-*-col-width`, `--ax-grid-container-width` | `width`, `max-width`, `flex-basis` | padding/margin/gap |
-| **Shadow / elevation** | `--Alias-drop-shadow-*`, `--Elevation-*`, `--Modal-*-shadow-*` | `box-shadow` | — |
-| **Border width** | `--border-width-2` | `border-width` | — |
-
-When a value matches a token **outside** the property's category, that is
-**not** a valid match — continue to Step 3.
-
-Also sanity-check **role**, not just category: `--Alias-content-typography-Body`
-(#505050) is for body text color specifically — don't reach for it just
-because you need some gray. Prefer the token whose name describes the role
-you are filling.
-
-When you use a value match, record: the Figma variable name (or "(unnamed)"),
-the raw value, and which token you substituted.
-
-### Step 3 — No suitable token: evaluate adding one
-
-No exact-name match and no value match in the right category. Decide
-between two outcomes and **flag it for the user either way** (see report):
-
-- **Add a new token** when the value is clearly a reusable design-system
-  value (a named Figma variable that simply isn't in `styles.css` yet, or a
-  value you expect to recur). Add it at the **bottom** of `:root`, named to
-  mirror the Figma variable (Step 1 normalization). Prefer aliasing an
-  existing primitive if one holds the value
-  (e.g. `--Corner-radius-corner-radius-200: var(--spacing-300);` style).
-- **Hardcode with a comment** when it's a true one-off with no Figma
-  variable behind it:
-  ```css
-  /* No token for this 6px radius — Figma value, verify with design */
-  border-radius: 6px;
-  ```
-
-Adding to `:root` in `styles.css` touches a global file — **never add a
-token silently.** Surface it in the report and let the user confirm before
-you commit a new `:root` entry.
+- If Figma provides a raw value without a bound variable, use that exact
+  value in CSS. Do not substitute a different variable because it happens
+  to have the same or a similar value.
+- If Figma names a variable that is absent from both the Express and S2A
+  stylesheets, flag the missing variable for review. Do not invent a
+  substitute or duplicate an S2A definition in Express `styles.css`.
+- A new Express `:root` token may still be proposed for a reusable,
+  non-S2A design-system value, but it requires user confirmation before
+  being added.
 
 ---
 
@@ -139,41 +101,37 @@ you commit a new `:root` entry.
 This is a required deliverable, folded into the Phase 9 summary. Its
 purpose is to make every non-obvious token decision auditable.
 
-Produce a table covering **every Figma variable/value you encountered that
-did not resolve via a Step 1 exact-name match** (exact-name matches are the
-happy path and don't need individual reporting — just note the count):
+Produce a table covering **only named Figma variables that did not resolve
+to an exact CSS custom property**. Exact matches are the happy path and
+only need to be counted. Hardcoded Figma values are used as-is and are not
+listed in this report:
 
 ```
 Figma variable            | Raw value | CSS property      | Resolution                              | Needs decision?
 ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
-spacing/spacing-300        | 16px      | padding           | value-match → --spacing-300             | no
-(unnamed)                  | #2C2C2C   | color             | value-match → --c1-text-text            | review: odd one-off token
-Card/corner-radius-large   | 12px      | border-radius     | NEW TOKEN proposed: --Card-corner-...   | YES — confirm before commit
-(unnamed)                  | 6px       | border-radius     | hardcoded (no token, no Figma var)      | YES — verify w/ design
-Heading/size-display       | 64px      | font-size         | no category match; closest --heading... | YES — value differs, confirm
+Heading/size-display        | 64px     | font-size         | no match in either stylesheet           | YES — review missing variable
 ```
 
 Columns:
-- **Figma variable** — the name from `get_variable_defs`, or `(unnamed)` if
-  the layer used a raw value.
+- **Figma variable** — the name from `get_variable_defs`.
 - **Raw value** — from `get_design_context`.
 - **CSS property** — what you were styling.
-- **Resolution** — one of: `value-match → --token`, `NEW TOKEN proposed: --token`,
-  `hardcoded`, or a near-miss note.
-- **Needs decision?** — `YES` for anything that adds a `:root` token,
-  hardcodes a value, or substitutes a token whose value isn't an exact match;
-  `review` for a match you're not fully confident is semantically right;
-  `no` for clean in-category value matches.
+- **Resolution** — `missing named variable` or
+  `NEW TOKEN proposed: --token`.
+- **Needs decision?** — `YES` for a missing named variable or proposed new
+  Express token.
 
 Anything marked `YES` must be raised with the user **before** it ships,
-since it either changes the global stylesheet or leaves an unmatched value.
+since it leaves a named design variable unresolved or proposes a new
+global token.
 
 ---
 
 ## Quick token inventory
 
-A non-exhaustive map of what exists today, to orient value searches. Always
-read the live `:root` in `styles.css` — this list drifts.
+A non-exhaustive map of Express tokens, to orient name searches. Always
+read the live `:root` in `styles.css` — this list drifts. For S2A names,
+consult the external stylesheet rather than relying on this inventory.
 
 ### Colour
 `--color-white`, `--color-black`, `--color-gray-100`…`--color-gray-950`
@@ -182,7 +140,7 @@ read the live `:root` in `styles.css` — this list drifts.
 (+ states), `--color-info-premium`, `--color-blue-600/-700/-800`,
 `--color-green-800/-900/-1000`, `--color-orange-700`, `--color-purple-1000`,
 `--color-focus-ring-strong`, `--color-brand-title`, `--gradient-highlight-*`.
-Newer Figma-mirrored: `--Palette-gray-100`…`-1000`, `--Palette-blue-1000`,
+Newer Express Figma-mirrored: `--Palette-gray-100`…`-1000`, `--Palette-blue-1000`,
 `--Alias-content-typography-Title/-Heading/-Body`,
 `--Alias-content-neutral-default/-hover`, `--Background-accent-default`,
 `--Background-secondary-default`, `--Buttons-default/-hover`,
@@ -212,23 +170,27 @@ Heading: `--heading-font-size-xxxl` (5rem) → `--heading-font-size-xs`
 `--ax-detail-weight` (700).
 
 ### Font family / weight
-`--body-font-family` (Adobe Clean — use for body **and** headings),
+`--body-font-family` (body text),
+`--heading-font-family` (heading text, with its configured fallback stack),
 `--body-serif-font-family`, `--heading-font-weight` (800),
 `--heading-font-weight-extra` (900), `--heading-font-weight-medium` (700),
 `--heading-font-weight-regular` (400), `--body-font-weight` (normal),
 `--subheading-font-weight` (700), `--font-weight-medium` (500).
 
-Headings have **no** dedicated font-family token — they use
-`--body-font-family` with a heavier `--heading-font-weight*`.
+Map S2A font-family variables to the Express variables that preserve the
+correct fonts and fallback stacks:
 
-> **Known exception — do not flag the font family.** Figma's design system
-> uses **Adobe Clean Spectrum VF** (the Spectrum 2 variable font), which has
-> no matching token; the codebase uses `--body-font-family` ('adobe-clean').
-> This is a **known, intentional** difference between design and dev that we
-> are not addressing yet. When Figma reports a Spectrum VF font family
-> (`Family/font-family-*`, `Font family/Sans serif`, etc.), silently map it
-> to `--body-font-family` and **omit it from the token-mapping report** — do
-> not raise it as a gap or a decision.
+| Figma variable | Express CSS variable |
+|---|---|
+| `--s2a-font-family-heading` | `--heading-font-family` |
+| `--s2a-font-family-body` | `--body-font-family` |
+
+Do not use the raw S2A font-family variable directly or map headings to
+`--body-font-family`.
+
+S2A custom properties use the `--s2a-*` prefix. Consult the external S2A
+stylesheet for their exact names and values; this inventory does not
+enumerate them.
 
 ### Width / shadow / misc
 `--block-{sm/md/lg/wd}-max-width`, `--block-wd-grid-max-width`,
@@ -240,10 +202,10 @@ Headings have **no** dedicated font-family token — they use
 
 ## Responsive behaviour
 
-Spacing and font tokens do **not** change value per breakpoint in the token
-layer (a few `--ax-grid-*` values do, in `@media` `:root` blocks). When
-Figma shows different sizes at different viewports, switch **which token**
-you reference inside a media query:
+Do not assume spacing or typography variables change values per breakpoint.
+When Figma shows different values at different viewports, use a media query
+to select the exact named variable or hardcoded Figma value for each
+breakpoint:
 
 ```css
 .my-block .heading { font-size: var(--heading-font-size-m); }
@@ -258,10 +220,9 @@ you reference inside a media query:
 ## Checklist before submitting block CSS
 
 - [ ] Ran `get_variable_defs` for every frame; have Figma variable names, not just values.
-- [ ] Every value resolved through the algorithm: exact-name → in-category value-match → new token / hardcoded.
-- [ ] No value-match crosses semantic categories (no spacing token on a radius, etc.).
-- [ ] Colours map to a colour-family token (matched by role, not just hue) or are flagged.
-- [ ] Font families use only `--body-font-family` (or `--body-serif-font-family`).
-- [ ] Font weights use the weight tokens.
+- [ ] Every named variable resolved by exact name in Express `styles.css` or the external S2A stylesheet; unmatched names are flagged.
+- [ ] Hardcoded Figma values are used exactly, without substituting a same-valued variable.
+- [ ] Colours use the named Figma variable where available or the exact hardcoded Figma value.
+- [ ] `--s2a-font-family-heading` maps to `--heading-font-family`, and `--s2a-font-family-body` maps to `--body-font-family`, preserving Express fallback fonts.
 - [ ] Any new `:root` token was confirmed with the user before commit and added at the bottom of `:root`.
-- [ ] Token-mapping report compiled for the Phase 9 summary, with every `YES`/`review` row called out.
+- [ ] Token-mapping report compiled for the Phase 9 summary, containing only named Figma variables not found in either stylesheet.

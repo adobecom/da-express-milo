@@ -81,7 +81,8 @@ export default async function init(el) {
         icon.append(svg);
       });
     }
-    tab.append(icon, listItem.textContent);
+    if (icon) tab.append(icon);
+    tab.append(listItem.textContent);
     tab.addEventListener('click', () => activateTab(tab));
     listItem.replaceWith(tab);
     return tab;
@@ -92,7 +93,8 @@ export default async function init(el) {
     e.preventDefault();
     const currTabIndex = tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
     if (currTabIndex === -1) return;
-    const nextTabIndex = (currTabIndex + (e.key === 'ArrowLeft' ? -1 : 1) + tabs.length) % tabs.length;
+    const direction = getComputedStyle(tabList).direction === 'rtl' ? -1 : 1;
+    const nextTabIndex = (currTabIndex + (e.key === 'ArrowLeft' ? -direction : direction) + tabs.length) % tabs.length;
     activateTab(tabs[nextTabIndex]);
   });
 }

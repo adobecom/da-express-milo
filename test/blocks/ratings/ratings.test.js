@@ -224,7 +224,7 @@ describe('Ratings Block - slider interactions', () => {
     expect(block.classList.contains('four-stars')).to.be.true;
   });
 
-  it('updateSliderStyle: sets tooltip left style after slider change', async () => {
+  it('updateSliderStyle: sets tooltip inline-start after slider change', async () => {
     await decorate(block);
     await waitForSlider(block);
 
@@ -233,7 +233,7 @@ describe('Ratings Block - slider interactions', () => {
     input.value = '4';
     input.dispatchEvent(new Event('change'));
 
-    expect(tooltip.style.left).to.not.equal('');
+    expect(tooltip.style.insetInlineStart).to.not.equal('');
   });
 
   it('updateCommentBoxAndTimer: feedback-required rating (3 stars) shows submit section and no countdown', async () => {
@@ -356,7 +356,7 @@ describe('Ratings Block - slider interactions', () => {
     input.dispatchEvent(new MouseEvent('mouseup'));
 
     // Chrome normalizes shorthand decimals: '.3s' → '0.3s'
-    expect(tooltip.style.transition).to.match(/left 0?\.3s, right 0?\.3s/);
+    expect(tooltip.style.transition).to.match(/inset-inline-start 0?\.3s/);
     expect(sliderFill.style.transition).to.match(/width 0?\.3s/);
   });
 
@@ -385,6 +385,35 @@ describe('Ratings Block - slider interactions', () => {
     const input = block.querySelector('input[type=range]');
     expect(input.value).to.equal('1');
     expect(block.classList.contains('one-star')).to.be.true;
+  });
+
+  it('keeps the slider tooltip aligned with RTL values and star clicks', async () => {
+    block.dir = 'rtl';
+    await decorate(block);
+    await waitForSlider(block);
+
+    const input = block.querySelector('input[type=range]');
+    const tooltip = block.querySelector('.tooltip');
+    const sliderFill = block.querySelector('.slider-fill');
+    input.style.width = '200px';
+
+    input.value = '1';
+    input.dispatchEvent(new Event('input'));
+    expect(tooltip.style.insetInlineStart).to.equal('0px');
+    expect(sliderFill.style.width).to.equal('30px');
+
+    block.querySelector('.five-stars').dispatchEvent(
+      new MouseEvent('click', { bubbles: true }),
+    );
+    expect(input.value).to.equal('5');
+    expect(tooltip.style.insetInlineStart).to.equal('140px');
+    expect(sliderFill.style.width).to.equal('170px');
+
+    input.value = '3';
+    input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
+    expect(input.value).to.equal('4');
+    input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    expect(input.value).to.equal('3');
   });
 
   it('textarea focus stops countdown and shows submit section', async () => {
