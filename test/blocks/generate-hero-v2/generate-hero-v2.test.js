@@ -9,7 +9,7 @@ window.isTestEnv = true;
 await import('../../../express/code/scripts/scripts.js');
 const { setLibs } = await import('../../../express/code/scripts/utils.js');
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
-const { default: decorate } = await import('../../../express/code/blocks/gen-template-marquee/gen-template-marquee.js');
+const { default: decorate } = await import('../../../express/code/blocks/generate-hero-v2/generate-hero-v2.js');
 
 const fixture = await readFile({ path: './mocks/default.html' });
 const originalFetch = window.fetch;
@@ -47,7 +47,7 @@ function addMetadata(metadata) {
     const meta = document.createElement('meta');
     meta.name = name;
     meta.content = content;
-    meta.dataset.genTemplateTest = '';
+    meta.dataset.generateHeroTest = '';
     document.head.append(meta);
   });
 }
@@ -55,13 +55,13 @@ function addMetadata(metadata) {
 async function prepareBlock(metadata = {}, templateSource = '') {
   addMetadata(metadata);
   document.body.innerHTML = fixture;
-  const block = document.querySelector('.gen-template-marquee');
+  const block = document.querySelector('.generate-hero-v2');
   if (templateSource) block.children[2].firstElementChild.textContent = templateSource;
   await decorate(block);
   return block;
 }
 
-describe('gen-template-marquee', () => {
+describe('generate-hero-v2', () => {
   beforeEach(() => {
     fetchedUrl = '';
     window.fetch = (url) => {
@@ -73,32 +73,32 @@ describe('gen-template-marquee', () => {
   afterEach(() => {
     window.fetch = originalFetch;
     document.body.replaceChildren();
-    document.head.querySelectorAll('meta[data-gen-template-test]').forEach((meta) => meta.remove());
+    document.head.querySelectorAll('meta[data-generate-hero-test]').forEach((meta) => meta.remove());
   });
 
   it('builds the prompt experience with current text fallbacks', async () => {
     const block = await prepareBlock();
-    const input = block.querySelector('.gen-template-prompt-input');
-    const form = block.querySelector('.gen-template-prompt-form');
+    const input = block.querySelector('.generate-hero-prompt-input');
+    const form = block.querySelector('.generate-hero-prompt-form');
 
     expect(block.querySelector('h1').textContent).to.equal('Generate templates with AI.');
     expect(input.placeholder).to.equal('Describe what template you want to make');
     expect(block.querySelector('label').textContent).to.equal('Prompt');
     expect(block.querySelector('label').htmlFor).to.equal(input.id);
-    expect(block.querySelector('.gen-template-prompt-submit').textContent).to.contain('Generate');
+    expect(block.querySelector('.generate-hero-prompt-submit').textContent).to.contain('Generate');
     expect(form.dataset.href).to.equal('https://new.express.adobe.com/neural-pixel-editor?entry=create-menu');
-    expect(block.querySelector('.gen-template-suggestions-label').textContent)
+    expect(block.querySelector('.generate-hero-suggestions-label').textContent)
       .to.equal('Get started with an example prompt');
   });
 
   it('only injects the authored branding logo', async () => {
     const blockWithoutLogo = await prepareBlock();
-    expect(blockWithoutLogo.querySelector('.gen-template-logo')).to.not.exist;
+    expect(blockWithoutLogo.querySelector('.generate-hero-logo')).to.not.exist;
 
     const blockWithLogo = await prepareBlock({
       'inject-branding-logo': 'adobe-express-logo',
     });
-    const logo = blockWithLogo.querySelector('.gen-template-logo');
+    const logo = blockWithLogo.querySelector('.generate-hero-logo');
 
     expect(logo).to.exist;
     expect(logo.src).to.contain('/express/code/icons/adobe-express-logo.svg');
@@ -106,41 +106,41 @@ describe('gen-template-marquee', () => {
 
   it('uses page metadata to override every prompt placeholder', async () => {
     const block = await prepareBlock({
-      'gen-template-prompt-label': 'Your prompt',
-      'gen-template-prompt-placeholder': 'Describe your design',
-      'gen-template-prompt-submit': 'Create',
-      'gen-template-suggestions-label': 'Try an example',
+      'generate-hero-prompt-label': 'Your prompt',
+      'generate-hero-prompt-placeholder': 'Describe your design',
+      'generate-hero-prompt-submit': 'Create',
+      'generate-hero-suggestions-label': 'Try an example',
     });
 
-    expect(block.querySelector('.gen-template-prompt-label').textContent).to.equal('Your prompt');
-    expect(block.querySelector('.gen-template-prompt-input').placeholder).to.equal('Describe your design');
-    expect(block.querySelector('.gen-template-prompt-submit').textContent).to.contain('Create');
-    expect(block.querySelector('.gen-template-suggestions-label').textContent).to.equal('Try an example');
+    expect(block.querySelector('.generate-hero-prompt-label').textContent).to.equal('Your prompt');
+    expect(block.querySelector('.generate-hero-prompt-input').placeholder).to.equal('Describe your design');
+    expect(block.querySelector('.generate-hero-prompt-submit').textContent).to.contain('Create');
+    expect(block.querySelector('.generate-hero-suggestions-label').textContent).to.equal('Try an example');
   });
 
   it('uses the trailing first-row link as the destination, not as body copy', async () => {
     const block = await prepareBlock();
-    const text = block.querySelector('.gen-template-text');
+    const text = block.querySelector('.generate-hero-text');
 
     expect(text.querySelector('a')).to.be.null;
     expect(text.querySelectorAll(':scope > p')).to.have.length(1);
-    expect(block.querySelector('.gen-template-prompt-submit').textContent).to.equal('Generate');
+    expect(block.querySelector('.generate-hero-prompt-submit').textContent).to.equal('Generate');
   });
 
   it('does not route without an authored destination', async () => {
     document.body.innerHTML = fixture;
-    const block = document.querySelector('.gen-template-marquee');
+    const block = document.querySelector('.generate-hero-v2');
     block.querySelector('a').closest('p').remove();
     await decorate(block);
 
-    expect(block.querySelector('.gen-template-prompt-form').dataset.href).to.be.undefined;
-    expect(block.querySelector('.gen-template-text > p').textContent)
+    expect(block.querySelector('.generate-hero-prompt-form').dataset.href).to.be.undefined;
+    expect(block.querySelector('.generate-hero-text > p').textContent)
       .to.equal('Create a fully editable template from a single prompt in minutes.');
   });
 
   it('grows and shrinks the prompt to fit its lines', async () => {
     const block = await prepareBlock();
-    const input = block.querySelector('.gen-template-prompt-input');
+    const input = block.querySelector('.generate-hero-prompt-input');
     const initialHeight = parseFloat(input.style.height);
 
     input.value = 'First line\nSecond line\nThird line\nFourth line';
@@ -156,8 +156,8 @@ describe('gen-template-marquee', () => {
 
   it('splits the authored comma-separated suggestion row', async () => {
     const block = await prepareBlock();
-    const suggestions = block.querySelectorAll('.gen-template-suggestion');
-    const input = block.querySelector('.gen-template-prompt-input');
+    const suggestions = block.querySelectorAll('.generate-hero-suggestion');
+    const input = block.querySelector('.generate-hero-prompt-input');
 
     expect(suggestions).to.have.length(4);
     suggestions[0].click();
@@ -173,11 +173,11 @@ describe('gen-template-marquee', () => {
     expect(requestUrl.searchParams.get('collectionId'))
       .to.equal('urn:aaid:sc:VA6C2:25a82757-01de-4dd9-b0ee-bde51dd3b418');
     expect(requestUrl.searchParams.getAll('filters')).to.include('pages.task.name==resume');
-    expect(block.querySelectorAll('.gen-template-column')).to.have.length(5);
-    expect(block.querySelectorAll('.gen-template-card')).to.have.length(14);
-    expect(block.querySelectorAll('.gen-template-card img[alt=""]')).to.have.length(14);
-    expect(block.querySelectorAll('.gen-template-card-square')).to.have.length(7);
-    expect(block.querySelectorAll('.gen-template-card-portrait')).to.have.length(7);
+    expect(block.querySelectorAll('.generate-hero-column')).to.have.length(5);
+    expect(block.querySelectorAll('.generate-hero-card')).to.have.length(14);
+    expect(block.querySelectorAll('.generate-hero-card img[alt=""]')).to.have.length(14);
+    expect(block.querySelectorAll('.generate-hero-card-square')).to.have.length(7);
+    expect(block.querySelectorAll('.generate-hero-card-portrait')).to.have.length(7);
   });
 
   it('loads templates from an authored collection ID', async () => {
@@ -187,13 +187,13 @@ describe('gen-template-marquee', () => {
 
     expect(requestUrl.searchParams.get('collectionId')).to.equal(collectionId);
     expect(requestUrl.searchParams.get('limit')).to.equal('23');
-    expect(block.querySelectorAll('.gen-template-card')).to.have.length(14);
+    expect(block.querySelectorAll('.generate-hero-card')).to.have.length(14);
   });
 
   it('keeps an empty submission on the page and focuses the prompt', async () => {
     const block = await prepareBlock();
-    const form = block.querySelector('.gen-template-prompt-form');
-    const input = block.querySelector('.gen-template-prompt-input');
+    const form = block.querySelector('.generate-hero-prompt-form');
+    const input = block.querySelector('.generate-hero-prompt-input');
 
     form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
 
@@ -202,8 +202,8 @@ describe('gen-template-marquee', () => {
 
   it('preserves reserved characters in the routed prompt', async () => {
     const block = await prepareBlock();
-    const form = block.querySelector('.gen-template-prompt-form');
-    const input = block.querySelector('.gen-template-prompt-input');
+    const form = block.querySelector('.generate-hero-prompt-form');
+    const input = block.querySelector('.generate-hero-prompt-input');
     const originalLocationAssign = window.t_locationAssign;
     const originalTrackingAppender = window.t_getTrackingAppendedURL;
     window.t_getTrackingAppendedURL = (url) => Promise.resolve(url);
@@ -224,7 +224,7 @@ describe('gen-template-marquee', () => {
 
   it('hardcoded-templates builds columns from authored images without fetching', async () => {
     document.body.innerHTML = fixture;
-    const block = document.querySelector('.gen-template-marquee');
+    const block = document.querySelector('.generate-hero-v2');
     block.classList.add('hardcoded-templates');
     const img = (w, h) => `<picture><img src="/a-${w}x${h}.png" width="${w}" height="${h}"></picture>`;
     block.children[2].innerHTML = [
@@ -237,11 +237,11 @@ describe('gen-template-marquee', () => {
     await decorate(block);
 
     expect(fetchedUrl).to.equal('');
-    const columns = [...block.querySelectorAll('.gen-template-column')];
+    const columns = [...block.querySelectorAll('.generate-hero-column')];
     expect(columns.map((c) => c.children.length)).to.deep.equal([2, 1, 2, 1]);
-    const cards = [...block.querySelectorAll('.gen-template-card')];
-    expect(cards.every((card) => card.classList.contains('gen-template-card-authored'))).to.be.true;
-    expect(block.querySelector('.gen-template-card-portrait, .gen-template-card-square')).to.be.null;
+    const cards = [...block.querySelectorAll('.generate-hero-card')];
+    expect(cards.every((card) => card.classList.contains('generate-hero-card-authored'))).to.be.true;
+    expect(block.querySelector('.generate-hero-card-portrait, .generate-hero-card-square')).to.be.null;
     const lcp = columns[2].querySelector('img');
     expect(lcp.loading).to.equal('eager');
     expect(lcp.getAttribute('src')).to.equal('/a-4096x4096.png');
