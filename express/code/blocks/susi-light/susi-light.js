@@ -636,8 +636,10 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
       destURL.hash = '';
     } catch { /* ignore — destURL fallback is already set */ }
   }
+  // token hands the session back to the opener page, so it only applies to popup mode;
+  // the same-tab redirect flow uses code, like every other susi-light variant
   const params = buildSUSIParams({
-    client_id, variant, destURL, locale, title, popup, responseType: 'token', el,
+    client_id, variant, destURL, locale, title, popup, responseType: popup ? 'token' : 'code', el,
   });
   if (!noRedirect && !isColor) {
     redirectIfLoggedIn(params.destURL);
@@ -646,7 +648,7 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const titleDiv = createTag('div', { class: 'title' }, title);
   const susiWrapper = createTag('div', { class: 'susi-wrapper' }, createSUSIComponent({
     ...params,
-    onSuccessfulToken: () => window.location.assign(destURL.toString()),
+    onSuccessfulToken: popup ? () => window.location.assign(destURL.toString()) : undefined,
   }));
   if (mobileTitle) {
     titleDiv.classList.add('desktop-only');
