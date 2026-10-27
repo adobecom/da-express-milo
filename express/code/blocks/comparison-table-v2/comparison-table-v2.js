@@ -506,6 +506,13 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
 
     let finished = false;
 
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (currentAnimationId) cancelAnimationFrame(currentAnimationId);
+      cleanup();
+    };
+
     const cancelOnUserInput = () => finish();
     
     const cleanup = () => {
@@ -525,13 +532,6 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
       currentAnimationId = null;
       cancelCurrentAnimation = null;
       if (typeof onComplete === 'function') onComplete();
-    };
-
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      if (currentAnimationId) cancelAnimationFrame(currentAnimationId);
-      cleanup();
     };
 
     cancelCurrentAnimation = finish;
