@@ -451,6 +451,10 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
   margin-bottom: var(--spacing-100);
 }
 
+main .comparison-table-v2 .sticky-header.is-stuck .plan-cell p {
+ margin-bottom: 0;
+}
+
 main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2, h3, h4, h5, h6, .sticky-header-title) {
   margin-bottom: var(--spacing-100);
 }
@@ -670,7 +674,6 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
 .comparison-table-v2 .plan-selector {
   position: relative;
   height: var(--dropdown-height);
-  margin-top: var(--spacing-100);
   border-radius: 0 0 7px 7px;
   border: 0 solid var(--color-gray-325);
   background: #EBEEFF;
