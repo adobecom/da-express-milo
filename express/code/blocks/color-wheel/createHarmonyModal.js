@@ -7,6 +7,24 @@ const STRIP_DEFAULTS = {
 };
 
 const NAVIGATION_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
+let uidCounter = 0;
+
+function createSecureUid(prefix = 'color-harmony-modal') {
+  const cryptoObj = window.crypto;
+  if (cryptoObj?.randomUUID) {
+    return `${prefix}-${cryptoObj.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  }
+  if (cryptoObj?.getRandomValues) {
+    const bytes = new Uint8Array(8);
+    cryptoObj.getRandomValues(bytes);
+    const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    return `${prefix}-${token.slice(0, 12)}`;
+  }
+
+  // Last-resort fallback for unusual runtimes that do not expose Web Crypto.
+  uidCounter += 1;
+  return `${prefix}-${Date.now().toString(36)}${uidCounter.toString(36)}`;
+}
 
 function createPaletteSummary(colors = []) {
   const palette = createTag('span', {
@@ -30,7 +48,7 @@ function createHarmonyModalContent({
 } = {}) {
   const title = strings.title || 'Learn about color harmonies';
   const confirmLabel = strings.confirm || 'Apply harmony';
-  const uid = `color-harmony-modal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const uid = createSecureUid();
   const titleId = `${uid}-title`;
   const element = createTag('div', { class: 'color-harmony-modal' });
   const header = createTag('header', { class: 'color-harmony-modal-header' });
