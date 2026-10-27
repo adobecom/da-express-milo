@@ -23,7 +23,6 @@ Every block in `express/code/blocks/` is **Active** unless it's listed below. Ch
 |---|---|---|
 | `app-banner` | `floating-button` | [DOTCOM-201140](https://jira.corp.adobe.com/browse/DOTCOM-201140) |
 | `quick-action-hub` | Remove instead of replacing | [DOTCOM-201141](https://jira.corp.adobe.com/browse/DOTCOM-201141) |
-| `page-list` | | |
 | `tabs-ax` | None | [MWPW-213055](https://jira.corp.adobe.com/browse/MWPW-213055) |
 | `toggle-bar` | None | [MWPW-213055](https://jira.corp.adobe.com/browse/MWPW-213055) |
 | `split-action` | None | [MWPW-213055](https://jira.corp.adobe.com/browse/MWPW-213055) |
