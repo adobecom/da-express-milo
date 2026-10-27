@@ -300,7 +300,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: var(--spacing-500) var(--spacing-500);
+    padding: var(--spacing-500);
     overflow-y: auto;
   }
 
