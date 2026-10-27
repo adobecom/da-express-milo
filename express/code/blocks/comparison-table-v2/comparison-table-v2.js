@@ -505,6 +505,9 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
     animatedTables.forEach((table) => table.classList.add('accordion-animating'));
 
     let finished = false;
+
+    const cancelOnUserInput = () => finish();
+    
     const cleanup = () => {
       window.removeEventListener('wheel', cancelOnUserInput);
       window.removeEventListener('touchstart', cancelOnUserInput);
@@ -530,7 +533,6 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
       if (currentAnimationId) cancelAnimationFrame(currentAnimationId);
       cleanup();
     };
-    const cancelOnUserInput = () => finish();
 
     cancelCurrentAnimation = finish;
     window.addEventListener('wheel', cancelOnUserInput, { passive: true });
@@ -638,8 +640,8 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
       const openingEndHeight = measureExpandedTableHeight(table);
       const currentAnchorTop = anchorTarget.getBoundingClientRect().top + startScroll;
       const closesAbove = closingContainer
-        && closingContainer !== container
-        && Boolean(closingContainer.compareDocumentPosition(container) & Node.DOCUMENT_POSITION_FOLLOWING);
+        ? tableContainers.indexOf(closingContainer) < tableContainers.indexOf(container)
+        : false;
       const finalAnchorTop = currentAnchorTop - (closesAbove ? closingStartHeight : 0);
       const finalDocumentHeight = document.documentElement.scrollHeight
         + openingEndHeight - closingStartHeight;
