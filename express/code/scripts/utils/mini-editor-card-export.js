@@ -19,13 +19,33 @@ function resolveFontFamily(family) {
   ));
 }
 
+function getSafeBackgroundUrl(src) {
+  let url;
+  try {
+    url = new URL(src, window.location.href);
+  } catch {
+    return null;
+  }
+
+  if (url.protocol === 'http:' || url.protocol === 'https:') {
+    return url.href;
+  }
+
+  return null;
+}
+
+
 function normalizeModel(model) {
   // Render from the full-res JPEG when available (download/copy is high-res); fall back to the
   // preview URL used by the on-page card.
   const src = model.backgroundFullUrl || model.backgroundUrl;
+  const safeUrl = getSafeBackgroundUrl(src);
+  if (!safeUrl) {
+    throw new Error(`Mini-editor background URL is invalid: ${src}`);
+  }
   return {
     ...model,
-    backgroundUrl: new URL(src, window.location.href).href,
+    backgroundUrl: safeUrl,
     font: { ...model.font, family: resolveFontFamily(model.font.family) },
   };
 }
