@@ -11,6 +11,7 @@ own — everything Express-specific lives here.
 | `gates.yaml` | Express's verification gates. When present, these **replace** the harness's built-in default gate set. |
 | `pr.yaml` | Branch naming and the PR body, shaped like `.github/pull_request_template.md`. |
 | `floor/gates.yaml` | Snapshot of the acom org floor the gates may tighten but never weaken. |
+| `web-test-runner.config.mjs` | The repository's Web Test Runner config with Chrome's sandbox off, for the unit-tests gate (the harness runs as root). |
 | `scripts/` | Helper scripts: the block-structure gate and the contract self-check. |
 
 ## Gates
@@ -22,7 +23,9 @@ own — everything Express-specific lives here.
   `.browserslistrc`), the same config `code-compatibility.yaml` runs in CI.
 - **stylelint** — `npx stylelint {css_files}` with `.stylelintrc.json`.
 - **unit-tests** — Web Test Runner (`web-test-runner.config.js`, port 2000) on
-  the affected files inside `test/**/*.test.js`. Nala E2E specs are out of
+  the affected files inside `test/**/*.test.js`, through
+  `.pinata/web-test-runner.config.mjs` (Chrome refuses to start as root with
+  its sandbox on). Nala E2E specs are out of
   scope: they need live pages and credentials.
 - **block-structure** — `node .pinata/scripts/check-block-structure.mjs {changed_files}`:
   every changed `express/code/blocks/<name>/` must contain both `<name>.js` and
