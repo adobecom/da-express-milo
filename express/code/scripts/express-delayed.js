@@ -45,7 +45,7 @@ function isDesktopChromium() {
 // Loads Express's hidden preload page after this page has loaded so the Express Service Worker
 // installs before the user opens the editor. Runs at most once per tab session.
 function prewarmExpress() {
-  if (prewarmScheduled || !getMetadata('prewarm-express')) return;
+  if (prewarmScheduled || getMetadata('prewarm-express')?.toLowerCase()?.trim() !== 'on') return;
   if (!isDesktopChromium() || navigator.connection?.saveData) return;
   try {
     if (sessionStorage.getItem(PREWARM_SESSION_KEY)) return;

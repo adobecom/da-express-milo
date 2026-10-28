@@ -30,7 +30,7 @@ describe('Express delayed pre-warm', () => {
     sessionStorage.removeItem(sessionKey);
     metadata = document.createElement('meta');
     metadata.name = 'prewarm-express';
-    metadata.content = 'true';
+    metadata.content = 'on';
     document.head.append(metadata);
     setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
     moduleId += 1;
@@ -60,6 +60,20 @@ describe('Express delayed pre-warm', () => {
     metadata.remove();
     await loadDelayed();
     expect(getFrame()).to.equal(null);
+  });
+
+  ['off', 'false', 'true', ''].forEach((value) => {
+    it(`does nothing when metadata is "${value}"`, async () => {
+      metadata.content = value;
+      await loadDelayed();
+      expect(getFrame()).to.equal(null);
+    });
+  });
+
+  it('accepts "on" case-insensitively with surrounding whitespace', async () => {
+    metadata.content = ' ON ';
+    await loadDelayed();
+    expect(getFrame()).not.to.equal(null);
   });
 
   it('waits for page load, then creates one hidden, non-focusable iframe', async () => {
