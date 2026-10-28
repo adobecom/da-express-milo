@@ -63,7 +63,12 @@ export default {
           // hooks fail the current (or, for import-time requests, the first) test. Recording
           // instead of relying on the rejection means callers that swallow errors can't hide it.
           // Mocking guidance: https://github.com/orgs/adobecom/discussions/814#discussioncomment-6060759
-          const isExternal = (url) => new URL(url, location.href).hostname !== location.hostname;
+          // Captured up front: some tests replace window.URL. data:/blob: URLs never hit the network.
+          const NativeURL = URL;
+          const isExternal = (url) => {
+            const { protocol, hostname } = new NativeURL(url, location.href);
+            return /^https?:$/.test(protocol) && hostname !== location.hostname;
+          };
           const violations = [];
           const disallow = (kind, url) => {
             violations.push(\`\${kind} \${url}\`);
