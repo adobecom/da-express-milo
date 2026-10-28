@@ -98,19 +98,28 @@ main .carousel-container .carousel-fader-right.arrow-hidden a.button.carousel-ar
 }
 
 main .carousel-container a.button.carousel-arrow::before {
+  --carousel-arrow-size: 8px;
+  --carousel-arrow-stroke-ratio: 0.25;
+  --carousel-arrow-stroke: calc(var(--carousel-arrow-size) * var(--carousel-arrow-stroke-ratio));
+  /* Center the painted area of the rotated, bordered chevron. */
+  --carousel-arrow-offset: calc(
+    var(--carousel-arrow-size) * 0.70710678 /
+    (2 + var(--carousel-arrow-stroke-ratio))
+  );
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   margin: 0;
-  width: 8px;
-  height: 8px;
-  border-top: solid 2px var(--color-gray-700);
-  border-right: solid 2px var(--color-gray-700);
+  width: var(--carousel-arrow-size);
+  height: var(--carousel-arrow-size);
+  border-top: solid var(--carousel-arrow-stroke) var(--color-gray-700);
+  border-right: solid var(--carousel-arrow-stroke) var(--color-gray-700);
   transform: translate(-50%, -50%);
 }
 
 main .carousel-container a.button.carousel-arrow-left::before {
+  left: calc(50% + var(--carousel-arrow-offset));
   transform: translate(-50%, -50%) rotate(-135deg);
 }
 
@@ -119,6 +128,7 @@ main .carousel-container a.button.carousel-arrow-right {
 }
 
 main .carousel-container a.button.carousel-arrow-right::before {
+  left: calc(50% - var(--carousel-arrow-offset));
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
