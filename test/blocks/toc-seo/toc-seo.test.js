@@ -81,7 +81,6 @@ const setupTest = async (htmlFile, {
   hideStartSection = false,
 } = {}) => {
   const testBody = await readFile({ path: htmlFile });
-  window.isTestEnv = true;
 
   // Default to desktop unless the test exercises a smaller viewport.
   Object.defineProperty(window, 'innerWidth', {
@@ -254,8 +253,6 @@ describe('Table of Contents SEO - Links Test', () => {
 
 describe('Table of Contents SEO - Error Handling Test', () => {
   it('should handle missing metadata gracefully', async () => {
-    window.isTestEnv = true;
-
     // Create a TOC block without full configuration
     const tocBlock = document.createElement('div');
     tocBlock.classList.add('toc-seo');

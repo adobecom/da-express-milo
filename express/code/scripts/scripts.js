@@ -516,7 +516,6 @@ const listenAlloy = () => {
 };
 
 async function loadPage() {
-  if (window.isTestEnv) return;
   const {
     loadArea,
     loadStyle,
@@ -540,6 +539,8 @@ async function loadPage() {
   // end TODO remove metadata after we go live
 
   const config = setConfig({ ...CONFIG, miloLibs });
+  // Unit tests need the shared Milo config, but none of the production page bootstrap below.
+  if (window.isTestEnv) return;
 
   // Legacy color.adobe.com deeplink redirect
   if (/color-theme-\d+\/?$/.test(window.location.pathname)) {
@@ -609,7 +610,12 @@ async function loadPage() {
   });
 }
 
-loadPage();
+if (window.isTestEnv) {
+  // Ensure test modules importing scripts.js observe initialized config deterministically.
+  await loadPage();
+} else {
+  loadPage();
+}
 
 (async function loadDa() {
   if (!new URL(window.location.href).searchParams.get('dapreview')) return;

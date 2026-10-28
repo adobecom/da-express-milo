@@ -16,10 +16,6 @@ async function prepBlock(filePath) {
 }
 
 describe('transparent-img-marquee', () => {
-  beforeEach(() => {
-    window.isTestEnv = true;
-  });
-
   it('decorates successfully', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block).to.exist;
@@ -77,10 +73,6 @@ describe('transparent-img-marquee', () => {
 });
 
 describe('transparent-img-marquee / CTAs + disclaimer', () => {
-  beforeEach(() => {
-    window.isTestEnv = true;
-  });
-
   it('builds a cta-container with a button-group', async () => {
     const block = await prepBlock('./mocks/with-ctas.html');
     expect(block.querySelector('.cta-container')).to.exist;

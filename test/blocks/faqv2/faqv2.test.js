@@ -19,10 +19,6 @@ const [body, expandable, longform] = await Promise.all([
 describe('FAQv2', () => {
   let clock;
 
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(() => {
     clock = sinon.useFakeTimers();
   });

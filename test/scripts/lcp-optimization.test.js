@@ -2,7 +2,6 @@ import { expect } from '@esm-bundle/chai';
 
 // Set before importing scripts.js so its module-scope loadPage() bails out;
 // a static import would be hoisted above this flag.
-window.isTestEnv = true;
 const { decorateAreaWithLCP } = await import('../../express/code/scripts/scripts.js');
 
 describe('LCP Image Optimization', () => {

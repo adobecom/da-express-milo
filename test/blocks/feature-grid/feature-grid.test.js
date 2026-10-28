@@ -9,10 +9,6 @@ const [, { default: decorate }] = await Promise.all([import('../../../express/co
 document.body.innerHTML = await readFile({ path: './mocks/body.html' });
 
 describe('Feature Grid Desktop', async () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   describe('Small Grid', async () => {
     const smallGrid = document.querySelector('#small-grid');
     await decorate(smallGrid);

@@ -9,7 +9,6 @@ const floatVer = await readFile({ path: './mocks/float-sticky.html' });
 
 describe('Toggle Bar - Default Variant', () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = defVer;
   });
 
@@ -32,7 +31,6 @@ describe('Toggle Bar - Default Variant', () => {
 
 describe('Toggle Bar - Sticky Variant', () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = stickyVer;
   });
 
@@ -61,7 +59,6 @@ describe('Toggle Bar - Sticky Variant', () => {
 
 describe('Toggle Bar - Float Sticky variant', async () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = floatVer;
   });
 

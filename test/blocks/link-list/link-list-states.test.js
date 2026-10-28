@@ -14,7 +14,6 @@ document.body.innerHTML = await readFile({ path: './mocks/basic.html' });
 
 describe('Link List States', () => {
   before(async () => {
-    window.isTestEnv = true;
     const linkList = document.querySelector('.link-list');
     await decorate(linkList);
   });

@@ -44,7 +44,6 @@ function setDocumentMetadata(includeForkCta2 = true) {
 
 describe('Mobile Fork Button Frictionless', () => {
   beforeEach(async () => {
-    window.isTestEnv = true;
     window.hlx = {};
     window.floatingCta = [
       {

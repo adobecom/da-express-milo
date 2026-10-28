@@ -13,10 +13,6 @@ const schemaDark = await readFile({ path: './mocks/schema-dark.html' });
 const schema = await readFile({ path: './mocks/schema.html' });
 
 describe('Steps', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Steps exist', async () => {
     document.body.innerHTML = body;
     const steps = document.querySelector('.steps');

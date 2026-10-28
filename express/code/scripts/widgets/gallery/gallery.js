@@ -33,16 +33,28 @@ function createControl(items, container, options = {}) {
   const intersecting = Array.from(items).fill(false);
 
   const len = items.length;
-  const atStart = () => container.scrollLeft <= parseFloat(getComputedStyle(container).paddingLeft) + 1;
-  const atEnd = () => container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
+  const scrollPosition = () => container.scrollLeft
+    * (getComputedStyle(container).direction === 'rtl' ? -1 : 1);
+  const atStart = () => scrollPosition()
+    <= parseFloat(getComputedStyle(container).paddingInlineStart) + 1;
+  const atEnd = () => scrollPosition() + container.clientWidth >= container.scrollWidth - 1;
   const updateButtons = () => {
     prevButton.disabled = atStart();
     nextButton.disabled = atEnd();
   };
+  // Geometry fallback for when the observer hasn't reported yet (e.g. a backgrounded tab).
+  const firstVisible = () => {
+    const { left, right } = container.getBoundingClientRect();
+    return items.findIndex((item) => {
+      const rect = item.getBoundingClientRect();
+      return rect.right > left + 1 && rect.left < right - 1;
+    });
+  };
   const pageInc = throttle((inc) => {
     if (inc < 0 && atStart()) return;
     if (inc > 0 && atEnd()) return;
-    const first = intersecting.indexOf(true);
+    const observed = intersecting.indexOf(true);
+    const first = observed === -1 ? firstVisible() : observed;
     if (first === -1) return; // middle of swapping only page
     const targetIndex = Math.max(0, Math.min(len - 1, first + inc));
     items[targetIndex].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
@@ -51,18 +63,15 @@ function createControl(items, container, options = {}) {
   nextButton.addEventListener('click', () => pageInc(1));
   container.addEventListener('scroll', updateButtons, { passive: true });
 
-  const updateDOM = debounce((first, last) => {
+  const render = (allVisible) => {
     updateButtons();
     const hasHorizontalOverflow = container.scrollWidth - container.clientWidth > 1;
-    if (items.length === last - first + 1 && !hasHorizontalOverflow) {
-      control.classList.add('hide');
-      container.classList.add('gallery--all-displayed');
-    } else {
-      control.classList.remove('hide');
-      container.classList.remove('gallery--all-displayed');
-    }
+    const fits = allVisible && !hasHorizontalOverflow;
+    control.classList.toggle('hide', fits);
+    container.classList.toggle('gallery--all-displayed', fits);
     control.classList.remove('loading');
-  }, 30);
+  };
+  const updateDOM = debounce((first, last) => render(items.length === last - first + 1), 30);
 
   const reactToChange = (entries) => {
     entries.forEach((entry) => {
@@ -84,7 +93,12 @@ function createControl(items, container, options = {}) {
   items.forEach((item) => scrollObserver.observe(item));
 
   control.append(prevButton, nextButton);
-  return control;
+  // Compute the initial state without waiting for an observer callback. Detached or unlaid-out
+  // containers cannot be measured yet, so those continue to wait for the observer.
+  const renderInitial = () => {
+    if (container.isConnected && container.clientWidth) render(true);
+  };
+  return { control, renderInitial };
 }
 
 export default async function buildGallery(
@@ -93,7 +107,7 @@ export default async function buildGallery(
   options = {},
 ) {
   ({ createTag, loadStyle } = await import(`${getLibs()}/utils/utils.js`));
-  const control = createControl([...items], container, options);
+  const { control, renderInitial } = createControl([...items], container, options);
   await new Promise((res) => {
     loadStyle('/express/code/scripts/widgets/gallery/gallery.css', res);
   });
@@ -103,5 +117,6 @@ export default async function buildGallery(
   [...items].forEach((item) => {
     item.classList.add('gallery--item');
   });
+  renderInitial();
   return { control };
 }

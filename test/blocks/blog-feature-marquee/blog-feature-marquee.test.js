@@ -89,10 +89,6 @@ describe('Blog Feature Marquee block', () => {
   let fetchStub;
   let restoreMeta = [];
 
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(() => {
     document.body.innerHTML = body;
     fetchStub = sinon.stub(window, 'fetch');

@@ -7,7 +7,6 @@ const testBody = await readFile({ path: './mocks/body.html' });
 
 describe('Playlist', () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = testBody;
   });
 

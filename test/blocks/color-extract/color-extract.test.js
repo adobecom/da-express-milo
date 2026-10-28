@@ -16,10 +16,6 @@ const basic = await readFile({ path: './mocks/basic.html' });
 const gradient = await readFile({ path: './mocks/gradient.html' });
 
 describe('Color Extract', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(() => {
     document.body.innerHTML = basic;
   });
@@ -76,10 +72,6 @@ describe('Color Extract', () => {
 });
 
 describe('Color Extract — gradient variant', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(() => {
     document.body.innerHTML = gradient;
   });
@@ -156,10 +148,6 @@ describe('Color Extract — sign-in image restoration', () => {
   // dynamic import is never reached in the test environment.
   const FAKE_SRC = './nonexistent-test-image.png';
   const PARAM_NAME = 'color-palette';
-
-  before(() => {
-    window.isTestEnv = true;
-  });
 
   afterEach(() => {
     sessionStorage.removeItem(IMAGE_SRC_KEY);

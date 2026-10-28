@@ -22,7 +22,6 @@ describe('Color How To Carousel', () => {
 
   describe('with 6 lines in the first row', () => {
     beforeEach(() => {
-      window.isTestEnv = true;
       document.body.innerHTML = redBody;
     });
 
@@ -43,7 +42,6 @@ describe('Color How To Carousel', () => {
 
   describe('with only 4 lines in the first row + is dark', () => {
     beforeEach(() => {
-      window.isTestEnv = true;
       document.body.innerHTML = blackBody;
     });
 
@@ -73,7 +71,6 @@ describe('Color How To Carousel', () => {
 
   describe('specs-card variant (opt-in via pagetype=color metadata)', () => {
     async function prepBlock(mock = './mocks/specs-basic.html') {
-      window.isTestEnv = true;
       document.body.innerHTML = await readFile({ path: mock });
       setColorPageType();
       const block = document.querySelector('.color-how-to-carousel');
@@ -82,7 +79,6 @@ describe('Color How To Carousel', () => {
     }
 
     it('does not activate without pagetype=color metadata (legacy rendering is untouched)', async () => {
-      window.isTestEnv = true;
       document.body.innerHTML = redBody;
       const block = document.querySelector('.color-how-to-carousel');
       await decorate(block);
@@ -239,7 +235,6 @@ describe('Color How To Carousel', () => {
     });
 
     it('schema variant emits a HowTo JSON-LD script with each step in order (combined with temporary-specs-card)', async () => {
-      window.isTestEnv = true;
       document.body.innerHTML = await readFile({ path: './mocks/specs-basic.html' });
       const block = document.querySelector('.color-how-to-carousel');
       block.classList.add('schema');

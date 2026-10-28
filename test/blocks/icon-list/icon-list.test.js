@@ -7,10 +7,6 @@ import { expect } from '@esm-bundle/chai';
 const [, { default: decorate }] = await Promise.all([import('../../../express/code/scripts/scripts.js'), import('../../../express/code/blocks/icon-list/icon-list.js')]);
 
 describe('Icon List', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Icon List exists', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     const iconList = document.querySelector('.icon-list');

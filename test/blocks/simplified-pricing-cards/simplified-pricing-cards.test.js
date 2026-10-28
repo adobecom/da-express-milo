@@ -17,7 +17,6 @@ describe('Pricing Cards', () => {
   let fetchStub;
 
   before(async () => {
-    window.isTestEnv = true;
     blocks = Array.from(document.querySelectorAll('.simplified-pricing-cards'));
     await Promise.all(blocks.map((block) => decorate(block)));
     fetchStub = sinon.stub(window, 'fetch');
