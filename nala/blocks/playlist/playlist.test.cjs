@@ -56,9 +56,8 @@ test.describe('PlaylistBlock Test Suite', () => {
       }
     });
 
-    // Turned off until bug fixed https://jira.corp.adobe.com/browse/MWPW-186670
     await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: true });
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
     await test.step('step-4: SEO validation', async () => {
