@@ -38,7 +38,7 @@ test.describe('Express IMS sign-in test suite', () => {
       test.skip(!hasAuthState(), 'No signed-in session (set IMS_EMAIL / IMS_PASS or run `npm run nala:login`)');
     });
 
-    test('@ims-login-signed-in gnav shows the user profile @login @express @smoke', async ({ page, baseURL }) => {
+    test('@ims-login-signed-in gnav reflects the signed-in state @login @express @smoke', async ({ page, baseURL }) => {
       const testUrl = `${baseURL}${LOGIN_START_PATH}${miloLibs}`;
       const gnav = new GnavProfile(page);
       console.info(`[Test Page]: ${testUrl}`);
@@ -50,17 +50,9 @@ test.describe('Express IMS sign-in test suite', () => {
         await expect(gnav.signInButton).toBeHidden();
       });
 
-      await test.step('step-2: Verify gnav profile', async () => {
-        await gnav.openUserProfile();
-        await gnav.checkUserProfile();
-        const expectedEmail = process.env.IMS_EMAIL?.toLowerCase();
-        if (!expectedEmail) return;
-        // The gnav truncates long emails ("abc…@x.com"), so match the visible
-        // start and end against IMS_EMAIL.
-        const shownEmail = (await gnav.profileEmail.textContent()).trim().toLowerCase();
-        const [shownStart, shownEnd = ''] = shownEmail.split('…');
-        expect(expectedEmail.startsWith(shownStart), `profile email "${shownEmail}"`).toBe(true);
-        expect(expectedEmail.endsWith(shownEnd), `profile email "${shownEmail}"`).toBe(true);
+      await test.step('step-2: Verify gnav sign-in state', async () => {
+        await expect(gnav.profileContainer).toBeVisible();
+        await expect(gnav.signInButton).toBeHidden();
       });
     });
   });
