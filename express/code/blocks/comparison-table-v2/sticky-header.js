@@ -1,4 +1,8 @@
-import { getIconElementDeprecated } from '../../scripts/utils.js';
+import {
+  FIXED_TOP_OFFSET_CHANGE_EVENT,
+  getFixedTopOffset,
+  getIconElementDeprecated,
+} from '../../scripts/utils.js';
 import { ComparisonTableState } from './comparison-table-state.js';
 
 const BREAKPOINTS = {
@@ -286,15 +290,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   let stickyHeight = 0;
   let releaseSuspensionCount = 0;
 
-  const getCSSNumericValue = (property) => {
-    const value = window.getComputedStyle(comparisonBlock).getPropertyValue(property);
-    return Number.parseFloat(value) || 0;
-  };
-
-  const getStickyTriggerOffset = () => {
-    if (!window.matchMedia(BREAKPOINTS.DESKTOP).matches) return 0;
-    return getCSSNumericValue('--gnav-offset-height');
-  };
+  const getStickyTriggerOffset = () => getFixedTopOffset();
 
   const headerSentinel = document.createElement('div');
   headerSentinel.style.cssText = 'position:absolute;top:0;height:1px;width:100%;pointer-events:none';
@@ -331,9 +327,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     }
     convertHeadingsToDivs(stickyHeader);
     stickyHeader.setAttribute('aria-hidden', 'true');
-    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
-      stickyHeader.classList.add('gnav-offset');
-    }
+    stickyHeader.classList.add('gnav-offset');
     isRetracted = false;
     isSticky = true;
   };
@@ -360,9 +354,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     if (!isSticky || !isRetracted) return;
     placeholder.style.display = 'flex';
     placeholder.style.height = `${stickyHeight}px`;
-    if (window.matchMedia(BREAKPOINTS.DESKTOP).matches) {
-      stickyHeader.classList.add('gnav-offset');
-    }
+    stickyHeader.classList.add('gnav-offset');
     stickyHeader.classList.remove('is-retracted');
     isRetracted = false;
   };
@@ -382,7 +374,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
     const contentBottom = getContentBottom(comparisonBlock);
     const isPastHeader = headerTop < stickyTriggerOffset;
     const headerOffset = stickyHeight || stickyHeader.offsetHeight;
-    const isContentVisible = contentBottom > headerOffset;
+    const isContentVisible = contentBottom > stickyTriggerOffset + headerOffset;
 
     if (!isPastHeader) {
       if (!isStickyReleaseSuspended()) {
@@ -411,7 +403,7 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   };
 
   let scrollTicking = false;
-  window.addEventListener('scroll', () => {
+  const handleScroll = () => {
     if (!scrollTicking) {
       requestAnimationFrame(() => {
         updateStickyState();
@@ -419,7 +411,9 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
       });
       scrollTicking = true;
     }
-  }, { passive: true });
+  };
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, updateStickyState);
 
   const headerObserver = new IntersectionObserver(
     (entries) => {
@@ -441,9 +435,10 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   );
   headerObserver.observe(headerSentinel);
 
+  let mutationObserver;
   const parentSection = getParentSection();
   if (parentSection) {
-    const mutationObserver = new MutationObserver(() => {
+    mutationObserver = new MutationObserver(() => {
       if (isSectionHidden() && isSticky) {
         removeStickyState();
       }
@@ -472,6 +467,14 @@ export function initStickyBehavior(stickyHeader, comparisonBlock) {
   return {
     suspendStickyRelease,
     resumeStickyRelease,
+    destroy: () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, updateStickyState);
+      headerObserver.disconnect();
+      mutationObserver?.disconnect();
+      headerSentinel.remove();
+      placeholder.remove();
+    },
   };
 }
 

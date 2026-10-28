@@ -46,6 +46,7 @@ describe('verb-express-hero', () => {
     .map((key) => `meta[name="${key}"]`)
     .join(', ');
   let originalMetadata;
+  let originalPlaceholders;
 
   function setLogoMetadata(name, content) {
     const meta = document.createElement('meta');
@@ -55,13 +56,28 @@ describe('verb-express-hero', () => {
   }
 
   beforeEach(() => {
+    originalPlaceholders = window.mph;
+    window.mph = {
+      'verb-dropzone-resume-builder-upload-cta': 'Upload your resume',
+      'verb-widget-resume-builder-file-limit': 'PDF, DOCX, or DOC up to 20 MB.',
+      'verb-dropzone-legal': 'Your file will be securely handled.',
+      'verb-dropzone-legal-2-ai': 'Review the Terms of Use and Privacy Policy.',
+      'verb-widget-terms-of-use': 'Terms of Use',
+      'verb-widget-privacy-policy': 'Privacy Policy',
+      'verb-widget-tool-tip': 'Files are secured.',
+      'verb-dropzone-drag-overlay': 'Drop your file here',
+      'close-dialog': 'Close error',
+    };
     originalMetadata = [...document.head.querySelectorAll(metadataSelector)];
     originalMetadata.forEach((meta) => meta.remove());
   });
 
   afterEach(() => {
+    if (originalPlaceholders === undefined) delete window.mph;
+    else window.mph = originalPlaceholders;
     document.head.querySelectorAll(metadataSelector).forEach((meta) => meta.remove());
     document.head.append(...originalMetadata);
+    document.body.replaceChildren();
   });
 
   it('decorates successfully', async () => {
@@ -145,8 +161,8 @@ describe('verb-express-hero', () => {
     const dropzone = block.querySelector('.cta-dropzone .verb-dropzone-area');
     expect(dropzone).to.exist;
     expect(dropzone.tagName).to.equal('BUTTON');
-    expect(dropzone.querySelector('.verb-dropzone-heading')).to.exist;
-    expect(dropzone.querySelector('.verb-dropzone-sub')).to.exist;
+    expect(dropzone.querySelector('.verb-dropzone-heading').textContent).to.equal('Upload your resume');
+    expect(dropzone.querySelector('.verb-dropzone-sub').textContent).to.equal('PDF, DOCX, or DOC up to 20 MB.');
     expect(block.querySelector('input[type="file"]')).to.exist;
   });
 

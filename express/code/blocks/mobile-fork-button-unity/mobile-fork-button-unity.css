@@ -6,7 +6,7 @@ main .mobile-fork-button-unity {
   padding: 0;
 }
 
-body[data-device="desktop"] main .floating-button-wrapper.mobile-fork-button-unity.mobile-fork-button-tablet[data-audience="mobile"][data-section-status="loaded"] {
+body[data-device="desktop"] main .floating-button-wrapper.mobile-fork-button-unity.mobile-fork-button-tablet:not(.floating-button--short-viewport-inline)[data-audience="mobile"][data-section-status="loaded"] {
   display: flex;
   position: fixed;
 }

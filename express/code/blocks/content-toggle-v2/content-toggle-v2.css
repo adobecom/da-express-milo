@@ -126,19 +126,9 @@ main .content-toggle-v2 .carousel-container a.button.carousel-arrow.carousel-arr
     width: var(--spacing-400);
 }
 
-main .content-toggle-v2 .carousel-container a.button.carousel-arrow-left::before {
-    margin-left: 5px;
-    transform: rotate(45deg) scale(-1);
-}
-
-main .content-toggle-v2 .carousel-container a.button.carousel-arrow-right::before {
-    margin-left: 5px;
-}
-
 main .content-toggle-v2 .carousel-container.circleless-button a.button.carousel-arrow::before {
     content: '';
     position: absolute;
-    margin-top: 9px;
     width: var(--spacing-200);
     height: var(--spacing-200);
     background: none;
