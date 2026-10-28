@@ -1,4 +1,5 @@
 import { expect } from '@esm-bundle/chai';
+import { executeServerCommand } from '@web/test-runner-commands';
 import { waitFor } from '../../helpers/waitfor.js';
 
 const imports = await Promise.all([
@@ -13,6 +14,8 @@ describe('shared gallery direction', () => {
   ['ltr', 'rtl'].forEach((direction) => {
     it(`updates controls and navigates in ${direction}`, async function testDirection() {
       this.timeout(10000);
+      // the gallery needs a rendered page; see bring-to-front in web-test-runner.config.js
+      await executeServerCommand('bring-to-front');
       const root = document.createElement('div');
       root.dir = direction;
       const container = document.createElement('div');

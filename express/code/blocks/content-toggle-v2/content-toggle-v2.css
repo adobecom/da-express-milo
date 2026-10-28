@@ -127,14 +127,11 @@ main .content-toggle-v2 .carousel-container a.button.carousel-arrow.carousel-arr
 }
 
 main .content-toggle-v2 .carousel-container.circleless-button a.button.carousel-arrow::before {
+    --carousel-arrow-size: var(--spacing-200);
     content: '';
     position: absolute;
-    width: var(--spacing-200);
-    height: var(--spacing-200);
     background: none;
     border-radius: 2px;
-    border-top: solid 3px var(--color-gray-700);
-    border-right: solid 3px var(--color-gray-700);
 }
 
 @media screen and (min-width: 768px) {
