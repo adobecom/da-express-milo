@@ -25,7 +25,7 @@ function normalizeModel(model) {
   // preview URL used by the on-page card.
   const src = model.backgroundFullUrl || model.backgroundUrl;
 
-  const safeUrl = getSafeUrl(src);
+  const safeUrl = getSafeUrl(src, { allowInlineImageDataUrl: true });
   if (!safeUrl) {
     throw new Error(`Mini-editor background URL is invalid: ${src}`);
   }

@@ -15,6 +15,7 @@ import {
   MAXIMIZE_ICON,
   MINIMIZE_ICON,
 } from './actionMenuIcons.js';
+import getSafeUrl from '../../utils/safe-url.js';
 
 const TYPES = ['full', 'nav-only', 'controls-only'];
 const ICON_MAP = {
