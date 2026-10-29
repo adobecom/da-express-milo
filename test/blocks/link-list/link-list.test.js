@@ -3,6 +3,7 @@
 
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 
 const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
@@ -100,15 +101,14 @@ describe('Link List', () => {
 });
 
 describe('Link List - Additional Coverage', () => {
-  let originalFetch;
+  let fetchStub;
   let originalGetLibs;
   let originalGetConfig;
   let originalReplaceKey;
 
   beforeEach(() => {
     // Mock fetch for external requests
-    originalFetch = window.fetch;
-    window.fetch = () => Promise.resolve({
+    fetchStub = sinon.stub(window, 'fetch').resolves({
       ok: true,
       json: () => Promise.resolve({ linkListCategories: 'Category 1, /path1\nCategory 2, /path2' }),
     });
@@ -127,7 +127,7 @@ describe('Link List - Additional Coverage', () => {
   });
 
   afterEach(() => {
-    window.fetch = originalFetch;
+    fetchStub.restore();
     window.getLibs = originalGetLibs;
     window.getConfig = originalGetConfig;
     window.replaceKey = originalReplaceKey;

@@ -23,7 +23,7 @@ export default async function fetchAllTemplatesMetadata(getConfig) {
       }
 
       const resp = await memoizedFetchUrl(sheet);
-      allTemplatesMetadata = resp?.data;
+      allTemplatesMetadata = resp?.data ?? [];
     } catch (err) {
       allTemplatesMetadata = [];
     }

@@ -106,7 +106,7 @@ describe('Blog Feature Marquee block', () => {
     document.body.innerHTML = '';
   });
 
-  it.skip('decorates dynamic carousel and applies filtering and config', async () => {
+  it('decorates dynamic carousel and applies filtering and config', async () => {
     const block = document.getElementById('blog-feature-marquee-block');
 
     fetchStub.resolves({
@@ -168,7 +168,7 @@ describe('Blog Feature Marquee block', () => {
 
     const firstAuthor = cards[0].querySelector('.blog-feature-marquee-card-author-name');
     expect(firstAuthor).to.exist;
-    expect(firstAuthor.textContent.trim()).to.equal('Express Team');
+    expect(firstAuthor.textContent.trim()).to.equal('Jane Doe');
 
     const controls = block.querySelector('.carousel-controls');
     expect(controls).to.exist;

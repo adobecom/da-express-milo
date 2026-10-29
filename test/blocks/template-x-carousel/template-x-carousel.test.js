@@ -16,18 +16,18 @@ const mockAPIResposne = JSON.parse(await readFile({ path: '../template-x-carouse
 
 describe('template-x-carousel', () => {
   let block;
-  let oldFetch;
+  let fetchStub;
+  const fetchTemplates = async (url) => {
+    if (url.includes('/express-search-api')) return mockRes({ payload: mockAPIResposne });
+    return {};
+  };
   before(async () => {
-    oldFetch = window.fetch;
-    sinon.stub(window, 'fetch').callsFake(async (url) => {
-      if (url.includes('/express-search-api')) return mockRes({ payload: mockAPIResposne });
-      return {};
-    });
+    fetchStub = sinon.stub(window, 'fetch').callsFake(fetchTemplates);
     block = document.querySelector('.template-x-carousel');
     await decorate(block);
   });
   after(() => {
-    window.fetch = oldFetch;
+    fetchStub.restore();
   });
 
   it('has correct block structures for search bar mode', async () => {
@@ -150,15 +150,14 @@ describe('template-x-carousel', () => {
     document.body.appendChild(errorBlock);
 
     // Mock fetch to return error
-    const originalFetch = window.fetch;
-    window.fetch = sinon.stub().rejects(new Error('API Error'));
+    fetchStub.rejects(new Error('API Error'));
 
     try {
       await decorate(errorBlock);
       // In non-prod environment, should show error message
       expect(errorBlock.textContent).to.include('Error loading templates');
     } finally {
-      window.fetch = originalFetch;
+      fetchStub.callsFake(fetchTemplates);
       errorBlock.remove();
     }
   });

@@ -2,28 +2,18 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createStripContainerRenderer } from '../../../../express/code/scripts/color-shared/renderers/createStripContainerRenderer.js';
+import { waitFor } from '../../../helpers/waitfor.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
-function waitForFrame() {
-  return new Promise((resolve) => {
-    requestAnimationFrame(resolve);
-  });
-}
+describe('createStripContainerRenderer', function stripContainerRendererSuite() {
+  this.timeout(10000);
 
-async function waitForCondition(predicate, attempts = 30) {
-  for (let index = 0; index < attempts; index += 1) {
-    if (predicate()) return true;
-    await waitForFrame();
-  }
-
-  return false;
-}
-
-describe('createStripContainerRenderer', () => {
   let renderer;
   let originalResizeObserver;
   let errorHandler;
+  let frameChannel;
+  let frameCallbacks;
 
   beforeEach(() => {
     originalResizeObserver = window.ResizeObserver;
@@ -37,6 +27,14 @@ describe('createStripContainerRenderer', () => {
       }
     };
     window.addEventListener('error', errorHandler, true);
+    frameChannel = new MessageChannel();
+    frameCallbacks = [];
+    frameChannel.port1.onmessage = () => frameCallbacks.shift()?.(performance.now());
+    sinon.stub(window, 'requestAnimationFrame').callsFake((callback) => {
+      frameCallbacks.push(callback);
+      frameChannel.port2.postMessage(null);
+      return frameCallbacks.length;
+    });
     sinon.stub(window, 'matchMedia').callsFake((query) => ({
       matches: false,
       media: query,
@@ -49,6 +47,10 @@ describe('createStripContainerRenderer', () => {
     renderer?.destroy();
     renderer = null;
     sinon.restore();
+    frameChannel.port1.close();
+    frameChannel.port2.close();
+    frameChannel = null;
+    frameCallbacks = null;
     document.body.innerHTML = '';
     if (originalResizeObserver) {
       window.ResizeObserver = originalResizeObserver;
@@ -59,7 +61,7 @@ describe('createStripContainerRenderer', () => {
   });
 
   // TODO: Fix test MWPW-192264
-  it.skip('opens the desktop color editor after render and cleans up its ResizeObserver', async () => {
+  it('opens the desktop color editor after render and cleans up its ResizeObserver', async () => {
     const disconnectSpy = sinon.spy();
     window.ResizeObserver = class {
       constructor(callback) {
@@ -115,12 +117,11 @@ describe('createStripContainerRenderer', () => {
       composed: true,
     }));
 
-    const opened = await waitForCondition(() => {
+    await waitFor(() => {
       const editor = document.body.querySelector('.swatches-color-edit-popover color-edit');
       return editor?.open === true;
-    }, 40);
+    });
 
-    expect(opened).to.be.true;
     expect(document.body.querySelector('.swatches-color-edit-popover')).to.exist;
 
     renderer.destroy();

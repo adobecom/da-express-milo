@@ -4,6 +4,7 @@ import {
   createColorInput,
   shouldAutoFocusColorEditInput,
 } from '../../../../express/code/blocks/color-contrast-checker/renderers/components/createColorInput.js';
+import { waitFor } from '../../../helpers/waitfor.js';
 
 function waitForFrame() {
   return new Promise((resolve) => {
@@ -11,23 +12,14 @@ function waitForFrame() {
   });
 }
 
-async function waitForElement(selector, attempts = 10) {
-  for (let index = 0; index < attempts; index += 1) {
-    const element = document.body.querySelector(selector);
-    if (element) return element;
-    await waitForFrame();
-  }
-
-  return null;
+async function waitForElement(selector) {
+  await waitFor(() => document.body.querySelector(selector));
+  return document.body.querySelector(selector);
 }
 
-async function waitForCondition(predicate, attempts = 10) {
-  for (let index = 0; index < attempts; index += 1) {
-    if (predicate()) return true;
-    await waitForFrame();
-  }
-
-  return false;
+async function waitForCondition(predicate) {
+  await waitFor(predicate);
+  return true;
 }
 
 async function waitFrames(count = 1) {
@@ -61,16 +53,32 @@ function dispatchPointerClick(element) {
   }));
 }
 
-describe('createColorInput', () => {
+describe('createColorInput', function colorInputSuite() {
+  this.timeout(10000);
+
   let matchMediaStub;
+  let frameChannel;
+  let frameCallbacks;
 
   beforeEach(() => {
+    frameChannel = new MessageChannel();
+    frameCallbacks = [];
+    frameChannel.port1.onmessage = () => frameCallbacks.shift()?.(performance.now());
+    sinon.stub(window, 'requestAnimationFrame').callsFake((callback) => {
+      frameCallbacks.push(callback);
+      frameChannel.port2.postMessage(null);
+      return frameCallbacks.length;
+    });
     matchMediaStub = sinon.stub(window, 'matchMedia');
     stubViewport(matchMediaStub, { mobile: true });
   });
 
   afterEach(() => {
     sinon.restore();
+    frameChannel.port1.close();
+    frameChannel.port2.close();
+    frameChannel = null;
+    frameCallbacks = null;
     document.body.innerHTML = '';
   });
 
@@ -121,7 +129,7 @@ describe('createColorInput', () => {
   });
 
   // Fix test MWPW-192264
-  it.skip('does not auto-focus the color-edit hex input on mobile', async () => {
+  it('does not auto-focus the color-edit hex input on mobile', async () => {
     stubViewport(matchMediaStub, { mobile: true, tablet: false });
     await import('../../../../express/code/scripts/color-shared/components/color-edit/index.js');
     const ColorEdit = customElements.get('color-edit');
@@ -143,7 +151,7 @@ describe('createColorInput', () => {
   });
 
   // Fix test MWPW-192264
-  it.skip('does not auto-focus the color-edit hex input on tablet', async () => {
+  it('does not auto-focus the color-edit hex input on tablet', async () => {
     stubViewport(matchMediaStub, { mobile: false, tablet: true });
     await import('../../../../express/code/scripts/color-shared/components/color-edit/index.js');
     const ColorEdit = customElements.get('color-edit');
@@ -165,7 +173,7 @@ describe('createColorInput', () => {
   });
 
   // Fix test MWPW-192264
-  it.skip('switches from one desktop color input to the other without immediately closing', async () => {
+  it('switches from one desktop color input to the other without immediately closing', async () => {
     stubViewport(matchMediaStub, { mobile: false, tablet: false });
 
     const foregroundInput = createColorInput({

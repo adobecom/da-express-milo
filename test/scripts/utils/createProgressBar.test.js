@@ -1,4 +1,5 @@
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 import { setLibs } from '../../../express/code/scripts/utils.js';
 import ProgressBar from '../../../express/code/scripts/utils/createProgressBar.js';
 
@@ -203,15 +204,13 @@ describe('ProgressBar Web Component', () => {
     });
 
     it('should return empty string when icon loading fails', async () => {
-      // Mock fetch to fail
-      const originalFetch = window.fetch;
-      window.fetch = () => Promise.reject(new Error('Network error'));
-
-      const result = await ProgressBar.loadAdobeExpressIcon();
-      expect(result).to.equal('');
-
-      // Restore original fetch
-      window.fetch = originalFetch;
+      const fetchStub = sinon.stub(window, 'fetch').rejects(new Error('Network error'));
+      try {
+        const result = await ProgressBar.loadAdobeExpressIcon();
+        expect(result).to.equal('');
+      } finally {
+        fetchStub.restore();
+      }
     });
   });
 

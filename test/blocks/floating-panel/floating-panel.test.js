@@ -8,8 +8,6 @@ import { mockRes } from '../test-utilities.js';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
 document.body.innerHTML = await readFile({ path: './mocks/body.html' });
-const originalFetch = window.fetch;
-
 const [{ getLibs }, _, { default: decorate }] = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js'), import(
   '../../../express/code/blocks/floating-panel/floating-panel.js'
 )]);
@@ -20,13 +18,14 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 
 describe('Floating-panel', async () => {
   const block = document.querySelector('.floating-panel');
+  let fetchStub;
   before(async () => {
-    window.fetch = sinon.stub().callsFake(() => mockRes({}));
+    fetchStub = sinon.stub(window, 'fetch').callsFake(() => mockRes({}));
     await decorate(block);
   });
 
   after(() => {
-    window.fetch = originalFetch;
+    fetchStub.restore();
   });
 
   it('decorates all required content', () => {

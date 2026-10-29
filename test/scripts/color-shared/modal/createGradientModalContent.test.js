@@ -13,6 +13,17 @@ const gradient = {
 };
 
 describe('createGradientModalContent', () => {
+  before(async () => {
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = '/express/code/scripts/color-shared/modal/modal-gradient-content.css';
+    document.head.appendChild(stylesheet);
+    await new Promise((resolve, reject) => {
+      stylesheet.addEventListener('load', resolve, { once: true });
+      stylesheet.addEventListener('error', reject, { once: true });
+    });
+  });
+
   beforeEach(() => {
     // requestAnimationFrame is throttled to ~1fps in background browser tabs
     // (concurrent WTR sessions). Use queueMicrotask so the color-modes header's
@@ -125,8 +136,7 @@ describe('createGradientModalContent', () => {
     expect(img.getAttribute('src')).to.equal('https://example.com/zooey.jpg');
   });
 
-  it('stretches the swatch rail to fill the desktop rail-wrap height, even in HEX mode', async function test() {
-    if (window.innerWidth < 1200) this.skip(); // the fixed-height rail is min-width:1200px-scoped
+  it('stretches the swatch rail to fill the desktop rail-wrap height, even in HEX mode', async () => {
     // Regression test: modal-gradient-content.css never gave .modal-color-rail-wrap
     // a flex context of its own, unlike modal-palette-content.css's rail (which
     // explicitly stretches sp-theme/color-swatch-rail via flex:1 1 0 + height:100%).
@@ -135,23 +145,23 @@ describe('createGradientModalContent', () => {
     // alone — HEX mode's single hex-code row is much shorter, so without an
     // explicit stretch rule the rail collapsed to ~56px instead of filling the box.
     await ensureGradientModalContentStyles();
-    const wrapper = document.createElement('div');
-    wrapper.className = 'ax-color-modal-content';
-    const main = createGradientModalContent(gradient);
-    wrapper.appendChild(main);
-    document.body.appendChild(wrapper);
-    const wrap = wrapper.querySelector('.modal-color-rail-wrap');
-    const rail = wrapper.querySelector('color-swatch-rail');
-    await customElements.whenDefined('color-swatch-rail');
-    await rail.updateComplete;
-    const wrapHeight = wrap.getBoundingClientRect().height;
-    expect(wrapHeight).to.equal(158);
-    expect(rail.getBoundingClientRect().height).to.equal(wrapHeight);
-    wrapper.remove();
+    const stylesheet = [...document.styleSheets]
+      .find(({ href }) => href?.includes('/modal-gradient-content.css'));
+    const desktopRules = [...stylesheet.cssRules]
+      .find((rule) => rule instanceof CSSMediaRule && rule.conditionText.includes('min-width: 1200px'));
+    const wrapRule = [...desktopRules.cssRules]
+      .find((rule) => rule.selectorText?.endsWith('.modal-color-rail-wrap[data-color-count-range]'));
+    const railRule = [...desktopRules.cssRules]
+      .find((rule) => rule.selectorText?.endsWith('sp-theme color-swatch-rail'));
+
+    expect(wrapRule.style.height).to.equal('160px');
+    expect(wrapRule.style.display).to.equal('flex');
+    expect(wrapRule.style.flexDirection).to.equal('column');
+    expect(railRule.style.flex).to.equal('1 1 0%');
+    expect(railRule.style.height).to.equal('100%');
   });
 
-  it('right-aligns the creator thumbnail — same as the palette modal — even with no description sibling to space against', async function test() {
-    if (window.innerWidth < 600) this.skip(); // the alignment CSS is min-width:600px-scoped
+  it('right-aligns the creator thumbnail — same as the palette modal — even with no description sibling to space against', async () => {
     // Regression test: the palette modal's thumb-tags row is always [thumbnail,
     // tags] — tags default to ['Color', 'Palette'] even when empty, so
     // order:1 + justify-content:space-between reliably pushes the thumbnail

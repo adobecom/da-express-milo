@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
+import { waitFor } from '../../helpers/waitfor.js';
 
 const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
@@ -131,7 +132,6 @@ describe('Comparison Table V2', () => {
 
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const selector = block.querySelector('.plan-selector');
     const dropdown = selector.querySelector('.plan-selector-choices');
@@ -160,7 +160,6 @@ describe('Comparison Table V2', () => {
 
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const ariaLiveRegion = block.querySelector('[aria-live="polite"]');
     const selector = block.querySelector('.plan-selector');
@@ -197,7 +196,6 @@ describe('Comparison Table V2', () => {
 
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const planCellWrapper = block.querySelector('.plan-cell-wrapper');
     const selector = planCellWrapper.querySelector('.plan-selector');
@@ -243,7 +241,6 @@ describe('Comparison Table V2', () => {
 
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 500); });
 
     const planCellWrapper = block.querySelector('.plan-cell-wrapper');
     const selector = planCellWrapper.querySelector('.plan-selector');
@@ -255,13 +252,12 @@ describe('Comparison Table V2', () => {
       cancelable: true,
     }));
 
-    await new Promise((resolve) => { setTimeout(resolve, 500); });
-
     const dropdown = selector.querySelector('.plan-selector-choices');
 
     const visibleOptions = dropdown.querySelectorAll('.plan-selector-choice:not(.invisible-content)');
     console.log('visibleOptions', visibleOptions);
 
+    await waitFor(() => visibleOptions[0].classList.contains('focused'));
     expect(visibleOptions[0].classList.contains('focused')).to.be.true;
 
     const arrowDownEvent = new KeyboardEvent('keydown', {
@@ -307,7 +303,6 @@ describe('Comparison Table V2', () => {
 
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 500); });
 
     const planCellWrapper = block.querySelector('.plan-cell-wrapper');
     const selector = planCellWrapper.querySelector('.plan-selector');
@@ -319,7 +314,6 @@ describe('Comparison Table V2', () => {
       bubbles: true,
       cancelable: true,
     }));
-    await new Promise((resolve) => { setTimeout(resolve, 500); });
 
     const dropdown = selector.querySelector('.plan-selector-choices');
 
@@ -357,7 +351,6 @@ describe('Comparison Table V2', () => {
 
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 500); });
 
     const planCellWrapper = block.querySelector('.plan-cell-wrapper');
     const selector = planCellWrapper.querySelector('.plan-selector');
@@ -370,10 +363,9 @@ describe('Comparison Table V2', () => {
       cancelable: true,
     }));
 
-    await new Promise((resolve) => { setTimeout(resolve, 500); });
-
     const dropdown = selector.querySelector('.plan-selector-choices');
     let visibleOptions = Array.from(dropdown.querySelectorAll('.plan-selector-choice:not(.invisible-content)'));
+    await waitFor(() => visibleOptions[0].classList.contains('focused'));
 
     // Find a non-selected option
     const nonSelectedOption = visibleOptions.find((opt) => !opt.classList.contains('selected'));
@@ -387,9 +379,7 @@ describe('Comparison Table V2', () => {
           bubbles: true,
           cancelable: true,
         }));
-        await new Promise((resolve) => { setTimeout(resolve, 100); });
       }
-      await new Promise((resolve) => { setTimeout(resolve, 100); });
       // The option should be focused
       expect(nonSelectedOption.classList.contains('focused')).to.be.true;
 
@@ -401,7 +391,6 @@ describe('Comparison Table V2', () => {
       });
       nonSelectedOption.dispatchEvent(enterEvent);
       console.log('nonSelectedOption', nonSelectedOption);
-      await new Promise((resolve) => { setTimeout(resolve, 100); });
 
       // Dropdown should be closed after selection
       expect(nonSelectedOption.classList.contains('selected')).to.be.true;
@@ -437,7 +426,7 @@ describe('Comparison Table V2', () => {
           cancelable: true,
         });
         anotherNonSelectedOption.dispatchEvent(keyUpEvent);
-        await new Promise((resolve) => { setTimeout(resolve, 300); });
+        await waitFor(() => anotherNonSelectedOption.classList.contains('selected'));
         console.log('anotherNonSelectedOption', anotherNonSelectedOption);
         // Dropdown should be closed after selection
         expect(anotherNonSelectedOption.classList.contains('selected')).to.be.true;
@@ -460,7 +449,6 @@ describe('Comparison Table V2', () => {
 
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const planCellWrapper = block.querySelector('.plan-cell-wrapper');
     const selector = planCellWrapper.querySelector('.plan-selector');
@@ -487,7 +475,7 @@ describe('Comparison Table V2', () => {
       cancelable: true,
     });
     visibleOptions[0].dispatchEvent(tabEvent);
-    await new Promise((resolve) => { setTimeout(resolve, 100); });
+    await waitFor(() => dropdown.classList.contains('invisible-content'));
     expect(dropdown.classList.contains('invisible-content')).to.be.true;
   });
 
@@ -509,7 +497,6 @@ describe('Comparison Table V2', () => {
 
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const planCellWrapper = block.querySelector('.plan-cell-wrapper');
     const selector = planCellWrapper.querySelector('.plan-selector');
@@ -545,7 +532,6 @@ describe('Comparison Table V2', () => {
   it('should create toggle buttons for collapsible sections', async () => {
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
     const toggleButtons = block.querySelectorAll('.toggle-button');
     expect(toggleButtons.length).to.be.greaterThan(0);
 
@@ -571,7 +557,6 @@ describe('Comparison Table V2', () => {
   it('should handle table cell visibility based on visible plans', async () => {
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
     const rows = block.querySelectorAll('tr');
     rows.forEach((row) => {
       const cells = row.querySelectorAll('.feature-cell:not(.feature-cell-header)');
@@ -598,7 +583,6 @@ describe('Comparison Table V2', () => {
   it('should mark currently visible plans as selected in dropdown', async () => {
     const block = document.querySelector('.comparison-table-v2');
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
     const selector = block.querySelector('.plan-selector');
     selector.click();
 

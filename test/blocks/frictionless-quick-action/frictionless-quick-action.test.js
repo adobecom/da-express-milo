@@ -17,18 +17,20 @@ const {
   getUploadMediaKind,
 } = imports[2];
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
-  mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'iwo3rvz.css' } } });
+  mod.setConfig({
+    codeRoot: '/express/code',
+    locales: { '': { ietf: 'en-US', tk: 'iwo3rvz.css' } },
+  });
 });
 
 document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
-const ogFetch = window.fetch;
 
 describe('Frictionless Quick Action Block', () => {
   afterEach(() => {
     sinon.restore();
   });
   it('initializes correctly', async () => {
-    window.fetch = sinon.stub().callsFake(() => mockRes({
+    sinon.stub(window, 'fetch').callsFake(() => mockRes({
       payload: {
         data: [
           {
@@ -57,7 +59,6 @@ describe('Frictionless Quick Action Block', () => {
     const dropzone = block.querySelector('div:nth-child(2) > div:nth-child(2) .dropzone');
     const dropzoneTitle = dropzone.querySelector(':scope > h4');
     expect(dropzoneTitle.textContent).to.be.equal('Drag and drop an image or browse to upload.');
-    window.fetch = ogFetch;
   });
 
   it('sdk loads other components', async () => {

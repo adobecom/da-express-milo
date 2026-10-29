@@ -50,10 +50,9 @@ const searchBarBody = `
 
 describe('template-x-carousel-toolbar', () => {
   let block;
-  let oldFetch;
+  let fetchStub;
   before(async () => {
-    oldFetch = window.fetch;
-    sinon.stub(window, 'fetch').callsFake(async (url) => {
+    fetchStub = sinon.stub(window, 'fetch').callsFake(async (url) => {
       if (url.includes('/express-search-api')) return mockRes({ payload: mockAPIResposne });
       return {};
     });
@@ -68,7 +67,7 @@ describe('template-x-carousel-toolbar', () => {
     await decorate(block);
   });
   after(() => {
-    window.fetch = oldFetch;
+    fetchStub.restore();
     delete window.t_locationAssign;
   });
 

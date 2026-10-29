@@ -9,11 +9,10 @@ setLibs('/libs');
 const imports = await Promise.all([import('../../express/code/scripts/utils.js'), import('../../express/code/scripts/scripts.js')]);
 const [{ getLibs }] = imports;
 
-const originalFetch = window.fetch;
-
 describe('Pricing offer format for segmentation link', () => {
+  let fetchStub;
   afterEach(() => {
-    window.fetch = originalFetch;
+    fetchStub.restore();
     sessionStorage.removeItem('visitorCountry');
   });
   it('handles US IP', async () => {
@@ -21,15 +20,15 @@ describe('Pricing offer format for segmentation link', () => {
       const conf = { locales: { '': { ietf: 'en-US', tk: 'hah7vzn.css' } } };
       mod.setConfig(conf);
     });
-    window.fetch = sinon.stub();
-    window.fetch.onFirstCall().returns(mockRes({
+    fetchStub = sinon.stub(window, 'fetch');
+    fetchStub.onFirstCall().returns(mockRes({
       payload: {
         country: 'US',
         state: 'CA',
         'Accept-Language': 'en-US,en;q=0.9',
       },
     }));
-    window.fetch.onSecondCall().returns(mockRes({
+    fetchStub.onSecondCall().returns(mockRes({
       payload: {
         data: {
           find: () => {},
@@ -43,8 +42,9 @@ describe('Pricing offer format for segmentation link', () => {
 });
 
 describe('Pricing offer format for DE segmentation link', () => {
+  let fetchStub;
   afterEach(() => {
-    window.fetch = originalFetch;
+    fetchStub.restore();
     sessionStorage.removeItem('visitorCountry');
   });
   it('handles DE IP', async () => {
@@ -52,15 +52,15 @@ describe('Pricing offer format for DE segmentation link', () => {
       const conf = { locales: { '': { ietf: 'de-DE', tk: 'hah7vzn.css' } } };
       mod.setConfig(conf);
     });
-    window.fetch = sinon.stub();
-    window.fetch.onFirstCall().returns(mockRes({
+    fetchStub = sinon.stub(window, 'fetch');
+    fetchStub.onFirstCall().returns(mockRes({
       payload: {
         country: 'DE',
         state: 'BE',
         'Accept-Language': 'de-DE,en;q=0.9',
       },
     }));
-    window.fetch.onSecondCall().returns(mockRes({
+    fetchStub.onSecondCall().returns(mockRes({
       payload: {
         data: {
           find: () => {},

@@ -123,17 +123,16 @@ describe('Label Metadata for Frictionless with Metadata: frictionless-safari', (
 });
 
 describe('SVG Inline Conversion', () => {
-  let oldFetch;
+  let fetchStub;
   before(async () => {
-    oldFetch = window.fetch;
     const svgContent = await readFile({ path: '../../express/code/icons/template-lightning.svg' });
-    sinon.stub(window, 'fetch').callsFake(async (url) => {
+    fetchStub = sinon.stub(window, 'fetch').callsFake(async (url) => {
       console.log('url', url);
       return mockRes({ payload: svgContent });
     });
   });
   after(() => {
-    window.fetch = oldFetch;
+    fetchStub.restore();
   });
   it('converts img to inline svg', async () => {
     const icon = getIconElementDeprecated('template-lightning');

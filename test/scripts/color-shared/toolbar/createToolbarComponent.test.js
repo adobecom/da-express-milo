@@ -241,7 +241,7 @@ describe('createToolbar', () => {
 
   describe('event bus', () => {
     // TODO: Fix this MWPW-192264
-    it.skip('on("edit", cb) fires when Edit button clicked', () => {
+    it('on("edit", cb) fires when Edit button clicked', () => {
       const onEdit = sinon.stub();
       const toolbar = createToolbar(defaultOptions({ onEdit }));
       document.body.appendChild(toolbar.element);

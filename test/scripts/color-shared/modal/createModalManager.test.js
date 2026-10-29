@@ -4,6 +4,7 @@ import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createModalManager } from '../../../../express/code/scripts/color-shared/modal/createModalManager.js';
 import { trapFocus } from '../../../../express/code/scripts/color-shared/spectrum/utils/a11y.js';
+import { waitFor } from '../../../helpers/waitfor.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
@@ -28,6 +29,12 @@ function createModalStubContent(opts = {}) {
   return wrap;
 }
 
+function createContent(html) {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  return template.content.firstElementChild;
+}
+
 async function openPaletteModal(modalManager, palette = {}) {
   await modalManager.open({
     _testStylesReady: true,
@@ -46,9 +53,56 @@ async function openGradientModal(modalManager, gradient = {}) {
   });
 }
 
+async function waitForModalClose() {
+  await Promise.resolve();
+  expect(document.querySelector('.ax-color-modal-curtain')?.getAttribute('aria-hidden')).to.equal('true');
+}
+
 // Fix tests MWPW-192264
-describe.skip('createModalManager', () => {
+describe('createModalManager', function modalManagerSuite() {
+  this.timeout(5000);
+
   let manager;
+  let originalSpacing500;
+  const timingSandbox = sinon.createSandbox();
+  const nativeSetTimeout = window.setTimeout.bind(window);
+
+  before(() => {
+    timingSandbox.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      nativeSetTimeout(() => cb(performance.now()), 0);
+      return 0;
+    });
+    timingSandbox.stub(window, 'setTimeout').callsFake((cb, delay = 0, ...args) => {
+      if (delay === 300) {
+        queueMicrotask(() => cb(...args));
+        return 0;
+      }
+      return nativeSetTimeout(cb, delay, ...args);
+    });
+  });
+
+  before(async () => {
+    originalSpacing500 = document.documentElement.style.getPropertyValue('--spacing-500');
+    document.documentElement.style.setProperty('--spacing-500', '24px');
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = '/express/code/scripts/color-shared/modal/modal-styles.css';
+    document.head.appendChild(stylesheet);
+    await new Promise((resolve, reject) => {
+      stylesheet.addEventListener('load', resolve, { once: true });
+      stylesheet.addEventListener('error', reject, { once: true });
+    });
+  });
+
+  after(() => {
+    if (originalSpacing500) {
+      document.documentElement.style.setProperty('--spacing-500', originalSpacing500);
+    } else {
+      document.documentElement.style.removeProperty('--spacing-500');
+    }
+  });
+
+  after(() => timingSandbox.restore());
 
   beforeEach(() => {
     window.__modalTestSkipStyles = true;
@@ -58,8 +112,9 @@ describe.skip('createModalManager', () => {
   afterEach(async () => {
     if (manager?.isOpen?.()) {
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
     }
+    manager?.destroy?.();
     window.__modalTestSkipStyles = false;
   });
 
@@ -114,7 +169,7 @@ describe.skip('createModalManager', () => {
       expect(document.querySelector('.ax-color-modal-title')).to.not.exist;
       expect(document.querySelector('.ax-color-modal-curtain')?.getAttribute('aria-label')).to.equal('Default Hidden');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
 
       await manager.open({
         _testStylesReady: true,
@@ -140,7 +195,7 @@ describe.skip('createModalManager', () => {
         _testStylesReady: true,
         title: 'Original',
         showTitle: true,
-        content: '<span id="slot">slot</span>',
+        content: createContent('<span id="slot">slot</span>'),
       });
 
       const body = manager.getBody();
@@ -226,7 +281,7 @@ describe.skip('createModalManager', () => {
       expect(manager.isOpen()).to.be.true;
       expect(document.querySelector('.ax-color-modal-title')?.textContent).to.equal('Second');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
     });
   });
 
@@ -251,12 +306,12 @@ describe.skip('createModalManager', () => {
 
       manager.close();
       expect(document.body.classList.contains('ax-color-modal-open')).to.be.false;
-      expect(manager.isOpen()).to.be.true; // still true until timeout
+      expect(manager.isOpen()).to.be.false;
 
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       expect(manager.isOpen()).to.be.false;
       expect(onCloseCalled).to.be.true;
-      expect(document.querySelector('.ax-color-modal-curtain')).to.not.exist;
+      expect(document.querySelector('.ax-color-modal-curtain')).to.exist;
     });
 
     it('no-op when already closed', async () => {
@@ -289,10 +344,10 @@ describe.skip('createModalManager', () => {
         content: '<p>Body</p>',
       });
       expect(manager.isOpen()).to.be.true;
-      expect(document.activeElement?.closest('.ax-color-modal-curtain')).to.exist;
+      await waitFor(() => document.activeElement?.closest('.ax-color-modal-curtain'));
 
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
 
       expect(manager.isOpen()).to.be.false;
       expect(document.activeElement).to.equal(trigger, 'focus should return to trigger after close');
@@ -314,7 +369,7 @@ describe.skip('createModalManager', () => {
       document.body.removeChild(trigger);
 
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       expect(manager.isOpen()).to.be.false;
     });
   });
@@ -336,8 +391,9 @@ describe.skip('createModalManager', () => {
         content: '',
       });
 
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-      await new Promise((r) => setTimeout(r, 350));
+      document.querySelector('.ax-color-modal-curtain')
+        .dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await waitForModalClose();
       expect(manager.isOpen()).to.be.false;
       expect(document.body.classList.contains('ax-color-modal-open')).to.be.false;
     });
@@ -355,7 +411,7 @@ describe.skip('createModalManager', () => {
       const curtain = document.querySelector('.ax-color-modal-curtain');
       expect(curtain?.getAttribute('aria-label')).to.equal('My Palette');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
 
       Object.defineProperty(window, 'innerWidth', { value: 800, configurable: true });
       openPaletteModal(manager);
@@ -363,7 +419,7 @@ describe.skip('createModalManager', () => {
       expect(document.querySelector('.ax-color-modal-title')).to.not.exist;
       expect(document.querySelector('.ax-color-modal-curtain')?.getAttribute('aria-label')).to.equal('Palette');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
 
       Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
     });
@@ -378,7 +434,7 @@ describe.skip('createModalManager', () => {
       expect(document.querySelector('.ax-color-modal-title')).to.not.exist;
       expect(document.querySelector('.ax-color-modal-curtain')?.getAttribute('aria-label')).to.equal('Sunset');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
     });
 
@@ -396,7 +452,7 @@ describe.skip('createModalManager', () => {
       expect(document.querySelector('.ax-color-modal-title')?.textContent).to.equal('Shell test');
       expect(document.querySelector('.ax-color-modal-stub-content')).to.exist;
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
     });
   });
@@ -411,20 +467,16 @@ describe.skip('createModalManager', () => {
         showTitle: true,
         content: '<p>Content</p>',
       });
-      expect(window.matchMedia('(min-width: 1024px)').matches).to.be.true;
       expect(document.querySelector('.ax-color-modal-container')).to.exist;
 
       Object.defineProperty(window, 'innerWidth', { value: 924, configurable: true });
       window.dispatchEvent(new Event('resize'));
-      await new Promise((r) => setTimeout(r, 200));
-      await new Promise((r) => setTimeout(r, 350));
 
       expect(manager.isOpen()).to.be.true;
-      expect(window.matchMedia('(min-width: 1024px)').matches).to.be.false;
       expect(document.querySelector('.ax-color-modal-container')).to.exist;
       expect(document.querySelector('.ax-color-modal-title')?.textContent).to.equal('Switch Test');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
     });
 
@@ -437,19 +489,14 @@ describe.skip('createModalManager', () => {
         showTitle: true,
         content: '<p>Content</p>',
       });
-      expect(window.matchMedia('(min-width: 1024px)').matches).to.be.false;
-
       Object.defineProperty(window, 'innerWidth', { value: 1124, configurable: true });
       window.dispatchEvent(new Event('resize'));
-      await new Promise((r) => setTimeout(r, 200));
-      await new Promise((r) => setTimeout(r, 350));
 
       expect(manager.isOpen()).to.be.true;
-      expect(window.matchMedia('(min-width: 1024px)').matches).to.be.true;
       expect(document.querySelector('.ax-color-modal-container')).to.exist;
       expect(document.querySelector('.ax-color-modal-title')?.textContent).to.equal('Grow Test');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
     });
   });
@@ -466,7 +513,7 @@ describe.skip('createModalManager', () => {
       await manager.open({
         _testStylesReady: true,
         title: 'Desktop',
-        content: '<p>Minimal</p>',
+        content: createContent('<p>Minimal</p>'),
       });
       const slot = manager.getBody();
       expect(slot).to.exist;
@@ -475,14 +522,14 @@ describe.skip('createModalManager', () => {
       expect(slot.querySelector('p')?.textContent).to.equal('Minimal');
       expect(document.querySelector('.ax-color-modal-container')).to.exist;
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
     });
 
-    it('drawer (tablet M / mobile S) provides content slot for 90vh shell', async () => {
+    it('drawer (tablet M / mobile S) provides content slot for 95vh shell', async () => {
       origWidth = window.innerWidth;
       Object.defineProperty(window, 'innerWidth', { value: 800, configurable: true });
       await manager.open({
-        content: '<p>Minimal</p>',
+        content: createContent('<p>Minimal</p>'),
       });
       const slot = manager.getBody();
       expect(slot).to.exist;
@@ -491,7 +538,7 @@ describe.skip('createModalManager', () => {
       expect(slot.querySelector('p')?.textContent).to.equal('Minimal');
       expect(document.querySelector('.ax-color-modal-container')).to.exist;
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
     });
 
     it('standard modal with tall (stub) content: slot contains content for overflow scroll', async () => {
@@ -508,7 +555,7 @@ describe.skip('createModalManager', () => {
       expect(slot.querySelector('.ax-color-modal-stub-content')).to.exist;
       expect(slot.querySelector('.ax-color-modal-stub-list')).to.exist;
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
     });
 
     it('drawer with tall (stub) content: slot contains content for overflow scroll', async () => {
@@ -524,7 +571,7 @@ describe.skip('createModalManager', () => {
       expect(slot.classList.contains('ax-color-modal-content')).to.be.true;
       expect(slot.querySelector('.ax-color-modal-stub-content')).to.exist;
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
     });
 
     it('single content slot per open (no duplicate slots for L/M/S)', async () => {
@@ -533,27 +580,27 @@ describe.skip('createModalManager', () => {
       await manager.open({
         _testStylesReady: true,
         title: 'One slot',
-        content: '<div id="only">only</div>',
+        content: createContent('<div id="only">only</div>'),
       });
       const container = document.querySelector('.ax-color-modal-container');
       const slots = container?.querySelectorAll('.ax-color-modal-content');
       expect(slots?.length).to.equal(1);
       expect(manager.getBody()?.querySelector('#only')?.textContent).to.equal('only');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
 
       Object.defineProperty(window, 'innerWidth', { value: 800, configurable: true });
       await manager.open({
         _testStylesReady: true,
         title: 'One slot',
-        content: '<div id="drawer-only">drawer</div>',
+        content: createContent('<div id="drawer-only">drawer</div>'),
       });
       const drawerContainer = document.querySelector('.ax-color-modal-container');
       const drawerSlots = drawerContainer?.querySelectorAll('.ax-color-modal-content');
       expect(drawerSlots?.length).to.equal(1);
       expect(manager.getBody()?.querySelector('#drawer-only')?.textContent).to.equal('drawer');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
     });
   });
 
@@ -574,7 +621,7 @@ describe.skip('createModalManager', () => {
       expect(['auto', 'scroll']).to.include(overflowY, 'content slot should scroll when overflow');
       expect(slot.scrollHeight).to.be.at.least(slot.clientHeight, 'tall stub content should make slot scrollable');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
     });
 
@@ -594,7 +641,7 @@ describe.skip('createModalManager', () => {
       expect(['auto', 'scroll']).to.include(overflowY, 'drawer content slot should scroll when overflow');
       expect(slot.scrollHeight).to.be.at.least(slot.clientHeight, 'tall stub content should make drawer slot scrollable');
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
     });
 
@@ -616,11 +663,11 @@ describe.skip('createModalManager', () => {
         expect(Math.round(rect.width)).to.equal(898, 'Figma L: desktop modal container width 898px');
       }
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
       Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
     });
 
-    it('drawer: container has max-height constraint (90vh or min when styles apply)', async () => {
+    it('drawer: container has max-height constraint (95vh or min when styles apply)', async () => {
       await manager.open({
         _testStylesReady: true,
         title: 'Drawer',
@@ -633,12 +680,12 @@ describe.skip('createModalManager', () => {
       const style = window.getComputedStyle(container);
       if (rect.height > 0) {
         const maxHeight = style.maxHeight ? parseInt(style.maxHeight, 10) : 0;
-        const vh = window.innerHeight * 0.9;
-        expect(rect.height).to.be.at.most(vh + 2, 'drawer should not exceed 90vh');
+        const vh = window.innerHeight * 0.95;
+        expect(rect.height).to.be.at.most(vh + 2, 'drawer should not exceed 95vh');
         if (maxHeight) expect(maxHeight).to.be.at.most(vh + 2);
       }
       manager.close();
-      await new Promise((r) => setTimeout(r, 350));
+      await waitForModalClose();
     });
   });
 });

@@ -17,8 +17,7 @@ describe('template-x-carousel-loop', () => {
   let block;
   let oldFetch;
   before(async () => {
-    oldFetch = window.fetch;
-    sinon.stub(window, 'fetch').callsFake(async (url) => {
+    oldFetch = sinon.stub(window, 'fetch').callsFake(async (url) => {
       if (url.includes('/express-search-api')) return mockRes({ payload: mockAPIResponse });
       return {};
     });
@@ -26,7 +25,7 @@ describe('template-x-carousel-loop', () => {
     await decorate(block);
   });
   after(() => {
-    window.fetch = oldFetch;
+    oldFetch.restore();
   });
 
   it('renders the heading and toolbar', () => {

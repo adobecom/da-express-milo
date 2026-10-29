@@ -213,7 +213,6 @@ describe('Template X Promo', () => {
 
     // Wait for the async operations to complete
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     // Debug: Check what's in the block
     console.log('Block innerHTML after decorate:', block.innerHTML);
@@ -286,7 +285,6 @@ describe('Template X Promo', () => {
 
     // Wait for the async operations to complete
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     // Debug: Check what's in the block
     console.log('Premium test - Block innerHTML after decorate:', block.innerHTML);
@@ -315,7 +313,6 @@ describe('Template X Promo', () => {
 
     // Wait for the async operations to complete
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     // Verify the parent has been populated (templates are added to parent, not block)
     expect(block.parentElement.innerHTML).to.not.be.empty;
@@ -394,7 +391,6 @@ describe('Template X Promo', () => {
 
     // Wait for the async operations to complete
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     // Verify the block has been populated
     expect(block.innerHTML).to.not.be.empty;
@@ -453,7 +449,6 @@ describe('Template X Promo', () => {
     try {
       // Wait for the async operations to complete
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify the block has been populated
       expect(block.innerHTML).to.not.be.empty;
@@ -522,7 +517,6 @@ describe('Template X Promo', () => {
 
     // First call
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const { parentElement } = block;
     const firstCallShareIcons = parentElement.querySelectorAll('.icon-share-arrow');
@@ -537,7 +531,6 @@ describe('Template X Promo', () => {
     // Second call (should be prevented by data-decorated attribute)
     await decorate(block);
     // Shorter timeout since it should return immediately
-    await new Promise((resolve) => { setTimeout(resolve, 100); });
 
     const secondCallShareIcons = parentElement.querySelectorAll('.icon-share-arrow');
     const secondCallTemplates = parentElement.querySelectorAll('.template');
@@ -623,7 +616,6 @@ describe('Template X Promo', () => {
     });
 
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const { parentElement } = block;
     expect(parentElement.classList.contains('three-up')).to.be.true;
@@ -742,7 +734,6 @@ describe('Template X Promo', () => {
     });
 
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const { parentElement } = block;
     expect(parentElement.classList.contains('four-up')).to.be.true;
@@ -800,7 +791,6 @@ describe('Template X Promo', () => {
 
     // First call
     await decorate(block);
-    await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
     const firstCallCount = fetchStub.callCount;
     expect(firstCallCount).to.be.greaterThan(0, 'At least one API call should have been made initially');
@@ -810,7 +800,6 @@ describe('Template X Promo', () => {
     // Second call (should be prevented by data-decorated attribute)
     await decorate(block);
     // Shorter timeout since it should return immediately
-    await new Promise((resolve) => { setTimeout(resolve, 100); });
 
     const secondCallCount = fetchStub.callCount;
 
@@ -827,7 +816,6 @@ describe('Template X Promo', () => {
     it('should test handleOneUpFromApiData function', async () => {
       // This function is called internally during decoration
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify the function worked by checking if templates were created
       const templates = block.parentElement.querySelectorAll('.template');
@@ -836,7 +824,6 @@ describe('Template X Promo', () => {
 
     it('should test createButtonSection function', async () => {
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify button sections were created
       const buttonContainers = block.parentElement.querySelectorAll('.button-container');
@@ -854,7 +841,6 @@ describe('Template X Promo', () => {
 
     it('should test createTemplateElement function', async () => {
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify template elements were created with proper structure
       const templates = block.parentElement.querySelectorAll('.template');
@@ -876,7 +862,6 @@ describe('Template X Promo', () => {
       });
 
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify desktop layout was created
       const templates = block.parentElement.querySelectorAll('.template');
@@ -938,7 +923,6 @@ describe('Template X Promo', () => {
 
       try {
         await decorate(testBlock);
-        await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
         // Verify carousel was created by checking for carousel-specific elements
         const wrapper = testBlock.querySelector('.promo-carousel-wrapper');
@@ -1014,7 +998,6 @@ describe('Template X Promo', () => {
 
       try {
         await decorate(testBlock);
-        await new Promise((resolve) => { setTimeout(resolve, 500); });
 
         // Simulate IntersectionObserver callback being triggered
         if (localIntersectionObserverStub.calledOnce) {
@@ -1047,7 +1030,6 @@ describe('Template X Promo', () => {
 
     it('should test initializeUtilities function', async () => {
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify utilities were initialized by checking for utility-dependent elements
       const shareIcons = block.parentElement.querySelectorAll('.icon-share-arrow');
@@ -1059,7 +1041,6 @@ describe('Template X Promo', () => {
 
     it('should test replaceKey function', async () => {
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify key replacement worked by checking for replaced URLs
       const images = block.parentElement.querySelectorAll('img[src*="design-assets.adobeprojectm.com"]');
@@ -1068,7 +1049,6 @@ describe('Template X Promo', () => {
 
     it('should test routeTemplates function', async () => {
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify templates were routed properly
       const templates = block.parentElement.querySelectorAll('.template');
@@ -1081,7 +1061,6 @@ describe('Template X Promo', () => {
 
     it('should test handleApiDrivenTemplates function', async () => {
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify API-driven templates were handled
       expect(fetchStub.called).to.be.true;
@@ -1092,7 +1071,6 @@ describe('Template X Promo', () => {
 
     it('should test handleResponsiveChange function', async () => {
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Test responsive change by changing viewport
       Object.defineProperty(window, 'innerWidth', {
@@ -1103,7 +1081,6 @@ describe('Template X Promo', () => {
 
       // Trigger resize event
       window.dispatchEvent(new Event('resize'));
-      await new Promise((resolve) => { setTimeout(resolve, 100); });
 
       // Verify responsive handling worked
       const templates = block.parentElement.querySelectorAll('.template');
@@ -1112,7 +1089,6 @@ describe('Template X Promo', () => {
 
     it('should test block cleanup function', async () => {
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       // Verify cleanup function exists and can be called
       // eslint-disable-next-line no-underscore-dangle
@@ -1212,7 +1188,6 @@ describe('Template X Promo', () => {
       });
 
       await decorate(block);
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
 
       parentElement = block.parentElement;
       templates = parentElement.querySelectorAll('.template');
@@ -1923,7 +1898,6 @@ describe('Template X Promo', () => {
 
       fetchStub.resolves(mockFreeResponse);
       await decorate(testBlock);
-      await new Promise((resolve) => { setTimeout(resolve, 500); }); // Increased wait time
 
       const ctaLink = testBlock.querySelector('.cta-link');
       if (!ctaLink) {
@@ -1946,7 +1920,6 @@ describe('Template X Promo', () => {
 
       fetchStub.resolves(mockFreeResponse);
       await decorate(testBlock);
-      await new Promise((resolve) => { setTimeout(resolve, 500); });
 
       const ctaLink = testBlock.querySelector('.cta-link');
       if (!ctaLink) {
@@ -1967,7 +1940,6 @@ describe('Template X Promo', () => {
 
       fetchStub.resolves(mockFreeResponse);
       await decorate(testBlock);
-      await new Promise((resolve) => { setTimeout(resolve, 500); });
 
       const ctaLink = testBlock.querySelector('.cta-link');
       if (!ctaLink) {
@@ -1988,7 +1960,6 @@ describe('Template X Promo', () => {
 
       fetchStub.resolves(mockFreeResponse);
       await decorate(testBlock);
-      await new Promise((resolve) => { setTimeout(resolve, 500); });
 
       const button = testBlock.querySelector('.button-container .button');
       const ctaLink = testBlock.querySelector('.button-container .cta-link');
@@ -2015,7 +1986,6 @@ describe('Template X Promo', () => {
 
       fetchStub.resolves(mockFreeResponse);
       await decorate(testBlock);
-      await new Promise((resolve) => { setTimeout(resolve, 500); });
 
       const ctaLink = testBlock.querySelector('.cta-link');
       if (!ctaLink) {
@@ -2036,7 +2006,6 @@ describe('Template X Promo', () => {
 
       fetchStub.resolves(mockFreeResponse);
       await decorate(testBlock);
-      await new Promise((resolve) => { setTimeout(resolve, 500); });
 
       const ctaLink = testBlock.querySelector('.cta-link');
       if (!ctaLink) {
@@ -2083,7 +2052,6 @@ describe('Template X Promo', () => {
 
       fetchStub.resolves(mockOneUpResponse);
       await decorate(testBlock);
-      await new Promise((resolve) => { setTimeout(resolve, 100); });
 
       const imageLink = testBlock.querySelector('.one-up-image-link');
 
@@ -2138,7 +2106,6 @@ describe('Template X Promo', () => {
 
       fetchStub.resolves(mockOneUpResponse);
       await decorate(testBlock);
-      await new Promise((resolve) => { setTimeout(resolve, 100); });
 
       const imageLink = testBlock.querySelector('.one-up-image-link');
 

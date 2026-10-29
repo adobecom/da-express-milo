@@ -25,7 +25,16 @@ module.exports = {
   overrides: [
     {
       files: ['test/**/*.js'],
-      rules: { 'no-console': 'off' },
+      rules: {
+        'no-console': 'off',
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: "AssignmentExpression[left.object.name='window'][left.property.name='fetch']",
+            message: 'Stub window.fetch with sinon.stub(window, \'fetch\') and restore it in a test hook.',
+          },
+        ],
+      },
     },
     {
       // Overrides for nala test

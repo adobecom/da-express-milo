@@ -7,6 +7,7 @@ import {
 } from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT, MOCK_LIBRARIES } from './mocks/palette.js';
 import { createMockCCLibraryProvider } from './mocks/stubs.js';
+import { waitFor } from '../../../helpers/waitfor.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
@@ -18,7 +19,7 @@ function waitForRaf() {
 }
 
 function waitForClose() {
-  return new Promise((r) => setTimeout(r, 300));
+  return waitFor(() => !document.querySelector('.ax-drawer-panel'));
 }
 
 function createAnchor() {
@@ -52,11 +53,37 @@ async function openDrawer(drawer) {
 }
 
 // Fix tests MWPW-192264
-describe.skip('createDrawer', function drawerSuite() {
+describe('createDrawer', function drawerSuite() {
   this.timeout(10000);
 
   let origWidth;
   let anchor;
+  const timingSandbox = sinon.createSandbox();
+  const nativeSetTimeout = window.setTimeout.bind(window);
+  const frameChannel = new MessageChannel();
+  const frameCallbacks = [];
+  frameChannel.port1.onmessage = () => frameCallbacks.shift()?.(performance.now());
+
+  before(() => {
+    timingSandbox.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      frameCallbacks.push(cb);
+      frameChannel.port2.postMessage(null);
+      return 0;
+    });
+    timingSandbox.stub(window, 'setTimeout').callsFake((cb, delay = 0, ...args) => {
+      if (delay === 100 || delay === 250) {
+        queueMicrotask(() => cb(...args));
+        return 0;
+      }
+      return nativeSetTimeout(cb, delay, ...args);
+    });
+  });
+
+  after(() => {
+    timingSandbox.restore();
+    frameChannel.port1.close();
+    frameChannel.port2.close();
+  });
 
   beforeEach(() => {
     origWidth = window.innerWidth;
@@ -69,7 +96,6 @@ describe.skip('createDrawer', function drawerSuite() {
     if (anchor && anchor.parentNode) anchor.remove();
     anchor = null;
     Object.defineProperty(window, 'innerWidth', { value: origWidth, configurable: true });
-    await new Promise((r) => setTimeout(r, 300));
   });
 
   describe('API', () => {
@@ -1159,7 +1185,7 @@ describe.skip('createDrawer', function drawerSuite() {
     });
 
     // Fix test MWPW-192264
-    it.skip('save failure closes drawer and announces error to screen reader', async () => {
+    it('save failure closes drawer and announces error to screen reader', async () => {
       anchor = createAnchor();
       const provider = createMockCCLibraryProvider();
       provider.saveTheme.rejects(new Error('Network error'));
@@ -1173,15 +1199,26 @@ describe.skip('createDrawer', function drawerSuite() {
       await openDrawer(drawer);
 
       const saveBtn = document.querySelector('.ax-drawer-save-btn');
-      saveBtn.click();
-      await new Promise((r) => setTimeout(r, 100));
-
-      expect(drawer.isOpen).to.be.false;
-      await waitForRaf();
       const liveRegion = document.getElementById('express-spectrum-live-region');
-      if (liveRegion) {
-        expect(liveRegion.textContent).to.include('Failed to save');
-      }
+      const announcement = new Promise((resolve, reject) => {
+        let observer;
+        const timeoutId = nativeSetTimeout(() => {
+          observer.disconnect();
+          reject(new Error('Timed out waiting for the save failure announcement'));
+        }, 5000);
+        observer = new MutationObserver(() => {
+          if (!/save failed|failed to save/i.test(liveRegion?.textContent || '')) return;
+          clearTimeout(timeoutId);
+          observer.disconnect();
+          resolve();
+        });
+        observer.observe(liveRegion, { childList: true, subtree: true });
+      });
+      saveBtn.click();
+      await announcement;
+
+      expect(provider.saveTheme.calledOnce).to.be.true;
+      expect(drawer.isOpen).to.be.false;
 
       await waitForClose();
     });
@@ -1328,7 +1365,7 @@ describe.skip('createDrawer', function drawerSuite() {
   });
 });
 
-// Not nested under the describe.skip above (MWPW-192264) — pure function, testable directly.
+// Pure function coverage for the button-row layout decision.
 describe('computeIsDirty', () => {
   const savedItem = {
     name: 'Sunset',

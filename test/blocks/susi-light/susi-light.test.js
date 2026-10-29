@@ -28,10 +28,10 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 
 describe('Susi-light', async () => {
   const blocks = [...document.querySelectorAll('.susi-light')];
-  const originalFetch = window.fetch;
+  let fetchStub;
   const originalLoadSUSI = SUSIUtils.loadSUSIScripts;
   before(async () => {
-    window.fetch = sinon.stub().callsFake((url) => {
+    fetchStub = sinon.stub(window, 'fetch').callsFake((url) => {
       if (/geo2/.test(url)) {
         return {
           country: 'US',
@@ -47,7 +47,7 @@ describe('Susi-light', async () => {
   });
 
   after(() => {
-    window.fetch = originalFetch;
+    fetchStub.restore();
     SUSIUtils.loadSUSIScripts = originalLoadSUSI;
   });
 

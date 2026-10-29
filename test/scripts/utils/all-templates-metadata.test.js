@@ -1,43 +1,48 @@
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 import { setLibs } from '../../../express/code/scripts/utils.js';
 
 setLibs('/libs');
 
 describe('All Templates Metadata', () => {
-  let mockFetch;
+  let fetchStub;
+  let importId = 0;
+  const originalUrl = window.location.href;
+  const importFresh = async () => {
+    importId += 1;
+    return import(`../../../express/code/scripts/utils/all-templates-metadata.js?test=${importId}`);
+  };
+
+  const mockFetch = (url) => {
+    if (url.includes('templates-dev.json')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: [{ id: 'dev-template' }] }),
+      });
+    }
+    if (url.includes('metadata.json')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ data: [{ id: 'prod-template' }] }),
+      });
+    }
+    return Promise.resolve({
+      ok: false,
+      json: () => Promise.resolve(null),
+    });
+  };
 
   beforeEach(() => {
-    // Mock fetch
-    mockFetch = (url) => {
-      if (url.includes('templates-dev.json')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ data: [{ id: 'dev-template' }] }),
-        });
-      }
-      if (url.includes('metadata.json')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ data: [{ id: 'prod-template' }] }),
-        });
-      }
-      return Promise.resolve({
-        ok: false,
-        json: () => Promise.resolve(null),
-      });
-    };
-
-    window.fetch = mockFetch;
+    fetchStub = sinon.stub(window, 'fetch').callsFake(mockFetch);
   });
 
   afterEach(() => {
-    // Clear any cached results by importing fresh module
-    // The global variable is in the module scope, not window
-    // We need to clear it by re-importing the module
+    fetchStub.restore();
+    window.history.replaceState(null, '', originalUrl);
   });
 
   it('should fetch templates metadata for production environment', async () => {
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '/us' },
@@ -50,7 +55,7 @@ describe('All Templates Metadata', () => {
   });
 
   it('should use different locale prefix', async () => {
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '/fr' },
@@ -63,9 +68,11 @@ describe('All Templates Metadata', () => {
   });
 
   it('should handle case sensitivity in dev parameter', async () => {
-    window.location.search = '?dev=TRUE';
+    const url = new URL(window.location.href);
+    url.searchParams.set('dev', 'TRUE');
+    window.history.replaceState(null, '', url);
 
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '/us' },
@@ -79,7 +86,7 @@ describe('All Templates Metadata', () => {
   });
 
   it('should return cached result on subsequent calls', async () => {
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '/us' },
@@ -97,9 +104,7 @@ describe('All Templates Metadata', () => {
   });
 
   it('should handle stage environment', async () => {
-    // Clear module cache and import fresh
-    delete window._allTemplatesMetadata; // eslint-disable-line no-underscore-dangle
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '/us' },
@@ -112,9 +117,9 @@ describe('All Templates Metadata', () => {
 
   it('should handle fetch errors gracefully', async () => {
     // Mock fetch to reject
-    window.fetch = () => Promise.reject(new Error('Network error'));
+    fetchStub.rejects(new Error('Network error'));
 
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '/us' },
@@ -127,12 +132,12 @@ describe('All Templates Metadata', () => {
 
   it('should handle non-ok response', async () => {
     // Mock fetch to return non-ok response
-    window.fetch = () => Promise.resolve({
+    fetchStub.resolves({
       ok: false,
       json: () => Promise.resolve(null),
     });
 
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '/us' },
@@ -144,7 +149,7 @@ describe('All Templates Metadata', () => {
   });
 
   it('should handle different locale prefixes', async () => {
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '/de' },
@@ -156,7 +161,7 @@ describe('All Templates Metadata', () => {
   });
 
   it('should handle empty locale prefix', async () => {
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     const mockGetConfig = () => ({
       locale: { prefix: '' },
@@ -168,7 +173,7 @@ describe('All Templates Metadata', () => {
   });
 
   it('should handle null/undefined getConfig', async () => {
-    const { default: fetchAllTemplatesMetadata } = await import('../../../express/code/scripts/utils/all-templates-metadata.js');
+    const { default: fetchAllTemplatesMetadata } = await importFresh();
 
     // Should throw error for invalid getConfig
     try {

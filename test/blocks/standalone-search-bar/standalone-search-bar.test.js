@@ -18,15 +18,14 @@ describe('standalone-search-bar', () => {
   let oldFetch;
 
   before(async () => {
-    oldFetch = window.fetch;
-    sinon.stub(window, 'fetch').callsFake(async () => mockRes({ payload: {} }));
+    oldFetch = sinon.stub(window, 'fetch').callsFake(async () => mockRes({ payload: {} }));
 
     block = document.querySelector('.standalone-search-bar');
     await decorate(block);
   });
 
   after(() => {
-    window.fetch = oldFetch;
+    oldFetch.restore();
     sinon.restore();
   });
 

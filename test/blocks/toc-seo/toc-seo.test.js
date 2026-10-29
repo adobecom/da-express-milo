@@ -2,10 +2,12 @@ import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
+const fetchSandbox = sinon.createSandbox();
+
 // Set up mocks BEFORE any imports to prevent external calls
 if (typeof window !== 'undefined') {
   // Mock fetch globally
-  window.fetch = () => Promise.resolve({
+  fetchSandbox.stub(window, 'fetch').resolves({
     ok: true,
     json: () => Promise.resolve({}),
     text: () => Promise.resolve(''),
@@ -74,6 +76,10 @@ const imports = await Promise.all([
 ]);
 
 const { default: decorate } = imports[1];
+
+after(() => {
+  fetchSandbox.restore();
+});
 
 const setupTest = async (htmlFile, {
   width = 1024,
