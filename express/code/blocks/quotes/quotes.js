@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-unresolved
-import { getLibs, addTempWrapperDeprecated, getLottie, lazyLoadLottiePlayer, toClassName } from '../../scripts/utils.js';
+import { getLibs, getFixedTopOffset, addTempWrapperDeprecated, getLottie, lazyLoadLottiePlayer, toClassName } from '../../scripts/utils.js';
 import loadCarousel from '../../scripts/utils/load-carousel.js';
 import {
   fetchRatingsData,
@@ -223,7 +223,7 @@ async function createQuotesRatings({
           // Scroll to top of section if needed
           const section = wrapper.closest('.section');
           if (window.scrollY > section.offsetTop) {
-            window.scrollTo(0, section.offsetTop - 64);
+            window.scrollTo(0, section.offsetTop - getFixedTopOffset());
           }
         };
         submit.addEventListener('click', handleSubmit);

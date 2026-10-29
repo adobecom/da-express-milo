@@ -124,6 +124,44 @@ describe('FAQv2', () => {
     expect(contents[1].classList.contains('open')).to.be.true;
   });
 
+  it('should keep all outer corners at 8px when open or closed in either direction', async () => {
+    document.body.innerHTML = expandable;
+    const block = document.querySelector('.faqv2');
+    await decorate(block);
+    clock.tick(150);
+
+    const style = document.createElement('style');
+    style.textContent = await readFile({
+      path: '../../../express/code/blocks/faqv2/faqv2.css',
+    });
+    document.head.append(style);
+    try {
+      const wrapper = block.querySelector('.faqv2-wrapper');
+      const toggle = wrapper.querySelector('.faqv2-toggle');
+      const header = toggle.querySelector('.faqv2-header');
+      const content = toggle.querySelector('.faqv2-content');
+      ['ltr', 'rtl'].forEach((direction) => {
+        block.dir = direction;
+        [true, false].forEach((isOpen) => {
+          if (content.classList.contains('open') !== isOpen) header.click();
+          expect(content.classList.contains('open')).to.equal(isOpen);
+          [wrapper, toggle].forEach((element) => {
+            const computed = getComputedStyle(element);
+            expect(computed.borderTopLeftRadius).to.equal('8px');
+            expect(computed.borderTopRightRadius).to.equal('8px');
+            expect(computed.borderBottomLeftRadius).to.equal('8px');
+            expect(computed.borderBottomRightRadius).to.equal('8px');
+          });
+          const computed = getComputedStyle(content);
+          expect(computed.borderBottomLeftRadius).to.equal('8px');
+          expect(computed.borderBottomRightRadius).to.equal('8px');
+        });
+      });
+    } finally {
+      style.remove();
+    }
+  });
+
   it('should render FAQv2 block with longform variant', async () => {
     document.body.innerHTML = longform;
     const block = document.querySelector('.faqv2');

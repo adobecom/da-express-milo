@@ -25,6 +25,7 @@ describe('Feature Grid Desktop', async () => {
 
     it('has all correct elements in each cell', () => {
       const cellList = smallGrid.querySelectorAll('.grid-item');
+      expect(cellList).to.have.lengthOf(4);
       cellList.forEach((cell) => {
         expect(cell.querySelector('h2')).to.exist;
         expect(cell.querySelector('p')).to.exist;
@@ -41,7 +42,6 @@ describe('Feature Grid Desktop', async () => {
     let fullGrid;
     let loadMoreButton;
     beforeEach(async () => {
-      document.body.innerHTML = await readFile({ path: './mocks/body.html' });
       fullGrid = document.querySelector('#full-grid');
       await decorate(fullGrid);
       loadMoreButton = fullGrid.querySelector('.load-more-button');
@@ -58,7 +58,8 @@ describe('Feature Grid Desktop', async () => {
     });
 
     it('has all correct elements in each cell', () => {
-      const cellList = document.querySelectorAll('#full-grid .grid-item');
+      const cellList = fullGrid.querySelectorAll('.grid-item');
+      expect(cellList.length).to.be.greaterThan(4);
       cellList.forEach((cell) => {
         expect(cell.querySelector('h2')).to.exist;
         expect(cell.querySelector('p')).to.exist;

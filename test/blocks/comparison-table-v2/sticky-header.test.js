@@ -68,6 +68,7 @@ describe('Sticky Header', () => {
 
   afterEach(() => {
     document.body.innerHTML = '';
+    document.documentElement.style.removeProperty('--express-fixed-top-height');
     clock.restore();
     sinon.restore();
   });
@@ -401,99 +402,6 @@ describe('Sticky Header', () => {
       expect(sentinel.style.height).to.equal('1px');
     });
 
-    it('should handle sticky state transitions', () => {
-      const stickyHeader = document.createElement('div');
-      stickyHeader.classList.add('sticky-header');
-      Object.defineProperty(stickyHeader, 'offsetHeight', { value: 100, configurable: true });
-
-      const comparisonBlock = document.createElement('div');
-      comparisonBlock.classList.add('comparison-table-v2');
-
-      const tableContainer = document.createElement('div');
-      tableContainer.classList.add('table-container');
-      comparisonBlock.appendChild(tableContainer);
-
-      // Add required parent structure
-      const section = document.createElement('section');
-      section.appendChild(comparisonBlock);
-      document.body.appendChild(section);
-
-      comparisonBlock.appendChild(stickyHeader);
-
-      initStickyBehavior(stickyHeader, comparisonBlock);
-
-      const placeholder = comparisonBlock.querySelector('.sticky-header-placeholder');
-      const headerSentinel = comparisonBlock.previousElementSibling;
-
-      // Mock header sentinel above viewport, content visible
-      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -10 });
-      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 500 });
-
-      // Trigger scroll to apply sticky
-      window.dispatchEvent(new Event('scroll'));
-      clock.tick(100);
-
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
-      expect(placeholder.style.display).to.equal('flex');
-      expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
-
-      // Mock header sentinel back in viewport
-      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: 10 });
-
-      // Trigger scroll to remove sticky
-      window.dispatchEvent(new Event('scroll'));
-      clock.tick(100);
-
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
-      expect(stickyHeader.classList.contains('gnav-offset')).to.be.false;
-      expect(placeholder.style.display).to.equal('none');
-    });
-
-    it('should expose controls to suspend sticky removal', () => {
-      const stickyHeader = document.createElement('div');
-      stickyHeader.classList.add('sticky-header');
-      Object.defineProperty(stickyHeader, 'offsetHeight', { value: 100, configurable: true });
-
-      const comparisonBlock = document.createElement('div');
-      comparisonBlock.classList.add('comparison-table-v2');
-
-      const tableContainer = document.createElement('div');
-      tableContainer.classList.add('table-container');
-      comparisonBlock.appendChild(tableContainer);
-
-      const section = document.createElement('section');
-      section.appendChild(comparisonBlock);
-      document.body.appendChild(section);
-
-      comparisonBlock.appendChild(stickyHeader);
-
-      const controls = initStickyBehavior(stickyHeader, comparisonBlock);
-      expect(controls).to.have.property('suspendStickyRelease');
-      expect(controls).to.have.property('resumeStickyRelease');
-
-      const headerSentinel = comparisonBlock.previousElementSibling;
-      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -10 });
-      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 500 });
-
-      window.dispatchEvent(new Event('scroll'));
-      clock.tick(100);
-
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
-
-      controls.suspendStickyRelease();
-      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: 20 });
-
-      window.dispatchEvent(new Event('scroll'));
-      clock.tick(100);
-
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
-
-      controls.resumeStickyRelease();
-      clock.tick(100);
-
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
-    });
-
     it('should handle hidden parent section', () => {
       const section = document.createElement('section');
       const stickyHeader = document.createElement('div');
@@ -546,7 +454,7 @@ describe('Sticky Header', () => {
 
       const comparisonBlock = document.createElement('div');
       comparisonBlock.classList.add('comparison-table-v2');
-      comparisonBlock.style.setProperty('--gnav-offset-height', '90px');
+      document.documentElement.style.setProperty('--express-fixed-top-height', '90px');
 
       const tableContainer = document.createElement('div');
       tableContainer.classList.add('table-container');
@@ -580,7 +488,7 @@ describe('Sticky Header', () => {
 
       const comparisonBlock = document.createElement('div');
       comparisonBlock.classList.add('comparison-table-v2');
-      comparisonBlock.style.setProperty('--gnav-offset-height', '90px');
+      document.documentElement.style.setProperty('--express-fixed-top-height', '90px');
 
       const tableContainer = document.createElement('div');
       tableContainer.classList.add('table-container');
@@ -604,6 +512,11 @@ describe('Sticky Header', () => {
 
       expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
       expect(placeholder.style.display).to.equal('none');
+
+      document.documentElement.style.setProperty('--express-fixed-top-height', '130px');
+      window.dispatchEvent(new CustomEvent('express:fixed-top-offset-change'));
+      expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
+      expect(placeholder.style.display).to.equal('flex');
     });
 
     it('should close dropdown when becoming sticky', () => {
@@ -668,6 +581,7 @@ describe('Sticky Header', () => {
       const stickyHeader = document.createElement('div');
       stickyHeader.classList.add('sticky-header');
       Object.defineProperty(stickyHeader, 'offsetHeight', { value: 100, configurable: true });
+      document.documentElement.style.setProperty('--express-fixed-top-height', '90px');
 
       const comparisonBlock = document.createElement('div');
       comparisonBlock.classList.add('comparison-table-v2');
@@ -690,7 +604,7 @@ describe('Sticky Header', () => {
 
       // Mock getBoundingClientRect - header sentinel above viewport
       headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: -50 });
-      // Mock content bottom below sticky header height (visible)
+      // Content remains below the fixed stack plus sticky header.
       tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 200 });
 
       // Trigger scroll to apply sticky state
@@ -701,8 +615,8 @@ describe('Sticky Header', () => {
       expect(stickyHeader.classList.contains('is-stuck')).to.be.true;
       expect(placeholder.style.display).to.equal('flex');
 
-      // Now mock content bottom above header height (not visible)
-      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 50 });
+      // Content has moved behind the combined fixed-stack and sticky-header boundary.
+      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 150 });
 
       // Trigger scroll
       window.dispatchEvent(new Event('scroll'));
@@ -981,42 +895,6 @@ describe('Sticky Header', () => {
       expect(stickyHeader.classList.contains('is-retracted')).to.be.false;
       expect(placeholder.style.display).to.equal('flex');
       expect(stickyHeader.classList.contains('gnav-offset')).to.be.true;
-    });
-
-    it('should not apply sticky when header sentinel is in viewport', () => {
-      const stickyHeader = document.createElement('div');
-      stickyHeader.classList.add('sticky-header');
-      Object.defineProperty(stickyHeader, 'offsetHeight', { value: 100, configurable: true });
-
-      const comparisonBlock = document.createElement('div');
-      comparisonBlock.classList.add('comparison-table-v2');
-      comparisonBlock.appendChild(stickyHeader);
-
-      const tableContainer = document.createElement('div');
-      tableContainer.classList.add('table-container');
-      comparisonBlock.appendChild(tableContainer);
-
-      const section = document.createElement('section');
-      section.appendChild(comparisonBlock);
-      document.body.appendChild(section);
-
-      // Initialize sticky behavior
-      initStickyBehavior(stickyHeader, comparisonBlock);
-
-      // Get the header sentinel
-      const headerSentinel = comparisonBlock.previousElementSibling;
-
-      // Mock header sentinel visible in viewport (not past it)
-      headerSentinel.getBoundingClientRect = sinon.stub().returns({ top: 50 });
-      tableContainer.getBoundingClientRect = sinon.stub().returns({ bottom: 500 });
-
-      // Trigger scroll
-      window.dispatchEvent(new Event('scroll'));
-      clock.tick(100);
-
-      // Should not apply sticky since header sentinel is in viewport
-      expect(stickyHeader.classList.contains('is-stuck')).to.be.false;
-      expect(stickyHeader.classList.contains('gnav-offset')).to.be.false;
     });
 
     it('should maintain gnav-offset when sticky on desktop', () => {

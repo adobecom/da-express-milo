@@ -33,9 +33,9 @@ Authoring) for publishing via Adobe EDS.
 >   as CSS reference, not authored separately.
 > - Link URLs use `https://www.adobe.com/` as a placeholder.
 >   Link display text must match Figma.
-> - Heading levels and body sizes are determined by visual heuristics
->   (font size, weight, position) since Express Figma designs do not
->   use `--s2a-typography-*` tokens.
+> - Use Figma typography tokens and text-style names to classify headings,
+>   body text, and eyebrows. Support both SOT and S2A designs; use visual
+>   heuristics only when the design provides no usable classification.
 
 ## Bundled resources
 
@@ -46,7 +46,7 @@ read when it becomes relevant.
 | File | Purpose |
 |------|---------|
 | `authoring-pattern.md` | HTML structure for DA block authoring: document skeleton, content rows, media placement, complete examples. |
-| `token-mapping.md` | Visual heuristics for classifying Figma text elements (heading level, body size, eyebrow, CTA style). |
+| `token-mapping.md` | Maps Figma typography tokens and text styles to authored headings, body text, and eyebrows, with visual fallbacks for SOT and S2A designs. |
 
 ### agents/
 | File | Purpose |
@@ -138,13 +138,14 @@ and follow its procedure.
 Each extraction returns:
 - Icon (Figma asset URL + node ID + alt text, if present)
 - Eyebrow text (if present)
-- Heading text + level (h1–h4)
-- Body text + size class (body-lg, body-md, body-sm)
+- Heading text + level (h1–h6) + source typography token/style, if present
+- Body text
 - Links (display text + CTA style: primary/secondary/plain)
 - Background (color string, or Figma asset URL + node ID if image)
 - Foreground image (Figma asset URL + node ID, if present)
 - Additional media (if present)
 - Fallback classifications (elements where heuristics were used)
+- Implementation notes (conflicting classifications)
 
 ---
 
@@ -291,7 +292,7 @@ CSS-driven responsive behaviour.
 **Left column text cell**:
 1. Icon (SVG): `<p><a href="<aem.page-url>"><aem.page-url></a></p>` (if present)
 2. Eyebrow: `<p>eyebrow text</p>` (if present)
-3. Heading: `<hN>text</hN>` where N is from the token mapping heuristic
+3. Heading: `<hN>text</hN>` where N follows the token-mapping reference
 4. Body: `<p>text</p>`
 5. Links:
    - Primary CTA: `<strong><a href="https://www.adobe.com/">text</a></strong>`
@@ -448,7 +449,7 @@ Upload complete. Delete /tmp/da-upload/ and /tmp/figma-media/ ? (y/n)
 ## Phase 9 — Summary
 
 1. **Block name** and DA file path.
-2. **Content structure**: icon, eyebrow, heading level, body size, link count.
+2. **Content structure**: icon, eyebrow, heading level, body text, link count.
 3. **Responsive notes**: what differs across viewports (for CSS implementation).
 4. **Placeholder links**: remind the user to replace `https://www.adobe.com/` URLs.
 5. **Fallback classifications**: elements where visual heuristics were used.

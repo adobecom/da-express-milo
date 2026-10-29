@@ -6,11 +6,59 @@ import {
   setLibs,
   hideQuickActionsOnDevices,
   getIconElementDeprecated,
+  getBrandingLogoElement,
   convertToInlineSVG,
   getContentRoot,
   decorateButtonsDeprecated,
+  FIXED_TOP_OFFSET_CHANGE_EVENT,
+  getFixedTopOffset,
+  measureFixedTopOffset,
+  usesC2Gnav,
+  trackFixedTopOffset,
 } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
+
+describe('Branding logos', () => {
+  let originalDirection;
+
+  beforeEach(() => {
+    originalDirection = document.documentElement.getAttribute('dir');
+  });
+
+  afterEach(() => {
+    if (originalDirection === null) document.documentElement.removeAttribute('dir');
+    else document.documentElement.setAttribute('dir', originalDirection);
+  });
+
+  it('uses the standard logo in LTR', () => {
+    document.documentElement.dir = 'ltr';
+    expect(getBrandingLogoElement().getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo.svg');
+  });
+
+  it('uses the RTL asset for default and explicitly selected standard logos', () => {
+    document.documentElement.dir = 'rtl';
+    [undefined, 'adobe-express-logo'].forEach((name) => {
+      expect(getBrandingLogoElement(name).getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo-rtl.svg');
+    });
+  });
+
+  it('preserves custom, white, and explicit RTL assets in either direction', () => {
+    ['ltr', 'rtl'].forEach((direction) => {
+      document.documentElement.dir = direction;
+      ['cobrand-lockup-acrobat-express', 'adobe-express-logo-white', 'adobe-express-logo-rtl'].forEach((name) => {
+        const logo = getBrandingLogoElement(name, 22, 'Authored label', 'custom-logo');
+        expect(logo.getAttribute('src')).to.equal(`/express/code/icons/${name}.svg`);
+        expect(logo.alt).to.equal('Authored label');
+        expect(logo.classList.contains('custom-logo')).to.equal(true);
+      });
+    });
+  });
+
+  it('does not change the general icon helper in RTL', () => {
+    document.documentElement.dir = 'rtl';
+    expect(getIconElementDeprecated('adobe-express-logo').getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo.svg');
+  });
+});
 
 describe('Libs', () => {
   it('Default Libs', () => {
@@ -60,6 +108,132 @@ describe('Libs', () => {
     };
     const libs = setLibs('/libs', location);
     expect(libs).to.equal('/libs');
+  });
+});
+
+describe('Fixed navigation stack offset', () => {
+  const setMetadata = (name, content) => {
+    const meta = document.createElement('meta');
+    meta.name = name;
+    meta.content = content;
+    document.head.append(meta);
+  };
+
+  afterEach(() => {
+    document.querySelectorAll('meta[name="foundation"], meta[name="gnav-foundation"]')
+      .forEach((meta) => meta.remove());
+    document.documentElement.style.removeProperty('--express-fixed-top-height');
+  });
+
+  it('detects the C2 gnav override on a C1 page', () => {
+    setMetadata('gnav-foundation', 'C2');
+    expect(usesC2Gnav()).to.be.true;
+  });
+
+  it('uses the active C2 desktop nav-only stack height', async () => {
+    setMetadata('foundation', 'c2');
+    const nav = document.createElement('div');
+    Object.defineProperty(nav, 'offsetHeight', { value: 64 });
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.resolve({
+          getGnavHeight: () => nav.offsetHeight,
+        }),
+      },
+    };
+
+    expect(await measureFixedTopOffset(config)).to.equal(64);
+  });
+
+  it('uses the active C2 nav-plus-breadcrumb stack height', async () => {
+    setMetadata('gnav-foundation', 'c2');
+    const nav = document.createElement('div');
+    const breadcrumbs = document.createElement('div');
+    Object.defineProperty(nav, 'offsetHeight', { value: 56 });
+    Object.defineProperty(breadcrumbs, 'offsetHeight', { value: 32 });
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.resolve({
+          getGnavHeight: () => nav.offsetHeight + breadcrumbs.offsetHeight,
+        }),
+      },
+    };
+
+    expect(await measureFixedTopOffset(config)).to.equal(88);
+  });
+
+  it('falls back to the header height when C2 navigation initialization rejects', async () => {
+    setMetadata('gnav-foundation', 'c2');
+    const header = document.createElement('header');
+    Object.defineProperty(header, 'offsetHeight', { value: 64 });
+    document.body.append(header);
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.reject(new Error('C2 failed to initialize')),
+      },
+    };
+
+    expect(await measureFixedTopOffset(config)).to.equal(64);
+    header.remove();
+  });
+
+  it('falls back to the header height when C2 height measurement fails', async () => {
+    setMetadata('gnav-foundation', 'c2');
+    const header = document.createElement('header');
+    Object.defineProperty(header, 'offsetHeight', { value: 64 });
+    document.body.append(header);
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.resolve({
+          getGnavHeight: () => {
+            throw new Error('C2 height unavailable');
+          },
+        }),
+      },
+    };
+
+    expect(await measureFixedTopOffset(config)).to.equal(64);
+    header.remove();
+  });
+
+  it('publishes runtime stack changes and stops cleanly', async () => {
+    setMetadata('gnav-foundation', 'c2');
+    let height = 88;
+    const config = {
+      federal: {
+        fedsGlobalNavigation: Promise.resolve({
+          getGnavHeight: () => height,
+        }),
+      },
+    };
+    const listener = sinon.spy();
+    window.addEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, listener);
+
+    const stop = await trackFixedTopOffset(config);
+    expect(getFixedTopOffset()).to.equal(88);
+    expect(listener.calledOnce).to.be.true;
+
+    height = 104;
+    window.dispatchEvent(new Event('resize'));
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    expect(getFixedTopOffset()).to.equal(104);
+    expect(listener.callCount).to.equal(2);
+
+    stop();
+    height = 120;
+    window.dispatchEvent(new Event('resize'));
+    await new Promise((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+    });
+    expect(getFixedTopOffset()).to.equal(104);
+    window.removeEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, listener);
+  });
+
+  it('reads the shared runtime offset for block consumers', () => {
+    document.documentElement.style.setProperty('--express-fixed-top-height', '96px');
+    expect(getFixedTopOffset()).to.equal(96);
   });
 });
 

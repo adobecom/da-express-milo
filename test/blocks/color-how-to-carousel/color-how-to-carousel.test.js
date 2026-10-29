@@ -74,9 +74,74 @@ describe('Color How To Carousel', () => {
       document.body.innerHTML = await readFile({ path: mock });
       setColorPageType();
       const block = document.querySelector('.color-how-to-carousel');
+      if (colorName) block.querySelector('h2').nextElementSibling.textContent = colorName;
       await decorate(block);
       return block;
     }
+
+    describe('English CTA search terms', () => {
+      let originalUrl;
+
+      beforeEach(() => {
+        originalUrl = window.location.href;
+      });
+
+      afterEach(() => {
+        window.history.replaceState({}, '', originalUrl);
+      });
+
+      ['', 'article'].forEach((pageType) => {
+        it(`preserves the authored CTA when pagetype is ${pageType || 'absent'}`, async () => {
+          window.isTestEnv = true;
+          window.history.replaceState({}, '', '/it/meanings/hot-pink');
+          document.body.innerHTML = redBody;
+          if (pageType) {
+            setColorPageType();
+            document.head.querySelector('meta[name="pagetype"]').content = pageType;
+          }
+          const block = document.querySelector('.color-how-to-carousel');
+          const cta = block.querySelector('a');
+          const authoredHref = cta.getAttribute('href');
+
+          await decorate(block);
+
+          expect(block.querySelector('.chtc-heading')).to.not.exist;
+          expect(block.querySelector('.img-wrapper')).to.exist;
+          expect(block.querySelector('a')).to.equal(cta);
+          expect(cta.getAttribute('href')).to.equal(authoredHref);
+        });
+      });
+
+      [
+        ['/meanings/red', 'Rosso', 'red'],
+        ['/it/meanings/red', 'Rosso', 'red'],
+        ['/it/meanings/hot-pink', 'Rosa acceso', 'hot pink'],
+        ['/fr/meanings/light-sky-blue', 'Bleu ciel clair', 'light sky blue'],
+        ['/it/meanings/hot-pink/', 'Rosa acceso', 'hot pink'],
+        ['/it/meanings/hot-pink.html', 'Rosa acceso', 'hot pink'],
+        ['/it/meanings/hot-pink.html/', 'Rosa acceso', 'hot pink'],
+        ['/it/meanings/hot%20pink', 'Rosa acceso', 'hot pink'],
+        ['/it/meanings/hot-pink?source=test#steps', 'Rosa acceso', 'hot pink'],
+        ['/express/colors/hot-pink', 'Jade', 'jade'],
+        ['/it/express/colors/hot-pink.html', 'Jade', 'jade'],
+        ['/test/preview', 'Jade', 'jade'],
+      ].forEach(([path, authoredName, englishName]) => {
+        it(`uses "${englishName}" for ${path} without changing authored content`, async () => {
+          window.history.replaceState({}, '', path);
+          const block = await prepBlock(undefined, authoredName);
+          const cta = block.querySelector('.chtc-how-to-card a.chtc-cta');
+          const url = new URL(cta.href);
+
+          expect(url.searchParams.get('q')).to.equal(englishName);
+          expect(url.searchParams.get('searchCategory')).to.equal('templates');
+          expect(url.searchParams.get('category')).to.equal('templates');
+          expect(url.searchParams.get('placement')).to.equal('outside-blocks');
+          expect(block.querySelector('.chtc-heading h2').textContent.trim())
+            .to.equal('How to use jade color.');
+          expect(cta.textContent).to.equal('Create Now');
+        });
+      });
+    });
 
     it('does not activate without pagetype=color metadata (legacy rendering is untouched)', async () => {
       document.body.innerHTML = redBody;
