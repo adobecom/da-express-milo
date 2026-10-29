@@ -20,7 +20,7 @@ echo "GITHUB_HEAD_REF: $GITHUB_HEAD_REF"
 if [[ "$GITHUB_REF" == refs/pull/* ]]; then
   # extract PR number and branch name
   PR_NUMBER=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
-  FEATURE_BRANCH="$GITHUB_HEAD_REF"
+  FEATURE_BRANCH="${branch:-$GITHUB_HEAD_REF}"
 elif [[ "$GITHUB_REF" == refs/heads/* ]]; then
   # extract branch name from GITHUB_REF
   FEATURE_BRANCH=$(echo "$GITHUB_REF" | awk -F'/' '{print $3}')
