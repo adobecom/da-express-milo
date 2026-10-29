@@ -8,7 +8,6 @@ describe('Pricing Cards Credits', () => {
   let pricingCardsCredits;
 
   before(() => {
-    window.isTestEnv = true;
     pricingCardsCredits = document.querySelector('.pricing-cards-credits');
     decorate(pricingCardsCredits);
   });

@@ -10,10 +10,6 @@ const body = await readFile({ path: './mocks/body.html' });
 const pricing = await readFile({ path: './mocks/pricing.html' });
 
 describe('List', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('List exists', async () => {
     document.body.innerHTML = body;
     const list = document.querySelector('.list');

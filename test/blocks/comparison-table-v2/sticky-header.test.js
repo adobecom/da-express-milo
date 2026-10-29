@@ -25,10 +25,6 @@ describe('Sticky Header', () => {
   let clock;
   let mockCreateTag;
 
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(async () => {
     document.body.innerHTML = body;
     clock = sinon.useFakeTimers();

@@ -2,7 +2,6 @@ import { readFile, setViewport } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-window.isTestEnv = true;
 
 const imports = await Promise.all([
   import('../../../express/code/scripts/utils.js'),

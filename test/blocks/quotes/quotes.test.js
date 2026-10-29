@@ -13,10 +13,6 @@ const singular = await readFile({ path: './mocks/singular.html' });
 const singularMultipleQuoteContent = await readFile({ path: './mocks/singular-multiple.html' });
 
 describe('Quotes', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Quotes exists', async () => {
     document.body.innerHTML = body;
     const quotes = document.querySelector('.quotes');

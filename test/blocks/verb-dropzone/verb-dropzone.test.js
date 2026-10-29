@@ -5,7 +5,6 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-window.isTestEnv = true;
 
 // Boot milo so setLibs is initialized before the block module loads
 const [{ getLibs }] = await Promise.all([

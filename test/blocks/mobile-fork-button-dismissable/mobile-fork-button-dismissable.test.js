@@ -65,7 +65,6 @@ function setMobileDom() {
 
 describe('Mobile Fork Button', () => {
   beforeEach(async () => {
-    window.isTestEnv = true;
     window.hlx = {};
     window.floatingCta = [
       {

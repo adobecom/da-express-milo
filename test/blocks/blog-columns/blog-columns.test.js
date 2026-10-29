@@ -4,8 +4,6 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
-window.isTestEnv = true;
-
 const [, { default: decorate }] = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/blog-columns/blog-columns.js'),
