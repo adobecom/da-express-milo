@@ -311,11 +311,118 @@ async function makeRatings(
   return ratings;
 }
 
-export default async function init(el) {
-  const rows = [...el.querySelectorAll(':scope > div')];
-  const hasLegacyHeadline = !!rows[0]?.querySelector('h1');
-  const foreground = createTag('div', { class: 'foreground' });
+function decorateLegacyHeadline(headline) {
+  headline.classList.add('headline');
+  const ctas = headline.querySelectorAll('a');
+  if (!ctas.length) {
+    headline.classList.add('no-cta');
+    return headline;
+  }
+  ctas[0].parentElement.classList.add('ctas');
+  // OST links still here mean the early (hero-fast) render: Milo's merch block will rewrite and
+  // then replace them, so styling them now only makes the button resize twice. Leave them alone
+  // and keep the row hidden (its other buttons still reserve the height) until the swap is done.
+  const isPendingMerch = (a) => a.href.includes('/tools/ost?');
+  if ([...ctas].some(isPendingMerch)) ctas[0].parentElement.classList.add('merch-pending');
+  const heading = headline.querySelector('h1, h2, h3, h4, h5, h6');
+  ctas.forEach((cta) => {
+    if (isPendingMerch(cta)) return;
+    cta.classList.add('button');
+    if (cta.querySelector('.icon')) return;
+    const icon = cta.parentElement?.querySelector(':scope > .icon');
+    const match = icon && iconRegex.exec(icon.className);
+    if (match?.[1]) {
+      const hasExistingGraphic = icon.querySelector('svg, img');
+      if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
+      const ctaText = cta.textContent.trim();
+      cta.textContent = '';
+      cta.title = cta.title || ctaText;
+      cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
+    }
+    if (!cta.getAttribute('aria-label') && heading) {
+      cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
+    }
+  });
+  if (!isPendingMerch(ctas[0])) ctas[0].classList.add('primaryCTA');
+  // Defer pricing formatting to idle time
+  // eslint-disable-next-line compat/compat
+  const idleCb = (cb) => (window.requestIdleCallback
+    // eslint-disable-next-line compat/compat
+    ? window.requestIdleCallback(cb, { timeout: 3000 })
+    : setTimeout(cb, 3000)
+  );
+  idleCb(() => {
+    ctas.forEach((cta) => formatDynamicCartLink(cta));
+  });
+  return headline;
+}
 
+async function loadRatings(ratingsPlaceholder) {
+  const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const config = getConfig();
+  const [ratingPlaceholder,
+    starsPlaceholder,
+    playStoreLabelPlaceholder,
+    appleStoreLabelPlaceholder] = await Promise.all([
+    replaceKey('app-store-ratings', config),
+    replaceKey('app-store-stars', config),
+    replaceKey('app-store-ratings-play-store', config),
+    replaceKey('app-store-ratings-apple-store', config),
+  ]);
+
+  const ratingsElement = await makeRatings(
+    ratingPlaceholder,
+    starsPlaceholder,
+    playStoreLabelPlaceholder,
+    appleStoreLabelPlaceholder,
+    config,
+  );
+  ratingsPlaceholder.replaceWith(ratingsElement);
+}
+
+function makeBrandingLogo() {
+  const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
+    || (['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
+    || null;
+  const logo = getBrandingLogoElement(brandingLogoName || 'adobe-express-logo');
+  logo.classList.add('express-logo');
+  return logo;
+}
+
+/**
+ * Synchronous first paint of the legacy (headline-in-block) layout, built only from
+ * authored content. Safe to call before Milo's setConfig: no getConfig, no
+ * placeholders, no fetch. Returns false when the block is not in legacy mode.
+ * Called early by scripts.js when the page opts in with `hero-fast`, otherwise by init.
+ */
+export function renderCritical(el) {
+  if (el.dataset.heroFast === 'rendered') return true;
+  const rows = [...el.querySelectorAll(':scope > div')];
+  if (!rows[0]?.querySelector('h1')) return false;
+
+  const [headline, background, ...items] = rows;
+  const logo = makeBrandingLogo();
+
+  const foreground = createTag('div', { class: 'foreground' });
+  background.classList.add('background');
+  el.append(foreground);
+
+  // Build cards first (do not nuke headline images)
+  const cards = items.map((item) => toCard(item));
+  const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
+  [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
+
+  decorateLegacyHeadline(headline);
+  foreground.append(logo, headline, cardsContainer);
+  // Reserve the ratings row (min-height in CSS) so filling it in later doesn't shift layout.
+  if (el.classList.contains('ratings')) foreground.append(createTag('div', { class: 'ratings' }));
+
+  el.dataset.heroFast = 'rendered';
+  return true;
+}
+
+export default async function init(el) {
   // Context: if a hero block exists in the previous section, tag for contextual styles
   const thisSection = el.closest('.section');
   let prevSection = thisSection && thisSection.previousElementSibling;
@@ -325,47 +432,6 @@ export default async function init(el) {
   if (prevSection?.querySelector('.grid-marquee-hero')) {
     el.classList.add('with-hero-above');
   }
-
-  // Helper to decorate headline in legacy mode
-  const decorateLegacyHeadline = (headline) => {
-    headline.classList.add('headline');
-    const ctas = headline.querySelectorAll('a');
-    if (!ctas.length) {
-      headline.classList.add('no-cta');
-      return headline;
-    }
-    ctas[0].parentElement.classList.add('ctas');
-    const heading = headline.querySelector('h1, h2, h3, h4, h5, h6');
-    ctas.forEach((cta) => {
-      cta.classList.add('button');
-      if (cta.querySelector('.icon')) return;
-      const icon = cta.parentElement?.querySelector(':scope > .icon');
-      const match = icon && iconRegex.exec(icon.className);
-      if (match?.[1]) {
-        const hasExistingGraphic = icon.querySelector('svg, img');
-        if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
-        const ctaText = cta.textContent.trim();
-        cta.textContent = '';
-        cta.title = cta.title || ctaText;
-        cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
-      }
-      if (!cta.getAttribute('aria-label') && heading) {
-        cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
-      }
-    });
-    ctas[0].classList.add('primaryCTA');
-    // Defer pricing formatting to idle time
-    // eslint-disable-next-line compat/compat
-    const idleCb = (cb) => (window.requestIdleCallback
-      // eslint-disable-next-line compat/compat
-      ? window.requestIdleCallback(cb, { timeout: 3000 })
-      : setTimeout(cb, 3000)
-    );
-    idleCb(() => {
-      ctas.forEach((cta) => formatDynamicCartLink(cta));
-    });
-    return headline;
-  };
 
   // Register responsive handlers for both modes
   largeMQ.addEventListener('change', () => {
@@ -377,126 +443,97 @@ export default async function init(el) {
   });
 
   // Legacy mode: headline + background + items inside this block
-  if (hasLegacyHeadline) {
-    const [headline, background, ...items] = rows;
-    const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
-      || (['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
-      || null;
-    const logo = getBrandingLogoElement(brandingLogoName || 'adobe-express-logo');
-
-    logo.classList.add('express-logo');
-
-    background.classList.add('background');
-    el.append(foreground);
-
-    // Build cards first (do not nuke headline images)
-    const cards = items.map((item) => toCard(item));
-    const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
-    [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
-
-    // Headline decoration now
-    decorateLegacyHeadline(headline);
-    foreground.append(logo, headline, cardsContainer);
-
-    // Ratings if needed
-    if (el.classList.contains('ratings')) {
-      const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-      const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-      const config = getConfig();
-      const [ratingPlaceholder,
-        starsPlaceholder,
-        playStoreLabelPlaceholder,
-        appleStoreLabelPlaceholder] = await Promise.all([
-        replaceKey('app-store-ratings', config),
-        replaceKey('app-store-stars', config),
-        replaceKey('app-store-ratings-play-store', config),
-        replaceKey('app-store-ratings-apple-store', config),
-      ]);
-
-      const ratingsElement = await makeRatings(
-        ratingPlaceholder,
-        starsPlaceholder,
-        playStoreLabelPlaceholder,
-        appleStoreLabelPlaceholder,
-        config,
-      );
-      foreground.append(ratingsElement);
-    }
-  } else {
-    // New mode: headline is in grid-marquee-hero; this block handles background + cards (+ratings)
-    const [, background, ...items] = rows;
-
-    // NUCLEAR OPTION: Remove ALL images initially to avoid LCP impact
-    const allImages = [...el.querySelectorAll('img')];
-    const imageData = allImages.map((img) => ({
-      element: img,
-      parent: img.parentNode,
-      nextSibling: img.nextSibling,
-    }));
-    allImages.forEach((img) => img.remove());
-
-    background.classList.add('background');
-    el.append(foreground);
-
-    // Image restoration function
-    let imagesRestored = false;
-    const restoreImages = () => {
-      if (imagesRestored) return;
-      imagesRestored = true;
-      imageData.forEach(({ element, parent, nextSibling }) => {
-        element.loading = 'lazy';
-        element.decoding = 'async';
-        element.fetchPriority = 'low';
-        if (nextSibling) {
-          parent.insertBefore(element, nextSibling);
-        } else {
-          parent.appendChild(element);
+  const preRendered = el.dataset.heroFast === 'rendered';
+  if (renderCritical(el)) {
+    if (preRendered) {
+      // The early render ran before Milo set <html dir>; the logo choice depends on it.
+      const logo = el.querySelector(':scope > .foreground > .express-logo');
+      const fresh = makeBrandingLogo();
+      if (logo && logo.getAttribute('src') !== fresh.getAttribute('src')) logo.replaceWith(fresh);
+      // Milo's merch block swaps OST links for a fresh checkout-link element (merch.js
+      // el.replaceWith). On the normal path that happens before this block decorates; here it
+      // happens after, so decorate the replacement and reveal the row once nothing is pending.
+      const ctas = el.querySelector(':scope > .foreground > .headline .ctas.merch-pending');
+      if (ctas) {
+        const heading = el.querySelector('.headline h1, .headline h2, .headline h3');
+        const settle = () => {
+          const links = [...ctas.querySelectorAll(':scope > a')];
+          if (links.some((a) => a.href.includes('/tools/ost?'))) return false;
+          links.forEach((a) => {
+            a.classList.add('button');
+            if (!a.getAttribute('aria-label') && heading) {
+              a.setAttribute('aria-label', `${a.textContent.trim()} ${heading.textContent.trim()}`);
+            }
+          });
+          links[0]?.classList.add('primaryCTA');
+          ctas.classList.remove('merch-pending');
+          return true;
+        };
+        if (!settle()) {
+          const observer = new MutationObserver(() => settle() && observer.disconnect());
+          observer.observe(ctas, { childList: true });
+          // Never leave the CTAs hidden if commerce fails to load.
+          setTimeout(() => {
+            observer.disconnect();
+            ctas.classList.remove('merch-pending');
+          }, 10000);
         }
-      });
-    };
-
-    if (items.length > 0) {
-      requestAnimationFrame(() => {
-        restoreImages();
-
-        const cards = items.map((item) => toCard(item));
-        const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
-        [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
-        foreground.append(cardsContainer);
-
-        if (el.classList.contains('ratings')) {
-          const ratingsPlaceholder = createTag('div', { class: 'ratings' });
-          foreground.append(ratingsPlaceholder);
-
-          setTimeout(async () => {
-            const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-            const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-            const config = getConfig();
-            const [ratingPlaceholder,
-              starsPlaceholder,
-              playStoreLabelPlaceholder,
-              appleStoreLabelPlaceholder] = await Promise.all([
-              replaceKey('app-store-ratings', config),
-              replaceKey('app-store-stars', config),
-              replaceKey('app-store-ratings-play-store', config),
-              replaceKey('app-store-ratings-apple-store', config),
-            ]);
-
-            const ratingsElement = await makeRatings(
-              ratingPlaceholder,
-              starsPlaceholder,
-              playStoreLabelPlaceholder,
-              appleStoreLabelPlaceholder,
-              config,
-            );
-            ratingsPlaceholder.replaceWith(ratingsElement);
-          }, 1000);
-        }
-      });
+      }
     }
+    const ratingsPlaceholder = el.querySelector(':scope > .foreground > .ratings');
+    if (ratingsPlaceholder) await loadRatings(ratingsPlaceholder);
+    return;
   }
 
-  // Done
+  // New mode: headline is in grid-marquee-hero; this block handles background + cards (+ratings)
+  const [, background, ...items] = el.querySelectorAll(':scope > div');
+  const foreground = createTag('div', { class: 'foreground' });
+
+  // NUCLEAR OPTION: Remove ALL images initially to avoid LCP impact
+  const allImages = [...el.querySelectorAll('img')];
+  const imageData = allImages.map((img) => ({
+    element: img,
+    parent: img.parentNode,
+    nextSibling: img.nextSibling,
+  }));
+  allImages.forEach((img) => img.remove());
+
+  background.classList.add('background');
+  el.append(foreground);
+
+  // Image restoration function
+  let imagesRestored = false;
+  const restoreImages = () => {
+    if (imagesRestored) return;
+    imagesRestored = true;
+    imageData.forEach(({ element, parent, nextSibling }) => {
+      element.loading = 'lazy';
+      element.decoding = 'async';
+      element.fetchPriority = 'low';
+      if (nextSibling) {
+        parent.insertBefore(element, nextSibling);
+      } else {
+        parent.appendChild(element);
+      }
+    });
+  };
+
+  if (items.length > 0) {
+    requestAnimationFrame(() => {
+      restoreImages();
+
+      const cards = items.map((item) => toCard(item));
+      const cardsContainer = createTag('div', { class: 'cards-container' }, cards.map(({ card }) => card));
+      [...cardsContainer.querySelectorAll('p:empty')].forEach((p) => p.remove());
+      foreground.append(cardsContainer);
+
+      if (el.classList.contains('ratings')) {
+        const ratingsPlaceholder = createTag('div', { class: 'ratings' });
+        foreground.append(ratingsPlaceholder);
+        setTimeout(() => loadRatings(ratingsPlaceholder), 1000);
+      }
+    });
+  }
 }
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && currDrawer) {

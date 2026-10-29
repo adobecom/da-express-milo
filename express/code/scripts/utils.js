@@ -943,6 +943,26 @@ function decorateCommerceLinks(area) {
   });
 }
 
+// Tier 1b: Milo's preloadLcpCodeFiles imports merch.js + commerce when section 1 holds an
+// OST link. Park the href (Milo matches '/tools/ost?' in it, so #_dnb alone isn't enough);
+// scripts.js restores it and loads the merch block after section 1.
+// Only on portrait phones with a floating CTA: grid-marquee hides the hero CTAs below 768px
+// and the floating CTA stands in for them, so a late checkout href costs nothing. Landscape
+// phones, tablets and desktop keep the eager link. If the device rotates later, the parked
+// link still loads once it gets a layout box (scripts.js whenRendered).
+// Opt out per page with metadata defer-hero-commerce=off.
+function deferHeroCommerce() {
+  if (getMetadata('defer-hero-commerce')?.trim().toLowerCase() === 'off') return;
+  if (document.body.dataset.device !== 'mobile') return;
+  if (!window.matchMedia('(orientation: portrait) and (max-width: 767px)').matches) return;
+  const floatingCta = getMetadata('show-floating-cta')?.trim().toLowerCase();
+  if (!['yes', 'y', 'true', 'on'].includes(floatingCta)) return;
+  document.querySelectorAll('body > main > div:first-child a[href*="/tools/ost?"]:not([data-dnb])').forEach((a) => {
+    a.dataset.deferredMerch = a.href;
+    a.setAttribute('href', '#');
+  });
+}
+
 export function decorateArea(area = document) {
   document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
   const selector = area === document ? 'main > div' : ':scope body > div';
@@ -951,6 +971,7 @@ export function decorateArea(area = document) {
   area.querySelectorAll('a[href*="#_dnb"]').forEach((a) => {
     a.dataset.dnb = 'true';
   });
+  if (area === document) deferHeroCommerce();
 
   preDecorateSections(area);
   // LCP image decoration
