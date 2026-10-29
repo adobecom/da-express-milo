@@ -6,12 +6,31 @@ import { expect } from '@esm-bundle/chai';
 
 const [, { default: decorate }] = await Promise.all([import('../../../express/code/scripts/scripts.js'), import('../../../express/code/blocks/feature-grid/feature-grid.js')]);
 
-document.body.innerHTML = await readFile({ path: './mocks/body.html' });
+describe('Feature Grid Desktop', () => {
+  let markup;
 
-describe('Feature Grid Desktop', async () => {
-  describe('Small Grid', async () => {
-    const smallGrid = document.querySelector('#small-grid');
-    await decorate(smallGrid);
+  before(async () => {
+    markup = await readFile({ path: './mocks/body.html' });
+  });
+
+  beforeEach(() => {
+    const fixture = new DOMParser().parseFromString(markup, 'text/html');
+    document.body.replaceChildren(
+      ...[...fixture.body.childNodes].map((node) => document.importNode(node, true)),
+    );
+  });
+
+  afterEach(() => {
+    document.body.replaceChildren();
+  });
+
+  describe('Small Grid', () => {
+    let smallGrid;
+
+    beforeEach(async () => {
+      smallGrid = document.querySelector('#small-grid');
+      await decorate(smallGrid);
+    });
 
     it('has a heading', () => {
       const heading = smallGrid.querySelector('.heading > h1');

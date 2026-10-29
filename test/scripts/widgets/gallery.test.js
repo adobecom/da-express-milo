@@ -1,5 +1,4 @@
 import { expect } from '@esm-bundle/chai';
-import { delay } from '../../helpers/waitfor.js';
 
 const imports = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
@@ -9,10 +8,9 @@ const { getLibs } = imports[0];
 await import(`${getLibs()}/utils/utils.js`).then((mod) => mod.setConfig({}));
 const { default: buildGallery } = await import('../../../express/code/scripts/widgets/gallery/gallery.js');
 
-async function scrollTo(container, left) {
+function scrollTo(container, left) {
   container.scrollLeft = left;
   container.dispatchEvent(new Event('scroll'));
-  await delay(150); // clears the click throttle's trailing window
 }
 
 describe('shared gallery direction', () => {
@@ -56,16 +54,15 @@ describe('shared gallery direction', () => {
           };
         });
         next.click();
-        await delay(150);
         expect(scrolled).to.deep.equal([1]);
         expect(Math.sign(container.scrollLeft)).to.equal(sign);
         expect(prev.disabled).to.be.false;
 
-        await scrollTo(container, sign * container.scrollWidth);
+        scrollTo(container, sign * container.scrollWidth);
         expect(next.disabled).to.be.true;
         expect(prev.disabled).to.be.false;
 
-        await scrollTo(container, 0);
+        scrollTo(container, 0);
         expect(prev.disabled).to.be.true;
         expect(next.disabled).to.be.false;
       } finally {

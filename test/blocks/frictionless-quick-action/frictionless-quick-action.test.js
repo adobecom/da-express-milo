@@ -16,6 +16,7 @@ const {
   logMediaUploadEvent,
   getUploadMediaKind,
 } = imports[2];
+const { PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP } = await import('../../../express/code/scripts/utils/frictionless-utils.js');
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({
     codeRoot: '/express/code',
@@ -26,6 +27,16 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
 
 describe('Frictionless Quick Action Block', () => {
+  before(() => {
+    // Preloading is covered by frictionless-utils tests. Block decoration must not start the
+    // real CC Everywhere SDK in this unit suite.
+    PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP['crop-image'] = false;
+  });
+
+  after(() => {
+    PRELOAD_ENABLED_QUICK_ACTIONS_DESKTOP['crop-image'] = true;
+  });
+
   afterEach(() => {
     sinon.restore();
   });
@@ -202,34 +213,18 @@ describe('Frictionless Quick Action Block', () => {
     meta.remove();
   });
 
-  it('sdk starts on file drop', async () => {
+  it('ignores a file drop with no files', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
     const block = document.body.querySelector('.frictionless-quick-action');
     await init(block);
 
     const dropzoneContainer = block.querySelector(':scope .dropzone-container');
-    const file = new File([''], 'test', { type: 'image/png' });
     const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
+    document.body.dataset.suppressfloatingcta = 'true';
 
-    const event = new DragEvent('drop', { dataTransfer });
-    const callback = function cb(mutationsList, observer) {
-      for (const mutation of mutationsList) {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeName === 'SCRIPT') {
-              const script = document.querySelector('head > script[src="https://sdk.cc-embed.adobe.com/v3/CCEverywhere.js"]');
-              expect(script).to.not.be.null;
-              observer.disconnect();
-            }
-          });
-        }
-      }
-    };
-    const observer = new MutationObserver(callback);
-    observer.observe(document.head, { childList: true, subtree: true });
+    dropzoneContainer.dispatchEvent(new DragEvent('drop', { dataTransfer }));
 
-    dropzoneContainer.dispatchEvent(event);
+    expect(document.body.dataset.suppressfloatingcta).to.equal('false');
   });
 });
 
