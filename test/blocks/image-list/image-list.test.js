@@ -9,10 +9,6 @@ await import('../../../express/code/scripts/scripts.js');
 const { default: decorate } = await import('../../../express/code/blocks/image-list/image-list.js');
 
 describe('Image List', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Image List exists', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     const imageList = document.querySelector('.image-list');

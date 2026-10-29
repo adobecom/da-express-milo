@@ -5,7 +5,6 @@ import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-window.isTestEnv = true;
 
 describe('ax-marquee-dynamic-hero', () => {
   let decorate;

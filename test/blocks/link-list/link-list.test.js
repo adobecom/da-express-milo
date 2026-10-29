@@ -4,9 +4,6 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
-// Set test environment flag BEFORE importing scripts.js to prevent loadPage() from running
-window.isTestEnv = true;
-
 const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/link-list/link-list.js'),

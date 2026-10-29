@@ -41,10 +41,6 @@ describe('createToolbar', () => {
     }
   });
 
-  beforeEach(() => {
-    window.isTestEnv = true;
-  });
-
   afterEach(() => {
     window.isTestEnv = false;
     sinon.restore();

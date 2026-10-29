@@ -9,7 +9,6 @@ const [, { default: decorate }] = await Promise.all([import('../../../express/co
 describe('Feature Grid Desktop', () => {
   let markup;
   before(async () => {
-    window.isTestEnv = true;
     markup = await readFile({ path: './mocks/body.html' });
   });
 

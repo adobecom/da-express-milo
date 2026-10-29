@@ -21,7 +21,6 @@ describe('Pricing Footer', () => {
   let clock;
 
   before(() => {
-    window.isTestEnv = true;
     originalResizeObserver = window.ResizeObserver;
     originalGetComputedStyle = window.getComputedStyle.bind(window);
   });

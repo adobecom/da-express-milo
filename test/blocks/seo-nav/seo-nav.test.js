@@ -11,10 +11,6 @@ const { default: decorate, updatePillsByCKG } = await import(
 document.body.innerHTML = await readFile({ path: './mocks/body.html' });
 
 describe('Seo Nav', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Seo Nav exists', () => {
     const seoNav = document.querySelector('.seo-nav');
     decorate(seoNav);

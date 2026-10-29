@@ -3,8 +3,6 @@ import { expect } from '@esm-bundle/chai';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
 
-window.isTestEnv = true;
-
 const imports = await Promise.all([import('../../express/code/scripts/utils.js'), import('../../express/code/scripts/scripts.js')]);
 const { getLibs } = imports[0];
 
@@ -25,7 +23,6 @@ function setMeta(name, content) {
 describe('branchlinks getTrackingAppendedURL', () => {
   let urls;
   before(() => {
-    window.isTestEnv = true;
     window.hlx = { experiment: null };
     setMeta('branch-asset-collection', 'test');
     setMeta('branch-newstuff', 'test');
@@ -62,7 +59,6 @@ describe('branchlinks getTrackingAppendedURL', () => {
 describe('branchlinks trackBranchParameteres', () => {
   let links;
   before(async () => {
-    window.isTestEnv = true;
     window.placeholders = {
       'search-branch-links':
                 'https://adobesparkpost.app.link/c4bWARQhWAb, https://adobesparkpost.app.link/lQEQ4Pi1YHb, https://adobesparkpost.app.link/9tmWXXDAhLb',
