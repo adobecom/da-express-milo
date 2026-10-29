@@ -306,7 +306,13 @@ async function applyNavLinkParamOverrides(navLinks) {
   const params = new URLSearchParams(window.location.search);
   return navLinks.map((link) => {
     const override = params.get(`${link.id}-link`);
-    return override ? { ...link, href: override } : link;
+    if(!override) return link;
+    
+    const safeurl = getSafeUrl(override);
+    if (!safeurl) {
+      return link;
+    }
+    return { ...link, href: safeurl.href };
   });
 }
 
