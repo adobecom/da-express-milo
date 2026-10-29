@@ -1,0 +1,391 @@
+/* Shared with da-dc: use literal values only, no tokens from site-level stylesheets. */
+
+/* ---------- Block ---------- */
+.resume-upload-fork {
+  color: #292929;
+  text-align: start;
+}
+
+.resume-upload-fork-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px 32px 12px;
+}
+
+.resume-upload-fork-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resume-upload-fork .resume-upload-fork-header :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+  color: #000;
+  font-family: 'Adobe Clean Display Black', adobe-clean-display, adobe-clean, 'Adobe Clean', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 24px;
+  letter-spacing: -0.48px;
+}
+
+.resume-upload-fork .resume-upload-fork-header p {
+  margin: 0;
+  color: rgb(0 0 0 / 64%);
+  font-size: 16px;
+  line-height: 20px;
+}
+
+.resume-upload-fork-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.resume-upload-fork-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 0 8px rgb(0 0 0 / 8%), 0 0 4px rgb(0 0 0 / 4%), 0 0 1px rgb(0 0 0 / 8%);
+  cursor: pointer;
+}
+
+.resume-upload-fork-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.resume-upload-fork-card.is-selected::after {
+  border-color: #292929;
+}
+
+.resume-upload-fork-card:focus-visible {
+  outline: 2px solid #4b75ff;
+  outline-offset: 2px;
+}
+
+.resume-upload-fork-card-media {
+  flex: none;
+  aspect-ratio: 276 / 144;
+  min-height: 126px;
+  overflow: hidden;
+  background: #f8f8f8;
+}
+
+.resume-upload-fork-card-media picture,
+.resume-upload-fork-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.resume-upload-fork-card-media img {
+  object-fit: cover;
+}
+
+.resume-upload-fork-card-media .resume-upload-fork-image-mobile {
+  display: none;
+}
+
+.resume-upload-fork-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+}
+
+.resume-upload-fork .resume-upload-fork-card-title {
+  margin: 0;
+  color: #292929;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.resume-upload-fork .resume-upload-fork-card-description {
+  margin: 0;
+  color: #292929;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.resume-upload-fork-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 32px 24px;
+  background: #fff;
+}
+
+.resume-upload-fork .resume-upload-fork-actions .con-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 22px;
+  border: 2px solid #000;
+  border-radius: 20px;
+  background: transparent;
+  color: #000;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.resume-upload-fork .resume-upload-fork-actions .con-button:hover {
+  background: rgb(0 0 0 / 6%);
+}
+
+.resume-upload-fork .resume-upload-fork-actions .con-button.fill {
+  background: #000;
+  color: #fff;
+}
+
+.resume-upload-fork .resume-upload-fork-actions .con-button.fill:hover {
+  border-color: #3f3f3f;
+  background: #3f3f3f;
+}
+
+.resume-upload-fork .resume-upload-fork-actions .con-button:focus-visible {
+  outline: 2px solid #4b75ff;
+  outline-offset: 2px;
+}
+
+/* ---------- Milo modal overrides (scoped to this block's dialog) ---------- */
+.dialog-modal.resume-upload-fork-modal {
+  --drawer-drag-y: 0px;
+
+  display: flex;
+  flex-direction: column;
+  width: min(640px, 100% - 64px);
+  max-width: none;
+  overflow: visible;
+  border-radius: 16px;
+  background: #fff;
+  animation: resume-upload-fork-fade-in 200ms ease-out;
+}
+
+.dialog-modal.resume-upload-fork-modal.is-closing {
+  animation: resume-upload-fork-fade-out 200ms ease-in forwards;
+}
+
+.dialog-modal.resume-upload-fork-modal > .fragment {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: inherit;
+}
+
+.dialog-modal.resume-upload-fork-modal .section {
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+.dialog-modal.resume-upload-fork-modal button.dialog-close {
+  top: -20px;
+  right: -20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: #fff;
+  box-shadow: 0 0 12px rgb(0 0 0 / 16%);
+  z-index: 2;
+}
+
+html[dir="rtl"] .dialog-modal.resume-upload-fork-modal button.dialog-close {
+  right: auto;
+  left: -20px;
+}
+
+.dialog-modal.resume-upload-fork-modal button.dialog-close svg {
+  width: 28px;
+  height: 28px;
+}
+
+.dialog-modal.resume-upload-fork-modal .dialog-close circle {
+  fill: #fff;
+}
+
+.dialog-modal.resume-upload-fork-modal .dialog-close line {
+  stroke: #292929;
+  stroke-width: 1.5;
+}
+
+.dialog-modal.resume-upload-fork-modal button.dialog-close:focus-visible {
+  outline: 2px solid #4b75ff;
+  outline-offset: 2px;
+}
+
+.dialog-modal.resume-upload-fork-modal + .modal-curtain.is-open {
+  background: rgb(0 0 0 / 48%);
+  backdrop-filter: blur(20px);
+  animation: resume-upload-fork-curtain-in 200ms ease-out;
+}
+
+.dialog-modal.resume-upload-fork-modal + .modal-curtain.is-closing {
+  animation: resume-upload-fork-curtain-out 200ms ease-in forwards;
+}
+
+/* ---------- Mobile drawer ---------- */
+@media (width < 600px) {
+  .resume-upload-fork-body {
+    padding: 24px 16px 16px;
+  }
+
+  .resume-upload-fork-cards {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .resume-upload-fork-card {
+    flex-direction: row;
+  }
+
+  .resume-upload-fork-card-media {
+    width: 139px;
+    min-height: 150px;
+    aspect-ratio: auto;
+  }
+
+  .resume-upload-fork-card-media.has-mobile-image .resume-upload-fork-image-desktop {
+    display: none;
+  }
+
+  .resume-upload-fork-card-media .resume-upload-fork-image-mobile {
+    display: block;
+  }
+
+  .resume-upload-fork-card-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 4px;
+    padding: 12px;
+  }
+
+  .resume-upload-fork-actions {
+    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .resume-upload-fork .resume-upload-fork-actions .con-button {
+    flex: 1 1 0;
+  }
+
+  .resume-upload-fork-modal .resume-upload-fork-body::before {
+    content: '';
+    align-self: center;
+    width: 80px;
+    height: 4px;
+    margin-bottom: -12px;
+    border-radius: 8px;
+    background: #d5d5d5;
+  }
+
+  .dialog-modal.resume-upload-fork-modal {
+    top: auto;
+    bottom: 0;
+    width: 100%;
+    max-height: calc(100% - 64px);
+    margin: 0;
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
+    transform: translateY(var(--drawer-drag-y));
+    transition: transform 200ms ease-out;
+    animation: resume-upload-fork-slide-up 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .dialog-modal.resume-upload-fork-modal.is-dragging {
+    transition: none;
+  }
+
+  .dialog-modal.resume-upload-fork-modal.is-closing {
+    animation: resume-upload-fork-slide-down 250ms ease-in forwards;
+  }
+
+  .dialog-modal.resume-upload-fork-modal > .fragment {
+    border-radius: 0;
+  }
+
+  /* Visually hidden, not display:none: Milo's focus loop returns focus to the close button. */
+  .dialog-modal.resume-upload-fork-modal button.dialog-close,
+  html[dir="rtl"] .dialog-modal.resume-upload-fork-modal button.dialog-close {
+    top: 0;
+    right: 0;
+    left: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-modal.resume-upload-fork-modal,
+  .dialog-modal.resume-upload-fork-modal + .modal-curtain.is-open {
+    animation: none;
+    transition: none;
+  }
+}
+
+@keyframes resume-upload-fork-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes resume-upload-fork-fade-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes resume-upload-fork-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes resume-upload-fork-slide-down {
+  from {
+    transform: translateY(var(--drawer-drag-y));
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes resume-upload-fork-curtain-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes resume-upload-fork-curtain-out {
+  to {
+    opacity: 0;
+  }
+}

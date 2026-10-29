@@ -14,7 +14,11 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales });
 });
 
-const { default: decorate } = await import('../../../express/code/blocks/verb-express-hero/verb-express-hero.js');
+const {
+  default: decorate,
+  initResumeFork,
+  RESUME_FORK_MODAL_ID,
+} = await import('../../../express/code/blocks/verb-express-hero/verb-express-hero.js');
 
 const styleSheets = [
   '/express/code/styles/styles.css',
@@ -177,5 +181,67 @@ describe('verb-express-hero', () => {
   it('appends a hidden error state to the block', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block.querySelector('.error.hide')).to.exist;
+  });
+});
+
+describe('verb-express-hero resume fork', () => {
+  let element;
+  let responses;
+  let modalOpens;
+  const onModalOpen = (e) => modalOpens.push(e.detail);
+  const select = (detail) => window.dispatchEvent(new CustomEvent('resume-upload-fork:select', { detail }));
+  const closeModal = (id) => window.dispatchEvent(new CustomEvent('milo:modal:closed', { detail: { id } }));
+
+  beforeEach(() => {
+    element = document.createElement('div');
+    const received = [];
+    responses = received;
+    modalOpens = [];
+    element.addEventListener('unity:resume-fork-response', (e) => received.push(e.detail));
+    window.addEventListener('modal:open', onModalOpen);
+    initResumeFork(element);
+  });
+
+  afterEach(() => {
+    window.removeEventListener('modal:open', onModalOpen);
+  });
+
+  it('opens the fork modal when Unity asks for it', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    expect(modalOpens).to.deep.equal([{ hash: `#${RESUME_FORK_MODAL_ID}` }]);
+  });
+
+  it('forwards continue-fork with the chosen product to Unity', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    select({ action: 'continue-fork', choice: 'refine' });
+    expect(responses).to.deep.equal([{ action: 'continue-fork', choice: 'refine' }]);
+  });
+
+  it('forwards cancel-fork to Unity', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    select({ action: 'cancel-fork' });
+    expect(responses).to.deep.equal([{ action: 'cancel-fork' }]);
+  });
+
+  it('treats closing the fork modal without a choice as cancel-fork', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    closeModal('some-other-modal');
+    expect(responses).to.deep.equal([]);
+    closeModal(RESUME_FORK_MODAL_ID);
+    expect(responses).to.deep.equal([{ action: 'cancel-fork' }]);
+  });
+
+  it('sends only one response per request', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    select({ action: 'continue-fork', choice: 'sharpen' });
+    closeModal(RESUME_FORK_MODAL_ID);
+    select({ action: 'cancel-fork' });
+    expect(responses).to.deep.equal([{ action: 'continue-fork', choice: 'sharpen' }]);
+  });
+
+  it('ignores fork events when Unity has not asked', () => {
+    select({ action: 'continue-fork', choice: 'sharpen' });
+    closeModal(RESUME_FORK_MODAL_ID);
+    expect(responses).to.deep.equal([]);
   });
 });
