@@ -32,7 +32,7 @@ function normalizeModel(model) {
   }
   return {
     ...model,
-    backgroundUrl: safeUrl,
+    backgroundUrl: safeUrl.href,
     font: { ...model.font, family: resolveFontFamily(model.font.family) },
   };
 }

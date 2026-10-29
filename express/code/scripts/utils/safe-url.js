@@ -7,7 +7,7 @@ function getSafeUrl(src) {
   }
 
   if (url.protocol === 'http:' || url.protocol === 'https:') {
-    return url.href;
+    return url;
   }
 
   return null;

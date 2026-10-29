@@ -82,7 +82,12 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
     }
   });
 
-  const media = videoSrc
+  const safeVideoUrl = videoSrc ? getSafeUrl(videoSrc).href : null;
+  if (videoSrc && !safeVideoUrl) {
+    console.warn(`Grid marquee video URL is invalid: ${videoSrc}`);
+  }
+
+  const media = safeVideoUrl
     ? createTag('video', {
       playsinline: '',
       muted: '',
@@ -90,7 +95,7 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
       preload: 'metadata',
       title: titleText,
       poster,
-    }, `<source src="${videoSrc}" type="video/mp4">`)
+    }, createTag('source', { src: safeVideoUrl.href, type: 'video/mp4' }))
     : createTag('img', { src: poster, alt: titleText });
   const videoWrapper = createTag('button', { class: 'video-container' }, media);
   // link video to first anchor
@@ -175,9 +180,11 @@ function getPosterSrc(img) {
   const candidate = match?.srcset.split(',')[0].trim().split(/\s+/)[0];
   if (candidate) return new URL(candidate, window.location.href).href;
   if (!img.src) return '';
-  const url = new URL(img.src, window.location.href);
-  if (url.searchParams.get('format') === 'png') url.searchParams.set('format', 'webply');
-  return url.href;
+
+  const safeUrl = getSafeUrl(img.src);
+  if (!safeUrl) return '';
+  if (safeUrl.searchParams.get('format') === 'png') safeUrl.searchParams.set('format', 'webply');
+  return safeUrl.href;
 }
 
 function toCard(drawer) {
