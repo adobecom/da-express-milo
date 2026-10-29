@@ -84,9 +84,6 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
   });
 
   const safeVideoUrl = videoSrc ? getSafeUrl(videoSrc) : null;
-  if (videoSrc && !safeVideoUrl) {
-    return null; // Invalid video URL, do not decorate drawer
-  }
 
   const media = safeVideoUrl
     ? createTag('video', {
