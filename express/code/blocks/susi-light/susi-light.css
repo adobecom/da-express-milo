@@ -300,7 +300,7 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: var(--spacing-500) var(--spacing-500) 0;
+    padding: var(--spacing-500);
     overflow-y: auto;
   }
 
@@ -312,6 +312,7 @@
 
   .susi-light.color.has-media .title {
     font-size: var(--heading-font-size-m);
+    font-weight: 800;
     line-height: var(--heading-line-height);
     margin: var(--spacing-100) 0 var(--spacing-300);
   }
