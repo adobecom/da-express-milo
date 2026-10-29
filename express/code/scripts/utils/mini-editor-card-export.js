@@ -5,7 +5,7 @@ import {
   MINI_EDITOR_EXPORT_WIDTH,
 } from './mini-editor-card-renderer.js';
 import measureQuoteExportWidth from './mini-editor-quote-width.js';
-import { getSafeUrl } from './safe-url.js';
+import getSafeUrl from './safe-url.js';
 
 const WORKER_TIMEOUT_MS = 10000;
 const DEFAULT_DOWNLOAD_FILENAME = 'download.png';
@@ -19,7 +19,6 @@ function resolveFontFamily(family) {
     bodyFont || fallback || 'sans-serif'
   ));
 }
-
 
 function normalizeModel(model) {
   // Render from the full-res JPEG when available (download/copy is high-res); fall back to the

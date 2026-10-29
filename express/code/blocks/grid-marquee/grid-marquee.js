@@ -8,6 +8,7 @@ import {
   formatDynamicCartLink,
   getMetadata,
 } from '../../scripts/utils.js';
+import getSafeUrl from '../../scripts/utils/safe-url.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
@@ -82,9 +83,9 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
     }
   });
 
-  const safeVideoUrl = videoSrc ? getSafeUrl(videoSrc).href : null;
+  const safeVideoUrl = videoSrc ? getSafeUrl(videoSrc) : null;
   if (videoSrc && !safeVideoUrl) {
-    console.warn(`Grid marquee video URL is invalid: ${videoSrc}`);
+    return null; // Invalid video URL, do not decorate drawer
   }
 
   const media = safeVideoUrl
