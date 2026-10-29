@@ -1,6 +1,6 @@
 import { createColorPaletteParamApi } from './utilities.js';
 
-const KEY = '__susiColorRedirect';
+const KEY = '__susiColorRedirect'; // MWPW-211102: used to pass the redirect URL from the color theme redirect page to the sign-in page and back
 
 export function setSusiColorRedirect(url) {
   window[KEY] = url;

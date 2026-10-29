@@ -20,7 +20,7 @@ const PROD_CONFIG = {
     kuler: {
       baseUrl: 'https://search.adobe.io/api/v2',
       exploreBaseUrl: 'https://themesb3.adobe.io',
-      apiKey: 'KulerBackendClientId',
+      apiKey: 'KulerBackendClientId', // MWPW-211091: this is a public key that the Kuler backend accepts for unauthenticated requests. It is not a secret.
       middleware: ['error', 'logging', { name: 'auth', topics: ['like.*'] }],
       endpoints: {
         search: '/search',
@@ -34,7 +34,7 @@ const PROD_CONFIG = {
     },
     stock: {
       baseUrl: 'https://stock.adobe.io/Rest/Media/1',
-      apiKey: 'ColorWeb',
+      apiKey: 'ColorWeb', // MWPW-211092: this is a public key that the Stock backend accepts for unauthenticated requests. It is not a secret.
       endpoints: {
         search: '/Search/Files',
         redirect: 'https://stock.adobe.com',
@@ -43,7 +43,7 @@ const PROD_CONFIG = {
     },
     behance: {
       baseUrl: 'https://cc-api-behance.adobe.io/v2',
-      apiKey: 'ColorWeb',
+      apiKey: 'ColorWeb', // MWPW-211094: this is a public key that the Behance backend accepts for unauthenticated requests. It is not a secret.
       endpoints: {
         projects: '/projects',
       },
@@ -51,7 +51,7 @@ const PROD_CONFIG = {
     cclibrary: {
       baseUrl: 'https://cc-api-assets.adobe.io',
       melvilleBasePath: 'https://libraries.adobe.io/api/v1',
-      apiKey: 'ColorWeb',
+      apiKey: 'ColorWeb', // MWPW-211095: this is a public key that the CC Library backend accepts for unauthenticated requests. It is not a secret.
       assetAclDirectoryKey: 'http://ns.adobe.com/adobecloud/rel/directory',
       middleware: ['error', 'logging', { name: 'auth', topics: ['cclibrary.theme.*', 'cclibrary.library.create', 'cclibrary.library.elements'] }],
       endpoints: {
@@ -66,8 +66,8 @@ const PROD_CONFIG = {
     },
     universal: {
       baseUrl: 'https://adobesearch.adobe.io/universal-search/v2',
-      apiKey: 'ColorWeb',
-      anonymousApiKey: 'AdobeExpressWeb',
+      apiKey: 'ColorWeb', // MWPW-211093: this is a public key that the Universal Search backend accepts for unauthenticated requests. It is not a secret.
+      anonymousApiKey: 'AdobeExpressWeb', // MWPW-211090: this is a public key that the Universal Search backend accepts for unauthenticated requests. It is not a secret.
       endpoints: {
         similarity: '/similarity-search',
         anonymousImageSearch: 'https://search.adobe.io/imageSearch',

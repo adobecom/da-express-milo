@@ -2,7 +2,7 @@ import { normalizeTheme, buildPaletteEditUrl } from '../color-shared/utils/utili
 
 const COLOR_THEME_PATTERN = /color-theme-(\d+)\/?$/;
 const API_BASE = 'https://themesb3.adobe.io/api/v2/themes';
-const API_KEY = 'KulerBackendClientId';
+const API_KEY = 'KulerBackendClientId'; // MWPW-211103: This is a public key that the Kuler backend accepts for unauthenticated requests. It is not a secret.
 const COLOR_WHEEL_PATH = '/create/color-wheel';
 
 /**

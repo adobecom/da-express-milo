@@ -57,15 +57,15 @@ const INVALID_UPLOAD_DISPLAY_MS = 5000;
 const URL_SHORTENER_CONFIGS = {
   prod: {
     serviceUrl: 'https://go.adobe.io',
-    apiKey: 'quickactions_hz_webapp',
+    apiKey: 'quickactions_hz_webapp',// MWPW-211096: prod service is used for prod builds
   },
   stage: {
     serviceUrl: 'https://go-stage.adobe.io',
-    apiKey: 'hz-dynamic-url-service',
+    apiKey: 'hz-dynamic-url-service', // MWPW-211097: stage service is used for both stage and prod builds, since prod service is not yet available
   },
   local: {
     serviceUrl: 'https://go-stage.adobe.io',
-    apiKey: 'hz-dynamic-url-service',
+    apiKey: 'hz-dynamic-url-service', // MWPW-211098: local development uses the stage service
   },
 };
 
