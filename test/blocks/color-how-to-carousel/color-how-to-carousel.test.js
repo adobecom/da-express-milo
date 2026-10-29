@@ -70,7 +70,7 @@ describe('Color How To Carousel', () => {
   });
 
   describe('specs-card variant (opt-in via pagetype=color metadata)', () => {
-    async function prepBlock(mock = './mocks/specs-basic.html') {
+    async function prepBlock(mock = './mocks/specs-basic.html', colorName = '') {
       document.body.innerHTML = await readFile({ path: mock });
       setColorPageType();
       const block = document.querySelector('.color-how-to-carousel');
