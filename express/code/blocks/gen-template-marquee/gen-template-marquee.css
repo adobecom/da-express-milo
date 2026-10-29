@@ -1,0 +1,494 @@
+main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
+  max-width: none;
+  padding: 0;
+}
+
+.gen-template-marquee {
+  --gen-template-padding-top: var(--spacing-500);
+  --gen-template-card-width: 250px;
+  --gen-template-column-gap: var(--spacing-600);
+  --gen-template-card-gap: 52px;
+  --gen-template-gallery-bottom-padding: 40px;
+  --gen-template-heading-line-height: 32px;
+  --gen-template-body-subtle: rgb(0 0 0 / 64%);
+  position: relative;
+  box-sizing: border-box;
+  overflow: clip;
+  padding: var(--gen-template-padding-top) var(--spacing-300) var(--gen-template-gallery-bottom-padding);
+  background: var(--color-white);
+  color: var(--Alias-content-typography-Heading);
+}
+
+.gen-template-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-350);
+  width: 100%;
+  max-width: 666px;
+  margin: 0 auto;
+}
+
+.gen-template-text,
+.gen-template-logo-heading,
+.gen-template-prompt,
+.gen-template-prompt-form,
+.gen-template-prompt-field,
+.gen-template-suggestions {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.gen-template-text,
+.gen-template-logo-heading {
+  align-items: center;
+  gap: var(--spacing-100);
+  text-align: center;
+}
+
+.gen-template-marquee .gen-template-logo.icon {
+  display: block;
+  width: 124px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.gen-template-marquee .gen-template-logo-heading :is(h1, h2, h3, h4, h5, h6) {
+  margin: 0; 
+  font-size: var(--heading-font-size-l);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: var(--gen-template-heading-line-height);
+  letter-spacing: -1px;
+  text-wrap: balance;
+}
+
+main .section .gen-template-text > p {
+  width: 100%;
+  margin: 0;
+  color: var(--gen-template-body-subtle);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  line-height: var(--spacing-350);
+  text-wrap: pretty;
+}
+
+.gen-template-prompt {
+  align-items: center;
+  gap: var(--spacing-300);
+}
+
+.gen-template-prompt-form {
+  --gen-template-prompt-shadow: 0 0 2px rgb(0 0 0 / 12%), 0 2px 6px rgb(0 0 0 / 4%), 0 4px 12px rgb(0 0 0 / 8%);
+  box-sizing: border-box;
+  padding: var(--spacing-100);
+  border: 1px solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-200);
+  background: var(--color-white);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Figma states: hover and active (focused or has text) lift the outer box.
+   Inner field: blue focus ring while empty, 2px #131313 active stroke once text is entered. */
+.gen-template-prompt-form:hover,
+.gen-template-prompt-form:has(.gen-template-prompt-input:is(:focus, :not(:placeholder-shown))) {
+  box-shadow: var(--gen-template-prompt-shadow);
+}
+
+.gen-template-prompt-field:has(.gen-template-prompt-input:focus-visible:placeholder-shown) {
+  outline: 2px solid #131313;
+  outline-offset: 0;
+}
+
+.gen-template-prompt-field:has(.gen-template-prompt-input:not(:placeholder-shown)) {
+  outline: 2px solid #131313;
+  outline-offset: 0;
+}
+
+.gen-template-prompt-field {
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200);
+  border-radius: var(--spacing-200);
+  background: var(--color-gray-100);
+}
+
+.gen-template-prompt-label {
+  color: var(--gen-template-body-subtle);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  font-weight: var(--subheading-font-weight);
+  line-height: var(--spacing-325);
+}
+
+/* Grows with its content (see resizePrompt) up to 3 lines, then scrolls. */
+.gen-template-prompt-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  max-height: calc(3 * var(--spacing-325));
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--Alias-content-neutral-default);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  line-height: var(--spacing-325);
+}
+
+.gen-template-prompt-input::placeholder {
+  color: var(--gen-template-body-subtle);
+  opacity: 1;
+}
+
+.gen-template-prompt-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-80);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 90px;
+  min-height: 38px;
+  margin: 0;
+  padding: 5px 1.2em var(--spacing-80);
+  border: 2px solid var(--color-info-primary);
+  border-radius: 18px;
+  background:  #292929;
+  color: var(--color-white);
+  cursor: pointer;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  font-weight: 600;
+  line-height: var(--body-line-height);
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.gen-template-prompt-submit:hover {
+  border-color: var(--color-info-primary-hover);
+  background: #131313
+}
+
+.gen-template-prompt-submit:active {
+  border-color: var(--color-info-primary-down);
+  background: #131313 
+}
+
+.gen-template-prompt-submit:focus-visible {
+  border-color: var(--color-info-primary-hover);
+  outline: none;
+  background: #131313;
+  box-shadow: 0 0 0 2px var(--color-white),
+    0 0 0 4px var(--color-info-accent-hover);
+}
+
+.gen-template-prompt-submit:disabled {
+  border-color: var(--color-gray-200);
+  background: var(--color-gray-200);
+  color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
+.gen-template-prompt-submit .icon {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  filter: brightness(0) invert(1);
+}
+
+.gen-template-suggestions {
+  align-items: center;
+  gap: var(--spacing-200);
+}
+
+.gen-template-suggestion:hover {
+  border-radius: var(--spacing-80);
+  background: var(--color-gray-300-variant);
+}
+
+main .section .gen-template-suggestions-label {
+  margin: 0;
+  color: var(--gen-template-body-subtle);
+  font-size: var(--body-font-size-s);
+  line-height: var(--spacing-325);
+  text-align: center;
+}
+
+/* Last chip ends flush with the prompt box; the fade hides once scrolled to the end. */
+.gen-template-suggestion-list {
+  display: flex;
+  gap: var(--spacing-200);
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+}
+
+.gen-template-suggestion-list::after {
+  position: absolute;
+  inset-inline-end: 0;
+  width: var(--spacing-600);
+  height: 44px;
+  background: linear-gradient(to left, var(--color-white) 26%, transparent);
+  content: '';
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.gen-template-suggestion-list.is-scroll-end::after {
+  opacity: 0;
+}
+
+[dir="rtl"] .gen-template-suggestion-list::after {
+  background: linear-gradient(to right, var(--color-white) 26%, transparent);
+}
+
+
+.gen-template-suggestion {
+  flex: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--spacing-200) var(--spacing-300);
+  border: 1px solid var(--color-gray-300-variant);
+  border-radius: var(--corner-radius-80);
+  /* background: var(--color-gray-100); */
+  color: var(--Alias-content-typography-Heading);
+  cursor: pointer;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  font-weight: var(--subheading-font-weight);
+  line-height: var(--spacing-325);
+  white-space: nowrap; 
+  scroll-snap-align: start;
+  background: #F8F8F8;
+}
+
+.gen-template-suggestion:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: -2px;
+}
+
+.gen-template-gallery {
+  display: flex;
+  gap: var(--gen-template-column-gap);
+  width: max-content;
+  margin-top: 40px;
+  /* Wider than the viewport by design: center on the middle column. */
+  margin-left: 50%;
+  translate: -50% 0;
+}
+
+.gen-template-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gen-template-card-gap);
+  width: var(--gen-template-card-width);
+}
+
+.gen-template-column:nth-child(3) {
+  padding-top: 45px;
+}
+
+.gen-template-card {
+  position: relative;
+  flex: none;
+  width: 100%;
+  aspect-ratio: 250 / 338;
+  overflow: hidden;
+  border-radius: var(--Corner-radius-corner-radius-200);
+}
+
+.gen-template-card-square {
+  aspect-ratio: 1;
+}
+
+.gen-template-card picture,
+.gen-template-card img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.gen-template-card img {
+  object-fit: cover;
+}
+
+/* hardcoded-templates: the image's own proportions set the card height. */
+.gen-template-card-authored {
+  aspect-ratio: auto;
+}
+
+.gen-template-card-authored picture,
+.gen-template-card-authored img {
+  position: static;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .gen-template-marquee {
+      view-timeline: --gen-template-marquee block;
+    }
+
+    /* Content pins below the nav and fades/lifts once the block's top reaches the viewport top.
+       `exit-crossing` rather than `contain`: when the block is shorter than the viewport
+       (e.g. zoomed far out) the `contain` range has already passed at scroll 0, which left
+       the content faded out on load. */
+    .gen-template-content {
+      --gen-template-content-lift: 64px;
+      position: sticky;
+      top: calc(var(--feds-height-nav) + var(--gen-template-padding-top));
+      z-index: 0;
+      animation: gen-template-content-fade linear both;
+      animation-timeline: --gen-template-marquee;
+      animation-range: exit-crossing 0px exit-crossing 360px;
+    }
+
+    /* Gallery rides over the pinned content; columns tighten to 24px. */
+    .gen-template-gallery {
+      position: relative;
+      z-index: 1;
+      animation: gen-template-gallery-gap-shrink ease-out both;
+      animation-timeline: --gen-template-marquee;
+      animation-range: contain 0% contain 60%;
+    }
+
+    .gen-template-column:nth-child(odd) {
+      animation: gen-template-column-rise linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    .gen-template-column:nth-child(even) {
+      animation: gen-template-column-fall linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    /* Mobile: side columns fan outward while the block scrolls away, fully off-screen by exit. */
+    @media (max-width: 599px) {
+      .gen-template-column:is(:nth-child(1), :nth-child(2), :nth-child(4), :nth-child(5)) {
+        animation: gen-template-column-spread linear both;
+        animation-timeline: --gen-template-marquee;
+        animation-range: contain 0% exit 100%;
+      }
+
+      .gen-template-column:nth-child(1) { --gen-template-spread: -75vw; }
+      .gen-template-column:nth-child(2) { --gen-template-spread: -50vw; }
+      .gen-template-column:nth-child(4) { --gen-template-spread: 50vw; }
+      .gen-template-column:nth-child(5) { --gen-template-spread: 75vw; }
+    }
+  }
+}
+
+@keyframes gen-template-column-spread {
+  to {
+    translate: var(--gen-template-spread) 0;
+  }
+}
+
+@keyframes gen-template-content-fade {
+  to {
+    visibility: hidden;
+    opacity: 0;
+    translate: 0 calc(-1 * var(--gen-template-content-lift));
+  }
+}
+
+@keyframes gen-template-gallery-gap-shrink {
+  to {
+    gap: 24px;
+  }
+}
+
+@media (min-width: 600px) {
+  .gen-template-marquee {
+    --gen-template-padding-top: var(--spacing-700);
+    --gen-template-card-width: 291px;
+    --gen-template-column-gap: 69px;
+    --gen-template-card-gap: 100px;
+    --gen-template-gallery-bottom-padding: 64px;
+    padding-inline: var(--spacing-500);
+  }
+
+  .gen-template-gallery {
+    margin-top: 60px;
+  }
+
+  .gen-template-prompt-form {
+    padding: var(--spacing-200);
+  }
+
+  .gen-template-prompt-field {
+    padding: var(--spacing-300);
+  }
+
+  .gen-template-prompt-label {
+    flex: 0 0 100%;
+  }
+
+  .gen-template-prompt-input {
+    min-height: var(--spacing-325);
+  }
+
+  .gen-template-prompt-submit {
+    align-self: end;
+    width: auto;
+  }
+
+  .gen-template-column:nth-child(1),
+  .gen-template-column:nth-child(5) {
+    margin-top: -176px;
+  }
+
+  .gen-template-column:nth-child(3) {
+    padding-top: 105px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .gen-template-marquee {
+    /* Exact desktop spacing from Figma frame 363:71100. */
+    --gen-template-padding-top: var(--spacing-800);
+    --gen-template-heading-line-height: 56px;
+    --gen-template-gallery-bottom-padding: 80px;
+  }
+
+  .gen-template-marquee .gen-template-logo.icon {
+    width: 181px;
+    height: var(--spacing-400);
+  }
+
+  .gen-template-marquee .gen-template-logo-heading :is(h1, h2, h3, h4, h5, h6) {
+    font-size: 56px;
+    line-height: var(--gen-template-heading-line-height);
+    letter-spacing: -1.68px;
+  }
+  .gen-template-suggestion-list {
+    justify-content: center;
+    overflow: visible;
+  }
+
+  .gen-template-suggestion-list::after {
+    content: none;
+  }
+}
+
+@media (min-width: 1680px) {
+  .gen-template-marquee {
+    /* Exact widescreen spacing from Figma frame 363:70836. */
+    --gen-template-card-width: 308px;
+  }
+}
