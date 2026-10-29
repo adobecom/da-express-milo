@@ -1,5 +1,4 @@
-const SAFE_INLINE_IMAGE_DATA_URL =
-  /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/i;
+const SAFE_INLINE_IMAGE_DATA_URL =  /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/i;
 
 function getSafeUrl(src, { allowInlineImageDataUrl = false } = {}) {
   let url;
