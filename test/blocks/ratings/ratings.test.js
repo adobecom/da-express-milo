@@ -20,6 +20,13 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 });
 
 const { default: decorate } = await import('../../../express/code/blocks/ratings/ratings.js');
+const RATING_STORAGE_KEYS = [
+  'ccxActionRatings',
+  'ccxActionRatingsFeedbacknalaTestRatings',
+];
+const clearRatingStorage = () => {
+  RATING_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+};
 
 // Poll until the submit button appears (block finishes async decoration)
 async function waitForSlider(block, timeout = 8000) {
@@ -47,7 +54,7 @@ describe('Ratings Block - syncSubmitDisabledState (WCAG 2.4.7)', () => {
   beforeEach(async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     block = document.querySelector('.ratings');
-    localStorage.clear();
+    clearRatingStorage();
   });
 
   afterEach(() => {
@@ -56,6 +63,7 @@ describe('Ratings Block - syncSubmitDisabledState (WCAG 2.4.7)', () => {
       clearInterval(window.ratingSubmitCountdown);
       window.ratingSubmitCountdown = null;
     }
+    clearRatingStorage();
   });
 
   it('renders the slider form after decoration', async () => {
@@ -201,7 +209,7 @@ describe('Ratings Block - slider interactions', () => {
   beforeEach(async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     block = document.querySelector('.ratings');
-    localStorage.clear();
+    clearRatingStorage();
   });
 
   afterEach(() => {
@@ -210,6 +218,7 @@ describe('Ratings Block - slider interactions', () => {
       clearInterval(window.ratingSubmitCountdown);
       window.ratingSubmitCountdown = null;
     }
+    clearRatingStorage();
   });
 
   it('updateSliderValue: change event snaps slider and adds rated + star class to block', async () => {
