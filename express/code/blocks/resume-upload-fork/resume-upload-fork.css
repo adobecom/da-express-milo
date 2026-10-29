@@ -73,8 +73,7 @@
 
 .resume-upload-fork-card-media {
   flex: none;
-  aspect-ratio: 276 / 144;
-  min-height: 126px;
+  height: 144px;
   overflow: hidden;
   background: #f8f8f8;
 }
@@ -246,10 +245,41 @@ html[dir="rtl"] .dialog-modal.resume-upload-fork-modal button.dialog-close {
   animation: resume-upload-fork-curtain-out 200ms ease-in forwards;
 }
 
+/* ---------- Tablet modal ---------- */
+@media (600px <= width < 1200px) {
+  .resume-upload-fork-cards {
+    gap: 16px;
+  }
+
+  .resume-upload-fork-card-media {
+    height: 126px;
+  }
+
+  .dialog-modal.resume-upload-fork-modal {
+    width: min(536px, 100% - 64px);
+  }
+
+  .dialog-modal.resume-upload-fork-modal button.dialog-close {
+    top: -13px;
+    right: -13px;
+  }
+
+  html[dir="rtl"] .dialog-modal.resume-upload-fork-modal button.dialog-close {
+    right: auto;
+    left: -13px;
+  }
+}
+
 /* ---------- Mobile drawer ---------- */
 @media (width < 600px) {
   .resume-upload-fork-body {
-    padding: 24px 16px 16px;
+    position: relative;
+    gap: 16px;
+    padding: 24px 16px 0;
+  }
+
+  .resume-upload-fork-header {
+    gap: 8px;
   }
 
   .resume-upload-fork-cards {
@@ -263,8 +293,8 @@ html[dir="rtl"] .dialog-modal.resume-upload-fork-modal button.dialog-close {
 
   .resume-upload-fork-card-media {
     width: 139px;
+    height: auto;
     min-height: 150px;
-    aspect-ratio: auto;
   }
 
   .resume-upload-fork-card-media.has-mobile-image .resume-upload-fork-image-desktop {
@@ -283,7 +313,7 @@ html[dir="rtl"] .dialog-modal.resume-upload-fork-modal button.dialog-close {
   }
 
   .resume-upload-fork-actions {
-    padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
   }
 
   .resume-upload-fork .resume-upload-fork-actions .con-button {
@@ -292,10 +322,11 @@ html[dir="rtl"] .dialog-modal.resume-upload-fork-modal button.dialog-close {
 
   .resume-upload-fork-modal .resume-upload-fork-body::before {
     content: '';
-    align-self: center;
+    position: absolute;
+    top: 8px;
+    left: calc(50% - 40px);
     width: 80px;
     height: 4px;
-    margin-bottom: -12px;
     border-radius: 8px;
     background: #d5d5d5;
   }
