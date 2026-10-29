@@ -137,7 +137,6 @@ function filterBlogPosts(config, index) {
   return result;
 }
 
-// this is similar function as in this PR, this can be a utility function
 function getSafeHrefFromText(text) {
   const trimmed = text && text.trim();
   if (!trimmed) {
@@ -156,7 +155,6 @@ function getSafeHrefFromText(text) {
   return null;
 }
 
-// this can be a utility function in the future if we need to use it in other places
 function normalizeConfigUrls(config) {
   const normalized = { ...config };
   if (normalized.featured) {
