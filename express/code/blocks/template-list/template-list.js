@@ -1877,7 +1877,7 @@ async function fetchBlockFragDeprecated(url, blockName) {
   return section;
 }
 
-// replace all instances of a token in a string with a value, or empty string if value is null or undefined
+// replace all instances of a token in a string with a value, or empty string
 const replaceToken = (html, token, value) => (
   html.replaceAll(token, () => String(value ?? ''))
 );
@@ -1937,7 +1937,7 @@ async function replaceRRTemplateList(block, props) {
 
     html = replaceToken(html, 'default-create-link-text', createText);
 
-    block.innerHTML = sanitizeAuthorHtml(html);  
+    block.innerHTML = sanitizeAuthorHtml(html);
   } else {
     block.remove();
   }
