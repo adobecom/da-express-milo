@@ -19,6 +19,7 @@ import buildCarousel from '../../scripts/widgets/carousel.js';
 import fetchAllTemplatesMetadata from '../../scripts/utils/all-templates-metadata.js';
 import { memoize } from '../../scripts/utils/hofs.js';
 import getBreadcrumbs from './breadcrumbs.js';
+import { sanitizeAuthorHtml } from '../../scripts/utils/content-replace.js';
 
 let createTag; let getConfig;
 let getMetadata; let decorateSections;
@@ -236,6 +237,13 @@ async function processResponse(props) {
   return null;
 }
 
+// copy children from source to target, preserving the original nodes in the source
+function copyChildren(source, target) {
+  target.replaceChildren(
+    ...Array.from(source.childNodes, (node) => node.cloneNode(true)),
+  );
+}
+
 async function fetchBlueprint(pathname) {
   if (window.spark.blueprint) {
     return (window.spark.blueprint);
@@ -246,7 +254,7 @@ async function fetchBlueprint(pathname) {
   const resp = await fetch(`${bpPath}.plain.html`);
   const body = await resp.text();
   const main = createTag('main');
-  main.innerHTML = body;
+  main.innerHTML = sanitizeAuthorHtml(body);
   await decorateSections(main);
 
   window.spark.blueprint = main;
@@ -1613,11 +1621,11 @@ export async function decorateTemplateList(block, props) {
 
     const bpBlocks = blueprint.querySelectorAll('.template-list');
     if (bpBlocks[i] && bpBlocks[i].className === block.className) {
-      block.innerHTML = bpBlocks[i].innerHTML;
+      copyChildren(bpBlocks[i], block);
     } else if (bpBlocks.length > 1 && bpBlocks[i].className !== block.className) {
       for (let x = 0; x < bpBlocks.length; x += 1) {
         if (bpBlocks[x].className === block.className) {
-          block.innerHTML = bpBlocks[x].innerHTML;
+          copyChildren(bpBlocks[x], block);
           break;
         }
       }
@@ -1869,6 +1877,11 @@ async function fetchBlockFragDeprecated(url, blockName) {
   return section;
 }
 
+// replace all instances of a token in a string with a value, or empty string
+const replaceToken = (html, token, value) => (
+  html.replaceAll(token, () => String(value ?? ''))
+);
+
 async function replaceRRTemplateList(block, props) {
   const relevantRowsData = await fetchRelevantRows(window.location.pathname);
   props.limit = parseInt(await replaceKey('relevant-rows-templates-limit', getConfig()), 10) || 10;
@@ -1904,20 +1917,27 @@ async function replaceRRTemplateList(block, props) {
       }
     }
 
-    block.innerHTML = block.innerHTML.replaceAll('default-title', relevantRowsData.shortTitle || '')
-      .replaceAll('default-tasks', relevantRowsData.templateTasks || '')
-      .replaceAll('default-topics', relevantRowsData.templateTopics || '')
-      .replaceAll('default-locale', relevantRowsData.templateLocale || 'en')
-      .replaceAll('default-premium', relevantRowsData.templatePremium || '')
-      .replaceAll('default-animated', relevantRowsData.templateAnimated || '')
-      .replaceAll('https://www.adobe.com/express/templates/default-create-link', relevantRowsData.createLink || '/')
-      .replaceAll('default-format', relevantRowsData.placeholderFormat || '');
+    let html = block.innerHTML;
+    html = replaceToken(html, 'default-title', relevantRowsData.shortTitle);
+    html = replaceToken(html, 'default-tasks', relevantRowsData.templateTasks);
+    html = replaceToken(html, 'default-topics', relevantRowsData.templateTopics);
+    html = replaceToken(html, 'default-locale', relevantRowsData.templateLocale || 'en');
+    html = replaceToken(html, 'default-premium', relevantRowsData.templatePremium);
+    html = replaceToken(html, 'default-animated', relevantRowsData.templateAnimated);
+    html = replaceToken(
+      html,
+      'https://www.adobe.com/express/templates/default-create-link',
+      relevantRowsData.createLink || '/',
+    );
+    html = replaceToken(html, 'default-format', relevantRowsData.placeholderFormat || '');
 
-    if (relevantRowsData.templateTasks === '') {
-      block.innerHTML = block.innerHTML.replaceAll('default-create-link-text', await replaceKey('start-from-scratch', getConfig()) || '');
-    } else {
-      block.innerHTML = block.innerHTML.replaceAll('default-create-link-text', relevantRowsData.createText || '');
-    }
+    const createText = relevantRowsData.templateTasks === ''
+      ? await replaceKey('start-from-scratch', getConfig()) || ''
+      : relevantRowsData.createText || '';
+
+    html = replaceToken(html, 'default-create-link-text', createText);
+
+    block.innerHTML = sanitizeAuthorHtml(html);
   } else {
     block.remove();
   }
