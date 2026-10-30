@@ -195,6 +195,10 @@ async function replaceDefaultPlaceholders(block, components) {
   }
 }
 
+export function sanitizeAuthorHtml(input) {
+  return HtmlSanitizer.SanitizeHtml(String(input ?? ''));
+}
+
 async function getReplacementsFromSearch() {
   // FIXME: tasks and tasksx split to be removed after mobile GA
   // eslint-disable-next-line max-len
