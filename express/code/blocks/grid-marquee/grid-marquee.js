@@ -450,34 +450,34 @@ export default async function init(el) {
       const logo = el.querySelector(':scope > .foreground > .express-logo');
       const fresh = makeBrandingLogo();
       if (logo && logo.getAttribute('src') !== fresh.getAttribute('src')) logo.replaceWith(fresh);
-      // Milo's merch block swaps OST links for a fresh checkout-link element (merch.js
-      // el.replaceWith). On the normal path that happens before this block decorates; here it
-      // happens after, so decorate the replacement and reveal the row once nothing is pending.
-      const ctas = el.querySelector(':scope > .foreground > .headline .ctas.merch-pending');
-      if (ctas) {
-        const heading = el.querySelector('.headline h1, .headline h2, .headline h3');
-        const settle = () => {
-          const links = [...ctas.querySelectorAll(':scope > a')];
-          if (links.some((a) => a.href.includes('/tools/ost?'))) return false;
-          links.forEach((a) => {
-            a.classList.add('button');
-            if (!a.getAttribute('aria-label') && heading) {
-              a.setAttribute('aria-label', `${a.textContent.trim()} ${heading.textContent.trim()}`);
-            }
-          });
-          links[0]?.classList.add('primaryCTA');
+    }
+    // Milo's merch block swaps OST links for a fresh checkout-link element (merch.js
+    // el.replaceWith). That normally happens before this block decorates, but after an early
+    // (hero-fast) render, or if merch fails, the row is still pending: decorate the replacement
+    // and reveal the row once nothing is pending, and never leave it hidden.
+    const ctas = el.querySelector(':scope > .foreground > .headline .ctas.merch-pending');
+    if (ctas) {
+      const heading = el.querySelector('.headline h1, .headline h2, .headline h3');
+      const settle = () => {
+        const links = [...ctas.querySelectorAll(':scope > a')];
+        if (links.some((a) => a.href.includes('/tools/ost?'))) return false;
+        links.forEach((a) => {
+          a.classList.add('button');
+          if (!a.getAttribute('aria-label') && heading) {
+            a.setAttribute('aria-label', `${a.textContent.trim()} ${heading.textContent.trim()}`);
+          }
+        });
+        links[0]?.classList.add('primaryCTA');
+        ctas.classList.remove('merch-pending');
+        return true;
+      };
+      if (!settle()) {
+        const observer = new MutationObserver(() => settle() && observer.disconnect());
+        observer.observe(ctas, { childList: true });
+        setTimeout(() => {
+          observer.disconnect();
           ctas.classList.remove('merch-pending');
-          return true;
-        };
-        if (!settle()) {
-          const observer = new MutationObserver(() => settle() && observer.disconnect());
-          observer.observe(ctas, { childList: true });
-          // Never leave the CTAs hidden if commerce fails to load.
-          setTimeout(() => {
-            observer.disconnect();
-            ctas.classList.remove('merch-pending');
-          }, 10000);
-        }
+        }, 10000);
       }
     }
     const ratingsPlaceholder = el.querySelector(':scope > .foreground > .ratings');

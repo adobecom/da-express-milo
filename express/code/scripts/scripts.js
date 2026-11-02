@@ -640,9 +640,13 @@ function loadDeferredMerch(loadBlock) {
       delete a.dataset.merchQueued;
       // Same shape decorateAutoBlock gives it: Milo derives the block name from classList[0].
       a.className = 'merch link-block';
-      await loadBlock(a);
-      const cta = parentNode.childNodes[index];
-      if (cta !== a && heroClasses.length && cta?.classList) cta.classList.add(...heroClasses);
+      try {
+        await loadBlock(a);
+      } finally {
+        // On failure merch leaves the link in place: give it back its hero styling.
+        const cta = parentNode.childNodes[index];
+        if (heroClasses.length && cta?.classList) cta.classList.add(...heroClasses);
+      }
     });
   });
 }
