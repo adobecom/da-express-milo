@@ -426,6 +426,10 @@
     border-radius: var(--s2a-border-radius-md);
   }
 
+  .image-reveal-stage {
+    max-height: 485px; /* Figma Desktop (L) slider height — caps the 2.09 aspect at wide viewports */
+  }
+
   .image-reveal-tabs {
     display: none; /* both groups are stacked and always visible at ≥1200px */
   }
