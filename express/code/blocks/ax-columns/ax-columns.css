@@ -1986,9 +1986,12 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   }
 
   .section .ax-columns>div {
+    gap: var(--spacing-700);
+  }
+
+  .section .ax-columns:not(.v2, .color)>div {
     padding-top: 0;
     padding-bottom: 0;
-    gap: var(--spacing-700);
   }
 
   .section.ax-max-entitled .ax-columns>div {
