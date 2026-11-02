@@ -14,9 +14,8 @@ const { expect } = require('@playwright/test');
 
 const AUTH_FILE = path.join(__dirname, '..', '.auth', 'user.json');
 const EMPTY_STORAGE_STATE = { cookies: [], origins: [] };
-// Neutral Nala page with the classic gnav (button.feds-signIn) and no
-// signed-in-specific block behaviour.
-const LOGIN_START_PATH = '/drafts/nala/blocks/ax-panels/ax-panels';
+// Live Express page with the C2 navigation and its sign-in/profile controls.
+const LOGIN_START_PATH = '/express/';
 
 // IMS redirects back to its registered redirect_uri (www.stage.adobe.com/home
 // for AdobeExpressWeb). That page is not under test and is bot-protected, so it
