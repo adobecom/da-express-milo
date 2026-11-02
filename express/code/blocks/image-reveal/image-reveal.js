@@ -1,10 +1,16 @@
-import { createTag } from '../../scripts/utils.js';
+import {
+  createTag,
+  decorateButtonsDeprecated,
+  getIconElementDeprecated,
+  convertToInlineSVG,
+} from '../../scripts/utils.js';
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 
-// Effects apply CSS filters to the single authored image; the filtered copy is
+// Effects apply CSS filters to the single selected image; the filtered copy is
 // clipped to the right of the slider. Duotone needs an SVG filter (see buildDuotoneFilter).
+// Filter values per the designer-approved spec in MWPW-186599 (Jira comments).
 const EFFECTS = [
-  { key: 'grayscale', label: 'Grayscale' },
+  { key: 'grayscale', label: 'Greyscale' },
   { key: 'color-punch', label: 'Color punch' },
   { key: 'duotone', label: 'Duotone' },
 ];
@@ -12,6 +18,9 @@ const DUOTONE_SHADOW = [0x00, 0x13, 0xda];
 const DUOTONE_HIGHLIGHT = [0x10, 0xff, 0xa8];
 const KEY_STEP = 1;
 const PAGE_STEP = 10;
+// ≥1200px the Figma design stacks both control groups in the panel;
+// below that they become tabs.
+const DESKTOP_QUERY = '(min-width: 1200px)';
 
 let instanceId = 0;
 
@@ -38,26 +47,6 @@ function buildDuotoneFilter(id) {
   filter.append(matrix, transfer);
   svg.append(filter);
   return svg;
-}
-
-function buildEffectControls(name, onChange) {
-  const fieldset = createTag('fieldset', { class: 'image-reveal-effects' });
-  fieldset.append(createTag('legend', { class: 'image-reveal-effects-legend' }, 'Effect'));
-  EFFECTS.forEach(({ key, label }, index) => {
-    const input = createTag('input', {
-      type: 'radio',
-      name,
-      value: key,
-      id: `${name}-${key}`,
-      class: 'image-reveal-effect-input',
-    });
-    input.checked = index === 0;
-    const option = createTag('label', { class: 'image-reveal-effect', for: input.id });
-    option.append(input, createTag('span', { class: 'image-reveal-effect-label' }, label));
-    fieldset.append(option);
-  });
-  fieldset.addEventListener('change', (event) => onChange(event.target.value));
-  return fieldset;
 }
 
 function initSlider(stage, handle, effectLabel) {
@@ -116,28 +105,60 @@ function initSlider(stage, handle, effectLabel) {
   return { refresh: () => set(value) };
 }
 
-export default function decorate(block) {
-  const picture = block.querySelector('picture');
-  if (!picture) {
+// 80px CSS thumbs at up to 2x DPR; reuse the pipeline's optimizer params when present.
+function thumbSrc(picture) {
+  const src = picture.querySelector('img')?.getAttribute('src') || '';
+  return src.includes('width=') ? src.replace(/width=\d+/, 'width=160') : src;
+}
+
+function buildThumb({ name, value, label, imgSrc, checked, thumbClass }) {
+  const input = createTag('input', {
+    type: 'radio',
+    name,
+    value,
+    class: 'image-reveal-thumb-input',
+  });
+  input.checked = checked;
+  const thumb = createTag('span', { class: `image-reveal-thumb-img ${thumbClass}`, 'aria-hidden': 'true' });
+  thumb.append(createTag('img', { src: imgSrc, alt: '' }));
+  const option = createTag('label', { class: 'image-reveal-thumb' });
+  option.append(input, thumb, createTag('span', { class: 'image-reveal-thumb-label' }, label));
+  return { option, input, img: thumb.querySelector('img') };
+}
+
+export default async function decorate(block) {
+  const images = [];
+  let headerRow = null;
+  let ctaRow = null;
+  [...block.children].forEach((row) => {
+    const picture = row.querySelector('picture');
+    if (picture) {
+      const labelCell = [...row.children].find((cell) => !cell.contains(picture));
+      const label = labelCell?.textContent.trim() || picture.querySelector('img')?.alt?.trim() || '';
+      images.push({ label, picture });
+    } else if (row.querySelector('a[href]')) {
+      ctaRow = row;
+    } else if (row.textContent.trim() && !headerRow) {
+      headerRow = row;
+    }
+  });
+
+  if (!images.length) {
     block.remove();
     return;
   }
 
   instanceId += 1;
   const id = `image-reveal-${instanceId}`;
-  const duotoneId = `${id}-duotone`;
   let effect = EFFECTS[0];
+  let selected = 0;
 
-  const stage = createTag('div', { class: 'image-reveal-stage' });
-  stage.style.setProperty('--image-reveal-duotone', `url(#${duotoneId})`);
+  block.style.setProperty('--image-reveal-duotone', `url(#${id}-duotone)`);
+
+  // --- Comparison stage ---
+  const stage = createTag('div', { class: 'image-reveal-stage', 'data-effect': effect.key });
   const base = createTag('div', { class: 'image-reveal-layer image-reveal-original' });
-  base.append(picture);
-  // Same picture/src, so the browser reuses the already-fetched image.
   const filtered = createTag('div', { class: 'image-reveal-layer image-reveal-filtered', 'aria-hidden': 'true' });
-  const clone = picture.cloneNode(true);
-  clone.querySelectorAll('img').forEach((img) => { img.alt = ''; });
-  filtered.append(clone);
-
   const handle = createTag('div', {
     class: 'image-reveal-handle',
     role: 'slider',
@@ -147,27 +168,149 @@ export default function decorate(block) {
     'aria-valuemax': '100',
     'aria-orientation': 'horizontal',
   });
-  handle.append(createTag('span', { class: 'image-reveal-grip', 'aria-hidden': 'true' }));
-  stage.append(base, filtered, handle, buildDuotoneFilter(duotoneId));
-
+  const grip = createTag('span', { class: 'image-reveal-grip', 'aria-hidden': 'true' });
+  handle.append(grip);
+  stage.append(base, filtered, handle, buildDuotoneFilter(`${id}-duotone`));
   const slider = initSlider(stage, handle, () => effect.label.toLowerCase());
+
+  const effectThumbImgs = [];
+  const paintStage = () => {
+    const { picture } = images[selected];
+    const fxClone = picture.cloneNode(true);
+    fxClone.querySelectorAll('img').forEach((img) => { img.alt = ''; });
+    base.replaceChildren(picture.cloneNode(true));
+    filtered.replaceChildren(fxClone);
+    const src = thumbSrc(picture);
+    effectThumbImgs.forEach((img) => { img.src = src; });
+  };
+
   const applyEffect = (key) => {
     effect = EFFECTS.find((e) => e.key === key) || EFFECTS[0];
     stage.dataset.effect = effect.key;
     slider.refresh();
     announceToScreenReader(`${effect.label} effect applied`);
   };
-  const controls = buildEffectControls(`${id}-effect`, applyEffect);
-  stage.dataset.effect = effect.key;
 
-  const panel = createTag('div', { class: 'image-reveal-panel' });
-  const copy = [...block.children].find((row) => !row.querySelector('picture') && row.textContent.trim());
-  if (copy) {
-    const text = createTag('div', { class: 'image-reveal-copy' });
-    text.append(...copy.querySelectorAll(':scope > div > *'));
-    panel.append(text);
+  const swapImage = (index) => {
+    if (index === selected || !images[index]) return;
+    selected = index;
+    paintStage();
+    announceToScreenReader(`${images[selected].label} image selected`);
+  };
+
+  // --- Control groups ---
+  const effectsRow = createTag('div', { class: 'image-reveal-thumbs' });
+  EFFECTS.forEach(({ key, label }, i) => {
+    const { option, img } = buildThumb({
+      name: `${id}-effect`,
+      value: key,
+      label,
+      imgSrc: thumbSrc(images[selected].picture),
+      checked: i === 0,
+      thumbClass: `image-reveal-thumb-img--${key}`,
+    });
+    effectThumbImgs.push(img);
+    effectsRow.append(option);
+  });
+  effectsRow.addEventListener('change', (event) => applyEffect(event.target.value));
+
+  const swapRow = createTag('div', { class: 'image-reveal-thumbs' });
+  images.forEach(({ label, picture }, i) => {
+    const { option } = buildThumb({
+      name: `${id}-image`,
+      value: i,
+      label,
+      imgSrc: thumbSrc(picture),
+      checked: i === 0,
+      thumbClass: '',
+    });
+    swapRow.append(option);
+  });
+  swapRow.addEventListener('change', (event) => swapImage(Number(event.target.value)));
+
+  const effectsGroup = createTag('div', { class: 'image-reveal-group', id: `${id}-effects`, role: 'tabpanel' });
+  effectsGroup.append(createTag('p', { class: 'image-reveal-group-title' }, 'Add an image effect'), effectsRow);
+  const tabDefs = [{ label: 'Image effects', icon: 'S2_Icon_Filters_20_N', panel: effectsGroup }];
+  if (images.length > 1) {
+    const swapGroup = createTag('div', { class: 'image-reveal-group', id: `${id}-swap`, role: 'tabpanel' });
+    swapGroup.append(createTag('p', { class: 'image-reveal-group-title' }, 'Try a different image'), swapRow);
+    tabDefs.push({ label: 'Change image', icon: 'S2_Icon_Image_20_N', panel: swapGroup });
   }
-  panel.append(controls);
 
-  block.replaceChildren(panel, stage);
+  const tabList = createTag('div', { class: 'image-reveal-tabs', role: 'tablist', 'aria-label': 'Image sandbox controls' });
+  const tabButtons = tabDefs.map(({ label, icon, panel }, i) => {
+    const tabId = `${id}-tab-${i}`;
+    panel.setAttribute('aria-labelledby', tabId);
+    const button = createTag('button', {
+      class: 'image-reveal-tab',
+      type: 'button',
+      role: 'tab',
+      id: tabId,
+      'aria-selected': String(i === 0),
+      'aria-controls': panel.id,
+    });
+    button.tabIndex = i === 0 ? 0 : -1;
+    const iconSpan = createTag('span', { class: 'image-reveal-tab-icon', 'aria-hidden': 'true' });
+    convertToInlineSVG(getIconElementDeprecated(icon)).then((svg) => iconSpan.append(svg));
+    button.append(iconSpan, label);
+    tabList.append(button);
+    return button;
+  });
+  tabList.hidden = tabDefs.length < 2;
+
+  function activateTab(index, focus = false) {
+    tabButtons.forEach((tab, i) => {
+      const active = i === index;
+      tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
+      tabDefs[i].panel.hidden = !active;
+    });
+    if (focus) tabButtons[index].focus();
+  }
+
+  tabButtons.forEach((tab, i) => tab.addEventListener('click', () => activateTab(i)));
+  tabList.addEventListener('keydown', (event) => {
+    if (!['ArrowRight', 'ArrowLeft'].includes(event.key)) return;
+    event.preventDefault();
+    const current = tabButtons.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+    if (current === -1) return;
+    const next = (current + (event.key === 'ArrowLeft' ? -1 : 1) + tabButtons.length) % tabButtons.length;
+    activateTab(next, true);
+  });
+
+  const desktopMedia = window.matchMedia(DESKTOP_QUERY);
+  const syncPanels = () => {
+    if (desktopMedia.matches) {
+      tabDefs.forEach(({ panel }) => { panel.hidden = false; });
+    } else {
+      const current = tabButtons.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+      activateTab(current === -1 ? 0 : current);
+    }
+  };
+  desktopMedia.addEventListener('change', syncPanels);
+
+  // --- CTA ---
+  const ctaContainer = createTag('div', { class: 'image-reveal-cta' });
+  const ctaCell = ctaRow?.querySelector(':scope > div');
+  if (ctaCell) ctaContainer.append(...[...ctaCell.children]);
+
+  // --- Assemble ---
+  const panel = createTag('div', { class: 'image-reveal-panel' });
+  panel.append(tabList, ...tabDefs.map(({ panel: p }) => p), ctaContainer);
+
+  const headerContainer = createTag('div', { class: 'image-reveal-header' });
+  const headerCell = headerRow?.querySelector(':scope > div');
+  if (headerCell) headerContainer.append(...[...headerCell.children]);
+
+  const sandbox = createTag('div', { class: 'image-reveal-sandbox' });
+  sandbox.append(panel, stage);
+  block.replaceChildren(headerContainer, sandbox);
+
+  convertToInlineSVG(getIconElementDeprecated('S2_Icon_ArrowLeftRight_20_N')).then((svg) => grip.append(svg));
+
+  paintStage();
+  syncPanels();
+
+  await decorateButtonsDeprecated(block);
+  ctaContainer.querySelectorAll('p:not(.action-area)').forEach((p) => p.classList.add('image-reveal-cta-subtext'));
 }

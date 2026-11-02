@@ -1,108 +1,91 @@
+/* MWPW-186599 — Image Reveal (Color Extract page sandbox).
+   Layout per Figma "Adobe-Color-Component-Library / image-reveal":
+   stacked slider-over-panel <600px, panel+slider row 600–1199px (tabbed controls),
+   white sandbox card with stacked groups ≥1200px. */
+
 .image-reveal {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-400);
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--spacing-400) var(--spacing-300);
+  padding-block: var(--spacing-600);
+  padding-inline: var(--spacing-300); /* Figma Grid/container-padding-side: 16 mobile, 32 tablet, 40 desktop */
+}
+
+/* ---------- Section header ---------- */
+.image-reveal-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.image-reveal-header:empty {
+  display: none;
+}
+
+.image-reveal .image-reveal-header h2 {
+  margin: 0;
+  color: var(--Palette-gray-900);
+  font-size: var(--ax-heading-xl-size);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 1.04; /* Figma headings/xl line-height — no matching token */
+}
+
+.image-reveal .image-reveal-header p {
+  margin: 0;
+  color: var(--color-gray-700-variant); /* Figma Content/neutral-subdued/default #464646 */
+  font-size: var(--body-font-size-s);
+  line-height: 1.3; /* Figma body line-height — no matching token */
+}
+
+/* ---------- Sandbox container ---------- */
+.image-reveal-sandbox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
 }
 
 .image-reveal-panel {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-300);
+  min-width: 0;
 }
 
-.image-reveal-copy > :first-child {
-  margin-top: 0;
-}
-
-.image-reveal-effects {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-100);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.image-reveal-effects-legend {
-  margin-bottom: var(--spacing-100);
-  padding: 0;
-  color: var(--color-gray-700);
-  font-size: var(--body-font-size-s);
-  font-weight: 700;
-}
-
-.image-reveal-effect {
-  position: relative;
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 var(--spacing-300);
-  border: 1px solid var(--color-gray-300-variant);
-  border-radius: var(--spacing-200);
-  background: var(--color-white);
-  cursor: pointer;
-  font-size: var(--body-font-size-s);
-  font-weight: 600;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.image-reveal-effect:hover {
-  background: var(--color-gray-100);
-}
-
-.image-reveal-effect:has(:checked) {
-  border-color: #131313;
-  background: var(--color-gray-100);
-}
-
-.image-reveal-effect:has(:focus-visible) {
-  outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
-}
-
-/* Native radios stay in the a11y tree; the whole label is the visual target. */
-.image-reveal-effect-input {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
+/* ---------- Comparison stage ---------- */
 .image-reveal-stage {
   --image-reveal-position: 50%;
   position: relative;
+  order: -1; /* slider sits above the panel on mobile */
   overflow: hidden;
-  border-radius: var(--spacing-200);
+  width: 100%;
+  aspect-ratio: 2.09; /* Figma slider ≈ 1254×600 at every breakpoint */
+  border-radius: var(--Corner-radius-corner-radius-100);
   cursor: ew-resize;
   touch-action: pan-y;
   user-select: none;
+}
+
+.image-reveal-layer {
+  position: absolute;
+  inset: 0;
 }
 
 .image-reveal-layer picture,
 .image-reveal-layer img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   pointer-events: none;
   -webkit-user-drag: none;
 }
 
 .image-reveal-filtered {
-  position: absolute;
-  inset: 0;
   clip-path: inset(0 0 0 var(--image-reveal-position));
 }
 
 [dir="rtl"] .image-reveal-filtered {
   clip-path: inset(0 var(--image-reveal-position) 0 0);
-}
-
-.image-reveal-filtered img {
-  height: 100%;
-  object-fit: cover;
 }
 
 .image-reveal-stage[data-effect="grayscale"] .image-reveal-filtered img {
@@ -117,6 +100,7 @@
   filter: var(--image-reveal-duotone);
 }
 
+/* ---------- Slider handle ---------- */
 .image-reveal-handle {
   position: absolute;
   top: 0;
@@ -125,7 +109,7 @@
   width: 2px;
   translate: -50% 0;
   background: var(--color-white);
-  box-shadow: 0 0 4px rgb(0 0 0 / 40%);
+  box-shadow: 0 0 4px rgb(0 0 0 / 40%); /* keeps the line visible over light images */
 }
 
 [dir="rtl"] .image-reveal-handle {
@@ -140,31 +124,23 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 40px;
-  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
   translate: -50% -50%;
+  border: 2px solid var(--S2-Buttons-Accent-Color-Default);
   border-radius: 50%;
   background: var(--color-white);
+  color: var(--Palette-gray-800);
   box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
 }
 
-.image-reveal-grip::before,
-.image-reveal-grip::after {
-  position: absolute;
-  top: 50%;
-  border: 6px solid transparent;
-  translate: 0 -50%;
-  content: '';
-}
-
-.image-reveal-grip::before {
-  left: 6px;
-  border-right-color: #131313;
-}
-
-.image-reveal-grip::after {
-  right: 6px;
-  border-left-color: #131313;
+.image-reveal-grip svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 .image-reveal-handle:focus-visible .image-reveal-grip {
@@ -172,15 +148,281 @@
   outline-offset: 2px;
 }
 
+/* ---------- Tabs (mobile/tablet) ---------- */
+.image-reveal-tabs {
+  display: flex;
+  gap: var(--spacing-500);
+}
+
+.image-reveal-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-80);
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--Palette-gray-700);
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+}
+
+.image-reveal-tab[aria-selected="true"] {
+  color: var(--Palette-gray-800);
+}
+
+.image-reveal-tab[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--Palette-gray-800);
+}
+
+.image-reveal-tab:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.image-reveal-tab-icon {
+  display: inline-flex;
+}
+
+.image-reveal-tab-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------- Control groups ---------- */
+.image-reveal-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.image-reveal-group[hidden] {
+  display: none; /* [hidden] loses to display:flex without this */
+}
+
+.image-reveal-group-title {
+  display: none; /* group titles only exist ≥1200px; tabs label the panels below that */
+}
+
+.image-reveal-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100);
+}
+
+.image-reveal-thumb {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-75);
+  width: 80px;
+  cursor: pointer;
+}
+
+/* Native radios stay in the a11y tree; the whole label is the visual target. */
+.image-reveal-thumb-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.image-reveal-thumb-img {
+  display: block;
+  box-sizing: border-box;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--color-gray-100); /* Figma "Bg for transparent assets" */
+}
+
+.image-reveal-thumb-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-reveal-thumb-img--grayscale img {
+  filter: grayscale(1);
+}
+
+.image-reveal-thumb-img--color-punch img {
+  filter: saturate(2) contrast(1.2) brightness(1.1);
+}
+
+.image-reveal-thumb-img--duotone img {
+  filter: var(--image-reveal-duotone);
+}
+
+.image-reveal-thumb:has(:checked) .image-reveal-thumb-img {
+  border-color: var(--Palette-gray-800);
+  box-shadow: inset 0 0 0 3px var(--color-white); /* Figma inner white ring (3px — no token) */
+}
+
+.image-reveal-thumb:has(:focus-visible) .image-reveal-thumb-img {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.image-reveal .image-reveal-thumb-label {
+  color: var(--Palette-gray-800);
+  font-size: var(--Global-Typography-Size-Label-Label-S);
+  line-height: var(--Global-Typography-Line-height-Label-Label-S);
+  text-align: center;
+}
+
+/* ---------- CTA ---------- */
+.image-reveal-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.image-reveal-cta:empty {
+  display: none;
+}
+
+.image-reveal .image-reveal-cta a.con-button:any-link {
+  box-sizing: border-box;
+  width: 100%;
+  background: rgb(0 0 0 / 84%); /* Figma Palette/transparent-black/800 — no token */
+  color: var(--color-white);
+  border-color: transparent;
+  font-size: var(--ax-body-s-size);
+}
+
+.image-reveal .image-reveal-cta a.con-button:any-link:hover {
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+.image-reveal .image-reveal-cta p {
+  margin: 0; /* beats main .section p { margin: 32px 0 } */
+}
+
+.image-reveal .image-reveal-cta p.action-area {
+  width: 100%;
+}
+
+.image-reveal .image-reveal-cta-subtext {
+  margin: 0;
+  color: var(--Palette-gray-700);
+  font-size: var(--ax-body-xxs-size);
+  line-height: 1.3; /* Figma body line-height — no matching token */
+  text-align: center;
+}
+
+/* ---------- SVG filter defs ---------- */
 .image-reveal-defs {
   position: absolute;
   width: 0;
   height: 0;
 }
 
-@media (min-width: 900px) {
+/* ---------- 600–1199px: side-by-side with tabs ---------- */
+@media (min-width: 600px) {
   .image-reveal {
-    grid-template-columns: 280px minmax(0, 1fr);
-    align-items: start;
+    padding-inline: var(--spacing-500);
+  }
+
+  .image-reveal-sandbox {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .image-reveal-panel {
+    flex: 0 0 256px;
+  }
+
+  .image-reveal-stage {
+    order: 0;
+    flex: 1 1 auto;
+  }
+}
+
+/* ---------- ≥1200px: white card, stacked groups ---------- */
+@media (min-width: 1200px) {
+  .image-reveal {
+    padding-block: var(--spacing-900);
+    padding-inline: var(--spacing-600);
+  }
+
+  .image-reveal-header {
+    align-items: center;
+    text-align: center;
+  }
+
+  .image-reveal .image-reveal-header h2 {
+    font-size: var(--heading-font-size-l); /* 36px */
+  }
+
+  .image-reveal .image-reveal-header p {
+    max-width: 700px;
+    font-size: var(--ax-body-s-size); /* 16px */
+  }
+
+  .image-reveal-sandbox {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1600px; /* Figma Grid/container-max-width */
+    margin-inline: auto;
+    padding: var(--spacing-400);
+    gap: var(--spacing-400);
+    border-radius: var(--Corner-radius-corner-radius-200);
+    background: var(--color-white);
+  }
+
+  .image-reveal-panel {
+    flex: 0 0 274px;
+    gap: var(--spacing-400);
+    align-self: stretch;
+    justify-content: center; /* Figma Action-panel: justify-center */
+  }
+
+  .image-reveal-stage {
+    border-radius: var(--Corner-radius-corner-radius-200);
+  }
+
+  .image-reveal-tabs {
+    display: none; /* both groups are stacked and always visible at ≥1200px */
+  }
+
+  .image-reveal .image-reveal-group-title {
+    display: block;
+    margin: 0;
+    color: var(--Palette-gray-900);
+    font-size: var(--Global-Typography-Size-Title-Title-XS);
+    font-weight: var(--subheading-font-weight);
+    line-height: var(--Global-Typography-Line-height-Title-Title-XS);
+  }
+
+  .image-reveal-thumbs {
+    gap: var(--spacing-300);
+  }
+
+  .image-reveal-grip {
+    width: 60px; /* Figma drifts 55–74px across frames; standardized to the Desktop (L) spec */
+    height: 60px;
+  }
+
+  .image-reveal-grip svg {
+    width: 24px;
+    height: 24px;
   }
 }
