@@ -144,7 +144,7 @@
   border: var(--s2a-border-width-md) solid var(--s2a-color-blue-900);
   border-radius: var(--s2a-border-radius-round);
   background: var(--s2a-color-gray-25);
-  color: var(--s2a-color-gray-800);
+  color: var(--s2a-color-blue-900); /* drives the icon's fill via currentColor */
   box-shadow: var(--s2a-shadow-level-2-x) var(--s2a-shadow-level-2-y) var(--s2a-shadow-level-2-blur) var(--s2a-shadow-level-2-spread) var(--s2a-shadow-level-2-color);
 }
 
@@ -152,13 +152,17 @@
   display: block;
   width: 20px;
   height: 20px;
+  stroke: var(--s2a-color-blue-900); /* inherits to the icon path */
 }
 
 .image-reveal-handle:focus-visible .image-reveal-grip {
-  /* Site-wide focus-ring convention (--color-focus-ring-strong = s2a-blue-800's value,
-     but the ring must stay consistent with every other focusable on the page) */
-  outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
+  /* repo stylelint bans var() fallbacks; --S2AC-Color-background-accent-focus isn't
+     defined in any loaded token sheet — #274DEA lives in s2a as blue-1000 */
+  outline-width: 1px;
+  outline-style: solid;
+  outline-color: var(--s2a-color-blue-1000);
+  outline-offset: 1px;
+  border-radius: 100px;
 }
 
 /* ---------- Tabs (mobile/tablet) ---------- */
