@@ -1989,13 +1989,17 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
     gap: var(--spacing-700);
   }
 
-  .section .ax-columns:not(.v2, .color, .fullsize)>div {
+  .section:not(.ax-max-entitled) .ax-columns:not(.v2, .color, .fullsize)>div {
     padding-top: 0;
     padding-bottom: 0;
   }
 
   .section.ax-max-entitled .ax-columns>div {
     gap: 0;
+  }
+
+  .section.ax-max-entitled .ax-columns>.columns-video {
+    gap: var(--spacing-300);
   }
 
   .section .ax-columns .column {
