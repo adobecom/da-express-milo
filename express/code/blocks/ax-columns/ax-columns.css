@@ -1962,10 +1962,10 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
 }
 
 /* Font Generator SEO page treatment, promoted to the ax-columns baseline. */
-.section .ax-columns p.button-container a.button:hover,
-.section .ax-columns p.button-container a.button:active,
-.section .ax-columns a.con-button:hover,
-.section .ax-columns a.con-button:active {
+.section .ax-columns p.button-container a.button:not(.dark, .secondary, .reverse):hover,
+.section .ax-columns p.button-container a.button:not(.dark, .secondary, .reverse):active,
+.section .ax-columns a.con-button:not(.dark, .secondary, .reverse):hover,
+.section .ax-columns a.con-button:not(.dark, .secondary, .reverse):active {
   background-color: var(--Background-Primary-Hover);
   border-color: var(--Background-Primary-Hover);
 }
