@@ -1,21 +1,23 @@
 /* MWPW-186599 — Image Reveal (Color Extract page sandbox).
    Layout per Figma "Adobe-Color-Component-Library / image-reveal":
    stacked slider-over-panel <600px, panel+slider row 600–1199px (tabbed controls),
-   white sandbox card with stacked groups ≥1200px. */
+   white sandbox card with stacked groups ≥1200px.
+   Tokens: S2A (www.adobe.com/libs/c2/styles/s2a-tokens.css) wherever a value
+   matches; legacy Express tokens and commented raw values for the rest. */
 
 .image-reveal {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-400);
-  padding-block: var(--spacing-600);
-  padding-inline: var(--spacing-300); /* Figma Grid/container-padding-side: 16 mobile, 32 tablet, 40 desktop */
+  gap: var(--s2a-spacing-lg);
+  padding-block: var(--s2a-spacing-2xl);
+  padding-inline: var(--s2a-spacing-md); /* Figma Grid/container-padding-side: 16 mobile, 32 tablet, 40 desktop */
 }
 
 /* ---------- Section header ---------- */
 .image-reveal-header {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-100);
+  gap: var(--s2a-spacing-xs);
 }
 
 .image-reveal-header:empty {
@@ -24,30 +26,30 @@
 
 .image-reveal .image-reveal-header h2 {
   margin: 0;
-  color: var(--Palette-gray-900);
-  font-size: var(--ax-heading-xl-size);
-  font-weight: var(--heading-font-weight-extra);
-  line-height: 1.04; /* Figma headings/xl line-height — no matching token */
+  color: var(--s2a-color-gray-900);
+  font-size: var(--ax-heading-xl-size); /* 28px — no s2a token (scale jumps 24→32) */
+  font-weight: var(--heading-font-weight-extra); /* 900 — no s2a weight tokens */
+  line-height: 1.04; /* Figma headings/xl — no unitless lh in s2a (29px @28 is off-scale) */
 }
 
 .image-reveal .image-reveal-header p {
   margin: 0;
-  color: var(--color-gray-700-variant); /* Figma Content/neutral-subdued/default #464646 */
-  font-size: var(--body-font-size-s);
-  line-height: 1.3; /* Figma body line-height — no matching token */
+  color: var(--color-gray-700-variant); /* Figma neutral-subdued #464646 — not in the s2a gray scale */
+  font-size: var(--s2a-typography-font-size-body-sm);
+  line-height: var(--s2a-font-line-height-xs); /* 18px ≈ Figma lh 1.3 @14px (18.2) */
 }
 
 /* ---------- Sandbox container ---------- */
 .image-reveal-sandbox {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-300);
+  gap: var(--s2a-spacing-md);
 }
 
 .image-reveal-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-300);
+  gap: var(--s2a-spacing-md);
   min-width: 0;
 }
 
@@ -69,7 +71,7 @@
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: var(--Corner-radius-corner-radius-100);
+  border-radius: var(--s2a-border-radius-xs);
 }
 
 .image-reveal-layer {
@@ -113,10 +115,10 @@
   top: 0;
   bottom: 0;
   inset-inline-start: var(--image-reveal-position);
-  width: 2px;
+  width: var(--s2a-border-width-md);
   translate: -50% 0;
-  background: var(--color-white);
-  box-shadow: 0 0 4px rgb(0 0 0 / 40%); /* keeps the line visible over light images */
+  background: var(--s2a-color-gray-25);
+  box-shadow: 0 0 4px rgb(0 0 0 / 40%); /* keeps the line visible over light images — utility value, no token */
 }
 
 [dir="rtl"] .image-reveal-handle {
@@ -134,14 +136,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
+  width: 48px; /* component size per Figma Slide-controls S — not a spacing value */
   height: 48px;
   translate: -50% -50%;
-  border: 2px solid var(--S2-Buttons-Accent-Color-Default);
-  border-radius: 50%;
-  background: var(--color-white);
-  color: var(--Palette-gray-800);
-  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+  border: var(--s2a-border-width-md) solid var(--s2a-color-blue-900);
+  border-radius: var(--s2a-border-radius-round);
+  background: var(--s2a-color-gray-25);
+  color: var(--s2a-color-gray-800);
+  box-shadow: var(--s2a-shadow-level-2-x) var(--s2a-shadow-level-2-y) var(--s2a-shadow-level-2-blur) var(--s2a-shadow-level-2-spread) var(--s2a-shadow-level-2-color);
 }
 
 .image-reveal-grip svg {
@@ -151,6 +153,8 @@
 }
 
 .image-reveal-handle:focus-visible .image-reveal-grip {
+  /* Site-wide focus-ring convention (--color-focus-ring-strong = s2a-blue-800's value,
+     but the ring must stay consistent with every other focusable on the page) */
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
 }
@@ -158,27 +162,27 @@
 /* ---------- Tabs (mobile/tablet) ---------- */
 .image-reveal-tabs {
   display: flex;
-  gap: var(--spacing-500);
+  gap: var(--s2a-spacing-xl);
 }
 
 .image-reveal-tab {
   position: relative;
   display: flex;
   align-items: center;
-  gap: var(--spacing-80);
+  gap: var(--spacing-80); /* 6px icon gap — no s2a token (scale jumps 4→8) */
   height: 48px;
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
   white-space: nowrap;
-  color: var(--Palette-gray-700);
-  font-size: var(--Global-Typography-Size-Label-Label-M);
-  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+  color: var(--s2a-color-gray-700);
+  font-size: var(--s2a-typography-font-size-body-sm);
+  line-height: var(--s2a-font-line-height-xs);
 }
 
 .image-reveal-tab[aria-selected="true"] {
-  color: var(--Palette-gray-800);
+  color: var(--s2a-color-gray-800);
 }
 
 .image-reveal-tab[aria-selected="true"]::after {
@@ -186,9 +190,9 @@
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--Palette-gray-800);
+  height: var(--s2a-border-width-md);
+  border-radius: var(--s2a-border-radius-3xs);
+  background: var(--s2a-color-gray-800);
 }
 
 .image-reveal-tab:focus-visible {
@@ -210,7 +214,7 @@
 .image-reveal-group {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-100);
+  gap: var(--s2a-spacing-xs);
 }
 
 .image-reveal-group[hidden] {
@@ -224,7 +228,7 @@
 .image-reveal-thumbs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-100);
+  gap: var(--s2a-spacing-xs);
 }
 
 .image-reveal-thumb {
@@ -232,8 +236,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-75);
-  width: 80px;
+  gap: var(--s2a-spacing-2xs);
+  width: 80px; /* Figma Thumbnail-Button fixed size — not a spacing value */
   cursor: pointer;
 }
 
@@ -252,9 +256,9 @@
   width: 80px;
   height: 80px;
   overflow: hidden;
-  border: 2px solid transparent;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  background: var(--color-gray-100); /* Figma "Bg for transparent assets" */
+  border: var(--s2a-border-width-md) solid transparent;
+  border-radius: var(--s2a-border-radius-xs);
+  background: var(--s2a-color-gray-50); /* Figma "Bg for transparent assets" */
 }
 
 .image-reveal-thumb-img img {
@@ -277,8 +281,8 @@
 }
 
 .image-reveal-thumb:has(:checked) .image-reveal-thumb-img {
-  border-color: var(--Palette-gray-800);
-  box-shadow: inset 0 0 0 3px var(--color-white); /* Figma inner white ring (3px — no token) */
+  border-color: var(--s2a-color-gray-800);
+  box-shadow: inset 0 0 0 3px var(--s2a-color-gray-25); /* Figma inner white ring (3px — no s2a width token) */
 }
 
 .image-reveal-thumb:has(:focus-visible) .image-reveal-thumb-img {
@@ -287,9 +291,10 @@
 }
 
 .image-reveal .image-reveal-thumb-label {
-  color: var(--Palette-gray-800);
-  font-size: var(--Global-Typography-Size-Label-Label-S);
-  line-height: var(--Global-Typography-Line-height-Label-Label-S);
+  color: var(--s2a-color-gray-800);
+  /* primitive, not the semantic body-xs — that one shifts to 14px ≥1024px */
+  font-size: var(--s2a-font-size-xs);
+  line-height: var(--s2a-font-line-height-xs);
   text-align: center;
 }
 
@@ -298,26 +303,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0px;
-  gap: var(--spacing-100);
+  gap: var(--s2a-spacing-xs);
 }
 
 .image-reveal-cta:empty {
   display: none;
-}
-
-.image-reveal .image-reveal-cta a.con-button:any-link {
-  box-sizing: border-box;
-  width: 100%;
-  background: rgb(0 0 0 / 84%); /* Figma Palette/transparent-black/800 — no token */
-  color: var(--color-white);
-  border-color: transparent;
-  font-size: var(--ax-body-s-size);
-}
-
-.image-reveal .image-reveal-cta a.con-button:any-link:hover {
-  background: var(--color-black);
-  color: var(--color-white);
 }
 
 .image-reveal .image-reveal-cta p {
@@ -328,11 +318,26 @@
   width: 100%;
 }
 
+.image-reveal .image-reveal-cta a.con-button:any-link {
+  box-sizing: border-box;
+  width: 100%;
+  background: rgb(0 0 0 / 84%); /* Figma transparent-black/800 @84% — s2a only offers 80%/88% */
+  color: var(--s2a-color-gray-25);
+  border-color: transparent;
+  border-radius: var(--s2a-border-radius-24);
+  font-size: var(--s2a-font-size-md);
+}
+
+.image-reveal .image-reveal-cta a.con-button:any-link:hover {
+  background: var(--s2a-color-gray-1000);
+  color: var(--s2a-color-gray-25);
+}
+
 .image-reveal .image-reveal-cta-subtext {
   margin: 0;
-  color: var(--Palette-gray-700);
-  font-size: var(--ax-body-xxs-size);
-  line-height: 1.3; /* Figma body line-height — no matching token */
+  color: var(--s2a-color-gray-700);
+  font-size: var(--s2a-font-size-xs); /* primitive — semantic body-xs shifts ≥1024px */
+  line-height: var(--s2a-font-line-height-2xs); /* 16px ≈ Figma lh 1.3 @12px (15.6) */
   text-align: center;
 }
 
@@ -346,7 +351,7 @@
 /* ---------- 600–1199px: side-by-side with tabs ---------- */
 @media (min-width: 600px) {
   .image-reveal {
-    padding-inline: var(--spacing-500);
+    padding-inline: var(--s2a-spacing-xl);
   }
 
   .image-reveal-sandbox {
@@ -355,7 +360,7 @@
   }
 
   .image-reveal-panel {
-    flex: 0 0 256px;
+    flex: 0 0 256px; /* Figma Action-panel width — component size, not spacing */
   }
 
   .image-reveal-stage {
@@ -367,8 +372,8 @@
 /* ---------- ≥1200px: white card, stacked groups ---------- */
 @media (min-width: 1200px) {
   .image-reveal {
-    padding-block: var(--spacing-900);
-    padding-inline: var(--spacing-600);
+    padding-block: var(--s2a-spacing-4xl);
+    padding-inline: var(--s2a-spacing-2xl);
   }
 
   .image-reveal-header {
@@ -377,34 +382,35 @@
   }
 
   .image-reveal .image-reveal-header h2 {
-    font-size: var(--heading-font-size-l); /* 36px */
+    font-size: var(--s2a-font-size-4xl); /* 36px */
   }
 
   .image-reveal .image-reveal-header p {
-    max-width: 700px;
-    font-size: var(--ax-body-s-size); /* 16px */
+    max-width: 700px; /* Figma text max-width — not a spacing value */
+    font-size: var(--s2a-typography-font-size-body-md);
+    line-height: var(--s2a-font-line-height-21); /* 21px ≈ Figma lh 1.3 @16px (20.8) */
   }
 
   .image-reveal-sandbox {
     box-sizing: border-box;
     width: 100%;
-    max-width: 1600px; /* Figma Grid/container-max-width */
+    max-width: 1600px; /* Figma Grid/container-max-width — not a spacing value */
     margin-inline: auto;
-    padding: var(--spacing-400);
-    gap: var(--spacing-400);
-    border-radius: var(--Corner-radius-corner-radius-200);
-    background: var(--color-white);
+    padding: var(--s2a-spacing-lg);
+    gap: var(--s2a-spacing-lg);
+    border-radius: var(--s2a-border-radius-md);
+    background: var(--s2a-color-gray-25);
   }
 
   .image-reveal-panel {
-    flex: 0 0 274px;
-    gap: var(--spacing-400);
+    flex: 0 0 274px; /* Figma desktop Action-panel width */
+    gap: var(--s2a-spacing-lg);
     align-self: stretch;
     justify-content: center; /* Figma Action-panel: justify-center */
   }
 
   .image-reveal-clip {
-    border-radius: var(--Corner-radius-corner-radius-200);
+    border-radius: var(--s2a-border-radius-md);
   }
 
   .image-reveal-tabs {
@@ -414,14 +420,14 @@
   .image-reveal .image-reveal-group-title {
     display: block;
     margin: 0;
-    color: var(--Palette-gray-900);
-    font-size: var(--Global-Typography-Size-Title-Title-XS);
-    font-weight: var(--subheading-font-weight);
-    line-height: var(--Global-Typography-Line-height-Title-Title-XS);
+    color: var(--s2a-color-gray-900);
+    font-size: var(--s2a-typography-font-size-body-md);
+    font-weight: var(--subheading-font-weight); /* 700 — no s2a weight tokens */
+    line-height: var(--s2a-font-line-height-sm); /* 20px */
   }
 
   .image-reveal-thumbs {
-    gap: var(--spacing-300);
+    gap: var(--s2a-spacing-md);
   }
 
   .image-reveal-grip {
