@@ -26,25 +26,25 @@ competingStyles.textContent = `
 document.head.append(competingStyles);
 
 const legacyVariants = [
-  ['heading-xxxxl', 48, 73, 82],
-  ['heading-xxxl', 40, 52, 58],
-  ['heading-xxl', 32, 44, 52],
-  ['heading-xl', 28, 36, 40],
-  ['heading-l', 24, 28, 32],
-  ['heading-m', 20, 24, 28],
-  ['heading-s', 18, 20, 22],
-  ['heading-xs', 16, 18, 20],
-  ['heading-xxs', 14, 14, 14],
+  ['xxxxl-heading', 1.1, 48, 73, 82],
+  ['xxxl-heading', 1.1, 40, 52, 58],
+  ['xxl-heading', 1.1, 32, 44, 52],
+  ['xl-heading', 1.1, 28, 36, 40],
+  ['l-heading', 1.1, 24, 28, 32],
+  ['m-heading', 1.15, 20, 24, 28],
+  ['s-heading', 1.15, 18, 20, 22],
+  ['xs-heading', 1.15, 16, 18, 20],
+  ['xxs-heading', 1.15, 14, 14, 14],
 ];
 
 const c2Variants = [
-  ['heading-super', 48, 73, 82],
-  ['heading-1', 40, 52, 58],
-  ['heading-2', 32, 44, 52],
-  ['heading-3', 28, 36, 40],
-  ['heading-4', 24, 28, 32],
-  ['heading-5', 20, 24, 28],
-  ['heading-6', 18, 20, 22],
+  ['heading-super', 1.1, 48, 73, 82],
+  ['heading-1', 1.1, 40, 52, 58],
+  ['heading-2', 1.1, 32, 44, 52],
+  ['heading-3', 1.1, 28, 36, 40],
+  ['heading-4', 1.1, 24, 28, 32],
+  ['heading-5', 1.15, 20, 24, 28],
+  ['heading-6', 1.15, 18, 20, 22],
 ];
 
 function renderVariants(variants) {
@@ -56,9 +56,12 @@ function renderVariants(variants) {
 }
 
 function expectSizes(variants, expectedIndex) {
-  variants.forEach(([variant, ...sizes]) => {
+  variants.forEach(([variant, lineHeightRatio, ...sizes]) => {
     const heading = document.querySelector(`[data-variant="${variant}"]`);
-    expect(getComputedStyle(heading).fontSize, variant).to.equal(`${sizes[expectedIndex]}px`);
+    const styles = getComputedStyle(heading);
+    expect(styles.fontSize, variant).to.equal(`${sizes[expectedIndex]}px`);
+    expect(parseFloat(styles.lineHeight), variant)
+      .to.be.closeTo(sizes[expectedIndex] * lineHeightRatio, 0.01);
   });
 }
 
@@ -101,7 +104,8 @@ describe('Universal heading size variants', () => {
         <div class="test-block ax-heading-l">
           <p>Body copy</p>
         </div>
-        <h3 class="ax-heading-xxl">Direct heading</h3>
+        <h3 class="ax-heading-xxl">Direct AX heading</h3>
+        <h3 class="heading-xl">Direct Milo heading</h3>
       </main>`;
 
     const block = document.querySelector('.test-block');
@@ -110,6 +114,7 @@ describe('Universal heading size variants', () => {
 
     expect(getComputedStyle(heading).fontSize).to.equal('24px');
     expect(getComputedStyle(document.querySelector('.ax-heading-xxl')).fontSize).to.equal('32px');
+    expect(getComputedStyle(document.querySelector('.heading-xl')).fontSize).to.equal('28px');
     expect(getComputedStyle(block.querySelector('p')).fontSize).to.equal('17px');
   });
 });

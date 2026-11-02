@@ -2037,56 +2037,56 @@ main .section.no-h2-margin .content h2 {
 /* An explicit author override must win block CSS, which loads after this stylesheet. */
 /* stylelint-disable declaration-no-important */
 /* Authored heading-size variants override block defaults without changing document semantics. */
-:is(.heading-xxxxl, .ax-heading-xxxxl, .heading-super) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-xxxxl, .ax-heading-xxxxl, .heading-super) {
+:is(.xxxxl-heading, .heading-xxxxl, .ax-heading-xxxxl, .heading-super) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xxxxl-heading, .heading-xxxxl, .ax-heading-xxxxl, .heading-super) {
   font-size: var(--ax-heading-xxxxl-size) !important;
   line-height: var(--ax-heading-xxxxl-lh) !important;
 }
 
-:is(.heading-xxxl, .ax-heading-xxxl, .heading-1) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-xxxl, .ax-heading-xxxl, .heading-1) {
+:is(.xxxl-heading, .heading-xxxl, .ax-heading-xxxl, .heading-1) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xxxl-heading, .heading-xxxl, .ax-heading-xxxl, .heading-1) {
   font-size: var(--ax-heading-xxxl-size) !important;
   line-height: var(--ax-heading-xxxl-lh) !important;
 }
 
-:is(.heading-xxl, .ax-heading-xxl, .heading-2) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-xxl, .ax-heading-xxl, .heading-2) {
+:is(.xxl-heading, .heading-xxl, .ax-heading-xxl, .heading-2) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xxl-heading, .heading-xxl, .ax-heading-xxl, .heading-2) {
   font-size: var(--ax-heading-xxl-size) !important;
   line-height: var(--ax-heading-xxl-lh) !important;
 }
 
-:is(.heading-xl, .ax-heading-xl, .heading-3) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-xl, .ax-heading-xl, .heading-3) {
+:is(.xl-heading, .heading-xl, .ax-heading-xl, .heading-3) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xl-heading, .heading-xl, .ax-heading-xl, .heading-3) {
   font-size: var(--ax-heading-xl-size) !important;
   line-height: var(--ax-heading-xl-lh) !important;
 }
 
-:is(.heading-l, .ax-heading-l, .heading-4) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-l, .ax-heading-l, .heading-4) {
+:is(.l-heading, .heading-l, .ax-heading-l, .heading-4) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.l-heading, .heading-l, .ax-heading-l, .heading-4) {
   font-size: var(--ax-heading-l-size) !important;
   line-height: var(--ax-heading-l-lh) !important;
 }
 
-:is(.heading-m, .ax-heading-m, .heading-5) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-m, .ax-heading-m, .heading-5) {
+:is(.m-heading, .heading-m, .ax-heading-m, .heading-5) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.m-heading, .heading-m, .ax-heading-m, .heading-5) {
   font-size: var(--ax-heading-m-size) !important;
   line-height: var(--ax-heading-m-lh) !important;
 }
 
-:is(.heading-s, .ax-heading-s, .heading-6) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-s, .ax-heading-s, .heading-6) {
+:is(.s-heading, .heading-s, .ax-heading-s, .heading-6) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.s-heading, .heading-s, .ax-heading-s, .heading-6) {
   font-size: var(--ax-heading-s-size) !important;
   line-height: var(--ax-heading-s-lh) !important;
 }
 
-:is(.heading-xs, .ax-heading-xs) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-xs, .ax-heading-xs) {
+:is(.xs-heading, .heading-xs, .ax-heading-xs) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xs-heading, .heading-xs, .ax-heading-xs) {
   font-size: var(--ax-heading-xs-size) !important;
   line-height: var(--ax-heading-xs-lh) !important;
 }
 
-:is(.heading-xxs, .ax-heading-xxs) :is(h1, h2, h3, h4, h5, h6),
-:is(h1, h2, h3, h4, h5, h6):is(.heading-xxs, .ax-heading-xxs) {
+:is(.xxs-heading, .heading-xxs, .ax-heading-xxs) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xxs-heading, .heading-xxs, .ax-heading-xxs) {
   font-size: var(--ax-heading-xxs-size) !important;
   line-height: var(--ax-heading-xxs-lh) !important;
 }
