@@ -13,6 +13,10 @@
   padding-inline: var(--s2a-spacing-md); /* Figma Grid/container-padding-side: 16 mobile, 32 tablet, 40 desktop */
 }
 
+.image-reveal-grip svg path {
+  stroke-width: 0px;
+}
+
 /* ---------- Section header ---------- */
 .image-reveal-header {
   display: flex;
