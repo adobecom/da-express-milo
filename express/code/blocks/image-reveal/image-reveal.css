@@ -362,10 +362,16 @@
   .image-reveal-sandbox {
     flex-direction: row;
     align-items: flex-start;
+    min-height: 372px; /* Figma tablet Action-panel height — component size, no token */
   }
 
   .image-reveal-panel {
     flex: 0 0 256px; /* Figma Action-panel width — component size, not spacing */
+    align-self: stretch; /* fills the 372px sandbox so the CTA can pin to its bottom */
+  }
+
+  .image-reveal-cta {
+    margin-block-start: auto; /* pins the CTA to the bottom of the sandbox */
   }
 
   .image-reveal-stage {
