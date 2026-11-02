@@ -229,6 +229,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--s2a-spacing-xs);
+  /* Reserves the taller "Change image" panel's height so tab switching
+     doesn't shift layout on mobile/tablet — component size, no token. */
+  min-height: 212px;
 }
 
 .image-reveal-thumb {
@@ -327,6 +330,7 @@
   border-color: transparent;
   border-radius: var(--s2a-border-radius-24);
   font-size: var(--s2a-font-size-md);
+  margin: 0px;
 }
 
 .image-reveal .image-reveal-cta a.con-button:any-link:hover {
@@ -407,7 +411,7 @@
     flex: 0 0 274px; /* Figma desktop Action-panel width */
     gap: var(--s2a-spacing-lg);
     align-self: stretch;
-    justify-content: center; /* Figma Action-panel: justify-center */
+    justify-content: flex-start;
   }
 
   .image-reveal-clip {
@@ -429,6 +433,7 @@
 
   .image-reveal-thumbs {
     gap: var(--s2a-spacing-md);
+    min-height: 0; /* desktop stacks both groups; no tab switching to compensate for */
   }
 
   .image-reveal-grip {
