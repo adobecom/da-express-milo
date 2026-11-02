@@ -51,7 +51,7 @@
 .image-reveal-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--s2a-spacing-md);
+  gap: var(--s2a-spacing-lg);
   min-width: 0;
 }
 
@@ -64,7 +64,7 @@
   aspect-ratio: 2.09; /* Figma slider ≈ 1254×600 at every breakpoint */
   cursor: ew-resize;
   touch-action: pan-y;
-  user-select: none;
+  user-select:164px;
 }
 
 /* Clips only the image layers to the rounded corners; the slider handle
@@ -379,6 +379,7 @@
   .image-reveal-stage {
     order: 0;
     flex: 1 1 auto;
+    max-height: 269px;
   }
 }
 
@@ -457,4 +458,14 @@
     width: 24px;
     height: 24px;
   }
+}
+
+@media (min-width: 1600px) {
+  .image-reveal-stage {
+        max-height: 600px;
+    }
+
+    .image-reveal-cta {
+       margin-block-start: unset;
+    }
 }
