@@ -56,13 +56,20 @@
   --image-reveal-position: 50%;
   position: relative;
   order: -1; /* slider sits above the panel on mobile */
-  overflow: hidden;
   width: 100%;
   aspect-ratio: 2.09; /* Figma slider ≈ 1254×600 at every breakpoint */
-  border-radius: var(--Corner-radius-corner-radius-100);
   cursor: ew-resize;
   touch-action: pan-y;
   user-select: none;
+}
+
+/* Clips only the image layers to the rounded corners; the slider handle
+   stays a sibling so the grip is never clipped at the stage edges. */
+.image-reveal-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--Corner-radius-corner-radius-100);
 }
 
 .image-reveal-layer {
@@ -395,7 +402,7 @@
     justify-content: center; /* Figma Action-panel: justify-center */
   }
 
-  .image-reveal-stage {
+  .image-reveal-clip {
     border-radius: var(--Corner-radius-corner-radius-200);
   }
 

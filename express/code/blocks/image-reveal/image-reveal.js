@@ -157,6 +157,8 @@ export default async function decorate(block) {
 
   // --- Comparison stage ---
   const stage = createTag('div', { class: 'image-reveal-stage', 'data-effect': effect.key });
+  // Layers are clipped by an inner wrapper so the slider grip can overflow the stage edges.
+  const clip = createTag('div', { class: 'image-reveal-clip' });
   const base = createTag('div', { class: 'image-reveal-layer image-reveal-original' });
   const filtered = createTag('div', { class: 'image-reveal-layer image-reveal-filtered', 'aria-hidden': 'true' });
   const handle = createTag('div', {
@@ -170,7 +172,8 @@ export default async function decorate(block) {
   });
   const grip = createTag('span', { class: 'image-reveal-grip', 'aria-hidden': 'true' });
   handle.append(grip);
-  stage.append(base, filtered, handle, buildDuotoneFilter(`${id}-duotone`));
+  clip.append(base, filtered);
+  stage.append(clip, handle, buildDuotoneFilter(`${id}-duotone`));
   const slider = initSlider(stage, handle, () => effect.label.toLowerCase());
 
   const effectThumbImgs = [];
