@@ -458,9 +458,7 @@ export default async function init(el) {
     const ctas = el.querySelector(':scope > .foreground > .headline .ctas.merch-pending');
     if (ctas) {
       const heading = el.querySelector('.headline h1, .headline h2, .headline h3');
-      const settle = () => {
-        const links = [...ctas.querySelectorAll(':scope > a')];
-        if (links.some((a) => a.href.includes('/tools/ost?'))) return false;
+      const decorate = (links) => {
         links.forEach((a) => {
           a.classList.add('button');
           if (!a.getAttribute('aria-label') && heading) {
@@ -469,14 +467,21 @@ export default async function init(el) {
         });
         links[0]?.classList.add('primaryCTA');
         ctas.classList.remove('merch-pending');
+      };
+      const settle = () => {
+        const links = [...ctas.querySelectorAll(':scope > a')];
+        if (links.some((a) => a.href.includes('/tools/ost?'))) return false;
+        decorate(links);
         return true;
       };
       if (!settle()) {
         const observer = new MutationObserver(() => settle() && observer.disconnect());
         observer.observe(ctas, { childList: true });
+        // Commerce failed or is very slow: show the links as plain buttons rather than nothing.
         setTimeout(() => {
+          if (!ctas.classList.contains('merch-pending')) return;
           observer.disconnect();
-          ctas.classList.remove('merch-pending');
+          decorate([...ctas.querySelectorAll(':scope > a')]);
         }, 10000);
       }
     }
