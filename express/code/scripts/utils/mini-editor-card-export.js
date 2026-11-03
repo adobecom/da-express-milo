@@ -5,7 +5,6 @@ import {
   MINI_EDITOR_EXPORT_WIDTH,
 } from './mini-editor-card-renderer.js';
 import measureQuoteExportWidth from './mini-editor-quote-width.js';
-import getSafeUrl from './safe-url.js';
 
 const WORKER_TIMEOUT_MS = 10000;
 const DEFAULT_DOWNLOAD_FILENAME = 'download.png';
@@ -24,14 +23,9 @@ function normalizeModel(model) {
   // Render from the full-res JPEG when available (download/copy is high-res); fall back to the
   // preview URL used by the on-page card.
   const src = model.backgroundFullUrl || model.backgroundUrl;
-
-  const safeUrl = getSafeUrl(src, { allowInlineImageDataUrl: true });
-  if (!safeUrl) {
-    throw new Error(`Mini-editor background URL is invalid: ${src}`);
-  }
   return {
     ...model,
-    backgroundUrl: safeUrl.href,
+    backgroundUrl: new URL(src, window.location.href).href,
     font: { ...model.font, family: resolveFontFamily(model.font.family) },
   };
 }
