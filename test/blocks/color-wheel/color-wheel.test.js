@@ -1,12 +1,14 @@
 /* eslint-env mocha */
 
 import { expect } from '@esm-bundle/chai';
+import ColorThemeExpressController from '../../../express/code/scripts/color-shared/controllers/ColorThemeExpressController.js';
 
 window.isTestEnv = true;
 
 const {
   normalizeSwatchHexes,
   harmonyRulesForSwatchCount,
+  withHarmonyPreviewColors,
   makeTransformPalette,
   paletteFromThemeState,
   swatchHexListFromState,
@@ -62,6 +64,36 @@ describe('color-wheel utilities', () => {
       const rules2 = harmonyRulesForSwatchCount(2).length;
       const rules3 = harmonyRulesForSwatchCount(3).length;
       expect(rules2).to.be.lessThan(rules3);
+    });
+  });
+
+  describe('withHarmonyPreviewColors', () => {
+    it('matches the palettes produced by selecting each main-page harmony', () => {
+      const colors = ['#B72818', '#185DB8', '#99B818', '#63332E', '#232C38'];
+      const initialState = {
+        swatches: colors.map((hex) => ({ hex })),
+        harmonyRule: 'CUSTOM',
+        baseColorIndex: 0,
+      };
+      const rules = harmonyRulesForSwatchCount(colors.length);
+      const previews = withHarmonyPreviewColors(
+        ColorThemeExpressController,
+        initialState,
+        rules,
+      );
+
+      previews.forEach(({ value, previewColors }) => {
+        const mainController = new ColorThemeExpressController({
+          swatches: colors,
+          harmonyRule: initialState.harmonyRule,
+          baseColorIndex: initialState.baseColorIndex,
+        });
+        mainController.setHarmonyRule(value);
+        expect(previewColors).to.deep.equal(
+          mainController.getState().swatches.map((swatch) => swatch.hex),
+        );
+        mainController.destroy();
+      });
     });
   });
 
