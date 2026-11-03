@@ -1,7 +1,5 @@
 // eslint-disable-next-line import/no-cycle
-import {
-  getCachedMetadata, getLibs, getMetadata, toClassName,
-} from './utils.js';
+import { getCachedMetadata, getLibs, toClassName } from './utils.js';
 
 function toCamelCase(name) {
   return toClassName(name).replace(/-([a-z])/g, (g) => g[1].toUpperCase());
@@ -43,12 +41,7 @@ const eventIntentPaths = new Set([
 ]);
 
 export function appendEventIntent(url, pathname = window.location.pathname) {
-  const eventIntent = getMetadata('branch-event-intent')?.trim().toLowerCase();
-  // Keep the original pages enabled until their content adopts the metadata.
-  const enabled = eventIntent
-    ? ['yes', 'y', 'true', 'on'].includes(eventIntent)
-    : eventIntentPaths.has(pathname);
-  if (!enabled) return url;
+  if (!eventIntentPaths.has(pathname)) return url;
 
   const destination = new URL(url);
   destination.searchParams.set('eventIntent', 'true');

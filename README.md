@@ -30,28 +30,6 @@ of preceding highlight or blog marquee blocks and their audience visibility sett
 On desktop, its fixed position is calculated from the first `long-form` section,
 with clearance for sticky navigation and the configured stop element.
 
-### Event intent on template edit links
-
-Set the page metadata `branch-event-intent` to `true` to add `eventIntent=true`
-to template-x edit buttons and image links and template-list edit buttons.
-This opt-in is independent of the page URL: localized pages, translated slugs,
-and regional locales can use the same metadata. Enable it only on pages in
-markets where the Events workflow is supported.
-
-The values `yes`, `y`, `true`, and `on` enable the flag (ignoring case and
-surrounding whitespace). An explicit non-empty value such as `false` or `off`
-disables automatic addition, including on the original event pages.
-Existing destination parameters and fragments are preserved; opting out does
-not remove an eventIntent parameter already authored in a destination.
-
-For rollout compatibility, absent or blank metadata retains the original
-exact-path fallback for `/express/templates/program/event`,
-`/express/create/poster/event`, and `/express/create/flyer/event`.
-Other pages, including localized URLs, require an explicit opt-in.
-Content owners must populate the metadata on applicable localized pages;
-locale prefixes and translated slugs are not inferred. Once all intended pages
-have adopted the metadata, the legacy allowlist can be removed separately.
-
 ### Running a Single Test File
 To run a specific test file with debugging enabled:
 ```sh
