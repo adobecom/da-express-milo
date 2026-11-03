@@ -50,6 +50,12 @@ main .section .grid-marquee h1 {
   display: none;
 }
 
+/* hero-fast: Milo hasn't swapped in the checkout link yet (see decorateLegacyHeadline).
+   Hidden, not removed, so the decorated sibling buttons keep the row's height. */
+.grid-marquee .headline .ctas.merch-pending {
+  visibility: hidden;
+}
+
 .grid-marquee .headline a:not(.primaryCTA) {
   background-color: var(--color-black);
   border-color: var(--color-black);
@@ -142,6 +148,12 @@ main .section .grid-marquee h1 {
 .grid-marquee .face img {
   border-radius: var(--spacing-100);
   width: var(--m-img-w);
+}
+
+/* Authored card images often lack width/height, so the cards would grow as each image
+   arrives. Hold the usual 4:3 box until the real ratio is known (auto takes over on load). */
+.grid-marquee .face img:not([height]) {
+  aspect-ratio: auto 4 / 3;
 }
 
 .grid-marquee .drawer {

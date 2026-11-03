@@ -1204,6 +1204,22 @@ main .section #hero {
   color: initial;
 }
 
+/* hero-fast: scripts.js rendered the hero block early; show its section before Milo
+   clears data-status. The doubled attribute outranks Milo's
+   `main .section:is([data-status='decorated'], [data-status='pending'])`. */
+main > div[data-hero-fast][data-hero-fast] {
+  display: block;
+  position: relative;
+}
+
+/* hero-fast: hold the localnav's height until Milo inserts .feds-localnav after the header
+   (shown below 900px, see Milo styles.css), so the early hero isn't pushed down. */
+@media (max-width: 899px) {
+  header[data-reserve-localnav]:not(:has(+ .feds-localnav)) {
+    margin-bottom: var(--feds-localnav-height);
+  }
+}
+
 /* jank protection for async blocks/sections */
 main .pricing,
 main .hero-animation {

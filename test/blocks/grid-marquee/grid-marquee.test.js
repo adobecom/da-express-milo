@@ -9,7 +9,7 @@ const imports = await Promise.all([
   import('../../../express/code/blocks/grid-marquee/grid-marquee.js'),
   import('../../../express/code/blocks/grid-marquee-hero/grid-marquee-hero.js'),
 ]);
-const { default: decorateGrid } = imports[1];
+const { default: decorateGrid, renderCritical } = imports[1];
 const { default: decorateHero } = imports[2];
 const { getLibs } = await import('../../../express/code/scripts/utils.js');
 const { setConfig } = await import(`${getLibs()}/utils/utils.js`);
@@ -101,6 +101,32 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     expect(headlineInGM).to.not.exist;
     expect(h1InGM).to.not.exist;
     expect(cards).to.exist;
+  });
+
+  it('renderCritical paints legacy markup synchronously and init does not re-render it', async () => {
+    document.body.innerHTML = oldAuthoring;
+    const gm = document.querySelector('.grid-marquee');
+
+    expect(renderCritical(gm)).to.be.true;
+    expect(gm.dataset.heroFast).to.equal('rendered');
+    expect(gm.querySelector('.headline .ctas a.button.primaryCTA')).to.exist;
+    const cardCount = gm.querySelectorAll('.cards-container .card').length;
+    expect(cardCount).to.be.greaterThan(0);
+
+    await decorateGrid(gm);
+    expect(gm.querySelectorAll(':scope > .foreground').length).to.equal(1);
+    expect(gm.querySelectorAll('.headline').length).to.equal(1);
+    expect(gm.querySelectorAll('.cards-container .card').length).to.equal(cardCount);
+    expect(renderCritical(gm)).to.be.true;
+    expect(gm.querySelectorAll(':scope > .foreground').length).to.equal(1);
+  });
+
+  it('renderCritical declines new-mode authoring so init keeps its own path', () => {
+    document.body.innerHTML = newAuthoring;
+    const gm = document.querySelector('.grid-marquee');
+    expect(renderCritical(gm)).to.be.false;
+    expect(gm.dataset.heroFast).to.be.undefined;
+    expect(gm.querySelector('.foreground')).to.not.exist;
   });
 
   const waitForVideo = async (root, timeoutMs = 2000) => {
