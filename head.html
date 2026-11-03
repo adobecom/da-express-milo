@@ -138,6 +138,16 @@
         libs = branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
       }
     }
+    // EXPERIMENT (MWPW-205712): same hints as the site-config Link header
+    // (rel=preload; as=script; crossorigin), but with the Milo URL this host really imports.
+    [`/express/code/scripts/utils.js`, `${libs}/utils/utils.js`].forEach((href) => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'script';
+      link.crossOrigin = 'anonymous';
+      link.href = href;
+      document.head.append(link);
+    });
     preload(`${libs}/styles/styles.css`, 'preload', 'style');
     if (meta('theme') !== 'doodlebug') preload('/express/code/styles/styles.css', 'preload', 'style');
     // Only grid-marquee opts into hero-fast (FAST_HERO_BLOCKS in scripts.js).
