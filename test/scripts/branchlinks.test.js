@@ -37,12 +37,29 @@ describe('branchlinks appendEventIntent', () => {
     });
   });
 
+  ['de', 'fr', 'jp', 'ca_fr'].forEach((locale) => {
+    eventPaths.forEach((path) => {
+      const pathname = `/${locale}${path}`;
+      it(`adds eventIntent=true on localized path ${pathname}`, () => {
+        const url = appendEventIntent('https://example.com/template?source=listing#preview', pathname);
+        const parsedUrl = new URL(url);
+
+        expect(parsedUrl.searchParams.getAll('eventIntent')).to.deep.equal(['true']);
+        expect(parsedUrl.searchParams.get('source')).to.equal('listing');
+        expect(parsedUrl.hash).to.equal('#preview');
+      });
+    });
+  });
+
   [
     '/express/templates/invitation',
     '/express/create/poster',
     '/express/create/flyer/event/other',
     '/express/templates/program/event-other',
-    '/fr/express/templates/program/event',
+    '/de/express/templates/invitation',
+    '/de/express/create/flyer/event/other',
+    '/de/express/templates/program/event-other',
+    '/de/express/templates/program/event/',
   ].forEach((pathname) => {
     it(`leaves the destination unchanged on ${pathname}`, () => {
       const destination = 'https://example.com/template?source=listing#preview';
@@ -54,7 +71,7 @@ describe('branchlinks appendEventIntent', () => {
   it('uses the current page pathname by default', () => {
     const originalUrl = window.location.href;
     try {
-      window.history.replaceState(null, '', eventPaths[0]);
+      window.history.replaceState(null, '', `/de${eventPaths[0]}`);
       const url = appendEventIntent('https://example.com/template');
       expect(new URL(url).searchParams.get('eventIntent')).to.equal('true');
     } finally {

@@ -34,14 +34,14 @@ function getPlacement(btn) {
   return placement;
 }
 
-const eventIntentPaths = new Set([
+const eventIntentPaths = [
   '/express/templates/program/event',
   '/express/create/poster/event',
   '/express/create/flyer/event',
-]);
+];
 
 export function appendEventIntent(url, pathname = window.location.pathname) {
-  if (!eventIntentPaths.has(pathname)) return url;
+  if (!eventIntentPaths.some((path) => pathname.endsWith(path))) return url;
 
   const destination = new URL(url);
   destination.searchParams.set('eventIntent', 'true');
