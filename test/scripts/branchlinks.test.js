@@ -22,7 +22,15 @@ const {
 
 document.body.innerHTML = await readFile({ path: './mocks/branchlinks.html' });
 
+function setMeta(name, content) {
+  document.head.append(createTag('meta', { name, content }));
+}
+
 describe('branchlinks appendEventIntent', () => {
+  afterEach(() => {
+    document.head.querySelectorAll('meta[name="branch-event-intent"]').forEach((meta) => meta.remove());
+  });
+
   const eventPaths = [
     '/express/templates/program/event',
     '/express/create/poster/event',
@@ -76,11 +84,62 @@ describe('branchlinks appendEventIntent', () => {
 
     expect(new URL(url).searchParams.getAll('eventIntent')).to.deep.equal(['true']);
   });
-});
 
-function setMeta(name, content) {
-  document.head.append(createTag('meta', { name, content }));
-}
+  [
+    '/fr/express/templates/program/event',
+    '/fr/express/creer/flyer/evenement',
+    '/de/express/erstellen/poster/veranstaltung',
+    '/jp/express/create/flyer/event',
+    '/ca_fr/express/creer/flyer/evenement',
+  ].forEach((pathname) => {
+    it(`supports authored event intent on localized page ${pathname}`, () => {
+      setMeta('branch-event-intent', 'true');
+
+      const url = appendEventIntent('https://example.com/template?source=listing#preview', pathname);
+      const parsed = new URL(url);
+      expect(parsed.searchParams.get('eventIntent')).to.equal('true');
+      expect(parsed.searchParams.get('source')).to.equal('listing');
+      expect(parsed.hash).to.equal('#preview');
+    });
+  });
+
+  ['yes', 'y', 'on', ' TRUE '].forEach((value) => {
+    it(`accepts the authored opt-in value "${value}"`, () => {
+      setMeta('branch-event-intent', value);
+
+      const url = appendEventIntent('https://example.com/template', '/localized-event-page');
+
+      expect(new URL(url).searchParams.get('eventIntent')).to.equal('true');
+    });
+  });
+
+  ['false', 'off', 'no', 'invalid'].forEach((value) => {
+    it(`overrides the legacy allowlist when metadata is "${value}"`, () => {
+      setMeta('branch-event-intent', value);
+      const destination = 'https://example.com/template?source=listing#preview';
+
+      expect(appendEventIntent(destination, eventPaths[0])).to.equal(destination);
+    });
+  });
+
+  it('preserves legacy eligibility when authored metadata is blank', () => {
+    setMeta('branch-event-intent', ' ');
+
+    expect(new URL(appendEventIntent('https://example.com/template', eventPaths[0]))
+      .searchParams.get('eventIntent')).to.equal('true');
+  });
+
+  it('replaces duplicate event intent values on an opted-in localized page', () => {
+    setMeta('branch-event-intent', 'true');
+
+    const url = appendEventIntent(
+      'https://example.com/template?eventIntent=false&eventIntent=true',
+      '/fr/express/creer/flyer/evenement',
+    );
+
+    expect(new URL(url).searchParams.getAll('eventIntent')).to.deep.equal(['true']);
+  });
+});
 
 describe('branchlinks getTrackingAppendedURL', () => {
   let urls;
