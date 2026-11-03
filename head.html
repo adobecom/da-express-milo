@@ -114,22 +114,38 @@
     }
   })();
 
-  // hero-fast: start the hero block's code at parse time instead of after scripts.js ->
-  // utils.js -> Milo. Utils and global styles are preloaded via site-config Link headers
-  // (MWPW-205712), so they are deliberately not repeated here.
-  (function preloadFastHero() {
+  // Global styles and the hero-fast block are otherwise discovered only after scripts.js ->
+  // utils.js -> Milo. Start them at parse time. utils.js is deliberately not hinted here: it is
+  // preloaded via site-config Link headers (MWPW-205712). Milo's styles href mirrors setLibs()
+  // in express/code/scripts/utils.js.
+  (function preloadCriticalPath() {
     if (headAlreadyLoaded) return;
-    const heroFast = document.querySelector('meta[name="hero-fast"]')?.content.trim().toLowerCase();
-    // Only grid-marquee opts into hero-fast (FAST_HERO_BLOCKS in scripts.js).
-    if (!['on', 'force'].includes(heroFast)) return;
-    const base = `${window.location.origin}/express/code/blocks/grid-marquee/grid-marquee`;
-    [[`${base}.css`, 'preload', 'style'], [`${base}.js`, 'modulepreload']].forEach(([href, rel, as]) => {
+    const preload = (href, rel, as) => {
       const link = document.createElement('link');
       link.rel = rel;
       link.href = href;
       if (as) link.as = as;
       document.head.append(link);
-    });
+    };
+    const meta = (name) => document.querySelector(`meta[name="${name}"]`)?.content.trim().toLowerCase();
+    const { hostname, search, origin } = window.location;
+    let libs = '/libs';
+    if (['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) {
+      const branch = new URLSearchParams(search).get('milolibs') || 'main';
+      if (!/^[a-zA-Z0-9_-]+$/.test(branch)) return;
+      if (branch === 'local') libs = 'http://localhost:6456/libs';
+      else if (!(branch === 'main' && hostname.includes('.stage.'))) {
+        libs = branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
+      }
+    }
+    preload(`${libs}/styles/styles.css`, 'preload', 'style');
+    if (meta('theme') !== 'doodlebug') preload('/express/code/styles/styles.css', 'preload', 'style');
+    // Only grid-marquee opts into hero-fast (FAST_HERO_BLOCKS in scripts.js).
+    if (['on', 'force'].includes(meta('hero-fast'))) {
+      const base = `${origin}/express/code/blocks/grid-marquee/grid-marquee`;
+      preload(`${base}.css`, 'preload', 'style');
+      preload(`${base}.js`, 'modulepreload');
+    }
   })();
 
   flagMeta.content = 'true';

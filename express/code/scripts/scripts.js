@@ -473,7 +473,8 @@ CONFIG.decorateArea = decorateAreaWithLCP;
   }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
-    const existing = document.querySelector(`link[href="${path}"]`);
+    // Match rel=stylesheet only: head.html may <link rel="preload"> the same href.
+    const existing = document.querySelector(`link[rel="stylesheet"][href="${path}"]`);
     if (existing) return;
 
     const link = document.createElement('link');
