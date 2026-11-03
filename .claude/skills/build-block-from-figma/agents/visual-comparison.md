@@ -136,17 +136,20 @@ For each breakpoint, evaluate:
 - Padding, margins, and gaps between elements.
 - Spacing between the block and its container edges.
 - Spacing between text elements (heading → body → CTA).
-- Verify values map to `--spacing-*` tokens.
+- Verify spacing uses the exact named Figma variable where available
+  (including S2A variables), or the exact Figma value when hardcoded.
 
 ### Typography
 - Font size, weight, and line height are visually consistent.
 - Heading vs body font sizes are correct per Figma.
-- Text colour matches the design — verify against `--color-*` tokens.
+- Text colour matches the design — verify against its named Figma variable
+  where available, including S2A variables, or the exact hardcoded value.
 
 ### Colours & backgrounds
 - Background colours, gradients, or images match Figma.
 - Foreground element colours (text, icons, borders) match.
-- Verify colours against Express `--color-*` / `--gradient-*` variables.
+- Verify colours against the named Figma variable in Express or the S2A
+  stylesheet, or the exact hardcoded Figma value.
 
 ### Media
 - **Element presence check (critical)**: cross-reference the

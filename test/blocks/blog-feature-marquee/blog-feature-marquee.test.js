@@ -333,4 +333,140 @@ describe('Blog Feature Marquee block', () => {
       '/express/learn/blog/report-writing-format-guide',
     ]);
   });
+
+  it('sorts matching posts by date descending regardless of query-index order', async () => {
+    document.body.innerHTML = `
+      <div class="blog-feature-marquee" id="date-sort-block">
+        <div>
+          <div>
+            <p>Featured</p>
+            <h2>Date sort</h2>
+            <p>Most recent posts should come first.</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <p>Design</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <p><a href="/express/learn/blog">View all</a></p>
+          </div>
+        </div>
+      </div>
+    `;
+    const block = document.getElementById('date-sort-block');
+
+    // Deliberately out of date order in the index: oldest, newest, middle.
+    // A naive implementation that takes matches in index order (without sorting
+    // by date) would return them in this same scrambled order.
+    fetchStub.resolves({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            path: '/express/learn/blog/oldest',
+            title: 'Oldest',
+            teaser: 'Oldest teaser',
+            image: '/img/oldest.png',
+            date: 1700000000,
+            author: 'Adobe Express',
+            tags: 'design',
+            category: 'Design',
+          },
+          {
+            path: '/express/learn/blog/newest',
+            title: 'Newest',
+            teaser: 'Newest teaser',
+            image: '/img/newest.png',
+            date: 1763000000,
+            author: 'Adobe Express',
+            tags: 'design',
+            category: 'Design',
+          },
+          {
+            path: '/express/learn/blog/middle',
+            title: 'Middle',
+            teaser: 'Middle teaser',
+            image: '/img/middle.png',
+            date: 1730000000,
+            author: 'Adobe Express',
+            tags: 'design',
+            category: 'Design',
+          },
+        ],
+      }),
+    });
+
+    await decorate(block);
+
+    const cardLinks = [...block.querySelectorAll('.blog-feature-marquee-card')]
+      .map((card) => card.getAttribute('href'));
+    expect(cardLinks).to.deep.equal([
+      '/express/learn/blog/newest',
+      '/express/learn/blog/middle',
+      '/express/learn/blog/oldest',
+    ]);
+  });
+
+  it('sorts posts with missing dates after dated posts', async () => {
+    document.body.innerHTML = `
+      <div class="blog-feature-marquee" id="undated-sort-block">
+        <div>
+          <div>
+            <p>Featured</p>
+            <h2>Undated sort</h2>
+            <p>Undated posts should come last.</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <p>Design</p>
+          </div>
+        </div>
+        <div>
+          <div>
+            <p><a href="/express/learn/blog">View all</a></p>
+          </div>
+        </div>
+      </div>
+    `;
+    const block = document.getElementById('undated-sort-block');
+    const post = (slug, date) => ({
+      path: `/express/learn/blog/${slug}`,
+      title: slug,
+      image: `/img/${slug}.png`,
+      date,
+      author: 'Adobe Express',
+      tags: 'design',
+      category: 'Design',
+    });
+
+    // query-index uses "" for posts without a publication date
+    fetchStub.resolves({
+      ok: true,
+      json: async () => ({
+        data: [
+          post('undated-a', ''),
+          post('older', 1700000000),
+          post('undated-b', ''),
+          post('newer', '1763000000'),
+        ],
+      }),
+    });
+
+    await decorate(block);
+
+    const cardLinks = [...block.querySelectorAll('.blog-feature-marquee-card')]
+      .map((card) => card.getAttribute('href'));
+    expect(cardLinks.slice(0, 2)).to.deep.equal([
+      '/express/learn/blog/newer',
+      '/express/learn/blog/older',
+    ]);
+    expect(cardLinks.slice(2).sort()).to.deep.equal([
+      '/express/learn/blog/undated-a',
+      '/express/learn/blog/undated-b',
+    ]);
+  });
 });

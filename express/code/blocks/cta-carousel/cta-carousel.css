@@ -48,6 +48,9 @@
 .cta-carousel .card {
     margin: 0 8px;
     position: relative;
+}
+
+.cta-carousel .card a {
     cursor: pointer;
 }
 
@@ -73,7 +76,7 @@
 
 .cta-carousel.gen-ai:not(.quick-action) .card .card-sleeve {
     height: 200px;
-    width: unset;
+    width: auto;
 }
 
 .cta-carousel.quick-action .card.gen-ai-action .card-sleeve {
@@ -272,10 +275,6 @@
     height: 100%;
     width: 100%;
     border-radius: 8px;
-}
-
-.cta-carousel.gen-ai:not(.quick-action) .card .card-sleeve { /* stylelint-disable-line no-duplicate-selectors */
-    width: auto;
 }
 
 .cta-carousel.gen-ai:not(.quick-action) .card .card-sleeve .media-wrapper,

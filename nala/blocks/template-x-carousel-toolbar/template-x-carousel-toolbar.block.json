@@ -18,6 +18,25 @@
         "@default",
         "@express"
       ]
+    },
+    {
+      "tcid": "1",
+      "name": "@template-x-carousel-toolbar-search-bar",
+      "selector": "div.template-x-carousel-toolbar.search-bar",
+      "path": "/drafts/nala/blocks/template-x-carousel-toolbar/template-x-carousel-toolbar-search-bar",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@template-x-carousel-toolbar",
+        "@search-bar",
+        "@login",
+        "@express"
+      ]
     }
   ]
 }

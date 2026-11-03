@@ -79,7 +79,7 @@ main .section .verb-express-hero p {
 
 .verb-express-hero .copy :is(h1, h2, h3, h4, h5, h6) {
   color: var(--color-gray-900);
-  font-family: var(--s2a-font-family-heading);
+  font-family: var(--heading-font-family);
   font-size: var(--heading-font-size-l);
   font-weight: var(--heading-font-weight-extra);
   /* Figma spec: 32px on a 36px heading (tight display leading) — no
@@ -120,6 +120,12 @@ main .section .verb-express-hero p {
   margin: 0;
   text-align: center;
   width: 100%;
+}
+
+main .verb-express-hero .cta-dropzone a.con-button.button-xl:any-link {
+  /* Hardcoded to match figma - will need to clean up after global button styles are fixed */
+  font-size: 18px;
+  line-height: 20px;
 }
 
 /* Keep the authored primary CTA in Challenger 1 when the mobile fork uses

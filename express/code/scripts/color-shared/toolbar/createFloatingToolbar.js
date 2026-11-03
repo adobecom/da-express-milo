@@ -297,6 +297,7 @@ export async function initFloatingToolbar(container, options = {}) {
     i18n: { ...toolbarI18n, ...i18nOverrides },
     drawerI18n,
     onCTA,
+    inModal,
     onEditClick,
     showEditLabel,
     actionButtons,

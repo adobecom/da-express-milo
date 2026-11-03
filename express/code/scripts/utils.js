@@ -48,6 +48,89 @@ export function getCachedMetadata(name) {
   return cachedMetadata[name];
 }
 
+export const FIXED_TOP_OFFSET_PROPERTY = '--express-fixed-top-height';
+export const FIXED_TOP_OFFSET_CHANGE_EVENT = 'express:fixed-top-offset-change';
+
+export function usesC2Gnav(doc = document) {
+  return ['foundation', 'gnav-foundation']
+    .some((name) => getMetadata(name, doc)?.trim().toLowerCase() === 'c2');
+}
+
+export function getFixedTopOffset(doc = document) {
+  const value = doc.defaultView?.getComputedStyle(doc.documentElement)
+    .getPropertyValue(FIXED_TOP_OFFSET_PROPERTY);
+  const offset = Number.parseFloat(value);
+  if (!Number.isNaN(offset)) return offset;
+  return doc.querySelector('header.global-navigation, header')?.offsetHeight || 0;
+}
+
+export async function measureFixedTopOffset(config, doc = document) {
+  const header = doc.querySelector('header.global-navigation, header');
+  const headerHeight = header?.offsetHeight || 0;
+  if (!header && !usesC2Gnav(doc)) return 0;
+
+  try {
+    if (usesC2Gnav(doc)) {
+      const globalNavigation = await config?.federal?.fedsGlobalNavigation;
+      return globalNavigation?.getGnavHeight?.() ?? headerHeight;
+    }
+
+    const { getGnavHeight } = await import(`${getLibs()}/blocks/global-navigation/utilities/utilities.js`);
+    return getGnavHeight();
+  } catch (error) {
+    window.lana?.log(`Error measuring fixed navigation stack: ${error?.message || error}`, {
+      tags: 'fixed-top-offset',
+      severity: 'error',
+    });
+    return headerHeight;
+  }
+}
+
+export async function trackFixedTopOffset(config, doc = document) {
+  const root = doc.documentElement;
+  let animationFrame;
+  let stopped = false;
+
+  const update = async () => {
+    const previousHeight = getFixedTopOffset(doc);
+    const height = await measureFixedTopOffset(config, doc);
+    if (stopped) return;
+    root.style.setProperty(FIXED_TOP_OFFSET_PROPERTY, `${height}px`);
+    if (height !== previousHeight) {
+      window.dispatchEvent(new CustomEvent(FIXED_TOP_OFFSET_CHANGE_EVENT, {
+        detail: { height },
+      }));
+    }
+  };
+  const scheduleUpdate = () => {
+    window.cancelAnimationFrame(animationFrame);
+    animationFrame = window.requestAnimationFrame(update);
+  };
+
+  await update();
+
+  const resizeObserver = typeof ResizeObserver === 'undefined'
+    ? null
+    : new ResizeObserver(scheduleUpdate);
+  doc.querySelectorAll(`
+    header.global-navigation,
+    header,
+    .feds-localnav,
+    .feds-promo-aside-wrapper,
+    .feds-breadcrumbs-wrapper
+  `).forEach((element) => resizeObserver?.observe(element));
+  window.addEventListener('resize', scheduleUpdate);
+  window.addEventListener('feds:compactchange', scheduleUpdate);
+
+  return () => {
+    stopped = true;
+    window.cancelAnimationFrame(animationFrame);
+    resizeObserver?.disconnect();
+    window.removeEventListener('resize', scheduleUpdate);
+    window.removeEventListener('feds:compactchange', scheduleUpdate);
+  };
+}
+
 export function isIPad() {
   return /iPad/.test(navigator.userAgent)
     || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -273,6 +356,13 @@ export function getIconElementDeprecated(icons, size, alt, additionalClassName, 
   return icon;
 }
 
+export function getBrandingLogoElement(name, size, alt, additionalClassName) {
+  const isRTL = getComputedStyle(document.documentElement).direction === 'rtl';
+  const brandingName = name ?? 'adobe-express-logo';
+  const logoName = brandingName === 'adobe-express-logo' && isRTL ? 'adobe-express-logo-rtl' : brandingName;
+  return getIconElementDeprecated(logoName, size, alt, additionalClassName);
+}
+
 export async function fixIcons(el = document) {
   /* backwards compatible icon handling, deprecated */
   el.querySelectorAll('svg use[href^="./_icons_"]').forEach(($use) => {
@@ -491,6 +581,32 @@ export function preDecorateSections(area) {
         const showwith = sectionMeta.showwith.toLowerCase();
         if (['fqa-off', 'fqa-on', 'fqa-non-qualified', 'fqa-qualified-mobile', 'fqa-qualified-desktop', 'fqa-qualified-ios', 'fqa-qualified-android'].includes(showwith)) hideQuickActionsOnDevices(navigator.userAgent);
         sectionRemove = showWithSearchParam !== null ? showWithSearchParam !== 'on' : getMetadata(showwith) !== 'on';
+      }
+      // section swapped for a fragment via page metadata, e.g.
+      // `metadata-fragment: wayfinder-promo` → the page metadata value is the
+      // fragment path; a missing or non-fragment value removes the section.
+      const fragmentKey = toClassName(sectionMeta['metadata-fragment']);
+      if (!sectionRemove && fragmentKey) {
+        const value = getMetadata(fragmentKey)?.trim();
+        let href = null;
+        try {
+          const url = value && new URL(value, window.location.origin);
+          // Runs before Milo localizes metadata, so authored aem.page/live links
+          // still point at the (auth-gated) preview host: re-root them on this origin.
+          const isAemHost = url && /\.(aem|hlx)\.(page|live)$/.test(url.hostname);
+          if (url?.pathname.includes('/fragments/')) {
+            href = isAemHost ? `${window.location.origin}${url.pathname}${url.search}${url.hash}` : url.href;
+          }
+        } catch { /* reported below */ }
+        if (href) {
+          [...section.children].forEach((child) => {
+            if (child !== sectionMetaBlock) child.remove();
+          });
+          sectionMetaBlock.before(createTag('p', {}, createTag('a', { href }, href)));
+        } else {
+          if (value) window.lana?.log(`metadata-fragment: not a fragment path "${value}"`, { tags: 'utils', severity: 'error' });
+          sectionRemove = true;
+        }
       }
       if (sectionRemove) section.remove();
       else if (sectionMeta.anchor) section.id = sectionMeta.anchor;

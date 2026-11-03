@@ -15,8 +15,24 @@ function customReporter() {
     },
   };
 }
+
+// Headless Chrome only renders the tab in front, and test files run side by side
+// in separate tabs. A test that needs real rendering (IntersectionObserver,
+// scrolling) calls executeServerCommand('bring-to-front') first.
+function bringToFront() {
+  return {
+    name: 'bring-to-front',
+    async executeCommand({ command, session }) {
+      if (command !== 'bring-to-front') return undefined;
+      await session.browser.getPage?.(session.id)?.bringToFront();
+      return true;
+    },
+  };
+}
+
 export default {
   nodeResolve: true,
+  plugins: [bringToFront()],
   coverageConfig: {
     exclude: [
       '**/mocks/**',

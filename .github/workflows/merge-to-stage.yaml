@@ -2,7 +2,7 @@ name: Merge to stage
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Run every 2 hours
+    - cron: '23 */2 * * *' # Run every 2 hours (off-peak minute to reduce GitHub scheduling delays)
   workflow_dispatch: # Allow manual trigger
   repository_dispatch:
     types: [merge-to-stage]

@@ -30,13 +30,56 @@ await Promise.all(styleSheets.map((href) => new Promise((resolve, reject) => {
 })));
 
 async function prepBlock(filePath) {
-  document.body.innerHTML = await readFile({ path: filePath });
+  const html = await readFile({ path: filePath });
+  const fixture = new DOMParser().parseFromString(html, 'text/html');
+  document.body.replaceChildren(
+    ...[...fixture.body.childNodes].map((node) => document.importNode(node, true)),
+  );
   const block = document.querySelector('.verb-express-hero');
   await decorate(block);
   return block;
 }
 
 describe('verb-express-hero', () => {
+  const logoMetadataKeys = ['inject-branding-logo', 'marquee-inject-logo'];
+  const metadataSelector = logoMetadataKeys
+    .map((key) => `meta[name="${key}"]`)
+    .join(', ');
+  let originalMetadata;
+  let originalPlaceholders;
+
+  function setLogoMetadata(name, content) {
+    const meta = document.createElement('meta');
+    meta.name = name;
+    meta.content = content;
+    document.head.append(meta);
+  }
+
+  beforeEach(() => {
+    originalPlaceholders = window.mph;
+    window.mph = {
+      'verb-dropzone-resume-builder-upload-cta': 'Upload your resume',
+      'verb-widget-resume-builder-file-limit': 'PDF, DOCX, or DOC up to 20 MB.',
+      'verb-dropzone-legal': 'Your file will be securely handled.',
+      'verb-dropzone-legal-2-ai': 'Review the Terms of Use and Privacy Policy.',
+      'verb-widget-terms-of-use': 'Terms of Use',
+      'verb-widget-privacy-policy': 'Privacy Policy',
+      'verb-widget-tool-tip': 'Files are secured.',
+      'verb-dropzone-drag-overlay': 'Drop your file here',
+      'close-dialog': 'Close error',
+    };
+    originalMetadata = [...document.head.querySelectorAll(metadataSelector)];
+    originalMetadata.forEach((meta) => meta.remove());
+  });
+
+  afterEach(() => {
+    if (originalPlaceholders === undefined) delete window.mph;
+    else window.mph = originalPlaceholders;
+    document.head.querySelectorAll(metadataSelector).forEach((meta) => meta.remove());
+    document.head.append(...originalMetadata);
+    document.body.replaceChildren();
+  });
+
   it('decorates successfully', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block).to.exist;
@@ -50,9 +93,40 @@ describe('verb-express-hero', () => {
     expect(block.querySelector('.image-column picture')).to.exist;
   });
 
-  it('injects the Adobe brand logo into the heading group', async () => {
+  it('omits the logo without metadata and preserves authored copy', async () => {
     const block = await prepBlock('./mocks/default.html');
-    expect(block.querySelector('.copy-column .heading-group > .express-logo')).to.exist;
+    expect(block.querySelector('.express-logo')).not.to.exist;
+    expect(block.querySelector('.copy h1')).to.exist;
+    expect(block.querySelector('.copy p')).to.exist;
+    expect(block.querySelector('.heading-group').textContent).not.to.include('null');
+  });
+
+  logoMetadataKeys.forEach((key) => {
+    ['on', 'yes', 'true', ' ON ', ' Yes ', ' TRUE '].forEach((value) => {
+      it(`injects the Adobe brand logo when ${key} is "${value}"`, async () => {
+        setLogoMetadata(key, value);
+        const block = await prepBlock('./mocks/default.html');
+        expect(block.querySelector('.copy-column .heading-group > .express-logo')).to.exist;
+      });
+    });
+  });
+
+  ['', 'off', 'no', 'false'].forEach((value) => {
+    it(`omits the logo when both metadata keys are "${value}"`, async () => {
+      logoMetadataKeys.forEach((key) => setLogoMetadata(key, value));
+      const block = await prepBlock('./mocks/default.html');
+      expect(block.querySelector('.express-logo')).not.to.exist;
+    });
+  });
+
+  logoMetadataKeys.forEach((enabledKey) => {
+    it(`injects the logo when only ${enabledKey} is enabled`, async () => {
+      logoMetadataKeys.forEach((key) => {
+        setLogoMetadata(key, key === enabledKey ? 'yes' : 'off');
+      });
+      const block = await prepBlock('./mocks/default.html');
+      expect(block.querySelector('.copy-column .heading-group > .express-logo')).to.exist;
+    });
   });
 
   it('keeps the authored heading and body copy, separate from the dropzone', async () => {
@@ -87,8 +161,8 @@ describe('verb-express-hero', () => {
     const dropzone = block.querySelector('.cta-dropzone .verb-dropzone-area');
     expect(dropzone).to.exist;
     expect(dropzone.tagName).to.equal('BUTTON');
-    expect(dropzone.querySelector('.verb-dropzone-heading')).to.exist;
-    expect(dropzone.querySelector('.verb-dropzone-sub')).to.exist;
+    expect(dropzone.querySelector('.verb-dropzone-heading').textContent).to.equal('Upload your resume');
+    expect(dropzone.querySelector('.verb-dropzone-sub').textContent).to.equal('PDF, DOCX, or DOC up to 20 MB.');
     expect(block.querySelector('input[type="file"]')).to.exist;
   });
 

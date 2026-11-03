@@ -160,9 +160,12 @@ function makeCtaLink(cardCta, styleName, styleNameId) {
 export function createFontCard(fontDef, previewText, fontSize, cardCta, strings = {}) {
   injectStyles();
   const {
-    copyLabel, copiedLabel, copiedMessage, sampleText,
+    copyLabel, copiedLabel, copiedMessage, sampleText, fontNames,
   } = { ...DEFAULT_PLACEHOLDERS, ...strings };
   const text = previewText || sampleText;
+  // Localized display name; analytics (daa-lh/daa-ll) keep the English
+  // styleName so reporting stays consistent across locales.
+  const displayName = fontNames?.[fontDef.id] || fontDef.styleName;
 
   const card = document.createElement('div');
   card.className = 'font-card';
@@ -177,7 +180,7 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   // is the tab stop. aria-label overrides name-from-content so arrow-key
   // navigation announces the style name, not the (often garbled) preview text.
   card.tabIndex = -1;
-  card.setAttribute('aria-label', fontDef.styleName);
+  card.setAttribute('aria-label', displayName);
 
   // Body wraps preview + copy btn so the overlay is bounded above the footer.
   const body = document.createElement('div');
@@ -243,7 +246,7 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
 
   const name = document.createElement('span');
   name.className = 'font-card-name';
-  name.textContent = fontDef.styleName;
+  name.textContent = displayName;
 
   footer.append(name);
   if (cardCta) {

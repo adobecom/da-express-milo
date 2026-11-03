@@ -171,6 +171,16 @@ describe('Columns', () => {
     expect(button.classList.contains('dark')).to.be.true;
   });
 
+  it('Supports a Milo-authored black fill button', async () => {
+    document.body.innerHTML = '<div class="ax-columns"><div><div><p><strong><a href="https://www.adobe.com/#_button-fill">CTA</a></strong></p></div></div></div>';
+    const columns = document.querySelector('.ax-columns');
+    await decorate(columns);
+
+    const button = columns.querySelector('a.button.fill');
+    expect(button).to.exist;
+    expect(button.href).to.equal('https://www.adobe.com/');
+  });
+
   it('Should decorate two buttons in a row', async () => {
     document.body.innerHTML = fullsizeTwoButtons;
     const columns = document.querySelector('.ax-columns');
@@ -219,6 +229,25 @@ describe('Logo injection', () => {
     const logo = block.querySelector('.express-logo');
     expect(logo).to.exist;
     expect(logo.classList.contains('icon-adobe-express-photos-logo')).to.be.true;
+  });
+
+  it('Should select the RTL logo only when logo injection is enabled', async () => {
+    const originalDirection = document.documentElement.dir;
+    document.documentElement.dir = 'rtl';
+    try {
+      document.body.innerHTML = injectLogo;
+      let block = document.querySelector('.ax-columns');
+      await decorate(block);
+      expect(block.querySelector('.express-logo')).to.not.exist;
+
+      document.body.innerHTML = injectLogo;
+      addMeta('marquee-inject-logo', 'on');
+      block = document.querySelector('.ax-columns');
+      await decorate(block);
+      expect(block.querySelector('.express-logo').getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo-rtl.svg');
+    } finally {
+      document.documentElement.dir = originalDirection;
+    }
   });
 
   it('Should inject the acrobat co-brand logo when marquee-inject-acrobat-logo is on', async () => {

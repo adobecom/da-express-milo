@@ -5,7 +5,7 @@ import initPanel from './panel.js';
 import { initFromUrl, initFonts } from './state.js';
 import createFontCardGrid from './fontCardGrid.js';
 import createToolbar from './toolbar.js';
-import loadFontGeneratorPlaceholders from './placeholders.js';
+import loadFontGeneratorPlaceholders, { loadFontLabels } from './placeholders.js';
 
 let filterPanelCount = 0;
 
@@ -185,7 +185,11 @@ async function decorateAsync(block) {
 
   // Await resolved copy before building any text-bearing component so the
   // user never sees English placeholder text swapped out (color-extract.js).
-  const strings = await placeholdersPromise;
+  const [placeholders, fontLabels] = await Promise.all([
+    placeholdersPromise,
+    loadFontLabels(fonts),
+  ]);
+  const strings = { ...placeholders, ...fontLabels };
   const content = getContent(strings);
 
   // Build the full component tree hidden alongside the skeleton so Spectrum

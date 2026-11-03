@@ -322,6 +322,7 @@ export async function createActionMenuComponent(options = {}) {
     onRedo,
     onGenerateRandom,
     transformPalette,
+    randomPaletteAnnouncement,
     getName,
     paletteTags,
     paletteId,
@@ -344,7 +345,7 @@ export async function createActionMenuComponent(options = {}) {
   let pushStateFn = null;
   let getCurrentPaletteFn = null;
   if (enableState) {
-    const state = createActionMenuState(stateKey, { transformPalette });
+    const state = createActionMenuState(stateKey, { transformPalette, randomPaletteAnnouncement });
     handleUndoState = state.onUndo;
     handleRedoState = state.onRedo;
     handleGenerateRandomState = state.onGenerateRandom;

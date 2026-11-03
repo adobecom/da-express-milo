@@ -2,6 +2,7 @@
 /* eslint-disable camelcase */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { getTrackingAppendedURL } from '../../scripts/branchlinks.js';
+import { transformLinkToAnimation } from '../../scripts/utils/media.js';
 
 let createTag; let loadScript;
 let getConfig; let isStage;
@@ -19,6 +20,10 @@ export const DCTX_ID_MAP = {
   'context-business': {
     stage: 'v:2,s,bg:CCEX2026,fc1e76f0-9167-11f1-a9b0-29d697c01ae6',
     prod: 'v:2,s,bg:CCEX2026,ea8e92e0-9166-11f1-a9b9-d34066769dc6',
+  },
+  'context-color-palette': {
+    stage: 'v:2,s,bg:colorSUSI,ac006510-c872-11f1-bbd0-c169ec4f4554',
+    prod: 'v:2,s,bg:colorSUSI,f30b9580-d144-11f1-b05d-b5538e129034',
   },
 };
 
@@ -545,6 +550,48 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
   return layout;
 }
 
+/**
+ * Waits for `.modal-curtain` to satisfy `predicate`, then calls `callback`
+ * with it — immediately if already satisfied, otherwise via a one-shot
+ * MutationObserver. Shared by blurModalCurtain and the video autoplay retry,
+ * since both just need to react to the curtain's open state.
+ */
+function onModalCurtainMatch(predicate, callback) {
+  const curtain = document.querySelector('.modal-curtain');
+  if (curtain && predicate(curtain)) {
+    callback(curtain);
+    return;
+  }
+  const observer = new MutationObserver(() => {
+    const c = document.querySelector('.modal-curtain');
+    if (c && predicate(c)) {
+      callback(c);
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+}
+
+function playSusiVideoOnModalOpen(video) {
+  onModalCurtainMatch(
+    (curtain) => curtain.classList.contains('is-open'),
+    () => video.play().catch(() => { /* ignore — may still be blocked */ }),
+  );
+}
+
+function buildSusiMedia(row) {
+  const videoLink = row?.querySelector('a[href$=".mp4"]');
+  if (!videoLink) return null;
+  transformLinkToAnimation(videoLink);
+  const video = row.querySelector('video');
+  if (!video) return row;
+  video.classList.add('susi-image');
+  video.setAttribute('disablepictureinpicture', '');
+  video.play().catch(() => { /* ignore — autoplay may be blocked until visible */ });
+  playSusiVideoOnModalOpen(video);
+  return row;
+}
+
 async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const rows = el.querySelectorAll(':scope > div > div');
   const isColor = el.classList.contains('color');
@@ -561,6 +608,9 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
 
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
+  const mobileTitle = isColor ? rows[3]?.textContent?.trim() : undefined;
+  const isDesktopViewport = window.matchMedia('(min-width: 1200px)').matches;
+  const media = (isColor && isDesktopViewport) ? buildSusiMedia(rows[4]) : null;
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
@@ -586,8 +636,10 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
       destURL.hash = '';
     } catch { /* ignore — destURL fallback is already set */ }
   }
+  // token hands the session back to the opener page, so it only applies to popup mode;
+  // the same-tab redirect flow uses code, like every other susi-light variant
   const params = buildSUSIParams({
-    client_id, variant, destURL, locale, title, popup, responseType: 'token',
+    client_id, variant, destURL, locale, title, popup, responseType: popup ? 'token' : 'code', el,
   });
   if (!noRedirect && !isColor) {
     redirectIfLoggedIn(params.destURL);
@@ -596,38 +648,40 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const titleDiv = createTag('div', { class: 'title' }, title);
   const susiWrapper = createTag('div', { class: 'susi-wrapper' }, createSUSIComponent({
     ...params,
-    onSuccessfulToken: () => window.location.assign(destURL.toString()),
+    onSuccessfulToken: popup ? () => window.location.assign(destURL.toString()) : undefined,
   }));
-  const layout = createTag('div', { class: 'susi-layout' }, [createLogo(), titleDiv, susiWrapper]);
+  if (mobileTitle) {
+    titleDiv.classList.add('desktop-only');
+  }
+  const mobileTitleDiv = mobileTitle
+    ? createTag('div', { class: 'title mobile-only' }, mobileTitle)
+    : null;
+  if (media && isColor) {
+    el.classList.add('has-media');
+    const mediaPane = media;
+    mediaPane.classList.add('susi-media');
+    const formPaneChildren = [createLogo(), titleDiv];
+    if (mobileTitleDiv) {
+      formPaneChildren.push(mobileTitleDiv);
+    }
+    formPaneChildren.push(susiWrapper);
+    const formPane = createTag('div', { class: 'susi-form-pane' }, formPaneChildren);
+    return createTag('div', { class: 'susi-layout' }, [mediaPane, formPane]);
+  }
+  const layoutChildren = [createLogo(), titleDiv];
+  if (mobileTitleDiv) {
+    layoutChildren.push(mobileTitleDiv);
+  }
+  layoutChildren.push(susiWrapper);
+  const layout = createTag('div', { class: 'susi-layout' }, layoutChildren);
   return layout;
 }
 
 function blurModalCurtain() {
-  const updateBlurState = () => {
-    const modalCurtain = document.querySelector('.modal-curtain');
-    const dialogModal = document.querySelector('.dialog-modal');
-    if (modalCurtain && dialogModal) {
-      if (modalCurtain.classList.contains('is-open')) {
-        modalCurtain.classList.add('blurred');
-      } else if (!modalCurtain.classList.contains('is-open')) {
-        modalCurtain.classList.remove('blurred');
-      }
-    }
-  };
-
-  const modalCurtain = document.querySelector('.modal-curtain');
-  if (modalCurtain) {
-    updateBlurState();
-  } else {
-    const observer = new MutationObserver(() => {
-      const curtain = document.querySelector('.modal-curtain');
-      if (curtain) {
-        updateBlurState();
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
+  onModalCurtainMatch(() => true, (modalCurtain) => {
+    if (!document.querySelector('.dialog-modal')) return;
+    modalCurtain.classList.toggle('blurred', modalCurtain.classList.contains('is-open'));
+  });
 }
 
 export default async function init(el) {

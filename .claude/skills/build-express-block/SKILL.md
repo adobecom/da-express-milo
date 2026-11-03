@@ -1,4 +1,5 @@
 ---
+name: build-express-block
 description: Author content from Figma to DA, then build the matching Express block against the published page.
 ---
 
@@ -36,7 +37,7 @@ Show the collected inputs back to the user and ask for one confirmation before k
 
 ## Phase B — Run the content skill
 
-Invoke the `build-content-from-figma` skill via the Skill tool. Hand it the Figma URLs (with their viewport labels), the DA org/repo/path, and the block name override if the user provided one.
+Use the local `.claude/skills/build-content-from-figma/SKILL.md` skill. Hand it the Figma URLs (with their viewport labels), the DA org/repo/path, and the block name override if the user provided one. If the skill cannot be used, stop and report why; do not skip its workflow.
 
 The content skill has its own internal prompts (block name confirmation, diff review, upload confirmation, preview/publish confirmation). Let the user answer those directly — do not pre-answer or skip them.
 
@@ -60,7 +61,7 @@ Show the parsed live URL to the user and confirm it before proceeding.
 
 ## Phase D — Run the block skill
 
-Invoke the `build-block-from-figma` skill via the Skill tool. Pass:
+Use the local `.claude/skills/build-block-from-figma/SKILL.md` skill. If the skill cannot be used, stop and report why. Pass:
 
 - **Preview URL**: the `.aem.live` URL from Phase C.
 - **Figma URLs**: the same per-viewport URLs collected in Phase A.

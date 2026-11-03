@@ -16,13 +16,16 @@
             {
               "selector": ".blog-feature-marquee-subcopy",
               "text": "Explore design trends and how-tos, marketing tips, and branding wisdom to make your content stand-out."
-            },
-            {
-              "selector": ".blog-feature-marquee-card .blog-feature-marquee-card-title",
-              "nth": 0,
-              "text": "Where creators find inspiration"
             }
           ],
+          "cards": {
+            "selector": ".blog-feature-marquee-card",
+            "titleSelector": ".blog-feature-marquee-card-title",
+            "dateSelector": ".blog-feature-marquee-card-author-date",
+            "hrefPattern": "^/express/learn/blog/[^/]+$",
+            "minCount": 1,
+            "sortedByDateDesc": true
+          },
           "media": [
             {
               "selector": ".blog-feature-marquee-card .blog-feature-marquee-featured-badge",
@@ -30,12 +33,6 @@
             }
           ],
           "interactives": [
-            {
-              "type": "link",
-              "selector": ".blog-feature-marquee-card",
-              "nth": 0,
-              "href": "/express/learn/blog/top-creative-influences"
-            },
             {
               "type": "link",
               "selector": ".blog-feature-marquee-view-all-link",

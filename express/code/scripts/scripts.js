@@ -19,6 +19,7 @@ import {
   getRedirectUri,
   getIconElementDeprecated,
   getContentRoot,
+  trackFixedTopOffset,
 } from './utils.js';
 
 // Add project-wide style path here.
@@ -28,6 +29,7 @@ const STYLES = [];
 const LIBS = '/libs';
 const miloLibs = setLibs(LIBS);
 let jarvisImmediatelyVisible = false;
+let stopFixedTopOffsetTracking;
 const jarvisVisibleMeta = getMetadata('jarvis-immediately-visible')?.toLowerCase();
 const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
@@ -399,6 +401,9 @@ CONFIG.decorateArea = decorateAreaWithLCP;
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
+  if (!document.querySelector('link[data-s2a-tokens="true"]')) {
+    paths.unshift('https://www.adobe.com/libs/c2/styles/s2a-tokens.css');
+  }
   if (getMetadata('theme') !== 'doodlebug') {
     paths.push('/express/code/styles/styles.css');
   }
@@ -407,9 +412,15 @@ CONFIG.decorateArea = decorateAreaWithLCP;
   }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
+    const existing = document.querySelector(`link[href="${path}"]`);
+    if (existing) return;
+
     const link = document.createElement('link');
     link.setAttribute('rel', 'stylesheet');
     link.setAttribute('href', path);
+    if (path === 'https://www.adobe.com/libs/c2/styles/s2a-tokens.css') {
+      link.dataset.s2aTokens = 'true';
+    }
     document.head.appendChild(link);
   });
 }());
@@ -591,6 +602,8 @@ async function loadPage() {
   });
 
   await loadArea();
+  stopFixedTopOffsetTracking?.();
+  stopFixedTopOffsetTracking = await trackFixedTopOffset(config);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));

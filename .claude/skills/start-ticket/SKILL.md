@@ -1,4 +1,5 @@
 ---
+name: start-ticket
 description: Given a ticket ID or description, open its Jira, the relevant draft/primary content page, check out the branch, ensure the local AEM server is up, and open any linked Figma and PR.
 ---
 
@@ -6,7 +7,7 @@ description: Given a ticket ID or description, open its Jira, the relevant draft
 
 Orchestrates the "get set up for this ticket" ritual: resolve the Jira issue, open its content and design links, switch to its branch, make sure the local dev server is actually usable, and surface the latest PR.
 
-Argument: `$ARGUMENTS` — a Jira ticket ID (e.g. `MWPW-123456`) or a free-text description of the ticket.
+Input: the user's supplied Jira ticket ID (e.g. `MWPW-123456`) or free-text description. Ask for one if neither was provided.
 
 ---
 
@@ -25,9 +26,11 @@ Argument: `$ARGUMENTS` — a Jira ticket ID (e.g. `MWPW-123456`) or a free-text 
 
 ## Phase A — Resolve the Jira ticket
 
-1. If `$ARGUMENTS` matches a ticket-key pattern (`[A-Z]+-[0-9]+`), use it directly.
-2. Otherwise treat it as free text: use the `mcp__corp-jira__search_jira_issues` tool with a JQL query scoped to the default project first (e.g. `project = MWPW AND text ~ "<keywords>" ORDER BY updated DESC`), and widen the search (drop the project filter) if nothing relevant comes back. Confirm the match with the user if more than one issue looks plausible — don't guess silently between two unrelated tickets.
-3. Pull the full issue: summary, description, and comments (`mcp__corp-jira__get_jira_comments`) — the description/PR/Figma links are often only in a comment, not the description field.
+If Jira access is unavailable, stop and tell the user; do not guess issue details.
+
+1. If the input matches a ticket-key pattern (`[A-Z]+-[0-9]+`), use it directly.
+2. Otherwise treat it as free text: use the available Jira issue-search tool with a JQL query scoped to the default project first (e.g. `project = MWPW AND text ~ "<keywords>" ORDER BY updated DESC`), and widen the search (drop the project filter) if nothing relevant comes back. Confirm the match with the user if more than one issue looks plausible — don't guess silently between two unrelated tickets.
+3. Pull the full issue: summary, description, and comments (using the available Jira issue and comments tools) — the description/PR/Figma links are often only in a comment, not the description field.
 4. Open the ticket: `open "https://jira.corp.adobe.com/browse/<KEY>"`.
 
 Keep the resolved key (`<KEY>`) and the collected description + comment text handy for the rest of the phases — you'll scan that text for URLs repeatedly below.
@@ -42,7 +45,7 @@ Scan the description + comments for URLs and classify them:
 
 Logic:
 1. If a draft URL is explicitly linked in the ticket → open it directly.
-2. If no draft URL is linked, search the DA drafts folder instead: use `mcp__claude_ai_AEM_DA_-_Prod__da_list_sources` on org `adobecom`, repo `da-express-milo`, path `drafts/`, and look for a source whose name matches the ticket's author (ldap) or keywords from the summary. Open its edit URL if found.
+2. If no draft URL is linked and DA source listing is available, search the DA drafts folder instead: use the available DA source-listing tool on org `adobecom`, repo `da-express-milo`, path `drafts/`, and look for a source whose name matches the ticket's author (ldap) or keywords from the summary. Open its edit URL if found. If DA source listing is unavailable, report that the draft search was skipped.
 3. If neither yields a draft, fall back to the **primary page** URL found in the ticket text and open that instead.
 4. If nothing at all is found, tell the user no content page could be identified — don't fabricate a URL.
 

@@ -105,6 +105,21 @@ describe('font-generator/fontCard', () => {
       expect(createFontCard(FONT, 'Hello', 16).getAttribute('aria-label')).to.equal('Bold');
     });
 
+    it('shows the localized font name while keeping analytics labels in English', () => {
+      const strings = { fontNames: { 'bold-1': 'Fett' } };
+      const card = createFontCard(FONT, 'Hello', 16, CTA, strings);
+      expect(card.querySelector('.font-card-name').textContent).to.equal('Fett');
+      expect(card.getAttribute('aria-label')).to.equal('Fett');
+      expect(card.getAttribute('daa-lh')).to.equal('Bold');
+      expect(card.querySelector('.font-card-cta').getAttribute('daa-ll')).to.equal(`${CTA.text} Bold`);
+    });
+
+    it('falls back to the styleName when no localized font name exists', () => {
+      const strings = { fontNames: { other: 'Andere' } };
+      const card = createFontCard(FONT, 'Hello', 16, null, strings);
+      expect(card.querySelector('.font-card-name').textContent).to.equal('Bold');
+    });
+
     it('keeps the card and its interactive children out of the normal tab order', () => {
       const card = createFontCard(FONT, 'Hello', 16, CTA);
       expect(card.tabIndex).to.equal(-1);
