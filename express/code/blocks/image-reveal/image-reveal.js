@@ -54,6 +54,7 @@ function initSlider(stage, handle, effectLabel) {
   const set = (next) => {
     value = Math.min(100, Math.max(0, Math.round(next)));
     stage.style.setProperty('--image-reveal-position', `${value}%`);
+    stage.classList.toggle('is-at-edge', value === 0 || value === 100);
     handle.setAttribute('aria-valuenow', value);
     handle.setAttribute('aria-valuetext', `${value}% original, ${100 - value}% ${effectLabel()}`);
   };
