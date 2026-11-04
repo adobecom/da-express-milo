@@ -273,10 +273,10 @@ function sanitizeExternalCtaUrl(url) {
   const normalized = normalizeEncodedAmpersands(url);
   // Experiment CTAs authored as root-relative paths resolve against the host
   // serving the page (e.g. a QA/EDS branch host), not the Express app. Force
-  // them onto new.express.adobe.com so the test destinations are stable
+  // them onto express.adobe.com so the test destinations are stable
   // regardless of where the page is served. Protocol-relative ("//host") and
   // absolute URLs are left untouched.
-  if (/^\/(?!\/)/.test(normalized)) return `https://new.express.adobe.com${normalized}`;
+  if (/^\/(?!\/)/.test(normalized)) return `https://express.adobe.com${normalized}`;
   return ensureAbsoluteUrl(normalized);
 }
 

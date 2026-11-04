@@ -143,6 +143,30 @@ describe('template-x-carousel-toolbar', () => {
       document.body.innerHTML = defaultBody;
     });
 
+    [false, true].forEach((signedIn) => {
+      it(`uses the canonical Express origin for default ${signedIn ? 'signed-in' : 'guest'} searches`, async () => {
+        const originalIMS = window.adobeIMS;
+        window.adobeIMS = { isSignedInUser: () => signedIn };
+        try {
+          block.querySelector('input.search-bar').value = 'birthday poster';
+          block.querySelector('.search-form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+          await waitUntil(() => window.t_locationAssign.called);
+          expect(window.t_locationAssign.calledOnce).to.be.true;
+          const destination = new URL(window.t_locationAssign.firstCall.args[0]);
+          expect(destination.hostname).to.equal('express.adobe.com');
+          expect(destination.pathname).to.equal(signedIn ? '/explore/templates' : '/new');
+          expect(destination.searchParams.get('q')).to.equal('birthday poster');
+          if (!signedIn) {
+            expect(destination.searchParams.get('width')).to.equal('1080');
+            expect(destination.searchParams.get('height')).to.equal('1080');
+            expect(destination.searchParams.get('taskID')).to.equal('standard-size-square');
+          }
+        } finally {
+          window.adobeIMS = originalIMS;
+        }
+      });
+    });
+
     it('builds the search field and toolbar layout', async () => {
       const toolbar = block.querySelector('.toolbar.search-bar');
       const searchBarWrapper = block.querySelector('.search-bar-wrapper');

@@ -225,8 +225,8 @@ function redirectToEditor(searchTerm) {
   }
 
   const url = isLoggedIn
-    ? new URL('https://new.express.adobe.com/explore/templates')
-    : new URL('https://new.express.adobe.com/new?width=1080&height=1080&unit=px&aspectRatioLock=true&category=templates&taskID=standard-size-square');
+    ? new URL('https://express.adobe.com/explore/templates')
+    : new URL('https://express.adobe.com/new?width=1080&height=1080&unit=px&aspectRatioLock=true&category=templates&taskID=standard-size-square');
   if (term) url.searchParams.set('q', term);
   navigate(url.toString());
 }
