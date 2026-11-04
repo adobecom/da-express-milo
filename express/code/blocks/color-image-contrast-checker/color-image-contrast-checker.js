@@ -275,6 +275,19 @@ export default async function decorate(block) {
     if (!source || !view) return;
     const { comparisonRow, analysisFrame, zoom } = view;
     const surfaceStyle = getComputedStyle(comparisonRow);
+    // Desktop minimized: hug the fitted image height, capped by the authored aspect ratio.
+    comparisonRow.style.removeProperty('block-size');
+    if (surfaceStyle.getPropertyValue('--icc-hug-height').trim() === '1') {
+      const [ratioWidth, ratioHeight] = surfaceStyle.aspectRatio.split('/').map(parseFloat);
+      const rowWidth = comparisonRow.getBoundingClientRect().width;
+      const imageWidth = (rowWidth - parseFloat(surfaceStyle.paddingLeft)
+        - parseFloat(surfaceStyle.paddingRight)
+        - parseFloat(getComputedStyle(view.comparison).columnGap)) / 2;
+      const chrome = parseFloat(surfaceStyle.getPropertyValue('--icc-comparison-padding-block'))
+        + parseFloat(surfaceStyle.paddingBottom);
+      const hugHeight = imageWidth * (source.height / source.width) + chrome;
+      comparisonRow.style.blockSize = `${Math.min(hugHeight, rowWidth * (ratioHeight / ratioWidth))}px`;
+    }
     const basePadding = parseFloat(surfaceStyle.getPropertyValue('--icc-comparison-padding-block'));
     const extraPadding = parseFloat(surfaceStyle.paddingTop) - basePadding;
     const frame = analysisFrame.getBoundingClientRect();

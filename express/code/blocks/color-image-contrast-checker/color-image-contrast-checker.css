@@ -806,6 +806,7 @@
 @media (min-width: 900px) {
   .color-image-contrast-checker .icc-comparison-row {
     --icc-comparison-padding-block: var(--spacing-300);
+    --icc-hug-height: 1;
 
     aspect-ratio: 881 / 516;
     padding: var(--spacing-300);
@@ -825,13 +826,15 @@
   }
 
   .color-image-contrast-checker.icc-dialog .icc-comparison-row {
+    --icc-hug-height: 0;
+
     padding: var(--spacing-300);
     padding-inline-start: calc(var(--spacing-700) + var(--spacing-300));
     padding-block-start: var(--icc-image-top-inset);
     border-radius: var(--Radius-corner-radius-200);
   }
 
-  .color-image-contrast-checker.icc-dialog .icc-frame :is(canvas, img) {
+  .color-image-contrast-checker .icc-frame :is(canvas, img) {
     inset-block-start: 0;
   }
 }
