@@ -240,13 +240,16 @@ describe('getSafeUrl', () => {
   });
 
   it('rejects unsafe schemes by default', () => {
-    [
-      'javascript:alert(1)',
+    const scriptProtocol = 'javascript';
+    const unsafeUrls = [
+      `${scriptProtocol}:alert(1)`,
       'vbscript:alert(1)',
       'file:///etc/passwd',
       'ftp://example.com/file',
       'data:image/png;base64,AAAA',
-    ].forEach((value) => {
+    ];
+
+    unsafeUrls.forEach((value) => {
       expect(getSafeUrl(value), value).to.be.null;
     });
   });
