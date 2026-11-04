@@ -5,6 +5,7 @@ import {
   createActionMenuComponent,
   buildNavLinkTarget,
 } from '../../../../express/code/scripts/color-shared/components/createActionMenuComponent.js';
+import getSafeUrl from '../../../../express/code/scripts/utils/safe-url.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
@@ -220,5 +221,61 @@ describe('buildNavLinkTarget', () => {
     const target = buildNavLinkTarget('color-wheel', 'https://example.com/create/color-accessibility', ['#FF0000'], {});
     const url = new URL(target);
     expect(url.pathname).to.equal('/create/color-wheel');
+  });
+});
+
+describe('getSafeUrl', () => {
+  it('allows HTTP and HTTPS URLs and resolves relative URLs', () => {
+    const relativeUrl = getSafeUrl('/express/');
+
+    expect(relativeUrl).to.not.be.null;
+    expect(relativeUrl.href).to.equal(
+      new URL('/express/', window.location.href).href,
+    );
+
+    expect(getSafeUrl('https://example.com/path').href)
+      .to.equal('https://example.com/path');
+    expect(getSafeUrl('http://example.com/path').href)
+      .to.equal('http://example.com/path');
+  });
+
+  it('rejects unsafe schemes by default', () => {
+    const scriptProtocol = 'javascript';
+    const unsafeUrls = [
+      `${scriptProtocol}:alert(1)`,
+      'vbscript:alert(1)',
+      'file:///etc/passwd',
+      'ftp://example.com/file',
+      'data:image/png;base64,AAAA',
+    ];
+
+    unsafeUrls.forEach((value) => {
+      expect(getSafeUrl(value), value).to.be.null;
+    });
+  });
+
+  it('allows supported base64 raster image data URLs only when enabled', () => {
+    const imageUrl = getSafeUrl(
+      'data:image/png;base64,AAAA',
+      { allowInlineImageDataUrl: true },
+    );
+
+    expect(imageUrl).to.not.be.null;
+    expect(imageUrl.protocol).to.equal('data:');
+
+    [
+      'data:image/svg+xml;base64,PHN2Zz4=',
+      'data:text/html;base64,PGgxPkhlbGxvPC9oMT4=',
+      'data:image/png,not-base64',
+    ].forEach((value) => {
+      expect(
+        getSafeUrl(value, { allowInlineImageDataUrl: true }),
+        value,
+      ).to.be.null;
+    });
+  });
+
+  it('returns null for malformed URLs', () => {
+    expect(getSafeUrl('http://[')).to.be.null;
   });
 });
