@@ -981,8 +981,14 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
           + 'rgba(0, 0, 0, 0.04) 0px 1px 4px 0px, '
           + 'rgba(0, 0, 0, 0.08) 0px 2px 8px 0px',
         );
-        expect(zoomBox.left - surfaceBox.left).to.equal(width >= 900 ? 16 : 10);
-        expect(zoomBox.top - surfaceBox.top).to.equal(width >= 900 ? 16 : 10);
+        let toolbarInset = 10;
+        if (width >= 600) toolbarInset = 8;
+        if (width >= 900) toolbarInset = 16;
+        expect(zoomBox.left - surfaceBox.left).to.equal(toolbarInset);
+        expect(zoomBox.top - surfaceBox.top).to.equal(toolbarInset);
+        if (width >= 900) {
+          expect(getComputedStyle(surface).paddingLeft).to.equal('64px');
+        }
         expect(zoomBox.width).to.equal(width >= 900 ? 40 : 32);
         expect(zoomBox.height).to.equal(width >= 900 ? 68 : 60);
         expect(getComputedStyle(zoom).position).to.equal('absolute');
