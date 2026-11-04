@@ -611,8 +611,14 @@ export default async function decorate(block) {
         try {
           const version = generation;
           const filename = `${sourceName}-contrast-${colorSpace}.png`;
+          const { width, height } = view.canvas;
+          const output = createTag('canvas', { width: width * 2, height });
+          const context = output.getContext('2d');
+          if (!context) throw new Error('saveError');
+          context.drawImage(view.canvas, 0, 0);
+          context.drawImage(view.original, width, 0, width, height);
           const blob = await new Promise((resolve) => {
-            view.canvas.toBlob(resolve, 'image/png');
+            output.toBlob(resolve, 'image/png');
           });
           if (destroyed || version !== generation) return;
           if (!blob) throw new Error('saveError');

@@ -319,6 +319,10 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   [...block.classList].filter((c) => c === 'closed').forEach((c) => floatButtonWrapper.classList.add(c));
   const floatButtonInnerWrapper = createTag('div', { class: 'floating-button-inner-wrapper' });
 
+  // The image contrast checker's upload hero has no same-fcta CTA to hide behind.
+  data.delayUntilViewportPassed ??= document.querySelector('.color-image-contrast-checker')
+    ?.closest('.section');
+
   // Apply initial suppression before insertion so the CTA cannot animate out from a visible state.
   const miniEditor = document.querySelector('.mini-editor');
   const shouldDelayFloatingCta = audience === 'mobile' || !!data.delayUntilViewportPassed;

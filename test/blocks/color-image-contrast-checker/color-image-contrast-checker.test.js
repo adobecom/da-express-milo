@@ -1506,7 +1506,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(block.classList.contains('has-image')).to.equal(true);
   });
 
-  it('exports a full-resolution PNG named for the selected analysis color space', async () => {
+  it('exports a full-resolution side-by-side PNG named for the selected analysis color space', async () => {
     await setup();
     await upload();
     const createUrl = URL.createObjectURL.bind(URL);
@@ -1524,7 +1524,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       const bytes = new Uint8Array(await exported.arrayBuffer());
       expect([...bytes.slice(0, 8)]).to.deep.equal([137, 80, 78, 71, 13, 10, 26, 10]);
       const view = new DataView(bytes.buffer);
-      expect([view.getUint32(16), view.getUint32(20)]).to.deep.equal([13, 9]);
+      expect([view.getUint32(16), view.getUint32(20)]).to.deep.equal([26, 9]);
       expect(click.lastCall.thisValue.download).to.equal(`authored-test-contrast-${space}.png`);
     }
   });
@@ -1543,8 +1543,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     await setup();
     await upload();
     let finish;
-    const canvas = block.querySelector('canvas');
-    const pending = sinon.stub(canvas, 'toBlob').callsFake((callback) => { finish = callback; });
+    const pending = sinon.stub(HTMLCanvasElement.prototype, 'toBlob').callsFake((callback) => { finish = callback; });
     const click = sinon.stub(HTMLAnchorElement.prototype, 'click');
     block.querySelector('[data-action="save"]').click();
     pending.restore();
@@ -1559,8 +1558,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     const file = await imageFile();
     await upload(new File([file], 'photograph.v2.PNG', { type: file.type }));
     let finish;
-    const canvas = block.querySelector('canvas');
-    const pending = sinon.stub(canvas, 'toBlob').callsFake((callback) => { finish = callback; });
+    const pending = sinon.stub(HTMLCanvasElement.prototype, 'toBlob').callsFake((callback) => { finish = callback; });
     const click = sinon.stub(HTMLAnchorElement.prototype, 'click');
     block.querySelector('[data-action="save"]').click();
     chooseSpace('adobe-rgb');
@@ -1790,7 +1788,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     const originalUrl = block.querySelector('.icc-frame img').src;
     const currentBlock = block;
     const canvas = block.querySelector('canvas');
-    const exportPng = sinon.spy(canvas, 'toBlob');
+    const exportPng = sinon.spy(HTMLCanvasElement.prototype, 'toBlob');
     const save = block.querySelector('[data-action="save"]');
     for (let attempt = 0; attempt < 3; attempt += 1) {
       let render;
