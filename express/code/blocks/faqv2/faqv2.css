@@ -32,11 +32,12 @@
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   width: 5px;
   height: 100%;
   background: linear-gradient(180deg, #FF4885 0.58%, #FC7D00 99.99%), linear-gradient(180deg, #D600C4 20%, #4B2BEE 100%);
-  border-radius: 8px 0 0 8px;
+  border-start-start-radius: 8px;
+  border-end-start-radius: 8px;
 }
 
 .faqv2 .has-background picture img {
@@ -755,7 +756,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-400) var(--spacing-300) var(--spacing-400) 21px;
+  padding-block: var(--spacing-400);
+  padding-inline: 21px var(--spacing-300);
+  text-align: start;
 }
 
 .faqv2.expandable .faqv2-content {
@@ -768,13 +771,20 @@
   color: var( --c1-text-text);
 }
 
+.faqv2.expandable:not(.longform) .faqv2-wrapper,
+.faqv2.expandable:not(.longform) .faqv2-toggle {
+  border-radius: 8px;
+}
+
 .faqv2.expandable:not(.longform) .faqv2-content {
-  padding-left: var(--spacing-350);
+  padding-inline: var(--spacing-350) var(--spacing-500);
+  border-radius: 0 0 8px 8px;
 }
 
 .faqv2.expandable:not(.longform) .faqv2-content.open {
   margin-top: 0;
-  padding: 0px var(--spacing-500) var(--spacing-300) var(--spacing-350);
+  padding-block: 0 var(--spacing-300);
+  padding-inline: var(--spacing-350) var(--spacing-500);
   background-color: var(--faq-background-color);
 }
 
@@ -785,7 +795,7 @@
 .faqv2 .toggle-icon {
   width: 12px;
   height: 12px;
-  margin-left: var(--spacing-350);
+  margin-inline-start: var(--spacing-350);
   transition: transform 0.3s ease;
 }
 

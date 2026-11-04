@@ -9,6 +9,17 @@ import sinon from 'sinon';
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
 window.isTestEnv = true;
 
+const s2aTokens = document.createElement('link');
+s2aTokens.rel = 'stylesheet';
+s2aTokens.href = '/test/blocks/resume-hero/mocks/s2a-tokens.css';
+s2aTokens.dataset.s2aTokens = 'true';
+const s2aTokensLoaded = new Promise((resolve, reject) => {
+  s2aTokens.addEventListener('load', resolve, { once: true });
+  s2aTokens.addEventListener('error', reject, { once: true });
+});
+document.head.append(s2aTokens);
+await s2aTokensLoaded;
+
 const [{ getLibs }] = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
   import('../../../express/code/scripts/scripts.js'),
@@ -483,10 +494,10 @@ describe('resume-hero', () => {
 
       expect(contentStyles.gap).to.equal('8px');
       expect(headingStyles.color).to.equal('rgb(44, 44, 44)');
-      expect(headingStyles.fontSize).to.equal('24px');
+      expect(headingStyles.fontSize).to.equal('18px');
       expect(headingStyles.fontWeight).to.equal('900');
-      expect(headingStyles.letterSpacing).to.equal('-0.48px');
-      expect(headingStyles.lineHeight).to.equal('24px');
+      expect(headingStyles.letterSpacing).to.equal('-0.2px');
+      expect(headingStyles.lineHeight).to.equal('20px');
       expect(headingStyles.textAlign).to.equal('center');
       expect(subcopyStyles.color).to.equal('rgb(0, 0, 0)');
       expect(subcopyStyles.fontWeight).to.equal('400');

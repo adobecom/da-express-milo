@@ -444,6 +444,12 @@
     line-height: 130%;
 }
 
+/* Milo sets word-break: keep-all on :root:lang(ko). Spaceless Korean copy in any slide then
+   widens the shared grid track */
+:lang(ko) .color-how-to-carousel.temporary-specs-card .tip-text {
+    overflow-wrap: anywhere;
+}
+
 .color-how-to-carousel.temporary-specs-card .chtc-how-to-card .button-container {
     text-align: left;
     margin: 0;

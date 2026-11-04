@@ -105,7 +105,7 @@ Elements appear in this order (all optional):
 |---------|-----|-------|
 | Icon (SVG) | `<p><a href="url">url</a></p>` | Both href and display text are the `aem.page` preview URL. Upload SVG at the same level as the document (not the shadow folder), then preview via EDS admin API. |
 | Eyebrow | `<p>` | Optional detail text above the heading. |
-| Heading | `<hN>` | N from visual heuristic (see `token-mapping.md`). |
+| Heading | `<hN>` | N from Figma typography tokens/styles, with visual fallback (see `token-mapping.md`). |
 | Body | `<p>` | One or more paragraphs. |
 | Links | `<a>` with wrappers | `<strong><a>` = primary CTA, `<em><a>` = secondary CTA, bare `<a>` = plain link. URLs are `https://www.adobe.com/` placeholders. |
 

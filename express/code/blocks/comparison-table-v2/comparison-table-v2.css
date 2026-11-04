@@ -7,7 +7,7 @@
   --icon-color: var(--color-green-900);
   --cell-width: var(--ax-grid-5-col-width);
   --plan-cell-background-color: #F5F5F5;
-  --gnav-offset-height: var(--spacing-800);
+  --gnav-offset-height: var(--express-fixed-top-height);
   --plan-cell-height: 65px;
   --header-cell-width: var(--ax-grid-12-col-width);
   --dropdown-height: 22px;
@@ -121,16 +121,9 @@ main .section .comparison-table-v2 p {
 
 
 .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
-  top: var(--spacing-0);
-}
-
-body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
-  top: var(--spacing-0);
-}
-
-body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
   top: var(--gnav-offset-height);
 }
+
 
 
 .comparison-table-v2 .sticky-header.is-stuck.is-retracted {
@@ -458,6 +451,10 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
   margin-bottom: var(--spacing-100);
 }
 
+main .comparison-table-v2 .sticky-header.is-stuck .plan-cell p {
+ margin-bottom: 0;
+}
+
 main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2, h3, h4, h5, h6, .sticky-header-title) {
   margin-bottom: var(--spacing-100);
 }
@@ -677,7 +674,6 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
 .comparison-table-v2 .plan-selector {
   position: relative;
   height: var(--dropdown-height);
-  margin-top: var(--spacing-100);
   border-radius: 0 0 7px 7px;
   border: 0 solid var(--color-gray-325);
   background: #EBEEFF;

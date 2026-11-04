@@ -161,6 +161,7 @@ function createColorExtractDropzone(block, config, onImageReady, strings = {}) {
     strings: imageUploadStrings,
     loadingText: colorExtractStrings.extractingColors,
     ariaLabel: colorExtractStrings.dropzoneAria,
+    onImageError: () => block.classList.remove('is-loading', 'is-dragging'),
     onImageReady: (image, src) => {
       block.classList.remove('is-loading');
       block.classList.add('has-image');
