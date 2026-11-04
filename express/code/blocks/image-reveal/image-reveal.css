@@ -1,6 +1,7 @@
 /* MWPW-186599 — Image Reveal (Color Extract page sandbox).
    Layout per Figma "Adobe-Color-Component-Library / image-reveal":
-   stacked slider-over-panel <600px, panel+slider row 600–1199px (tabbed controls),
+   stacked slider-over-panel <899px (Tablet S 600–898px widens gutters),
+   panel+slider row 899–1199px (Tablet L, tabbed controls),
    white sandbox card with stacked groups ≥1200px.
    Tokens: S2A (www.adobe.com/libs/c2/styles/s2a-tokens.css) wherever a value
    matches; legacy Express tokens and commented raw values for the rest. */
@@ -494,12 +495,6 @@
   .image-reveal-grip svg {
     width: 20px;
     height: 20px;
-  }
-}
-
-@media (min-width: 1600px) {
-  .image-reveal-cta {
-    margin-block-start: unset;
   }
 }
 
