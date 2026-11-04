@@ -1,4 +1,4 @@
-import { readFile, setViewport } from '@web/test-runner-commands';
+import { readFile, setViewport, emulateMedia } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
 window.isTestEnv = true;
@@ -214,6 +214,8 @@ describe('resume-upload-fork', () => {
     });
 
     it('closes the modal after a choice', async () => {
+      // CI's Linux Chrome can report reduced motion, which skips the exit animation.
+      await emulateMedia({ reducedMotion: 'no-preference' });
       const { block, dialog, curtain } = render(true);
       await decorate(block);
       const closed = new Promise((resolve) => {
@@ -227,6 +229,20 @@ describe('resume-upload-fork', () => {
       expect(detail.id).to.equal('resume-upload-fork');
       expect(dialog.isConnected).to.be.false;
       expect(curtain.isConnected).to.be.false;
+    });
+
+    it('closes without the exit animation when reduced motion is preferred', async () => {
+      await emulateMedia({ reducedMotion: 'reduce' });
+      const { block, dialog } = render(true);
+      await decorate(block);
+      const closed = new Promise((resolve) => {
+        window.addEventListener('milo:modal:closed', resolve, { once: true });
+      });
+      block.querySelector('[data-action="continue-fork"]').click();
+      expect(dialog.classList.contains('is-closing')).to.be.false;
+      await closed;
+      expect(dialog.isConnected).to.be.false;
+      await emulateMedia({ reducedMotion: 'no-preference' });
     });
 
     it('focuses the container on open, then Tab moves to the selected card', async () => {
