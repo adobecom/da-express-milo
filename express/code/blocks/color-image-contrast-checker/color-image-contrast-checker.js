@@ -197,8 +197,6 @@ function createView(content, strings, id, onColorChange) {
     footer,
     canvas,
     original,
-    analysisFrame,
-    originalFrame,
     dialog,
     tips,
   };
@@ -273,7 +271,7 @@ export default async function decorate(block) {
   };
   const resize = () => {
     if (!source || !view) return;
-    const { comparisonRow, analysisFrame, zoom } = view;
+    const { comparisonRow, zoom } = view;
     const surfaceStyle = getComputedStyle(comparisonRow);
     // Desktop minimized: hug the fitted image height, capped by the authored aspect ratio.
     comparisonRow.style.removeProperty('block-size');
@@ -290,10 +288,13 @@ export default async function decorate(block) {
     }
     const basePadding = parseFloat(surfaceStyle.getPropertyValue('--icc-comparison-padding-block'));
     const extraPadding = parseFloat(surfaceStyle.paddingTop) - basePadding;
-    const frame = analysisFrame.getBoundingClientRect();
+    // Both images share one scroll container; size each against half of its border box so
+    // scrollbars appearing in fill mode never feed back into the scale.
+    const { comparison } = view;
+    const frame = comparison.getBoundingClientRect();
     const toolbar = zoom.getBoundingClientRect();
-    const width = analysisFrame.clientWidth;
-    const fullHeight = analysisFrame.clientHeight + extraPadding;
+    const width = (comparison.offsetWidth - parseFloat(getComputedStyle(comparison).columnGap)) / 2;
+    const fullHeight = comparison.offsetHeight + extraPadding;
     if (!width || fullHeight <= 0) return;
     const imageScale = (height) => (mode === 'fit'
       ? Math.min(width / source.width, height / source.height)
@@ -315,10 +316,11 @@ export default async function decorate(block) {
     } else {
       comparisonRow.style.removeProperty('--icc-image-top-inset');
     }
-    const height = analysisFrame.clientHeight;
+    const height = comparison.offsetHeight;
     const scale = imageScale(height);
-    view.panel.style.setProperty('--icc-image-width', `${source.width * scale}px`);
-    view.panel.style.setProperty('--icc-image-height', `${source.height * scale}px`);
+    // Floor so fitted images never overflow the shared scroller by a sub-pixel.
+    view.panel.style.setProperty('--icc-image-width', `${Math.floor(source.width * scale)}px`);
+    view.panel.style.setProperty('--icc-image-height', `${Math.floor(source.height * scale)}px`);
   };
   const arrange = () => {
     if (!view) return;
@@ -574,15 +576,7 @@ export default async function decorate(block) {
       cancelAnimationFrame(resizeFrame);
       resizeFrame = requestAnimationFrame(resize);
     });
-    resizeObserver.observe(view.analysisFrame);
-    const frames = [view.analysisFrame, view.originalFrame];
-    frames.forEach((frame, index) => {
-      frame.addEventListener('scroll', () => {
-        const other = frames[1 - index];
-        if (other.scrollLeft !== frame.scrollLeft) other.scrollLeft = frame.scrollLeft;
-        if (other.scrollTop !== frame.scrollTop) other.scrollTop = frame.scrollTop;
-      }, { passive: true, signal });
-    });
+    resizeObserver.observe(view.comparison);
     media.addEventListener('change', arrange, { signal });
     window.addEventListener('popstate', () => {
       if (window.history.state?.[HISTORY_KEY] !== id) landing();
@@ -613,12 +607,7 @@ export default async function decorate(block) {
           control.tabIndex = selected ? 0 : -1;
         });
         resize();
-        if (mode === 'fit') {
-          frames.forEach((frame) => {
-            frame.scrollTop = 0;
-            frame.scrollLeft = 0;
-          });
-        }
+        if (mode === 'fit') view.comparison.scrollTo(0, 0);
       }
       if (action === 'save' && ready && !view.save.disabled) {
         try {

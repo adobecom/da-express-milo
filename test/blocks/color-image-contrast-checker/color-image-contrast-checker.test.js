@@ -84,6 +84,13 @@ function chooseSpace(space) {
   block.querySelector(`.color-dropdown-option[data-value="${space}"]`).click();
 }
 
+// Both panes share one scroller; each image is sized against half of its border box.
+const comparisonSlot = (root) => {
+  const comparison = root.querySelector('.icc-comparison');
+  const gap = parseFloat(getComputedStyle(comparison).columnGap);
+  return { width: (comparison.offsetWidth - gap) / 2, height: comparison.offsetHeight };
+};
+
 describe('Color Image Contrast Checker placeholders and composition', () => {
   before(async () => {
     await Promise.all([
@@ -1015,8 +1022,9 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         });
         block.querySelectorAll('.icc-frame').forEach((frame) => {
           expect(getComputedStyle(frame).backgroundColor).to.equal('rgba(0, 0, 0, 0)');
-          expect(getComputedStyle(frame).overflow).to.equal('auto');
+          expect(getComputedStyle(frame).overflow).to.equal('visible');
         });
+        expect(getComputedStyle(block.querySelector('.icc-comparison')).overflow).to.equal('auto');
         expect(getComputedStyle(block.querySelector('.icc-footer')).display)
           .to.equal(width >= 700 ? 'none' : 'flex');
         if (width >= 1200) {
@@ -1040,16 +1048,16 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       await setup();
       await upload();
       const panel = block.querySelector('.icc-panel');
-      const frame = block.querySelector('.icc-frame');
       const fit = block.querySelector('[data-action="fit"]');
       const fill = block.querySelector('[data-action="fill"]');
       const expand = block.querySelector('[data-action="expand"]');
       const scaleMatches = (mode) => {
+        const slot = comparisonSlot(block);
         const scale = mode === 'fit'
-          ? Math.min(frame.clientWidth / 13, frame.clientHeight / 9)
-          : Math.max(1.5, frame.clientWidth / 13, frame.clientHeight / 9);
-        return Math.abs(parseFloat(panel.style.getPropertyValue('--icc-image-width')) - 13 * scale)
-          < 0.1;
+          ? Math.min(slot.width / 13, slot.height / 9)
+          : Math.max(1.5, slot.width / 13, slot.height / 9);
+        return parseFloat(panel.style.getPropertyValue('--icc-image-width'))
+          === Math.floor(13 * scale);
       };
       for (const width of [375, 600, 699, 700, 899, 1440]) {
         await setViewport({ width, height: 1000 });
@@ -1097,6 +1105,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         await setup();
         await upload(await imageFile(source.width, source.height));
         const frames = [...block.querySelectorAll('.icc-frame')];
+        const host = block;
+        const comparison = host.querySelector('.icc-comparison');
         const fit = block.querySelector('[data-action="fit"]');
         const fill = block.querySelector('[data-action="fill"]');
         const expand = block.querySelector('[data-action="expand"]');
@@ -1104,12 +1114,13 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         const zoom = block.querySelector('.icc-zoom');
         const surface = block.querySelector('.icc-comparison-row');
         const scaleFor = (mode) => {
-          const x = frames[0].clientWidth / source.width;
-          const y = frames[0].clientHeight / source.height;
+          const slot = comparisonSlot(host);
+          const x = slot.width / source.width;
+          const y = slot.height / source.height;
           return mode === 'fit' ? Math.min(x, y) : Math.max(1.5, x, y);
         };
-        const matches = (mode) => Math.abs(canvas.getBoundingClientRect().width
-          - source.width * scaleFor(mode)) < 0.1;
+        const matches = (mode) => canvas.getBoundingClientRect().width
+          === Math.floor(source.width * scaleFor(mode));
         for (const width of [375, 768, 1024, 1199, 1200, 1440]) {
           await setViewport({ width, height: 900 });
           for (const expanded of [false, true]) {
@@ -1119,34 +1130,29 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
             const scale = scaleFor('fill');
             expect(scale).to.be.at.least(1.5);
             const toolbar = zoom.getBoundingClientRect();
+            const clip = comparison.getBoundingClientRect();
             for (const frame of frames) {
               const image = frame.firstElementChild.getBoundingClientRect();
-              const clip = frame.getBoundingClientRect();
-              expect(image.width).to.be.closeTo(source.width * scale, 0.1);
-              expect(image.height).to.be.closeTo(source.height * scale, 0.1);
-              expect(image.height).to.be.at.least(frame.clientHeight);
+              expect(image.width).to.equal(Math.floor(source.width * scale));
+              expect(image.height).to.equal(Math.floor(source.height * scale));
+              expect(image.height).to.be.at.least(comparisonSlot(host).height - 1);
               expect(Math.max(image.left, clip.left) >= toolbar.right + 8 - 0.1
                 || Math.max(image.top, clip.top) >= toolbar.bottom + 8 - 0.1)
                 .to.equal(true);
             }
             expect([canvas.width, canvas.height]).to.deep.equal([source.width, source.height]);
-            frames[0].scrollTop = frames[0].scrollHeight;
-            frames[0].scrollLeft = frames[0].scrollWidth;
-            await waitFor(() => frames[1].scrollTop === frames[0].scrollTop
-              && frames[1].scrollLeft === frames[0].scrollLeft);
+            comparison.scrollTo(comparison.scrollWidth, comparison.scrollHeight);
             fit.click();
             await waitFor(() => matches('fit'), () => JSON.stringify({
               width,
               expanded,
               expected: source.width * scaleFor('fit'),
               actual: canvas.getBoundingClientRect().width,
-              frameWidth: frames[0].clientWidth,
-              frameHeight: frames[0].clientHeight,
+              slot: comparisonSlot(host),
               selected: fit.getAttribute('aria-pressed'),
               inset: surface.style.getPropertyValue('--icc-image-top-inset'),
             }));
-            await waitFor(() => frames.every((frame) => frame.scrollTop === 0
-              && frame.scrollLeft === 0));
+            await waitFor(() => comparison.scrollTop === 0 && comparison.scrollLeft === 0);
             if (expanded) expand.click();
           }
         }
@@ -1157,80 +1163,56 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
   });
 
   [
-    { axis: 'vertical', property: 'scrollTop', extent: 'scrollHeight', client: 'clientHeight', width: 10, height: 100 },
-    { axis: 'horizontal', property: 'scrollLeft', extent: 'scrollWidth', client: 'clientWidth', width: 100, height: 10 },
+    { axis: 'vertical', property: 'scrollTop', extent: 'scrollHeight', client: 'clientHeight', edge: 'top', width: 10, height: 100 },
+    { axis: 'horizontal', property: 'scrollLeft', extent: 'scrollWidth', client: 'clientWidth', edge: 'left', width: 100, height: 10 },
   ].forEach((scenario) => {
-    it(`synchronizes ${scenario.axis} scrolling from either pane across normal and expanded layouts`, async () => {
+    it(`scrolls both panes ${scenario.axis}ly through one shared scroller across normal and expanded layouts`, async () => {
       const viewport = { width: window.innerWidth, height: window.innerHeight };
       try {
         await setup();
         await upload(await imageFile(scenario.width, scenario.height));
-        const frames = [...block.querySelectorAll('.icc-frame')];
+        const comparison = block.querySelector('.icc-comparison');
+        const images = [...block.querySelectorAll('.icc-frame > *')];
         const fit = block.querySelector('[data-action="fit"]');
         const fill = block.querySelector('[data-action="fill"]');
         const expand = block.querySelector('[data-action="expand"]');
-        const panel = block.querySelector('.icc-panel');
-        const scaleMatches = () => {
-          const scale = Math.max(
-            1.5,
-            frames[0].clientWidth / scenario.width,
-            frames[0].clientHeight / scenario.height,
-          );
-          return Math.abs(parseFloat(panel.style.getPropertyValue('--icc-image-width'))
-            - scenario.width * scale) < 0.1;
-        };
         for (const width of [375, 768, 1440]) {
           await setViewport({ width, height: 900 });
           fill.click();
           for (const expanded of [false, true]) {
             if (expanded) expand.click();
-            await waitFor(scaleMatches);
-            const limit = Math.min(...frames.map((frame) => (
-              frame[scenario.extent] - frame[scenario.client]
-            )));
-            expect(limit).to.be.greaterThan(0);
-            for (const index of [0, 1]) {
-              const position = Math.round(limit * (index ? 0.75 : 0.25));
-              frames[index][scenario.property] = position;
-              await waitFor(() => frames[1 - index][scenario.property]
-                === frames[index][scenario.property]);
-              expect(frames[index][scenario.property]).to.equal(position);
-            }
-            expect([block.querySelector('canvas').width, block.querySelector('canvas').height])
-              .to.deep.equal([scenario.width, scenario.height]);
+            await waitFor(
+              () => comparison[scenario.extent] > comparison[scenario.client],
+              () => JSON.stringify({
+                width,
+                expanded,
+                extent: comparison[scenario.extent],
+                client: comparison[scenario.client],
+                image: comparison.closest('.icc-panel').style.cssText,
+              }),
+            );
+            block.querySelectorAll('.icc-frame').forEach((frame) => {
+              expect(frame.scrollHeight).to.equal(frame.clientHeight);
+              expect(getComputedStyle(frame).overflow).to.equal('visible');
+            });
+            comparison[scenario.property] = 0;
+            const before = images.map((image) => image.getBoundingClientRect()[scenario.edge]);
+            const position = Math.round(
+              (comparison[scenario.extent] - comparison[scenario.client]) / 2,
+            );
+            comparison[scenario.property] = position;
+            const after = images.map((image) => image.getBoundingClientRect()[scenario.edge]);
+            expect(before[0] - after[0]).to.be.closeTo(position, 0.5);
+            expect(before[1] - after[1]).to.be.closeTo(position, 0.5);
             if (expanded) expand.click();
           }
           fit.click();
-          await waitFor(() => frames.every((frame) => frame.scrollTop === 0
-            && frame.scrollLeft === 0));
+          await waitFor(() => comparison.scrollTop === 0 && comparison.scrollLeft === 0);
         }
       } finally {
         await setViewport(viewport);
       }
-    });
-  });
-
-  it('releases synchronized scroll listeners on teardown and does not duplicate them on redecoration', async () => {
-    await setup();
-    await upload(await imageFile(10, 100));
-    block.querySelector('[data-action="fill"]').click();
-    const frames = [...block.querySelectorAll('.icc-frame')];
-    await waitFor(() => frames.every((frame) => frame.scrollHeight > frame.clientHeight));
-    frames[1].scrollTop = 10;
-    await waitFor(() => frames[0].scrollTop === 10);
-    block.dispatchEvent(new Event('color-image-contrast-checker:destroy'));
-    const write = sinon.spy();
-    Object.defineProperty(frames[1], 'scrollTop', { get: () => 0, set: write });
-    frames[0].dispatchEvent(new Event('scroll'));
-    expect(write.called).to.equal(false);
-    await decorate(block);
-    await upload(await imageFile(10, 100));
-    block.querySelector('[data-action="fill"]').click();
-    const freshFrames = [...block.querySelectorAll('.icc-frame')];
-    await waitFor(() => freshFrames.every((frame) => frame.scrollHeight > frame.clientHeight));
-    freshFrames[0].scrollTop = 15;
-    await waitFor(() => freshFrames[1].scrollTop === 15);
-    expect(write.called).to.equal(false);
+    }).timeout(10000);
   });
 
   it('avoids image pixels without a side gutter and keeps controls on top when space is too tight', async () => {
@@ -1243,6 +1225,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       const frame = block.querySelector('.icc-frame');
       const canvas = block.querySelector('canvas');
       const expand = block.querySelector('[data-action="expand"]');
+      const host = block;
       let reservations = 0;
       for (const width of [375, 768, 1440]) {
         await setViewport({ width, height: 1000 });
@@ -1256,19 +1239,18 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
           for (const mode of ['fit', 'fill']) {
             block.querySelector(`[data-action="${mode}"]`).click();
             await waitFor(() => {
+              const slot = comparisonSlot(host);
               const scale = mode === 'fit'
-                ? Math.min(frame.clientWidth / canvas.width, frame.clientHeight / canvas.height)
-                : Math.max(
-                  1.5,
-                  frame.clientWidth / canvas.width,
-                  frame.clientHeight / canvas.height,
-                );
-              return Math.abs(canvas.getBoundingClientRect().width - canvas.width * scale) < 0.1;
+                ? Math.min(slot.width / canvas.width, slot.height / canvas.height)
+                : Math.max(1.5, slot.width / canvas.width, slot.height / canvas.height);
+              return canvas.getBoundingClientRect().width === Math.floor(canvas.width * scale);
             });
-            expect(frame.getBoundingClientRect().width).to.be.closeTo(expectedWidth, 0.1);
+            if (mode === 'fit') {
+              expect(frame.getBoundingClientRect().width).to.be.closeTo(expectedWidth, 0.1);
+            }
             const toolbar = zoom.getBoundingClientRect();
+            const clip = frame.parentElement.getBoundingClientRect();
             for (const pane of block.querySelectorAll('.icc-frame')) {
-              const clip = pane.getBoundingClientRect();
               const image = pane.firstElementChild.getBoundingClientRect();
               const overlaps = Math.max(image.left, clip.left) < toolbar.right
                 && Math.min(image.right, clip.right) > toolbar.left
@@ -1276,7 +1258,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
                 && Math.min(image.bottom, clip.bottom) > toolbar.top;
               expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
                 .to.equal(false);
-              expect(getComputedStyle(pane).overflow).to.equal('auto');
+              expect(getComputedStyle(pane).overflow).to.equal('visible');
               if (surface.style.getPropertyValue('--icc-image-top-inset')) {
                 expect(clip.top - toolbar.bottom).to.be.closeTo(8, 0.1);
                 reservations += 1;
@@ -1291,6 +1273,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       }
       expect(reservations).to.be.greaterThan(0);
       expect([canvas.width, canvas.height]).to.deep.equal([13, 9]);
+      // Below desktop, so the height-hugging resize does not replace the forced block size.
+      await setViewport({ width: 768, height: 1000 });
       surface.style.blockSize = '75px';
       surface.style.aspectRatio = 'auto';
       block.querySelector('[data-action="fill"]').click();

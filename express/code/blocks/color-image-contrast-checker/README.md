@@ -325,8 +325,8 @@ area does not grow to browser-screen height in the normal view; expansion uses
 the available screen height. This is display-only zoom, not resampling: analysis
 and PNG exports retain the original resolution.
 Zoom has one tab stop with arrow/Home/End navigation.
-The contrast and original image panes scroll together horizontally and vertically:
-scrolling either pane updates the other, in both normal and expanded views.
+The contrast and original image panes share one scroll container (`.icc-comparison`),
+so a single scrollbar moves both images together in normal and expanded views.
 Desktop/tablet/mobile controls follow
 the annotated DOM focus order; the native modal shows the compact legend, contains
 focus, dismisses an open tooltip before closing on Escape, and restores focus

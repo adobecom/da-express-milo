@@ -1,6 +1,9 @@
 @import url('../../scripts/color-shared/components/dropdown/dropdown.css');
 
 .color-image-contrast-checker {
+  --icc-image-width: 0px;
+  --icc-image-height: 0px;
+
   color: var(--color-gray-950);
   font-family: var(--body-font-family);
   inline-size: 100%;
@@ -330,6 +333,8 @@
   position: relative;
   display: flex;
   min-inline-size: 0;
+  /* Keep the aspect ratio authoritative; oversized images scroll inside .icc-comparison. */
+  min-block-size: 0;
   aspect-ratio: 311 / 200;
   padding: var(--spacing-100) var(--spacing-300) var(--spacing-100) var(--spacing-700);
   padding-block-start: var(--icc-image-top-inset);
@@ -384,17 +389,20 @@
   position: relative;
   z-index: 0;
   min-inline-size: 0;
+  min-block-size: 0;
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Tracks grow to the scaled image so both panes share this one scrollbar. */
+  grid-template-columns: repeat(2, minmax(var(--icc-image-width), 1fr));
+  grid-template-rows: minmax(var(--icc-image-height), 1fr);
   gap: var(--spacing-100);
+  overflow: auto;
 }
 
 .color-image-contrast-checker .icc-frame {
   position: relative;
   min-block-size: 0;
   min-inline-size: 0;
-  overflow: auto;
 }
 
 .color-image-contrast-checker .icc-frame :is(canvas, img) {
