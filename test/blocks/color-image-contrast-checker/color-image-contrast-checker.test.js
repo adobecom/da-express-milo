@@ -970,7 +970,11 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         let ratio = 311 / 200;
         if (width >= 600) ratio = 787 / 513;
         if (width >= 900) ratio = 881 / 516;
-        expect(surfaceBox.height).to.be.closeTo(surfaceBox.width / ratio, 0.1);
+        if (width >= 900) {
+          expect(surfaceBox.height).to.be.at.most(surfaceBox.width / ratio + 0.1);
+        } else {
+          expect(surfaceBox.height).to.be.closeTo(surfaceBox.width / ratio, 0.1);
+        }
         expect(getComputedStyle(surface).backgroundColor).to.equal('rgb(243, 243, 243)');
         expect(getComputedStyle(surface).borderRadius).to.equal(width >= 900 ? '8px' : '16px');
         expect(getComputedStyle(surface).outlineColor).to.equal('rgba(82, 88, 228, 0.1)');
@@ -988,6 +992,12 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         expect(zoomBox.top - surfaceBox.top).to.equal(toolbarInset);
         if (width >= 900) {
           expect(getComputedStyle(surface).paddingLeft).to.equal('64px');
+          const canvas = block.querySelector('.icc-frame canvas');
+          const gapTop = () => canvas.getBoundingClientRect().top
+            - zoom.getBoundingClientRect().top;
+          await waitFor(() => Math.abs(gapTop()) < 0.5);
+          const maxHeight = surfaceBox.width / ratio;
+          await waitFor(() => surface.getBoundingClientRect().height < maxHeight - 1);
         }
         expect(zoomBox.width).to.equal(width >= 900 ? 40 : 32);
         expect(zoomBox.height).to.equal(width >= 900 ? 68 : 60);
