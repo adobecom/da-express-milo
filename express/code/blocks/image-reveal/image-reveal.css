@@ -13,6 +13,12 @@
   padding-inline: var(--s2a-spacing-md); /* Figma Grid/container-padding-side: 16 mobile, 32 tablet, 40 desktop */
 }
 
+/* Authorable "grey" variant: paints the Figma section background (#F8F8F8)
+   independent of section-metadata styles. */
+.image-reveal.grey {
+  background: var(--s2a-color-gray-50);
+}
+
 .image-reveal-grip svg path {
   stroke-width: 0px;
 }
@@ -154,8 +160,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px; /* component size per Figma Slide-controls S — not a spacing value */
-  height: 48px;
+  box-sizing: border-box; /* Figma sizes include the 2px border */
+  width: 24px; /* Figma Slide-controls Size S — component size, not spacing */
+  height: 24px;
   translate: -50% -50%;
   border: var(--s2a-border-width-md) solid var(--s2a-color-blue-900);
   border-radius: var(--s2a-border-radius-round);
@@ -166,8 +173,8 @@
 
 .image-reveal-grip svg {
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 12px; /* Figma Slide-controls Size S icon */
+  height: 12px;
   stroke: var(--s2a-color-gray-800); /* inherits to the icon path */
 }
 
@@ -375,12 +382,19 @@
   height: 0;
 }
 
-/* ---------- 600–1199px: side-by-side with tabs ---------- */
+/* ---------- Tablet S, 600–898px: stacked like mobile, wider gutters ---------- */
 @media (min-width: 600px) {
   .image-reveal {
     padding-inline: var(--s2a-spacing-xl);
   }
 
+  .image-reveal-thumbs {
+    min-height: 0; /* 6 thumbs fit one row at ≥600px, nothing to reserve */
+  }
+}
+
+/* ---------- Tablet L, 899–1199px: side-by-side with tabs ---------- */
+@media (min-width: 899px) {
   .image-reveal-sandbox {
     flex-direction: row;
     align-items: flex-start;
@@ -392,6 +406,10 @@
     align-self: stretch; /* fills the 372px sandbox so the CTA can pin to its bottom */
   }
 
+  .image-reveal-thumbs {
+    min-height: 212px; /* 256px panel wraps thumbs to two rows; reserve it across tab switches */
+  }
+
   .image-reveal-cta {
     margin-block-start: auto; /* pins the CTA to the bottom of the sandbox */
   }
@@ -399,7 +417,6 @@
   .image-reveal-stage {
     order: 0;
     flex: 1 1 auto;
-    max-height: 269px;
   }
 }
 
@@ -448,7 +465,7 @@
   }
 
   .image-reveal-stage {
-    max-height: 485px; /* Figma Desktop (L) slider height — caps the 2.09 aspect at wide viewports */
+    align-self: stretch; /* matches the panel height so the card has no dead space under the CTA */
   }
 
   .image-reveal-tabs {
@@ -470,24 +487,20 @@
   }
 
   .image-reveal-grip {
-    width: 60px; /* Figma drifts 55–74px across frames; standardized to the Desktop (L) spec */
-    height: 60px;
+    width: 40px; /* Figma Slide-controls Size L */
+    height: 40px;
   }
 
   .image-reveal-grip svg {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 }
 
 @media (min-width: 1600px) {
-  .image-reveal-stage {
-        max-height: 600px;
-    }
-
-    .image-reveal-cta {
-       margin-block-start: unset;
-    }
+  .image-reveal-cta {
+    margin-block-start: unset;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
