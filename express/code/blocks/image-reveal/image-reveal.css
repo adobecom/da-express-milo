@@ -349,6 +349,9 @@
 }
 
 .image-reveal .image-reveal-cta p.action-area {
+  /* inline-block button sits on the text baseline of the p's 27px line box,
+     leaving descender space below it; flex makes the p hug the button. */
+  display: flex;
   width: 100%;
 }
 
