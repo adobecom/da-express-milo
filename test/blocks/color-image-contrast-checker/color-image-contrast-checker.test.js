@@ -997,12 +997,12 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         if (width >= 900) toolbarInset = 16;
         expect(zoomBox.left - surfaceBox.left).to.equal(toolbarInset);
         expect(zoomBox.top - surfaceBox.top).to.equal(toolbarInset);
+        const canvas = block.querySelector('.icc-frame canvas');
+        const gapTop = () => canvas.getBoundingClientRect().top
+          - zoom.getBoundingClientRect().top;
+        await waitFor(() => Math.abs(gapTop()) < 0.5);
         if (width >= 900) {
           expect(getComputedStyle(surface).paddingLeft).to.equal('64px');
-          const canvas = block.querySelector('.icc-frame canvas');
-          const gapTop = () => canvas.getBoundingClientRect().top
-            - zoom.getBoundingClientRect().top;
-          await waitFor(() => Math.abs(gapTop()) < 0.5);
           const maxHeight = surfaceBox.width / ratio;
           await waitFor(() => surface.getBoundingClientRect().height < maxHeight - 1);
         }
@@ -1136,8 +1136,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
               expect(image.width).to.equal(Math.floor(source.width * scale));
               expect(image.height).to.equal(Math.floor(source.height * scale));
               expect(image.height).to.be.at.least(comparisonSlot(host).height - 1);
-              expect(Math.max(image.left, clip.left) >= toolbar.right + 8 - 0.1
-                || Math.max(image.top, clip.top) >= toolbar.bottom + 8 - 0.1)
+              expect(Math.max(image.left, clip.left) >= toolbar.right + 4 - 0.1
+                || Math.max(image.top, clip.top) >= toolbar.bottom + 4 - 0.1)
                 .to.equal(true);
             }
             expect([canvas.width, canvas.height]).to.deep.equal([source.width, source.height]);
@@ -1264,7 +1264,9 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
                 reservations += 1;
               }
             }
-            if (mode === 'fit') {
+            // Normal views keep a side gutter wider than the toolbar, so Fit stays flush with
+            // it; the narrow expanded view may reserve a top inset because images are top-aligned.
+            if (mode === 'fit' && !expanded) {
               expect(surface.style.getPropertyValue('--icc-image-top-inset')).to.equal('');
             }
           }

@@ -327,7 +327,8 @@
 }
 
 .color-image-contrast-checker .icc-comparison-row {
-  --icc-comparison-padding-block: var(--spacing-100);
+  /* Matches the zoom toolbar's top inset so image tops sit flush with it. */
+  --icc-comparison-padding-block: 10px;
   --icc-image-top-inset: var(--icc-comparison-padding-block);
 
   position: relative;
@@ -407,7 +408,7 @@
 
 .color-image-contrast-checker .icc-frame :is(canvas, img) {
   position: absolute;
-  inset-block-start: max(0%, calc((100% - var(--icc-image-height)) / 2));
+  inset-block-start: 0;
   inset-inline-start: max(0%, calc((100% - var(--icc-image-width)) / 2));
   inline-size: var(--icc-image-width);
   block-size: var(--icc-image-height);
@@ -706,6 +707,8 @@
   }
 
   .color-image-contrast-checker .icc-comparison-row {
+    --icc-comparison-padding-block: var(--spacing-100);
+
     aspect-ratio: 787 / 513;
   }
 
@@ -840,10 +843,6 @@
     padding-inline-start: calc(var(--spacing-700) + var(--spacing-300));
     padding-block-start: var(--icc-image-top-inset);
     border-radius: var(--Radius-corner-radius-200);
-  }
-
-  .color-image-contrast-checker .icc-frame :is(canvas, img) {
-    inset-block-start: 0;
   }
 }
 

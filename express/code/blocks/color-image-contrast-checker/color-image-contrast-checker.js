@@ -301,10 +301,12 @@ export default async function decorate(block) {
       : Math.max(MIN_FILL_SCALE, width / source.width, height / source.height));
     const fullScale = imageScale(fullHeight);
     const imageLeft = frame.left + Math.max(0, (width - source.width * fullScale) / 2);
-    const imageTop = frame.top - extraPadding
-      + Math.max(0, (fullHeight - source.height * fullScale) / 2);
+    // Images are top-aligned in their frames (horizontally centered).
+    const imageTop = frame.top - extraPadding;
     const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
-    const clearance = mode === 'fill' ? toolbarGap : 0;
+    // The 48px/64px side gutters already clear the toolbar; only reserve the top inset
+    // when an image would come within 4px of it, so image tops stay flush with the toolbar.
+    const clearance = mode === 'fill' ? parseFloat(surfaceStyle.getPropertyValue('--spacing-75')) : 0;
     const overlaps = imageLeft < toolbar.right + clearance
       && imageLeft + Math.min(width, source.width * fullScale) > toolbar.left - clearance
       && imageTop < toolbar.bottom + clearance
