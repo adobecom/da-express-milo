@@ -81,7 +81,7 @@ describe('resume-upload-fork', () => {
     const group = block.querySelector('[role="radiogroup"]');
     expect(group.getAttribute('aria-labelledby')).to.equal(heading.id);
     const cards = [...group.querySelectorAll('[role="radio"]')];
-    expect(cards.map((c) => c.dataset.choice)).to.deep.equal(['sharpen', 'refine']);
+    expect(cards.map((c) => c.dataset.choice)).to.deep.equal(['sharpen', 'refresh']);
     expect(block.querySelector('.resume-upload-fork-actions')).to.exist;
   });
 
@@ -141,34 +141,34 @@ describe('resume-upload-fork', () => {
   it('selects the first card by default', async () => {
     const { block } = render();
     await decorate(block);
-    const [sharpen, refine] = block.querySelectorAll('[role="radio"]');
+    const [sharpen, refresh] = block.querySelectorAll('[role="radio"]');
     expect(sharpen.getAttribute('aria-checked')).to.equal('true');
     expect(sharpen.tabIndex).to.equal(0);
-    expect(refine.getAttribute('aria-checked')).to.equal('false');
-    expect(refine.tabIndex).to.equal(-1);
+    expect(refresh.getAttribute('aria-checked')).to.equal('false');
+    expect(refresh.tabIndex).to.equal(-1);
   });
 
   it('selects a card on click', async () => {
     const { block } = render();
     await decorate(block);
-    const [sharpen, refine] = block.querySelectorAll('[role="radio"]');
-    refine.click();
-    expect(refine.getAttribute('aria-checked')).to.equal('true');
+    const [sharpen, refresh] = block.querySelectorAll('[role="radio"]');
+    refresh.click();
+    expect(refresh.getAttribute('aria-checked')).to.equal('true');
     expect(sharpen.getAttribute('aria-checked')).to.equal('false');
   });
 
   it('moves the selection and focus with arrow keys and wraps', async () => {
     const { block } = render();
     await decorate(block);
-    const [sharpen, refine] = block.querySelectorAll('[role="radio"]');
+    const [sharpen, refresh] = block.querySelectorAll('[role="radio"]');
     key(sharpen, 'ArrowRight');
-    expect(refine.getAttribute('aria-checked')).to.equal('true');
-    expect(document.activeElement).to.equal(refine);
-    key(refine, 'ArrowDown');
+    expect(refresh.getAttribute('aria-checked')).to.equal('true');
+    expect(document.activeElement).to.equal(refresh);
+    key(refresh, 'ArrowDown');
     expect(sharpen.getAttribute('aria-checked')).to.equal('true');
     key(sharpen, 'ArrowUp');
-    expect(refine.getAttribute('aria-checked')).to.equal('true');
-    key(refine, 'ArrowLeft');
+    expect(refresh.getAttribute('aria-checked')).to.equal('true');
+    key(refresh, 'ArrowLeft');
     expect(sharpen.getAttribute('aria-checked')).to.equal('true');
   });
 
@@ -194,7 +194,7 @@ describe('resume-upload-fork', () => {
     block.querySelector('[data-action="continue-fork"]').click();
     expect(events).to.deep.equal([
       { action: 'continue-fork', choice: 'sharpen' },
-      { action: 'continue-fork', choice: 'refine' },
+      { action: 'continue-fork', choice: 'refresh' },
     ]);
   });
 
@@ -251,15 +251,15 @@ describe('resume-upload-fork', () => {
       const close = document.createElement('button');
       close.className = 'dialog-close';
       dialog.prepend(close);
-      const [, refine] = block.querySelectorAll('.resume-upload-fork-card');
-      refine.click();
-      refine.focus();
+      const [, refresh] = block.querySelectorAll('.resume-upload-fork-card');
+      refresh.click();
+      refresh.focus();
       window.dispatchEvent(new CustomEvent('milo:modal:loaded', { detail: { id: dialog.id } }));
       expect(document.activeElement).to.equal(dialog);
       expect(dialog.tabIndex).to.equal(-1);
 
       key(dialog, 'Tab');
-      expect(document.activeElement).to.equal(refine);
+      expect(document.activeElement).to.equal(refresh);
 
       dialog.focus();
       dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true }));

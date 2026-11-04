@@ -220,8 +220,8 @@ describe('verb-express-hero resume fork', () => {
 
   it('forwards continue-fork with the chosen product to Unity', () => {
     element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
-    select({ action: 'continue-fork', choice: 'refine' });
-    expect(responses).to.deep.equal([{ action: 'continue-fork', choice: 'refine' }]);
+    select({ action: 'continue-fork', choice: 'refresh' });
+    expect(responses).to.deep.equal([{ action: 'continue-fork', choice: 'refresh' }]);
   });
 
   it('forwards cancel-fork to Unity', () => {
@@ -269,7 +269,7 @@ describe('verb-express-hero resume fork', () => {
       expect(tracked).to.deep.equal(['fork-modal:shown']);
     });
 
-    ['sharpen', 'refine'].forEach((choice) => {
+    ['sharpen', 'refresh'].forEach((choice) => {
       it(`tracks continue on ${choice}`, () => {
         showFork();
         select({ action: 'continue-fork', choice });

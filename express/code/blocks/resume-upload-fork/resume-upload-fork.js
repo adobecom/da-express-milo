@@ -3,7 +3,7 @@ import { setLibs } from '../../scripts/utils.js';
 
 export const SELECT_EVENT = 'resume-upload-fork:select';
 export const ACTIONS = { continue: 'continue-fork', cancel: 'cancel-fork' };
-export const CHOICES = ['sharpen', 'refine'];
+export const CHOICES = ['sharpen', 'refresh'];
 export const DISMISS = {
   cancel: 'cancel',
   close: 'close',
