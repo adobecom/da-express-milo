@@ -1206,6 +1206,20 @@ async function decorateNewTemplates(block, props, options = { reDrawMasonry: fal
   }
 }
 
+/**
+ * Mirrors the `active` class of the view toggle links onto `aria-current`.
+ * @param {Iterable<HTMLElement>} buttons view toggle links
+ */
+export function syncViewToggleCurrent(buttons) {
+  buttons.forEach((b) => {
+    if (b.classList.contains('active')) {
+      b.setAttribute('aria-current', 'true');
+    } else {
+      b.removeAttribute('aria-current');
+    }
+  });
+}
+
 async function redrawTemplates(block, toolBar, props) {
   const heading = toolBar.querySelector('h2');
   const lang = getConfig().locale.ietf;
@@ -1224,6 +1238,7 @@ async function redrawTemplates(block, toolBar, props) {
       viewButtons.forEach((button) => {
         button.classList.remove('active');
       });
+      syncViewToggleCurrent(viewButtons);
       ['sm-view', 'md-view', 'lg-view'].forEach((className) => {
         block.classList.remove(className);
       });
@@ -1362,7 +1377,7 @@ function getPlaceholderWidth(block) {
   return width;
 }
 
-function toggleMasonryView(block, button, toggleButtons, props) {
+export function toggleMasonryView(block, button, toggleButtons, props) {
   const templatesToView = block.querySelectorAll('.template:not(.placeholder)');
   const blockWrapper = block.closest('.template-list-wrapper');
   if (!button.classList.contains('active') && templatesToView.length > 0) {
@@ -1392,6 +1407,8 @@ function toggleMasonryView(block, button, toggleButtons, props) {
 
     props.masonry?.draw();
   }
+
+  syncViewToggleCurrent(toggleButtons);
 
   const placeholder = block.querySelector('.template.placeholder');
   const ratios = props.placeholderFormat;
