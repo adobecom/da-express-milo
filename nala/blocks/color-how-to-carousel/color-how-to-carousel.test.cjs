@@ -176,10 +176,10 @@ test.describe('ColorHowToCarouselBlock Test Suite', () => {
         });
       }
 
-      await test.step('step-8: Accessibility validation', async (step) => {
-        step.skip(isSpecs, 'MWPW-213428: specs-card CTA contrast is 1.22:1 instead of 4.5:1; accessibility skip explicitly approved pending a production fix.');
+      await test.step('step-8: Accessibility validation', async () => {
         await expect(block.activeTip).toHaveCSS('opacity', '1');
-        await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+        // MWPW-213428: specs-card CTA contrast is 1.22:1 instead of 4.5:1; skip approved pending a production fix.
+        await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: isSpecs });
       });
 
       await test.step('step-9: SEO validation', async () => {
