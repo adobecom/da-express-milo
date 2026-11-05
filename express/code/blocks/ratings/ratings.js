@@ -92,6 +92,7 @@ export default async function decorate(block) {
     const scrollAnchor = block.querySelector('.ratings-scroll-anchor');
     const commentBox = block.querySelector('.slider-comment');
     const timerAnimation = createTag('div', { class: 'timer' });
+    submit.inert = true;
     const syncSubmitDisabledState = () => {
       const shouldDisable = textarea.hasAttribute('required') && textarea.value.trim() === '';
       if (shouldDisable === (submit.getAttribute('aria-disabled') === 'true')) return;
@@ -131,14 +132,17 @@ export default async function decorate(block) {
       if (val !== index) return;
       if (ratings[index - 1].feedbackRequired || textarea.value !== '') {
         commentBox.classList.add('submit--appear');
+        submit.inert = false;
         timerAnimation.remove();
         countdown(false);
       } else {
         commentBox.classList.remove('submit--appear');
+        submit.inert = true;
         stars[index - 1].parentElement.appendChild(timerAnimation);
         countdown(true);
       }
       commentBox.classList.add('comment--appear');
+      commentBox.inert = false;
     };
     // Updates the value of the slider and tooltip.
     const updateSliderValue = (snap = true) => {
@@ -232,6 +236,7 @@ export default async function decorate(block) {
     });
     textarea.addEventListener('focus', () => {
       commentBox.classList.add('submit--appear');
+      submit.inert = false;
       timerAnimation.remove();
       countdown(false);
     });
@@ -317,7 +322,7 @@ export default async function decorate(block) {
         <div class="vertical-line"><button type="button" aria-label="4" class="stars four-stars"></button></div>
         <div class="vertical-line"><button type="button" aria-label="5" class="stars five-stars"></button></div>
       </div>
-      <div class="slider-comment">
+      <div class="slider-comment" inert>
         <label for="comment"></label>
         <textarea id="comment" name="comment" rows="4" placeholder=""></textarea>
         <input type="submit" value="${submitButtonText}">

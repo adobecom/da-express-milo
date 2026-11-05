@@ -244,7 +244,10 @@ describe('Ratings Block - slider interactions', () => {
     const commentBox = block.querySelector('.slider-comment');
     input.value = '3';
     input.dispatchEvent(new Event('change'));
+    const submit = block.querySelector('input[type=submit]');
 
+    expect(commentBox.inert).to.be.false;
+    expect(submit.inert).to.be.false;
     expect(commentBox.classList.contains('submit--appear')).to.be.true;
     expect(commentBox.classList.contains('comment--appear')).to.be.true;
     expect(window.ratingSubmitCountdown).to.be.null;
@@ -431,6 +434,8 @@ describe('Ratings Block - slider interactions', () => {
 
     textarea.dispatchEvent(new Event('focus'));
 
+    const submit = block.querySelector('input[type=submit]');
+    expect(submit.inert).to.be.false;
     expect(window.ratingSubmitCountdown).to.be.null;
     expect(commentBox.classList.contains('submit--appear')).to.be.true;
   });
