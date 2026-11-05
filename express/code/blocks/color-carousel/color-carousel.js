@@ -7,7 +7,6 @@ const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
 
 let createTag;
 let getConfig;
-let getMetadata;
 let replaceKey;
 
 function watchForOverflow(row, onOverflow) {
@@ -120,7 +119,7 @@ export default async function decorate(block) {
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
   ]);
-  ({ createTag, getConfig, getMetadata } = utils);
+  ({ createTag, getConfig } = utils);
   ({ replaceKey } = placeholders);
 
   const rows = [...block.querySelectorAll(':scope > div')];
