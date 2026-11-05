@@ -337,5 +337,70 @@ describe('resume-upload-fork', () => {
         await setViewport({ width: 800, height: 600 });
       }
     });
+
+    describe('swipe to close', () => {
+      const touch = (target, type, y) => {
+        const point = new Touch({ identifier: 1, target, clientY: y });
+        const touches = type === 'touchend' ? [] : [point];
+        target.dispatchEvent(new TouchEvent(type, { touches, changedTouches: [point] }));
+      };
+      const swipe = (dialog, distance, end = 'touchend') => {
+        touch(dialog, 'touchstart', 100);
+        touch(dialog, 'touchmove', 100 + distance);
+        touch(dialog, end, 100 + distance);
+      };
+
+      afterEach(() => setViewport({ width: 800, height: 600 }));
+
+      it('closes the drawer after a long swipe down on mobile', async () => {
+        await emulateMedia({ reducedMotion: 'no-preference' });
+        await setViewport({ width: 375, height: 800 });
+        const { block, dialog } = render(true);
+        await decorate(block);
+        const closed = new Promise((resolve) => {
+          window.addEventListener('milo:modal:closed', (e) => resolve(e.detail), { once: true });
+        });
+        touch(dialog, 'touchstart', 100);
+        touch(dialog, 'touchmove', 1000);
+        expect(dialog.classList.contains('is-dragging')).to.be.true;
+        expect(dialog.style.getPropertyValue('--drawer-drag-y')).to.equal('400px');
+        touch(dialog, 'touchend', 1000);
+        expect(dialog.classList.contains('is-dragging')).to.be.false;
+        expect(dialog.classList.contains('is-closing')).to.be.true;
+        expect((await closed).id).to.equal('resume-upload-fork');
+        expect(events).to.deep.equal([{ action: 'cancel-fork', dismiss: 'swipe' }]);
+      });
+
+      it('snaps the drawer back after a short or cancelled swipe', async () => {
+        await setViewport({ width: 375, height: 800 });
+        const { block, dialog } = render(true);
+        await decorate(block);
+        swipe(dialog, 50);
+        swipe(dialog, 80, 'touchcancel');
+        swipe(dialog, -50);
+        expect(dialog.style.getPropertyValue('--drawer-drag-y')).to.equal('');
+        expect(dialog.classList.contains('is-closing')).to.be.false;
+      });
+
+      it('does not drag when the drawer content is scrolled', async () => {
+        await setViewport({ width: 375, height: 800 });
+        const { block, dialog } = render(true);
+        await decorate(block);
+        const scroller = dialog.querySelector('.fragment');
+        Object.defineProperty(scroller, 'scrollTop', { value: 10 });
+        swipe(dialog, 200);
+        expect(dialog.classList.contains('is-dragging')).to.be.false;
+        expect(dialog.classList.contains('is-closing')).to.be.false;
+      });
+
+      it('ignores swipes on tablet and desktop', async () => {
+        await setViewport({ width: 1024, height: 800 });
+        const { block, dialog } = render(true);
+        await decorate(block);
+        swipe(dialog, 200);
+        expect(dialog.classList.contains('is-dragging')).to.be.false;
+        expect(dialog.classList.contains('is-closing')).to.be.false;
+      });
+    });
   });
 });
