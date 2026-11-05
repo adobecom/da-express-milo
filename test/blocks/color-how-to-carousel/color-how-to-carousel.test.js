@@ -4,78 +4,15 @@ import sinon from 'sinon';
 
 const [, { default: decorate }] = await Promise.all([import('../../../express/code/scripts/scripts.js'), import('../../../express/code/blocks/color-how-to-carousel/color-how-to-carousel.js')]);
 
-const redBody = await readFile({ path: './mocks/body.html' });
-const blackBody = await readFile({ path: './mocks/body-dark.html' });
-
-function setColorPageType() {
-  const meta = document.createElement('meta');
-  meta.name = 'pagetype';
-  meta.content = 'color';
-  document.head.appendChild(meta);
-}
-
 describe('Color How To Carousel', () => {
   afterEach(() => {
     document.head.querySelectorAll('script[type="application/ld+json"]').forEach((s) => s.remove());
-    document.head.querySelectorAll('meta[name="pagetype"]').forEach((m) => m.remove());
   });
 
-  describe('with 6 lines in the first row', () => {
-    beforeEach(() => {
-      window.isTestEnv = true;
-      document.body.innerHTML = redBody;
-    });
-
-    it('block exists', async () => {
-      const block = document.querySelector('.color-how-to-carousel');
-      await decorate(block);
-      expect(block).to.exist;
-    });
-
-    it('schema variant builds schema', async () => {
-      const block = document.querySelector('.color-how-to-carousel');
-      block.classList.add('schema');
-      await decorate(block);
-      const schema = document.querySelector('head script[type="application/ld+json"]');
-      expect(schema).to.exist;
-    });
-  });
-
-  describe('with only 4 lines in the first row + is dark', () => {
-    beforeEach(() => {
-      window.isTestEnv = true;
-      document.body.innerHTML = blackBody;
-    });
-
-    it('block has a dark class', async () => {
-      const block = document.querySelector('.color-how-to-carousel');
-      await decorate(block);
-      expect(block.classList.contains('dark')).to.be.true;
-    });
-
-    it('schema variant builds schema', async () => {
-      const block = document.querySelector('.color-how-to-carousel');
-      block.classList.add('schema');
-      await decorate(block);
-      const schema = document.querySelector('head script[type="application/ld+json"]');
-      expect(schema).to.exist;
-    });
-
-    it('the missing 2 rows are icon and CTA', async () => {
-      const block = document.querySelector('.color-how-to-carousel');
-      await decorate(block);
-      const icon = block.querySelector('.icon-color-how-to-icon');
-      const cta = block.querySelector('.contnt-wrapper a.button.accent');
-      expect(icon).to.not.exist;
-      expect(cta).to.not.exist;
-    });
-  });
-
-  describe('specs-card variant (opt-in via pagetype=color metadata)', () => {
+  describe('specs-card layout', () => {
     async function prepBlock(mock = './mocks/specs-basic.html', colorName = '') {
       window.isTestEnv = true;
       document.body.innerHTML = await readFile({ path: mock });
-      setColorPageType();
       const block = document.querySelector('.color-how-to-carousel');
       if (colorName) block.querySelector('h2').nextElementSibling.textContent = colorName;
       await decorate(block);
@@ -91,28 +28,6 @@ describe('Color How To Carousel', () => {
 
       afterEach(() => {
         window.history.replaceState({}, '', originalUrl);
-      });
-
-      ['', 'article'].forEach((pageType) => {
-        it(`preserves the authored CTA when pagetype is ${pageType || 'absent'}`, async () => {
-          window.isTestEnv = true;
-          window.history.replaceState({}, '', '/it/meanings/hot-pink');
-          document.body.innerHTML = redBody;
-          if (pageType) {
-            setColorPageType();
-            document.head.querySelector('meta[name="pagetype"]').content = pageType;
-          }
-          const block = document.querySelector('.color-how-to-carousel');
-          const cta = block.querySelector('a');
-          const authoredHref = cta.getAttribute('href');
-
-          await decorate(block);
-
-          expect(block.querySelector('.chtc-heading')).to.not.exist;
-          expect(block.querySelector('.img-wrapper')).to.exist;
-          expect(block.querySelector('a')).to.equal(cta);
-          expect(cta.getAttribute('href')).to.equal(authoredHref);
-        });
       });
 
       [
@@ -146,29 +61,13 @@ describe('Color How To Carousel', () => {
       });
     });
 
-    it('does not activate without pagetype=color metadata (legacy rendering is untouched)', async () => {
-      window.isTestEnv = true;
-      document.body.innerHTML = redBody;
-      const block = document.querySelector('.color-how-to-carousel');
-      await decorate(block);
-      expect(block.querySelector('.chtc-heading')).to.not.exist;
-      expect(block.querySelector('.img-wrapper')).to.exist;
-    });
-
     it('decorates without error', async () => {
       const block = await prepBlock();
       expect(block).to.exist;
-      expect(block.classList.contains('temporary-specs-card')).to.be.true;
+      expect(block.querySelector(':scope > .chtc-container')).to.exist;
     });
 
-    it('does not leak legacy .tips/.tip styling (display/margin) onto the temporary-specs-card layout', async () => {
-      // Regression test: the legacy render path styles `.tips .tip` with
-      // `display: none` / `margin-top` / `margin-bottom` under the bare
-      // `.color-how-to-carousel` selector. Those rules must not apply once
-      // `.temporary-specs-card` is present, or inactive tips get removed from the
-      // grid's height calculation (display:none) while the active tip picks
-      // up unwanted legacy margins — inflating the how-to-card with extra
-      // blank space below its content.
+    it('keeps every tip in the grid so the card height does not change between slides', async () => {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = new URL('../../../express/code/blocks/color-how-to-carousel/color-how-to-carousel.css', import.meta.url).href;
@@ -282,9 +181,8 @@ describe('Color How To Carousel', () => {
         .to.equal('#1FA774');
     });
 
-    it('does not emit a schema script when the schema variant is not authored alongside it', async () => {
-      // specs-no-icon.html carries only `temporary-specs-card`, no `schema` —
-      // this is the "drop the schema variant" case for pages adopting specs-card.
+    it('does not emit a schema script when the schema variant is not authored', async () => {
+      // specs-no-icon.html carries no `schema` variant.
       const block = await prepBlock('./mocks/specs-no-icon.html');
       expect(block.classList.contains('schema')).to.be.false;
       const schema = document.querySelector('head script[type="application/ld+json"]');
@@ -303,7 +201,7 @@ describe('Color How To Carousel', () => {
       expect(title.textContent.trim()).to.equal('Color specs');
     });
 
-    it('schema variant emits a HowTo JSON-LD script with each step in order (combined with temporary-specs-card)', async () => {
+    it('schema variant emits a HowTo JSON-LD script with each step in order', async () => {
       window.isTestEnv = true;
       document.body.innerHTML = await readFile({ path: './mocks/specs-basic.html' });
       const block = document.querySelector('.color-how-to-carousel');
