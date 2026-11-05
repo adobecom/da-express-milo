@@ -101,8 +101,6 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blad
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blade/holiday-blade-free
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blade/holiday-blade-animated
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/hero-color
-
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/hover-cards/hover-cards
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-how-to-cards/how-to-cards
