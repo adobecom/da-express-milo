@@ -1,7 +1,3 @@
-:root {
-  --hero-animation-overlay-video-height: 430px;
-}
-
 .section:first-child .ax-columns:first-child {
   min-height: unset;
 }
@@ -92,7 +88,6 @@ main .section .ax-columns.enterprise .column h2 {
   padding-left: 0;
   padding-right: 0;
 } */
-
 .section:has(.ax-columns.enterprise) .content h2 {
   margin-top: 0;
   padding-top: var(--spacing-900);
@@ -167,11 +162,9 @@ main .section .ax-columns.enterprise .column h2 {
   border-radius: 16px;
 }
 
-/* stylelint-disable-next-line no-duplicate-selectors */
 .ax-columns.top.center,
 .ax-columns.fullsize.center,
-.ax-columns.light,
-.ax-columns.fullsize.center {
+.ax-columns.light {
   max-width: var(--block-sm-max-width);
   padding-left: 0;
   padding-right: 0;
@@ -314,7 +307,7 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns.marquee .column {
   padding-left: 0;
   padding-right: 0;
-  text-align: left;
+  text-align: start;
 }
 
 .ax-columns.marquee .column-picture:not(.column-picture-mobile) {
@@ -359,7 +352,7 @@ main .section .ax-columns.enterprise .column h2 {
 .section .ax-columns.marquee .column,
 .section .ax-columns.marquee .column h1,
 .section .ax-columns.marquee .column p {
-  text-align: left;
+  text-align: start;
 }
 
 .section .ax-columns.marquee .column p {
@@ -489,6 +482,10 @@ main .section .ax-columns.enterprise .column h2 {
   height: 24px;
   margin-right: var(--spacing-200);
   float: left;
+}
+
+.ax-columns .icon.icon-adobe-express-logo-rtl {
+  margin-right: 0;
 }
 
 .ax-columns .brand.icon {
@@ -803,7 +800,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   padding-right: var(--spacing-400);
   width: calc(100% - 48px);
 } */
-
 .ax-columns .column.column-picture {
   padding-left: var(--spacing-100);
   padding-right: var(--spacing-100);
@@ -886,6 +882,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   text-align: start;
 }
 
+/* Milo sets word-break: keep-all on :root:lang(ko), so spaceless Korean copy cannot wrap. */
+:lang(ko) .ax-columns.color :is(h2, p) {
+  overflow-wrap: anywhere;
+}
+
 .ax-columns.color h2 {
   font-size: var(--heading-font-size-l);
 }
@@ -936,7 +937,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .ax-columns.marquee .button-container.free-plan-container .free-plan-widget {
   font-size: var(--body-font-size-s);
-  margin-left: 15px;
+  margin-inline-start: 15px;
 }
 
 .ax-columns.marquee .button-container.free-plan-container .free-plan-widget.plan-widget-tag {
@@ -995,6 +996,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
 .ax-columns.marquee .button-container.free-plan-container {
   display: none;
+  justify-content: flex-start;
 }
 
 .section .ax-columns.marquee {
@@ -1005,11 +1007,10 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   display: none;
 }
 
+/* stylelint-disable-next-line no-duplicate-selectors */
 .section .ax-columns.marquee h1.columns-heading-long {
-  /* stylelint-disable-line no-duplicate-selectors */
   font-size: var(--heading-font-size-m);
 }
-
 .ax-columns.fullsize .button-container.two-ctas {
   display: flex;
   flex-flow: row wrap;
@@ -1239,11 +1240,10 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     transform: unset;
   }
 
+  /* stylelint-disable-next-line no-duplicate-selectors */
   .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon {
-    /* stylelint-disable-line no-duplicate-selectors */
     padding-left: 0;
   }
-
   .ax-columns .has-brand {
     padding-top: 0;
   }
@@ -1552,7 +1552,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.marquee .button-container.free-plan-container {
     display: flex;
-    align-items: start;
+    align-items: center;
+    margin-top: var(--spacing-200);
   }
 
   .section:has(.ax-columns.marquee) {
@@ -1713,12 +1714,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-left: unset;
   }
 
+  /* stylelint-disable-next-line no-duplicate-selectors */
   .ax-columns.marquee .button-container.free-plan-container {
-    /* stylelint-disable-line no-duplicate-selectors */
     align-items: center;
     margin-top: var(--spacing-200);
   }
-
   .ax-columns.marquee .column-picture::before {
     width: 160%;
     height: 160%;
@@ -1928,8 +1928,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     display: flex;
     min-width: 600px;
     max-width: 1199px;
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list */
     padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px);
-    /* stylelint-disable-line declaration-property-value-disallowed-list */
     flex-direction: column;
     align-items: center;
     gap: 10px;
@@ -1966,8 +1966,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   .section.ax-max-entitled:has(.ax-columns) div.ax-columns>div {
     gap: var(--spacing-700);
     padding: 0px var(--spacing-400);
+    /* stylelint-disable-next-line declaration-property-value-disallowed-list */
     min-width: var(--Global-Device-Widths-device-min-width, 600px);
-    /* stylelint-disable-line declaration-property-value-disallowed-list */
     margin: auto;
     max-width: var(--block-lg-max-width);
   }
@@ -2026,10 +2026,10 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
     padding-bottom: 0;
     gap: var(--spacing-700);
   }
-
   .section.ax-max-entitled .ax-columns>div {
     gap: 0;
   }
+
 
 
   .section .ax-columns .column {

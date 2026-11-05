@@ -58,3 +58,7 @@
 .gallery-control button:disabled path {
   stroke: var(--color-gray-300);
 }
+
+.gallery-control:dir(rtl) button svg {
+  transform: scaleX(-1);
+}

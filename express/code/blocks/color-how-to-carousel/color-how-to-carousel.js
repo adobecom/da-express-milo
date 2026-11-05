@@ -459,6 +459,12 @@ function buildHowToCard(block, rows, payload) {
   return card;
 }
 
+function getEnglishColorName(fallback) {
+  const match = window.location.pathname.match(/\/meanings\/([^/]+?)(?:\.html)?\/?$/);
+  const slug = match && decodeURIComponent(match[1]).replace(/-/g, ' ').trim();
+  return slug || fallback;
+}
+
 async function decorateSpecsCard(block) {
   block.classList.add('temporary-specs-card');
   addTempWrapperDeprecated(block, 'color-how-to-carousel');
@@ -501,7 +507,7 @@ async function decorateSpecsCard(block) {
   cursor += 1;
   payload.cta = colorDataRows[cursor]?.querySelector('a') || null;
   payload.cta?.classList.add('button', 'chtc-cta');
-  await applyCreateNowLink(payload.cta, payload.colorName);
+  await applyCreateNowLink(payload.cta, getEnglishColorName(payload.colorName));
 
   colorDataDiv.remove();
 

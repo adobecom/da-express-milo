@@ -1,8 +1,6 @@
 .steps {
   margin-top: 56px;
-  display: -ms-grid; /* stylelint-disable-line */
-  display: grid; /* stylelint-disable-line */
-  -ms-grid-columns: 1fr;
+  display: grid;
   grid-template-columns: 1fr;
   grid-gap: var(--spacing-300);
   max-width: 320px;
@@ -21,21 +19,19 @@
 
 .steps h3 {
   font-size: var(--heading-font-size-s);
-  text-align: left;
+  text-align: start;
   line-height: 26px;
   margin-top: 0;
 }
 
 .section .steps p {
   font-size: var(--body-font-size-s);
-  text-align: left;
+  text-align: start;
   margin: 4px 0;
 }
 
 .steps > div {
-  display: -webkit-box; /* stylelint-disable-line */
-  display: -ms-flexbox; /* stylelint-disable-line */
-  display: flex; /* stylelint-disable-line */
+  display: flex;
   padding: var(--spacing-350);
   border-radius: var(--spacing-200);
   background-color: var(--color-gray-700);
@@ -43,7 +39,7 @@
 }
 
 .steps .step-image {
-  margin-right: var(--spacing-350);
+  margin-inline-end: var(--spacing-350);
 }
 
 .steps .step-image svg,
@@ -132,14 +128,11 @@
     max-width: 950px;
   }
   .steps {
-    -ms-grid-columns: 1fr 1fr 1fr;
     grid-template-columns: 1fr 1fr 1fr;
     max-width: none;
   }
   .steps > div {
-    display: -webkit-box; /* stylelint-disable-line */
-    display: -ms-flexbox; /* stylelint-disable-line */
-    display: flex; /* stylelint-disable-line */
+    display: flex;
   }
 }
 

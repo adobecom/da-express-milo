@@ -58,7 +58,7 @@
 }
 
 .section .toggle-bar-wrapper > .toggle-bar.sticky.sticking.bumped-by-gnav > div:nth-of-type(2) {
-    top: calc(var(--global-height-nav));
+    top: var(--express-fixed-top-height);
 }
 
 .section .toggle-bar-wrapper > .toggle-bar.sticky.sticking.hidden > div:nth-of-type(2) {

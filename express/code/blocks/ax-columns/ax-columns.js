@@ -1,4 +1,4 @@
-import { getLibs, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import { getLibs, toClassName, getIconElementDeprecated, getBrandingLogoElement, decorateButtonsDeprecated } from '../../scripts/utils.js';
 
 import {
   addAnimationToggle,
@@ -204,16 +204,12 @@ function injectLogo(block) {
     logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   } else {
     const mediaQuery = window.matchMedia('(min-width: 900px)');
-    logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
+    logo = getBrandingLogoElement(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
     mediaQuery.addEventListener('change', (e) => {
       if (!block.classList.contains('dark')) return;
-      if (e.matches) {
-        logo.src = logo.src.replace(`${LOGO}.svg`, `${LOGO_WHITE}.svg`);
-        logo.alt = logo.alt.replace(LOGO, LOGO_WHITE);
-      } else {
-        logo.src = logo.src.replace(`${LOGO_WHITE}.svg`, `${LOGO}.svg`);
-        logo.alt = logo.alt.replace(LOGO_WHITE, LOGO);
-      }
+      const nextLogo = getBrandingLogoElement(e.matches ? LOGO_WHITE : LOGO);
+      logo.src = nextLogo.src;
+      logo.alt = nextLogo.alt;
     });
   }
 

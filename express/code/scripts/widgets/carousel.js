@@ -111,7 +111,9 @@ export function initToggleTriggers(parent) {
     }
   };
 
-  platform.addEventListener('scroll', throttle(updateEndArrowState, 100));
+  // trailing: the final scroll event must be evaluated, or a short scroll back
+  // from the end leaves the end arrow stuck hidden at the stale mid-scroll state
+  platform.addEventListener('scroll', throttle(updateEndArrowState, 100, { trailing: true }));
 
   const options = { threshold: 0, root: parent };
   const slideObserver = new IntersectionObserver(onSlideIntersect, options);
