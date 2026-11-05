@@ -2,7 +2,27 @@ import { getLibs, getMobileOperatingSystem, getIconElementDeprecated, addTempWra
 import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
 import { createMultiFunctionButton, collectFloatingButtonData, createMetadataMap, SUPPORTED_MWEB_OS } from '../../scripts/utils/mobile-fork-button-utils.js';
 
+const MOBILE_FORK_RESOLVED_EVENT = 'mobileforkresolved';
+const MOBILE_FORK_RESOLVED_PATH_KEY = 'express-mobile-fork-resolved-path';
+
 let createTag; let getMetadata;
+
+function rememberForkResolution() {
+  try {
+    sessionStorage.setItem(MOBILE_FORK_RESOLVED_PATH_KEY, window.location.pathname);
+  } catch { /* sessionStorage unavailable */ }
+}
+
+function consumeForkResolution() {
+  try {
+    const resolvedPath = sessionStorage.getItem(MOBILE_FORK_RESOLVED_PATH_KEY);
+    if (!resolvedPath) return false;
+    sessionStorage.removeItem(MOBILE_FORK_RESOLVED_PATH_KEY);
+    return resolvedPath === window.location.pathname;
+  } catch {
+    return false;
+  }
+}
 
 async function mWebStickyCTA() {
   const newBlock = createTag(
@@ -58,8 +78,13 @@ function mWebCloseEvents() {
   closeElements.forEach((element) => {
     element.addEventListener('click', (event) => {
       event.preventDefault();
+      const action = element.classList.contains('mweb-close') ? 'close' : 'continue';
+      rememberForkResolution();
       mWebStickyCTA();
       mWebOverlayScroll();
+      document.dispatchEvent(new CustomEvent(MOBILE_FORK_RESOLVED_EVENT, {
+        detail: { action },
+      }));
     });
   });
 }
@@ -75,7 +100,8 @@ export default async function decorate(block) {
   ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
   const eligibilityOn = getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() === 'on';
   const os = getMobileOperatingSystem();
-  const shouldShowDismissable = eligibilityOn ? os === 'Android' : SUPPORTED_MWEB_OS.includes(os);
+  const shouldShowDismissable = !consumeForkResolution()
+    && (eligibilityOn ? os === 'Android' : SUPPORTED_MWEB_OS.includes(os));
   if (!shouldShowDismissable) {
     const { default: decorateNormal } = await import('../floating-button/floating-button.js');
     decorateNormal(block);

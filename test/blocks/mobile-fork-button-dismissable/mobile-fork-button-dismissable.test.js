@@ -10,6 +10,7 @@ const imports = await Promise.all([
   import('../../../express/code/blocks/mobile-fork-button-dismissable/mobile-fork-button-dismissable.js'),
 ]);
 const { default: decorate } = imports[1];
+const FORK_RESOLVED_PATH_KEY = 'express-mobile-fork-resolved-path';
 
 function setDocumentMetadata(
   includeForkCta2 = true,
@@ -67,6 +68,7 @@ describe('Mobile Fork Button', () => {
   beforeEach(async () => {
     window.isTestEnv = true;
     window.hlx = {};
+    sessionStorage.removeItem(FORK_RESOLVED_PATH_KEY);
     window.floatingCta = [
       {
         path: 'default',
@@ -86,6 +88,7 @@ describe('Mobile Fork Button', () => {
 
   afterEach(() => {
     window.placeholders = undefined;
+    sessionStorage.removeItem(FORK_RESOLVED_PATH_KEY);
     document.body.innerHTML = '';
   });
 
@@ -113,6 +116,10 @@ describe('Mobile Fork Button', () => {
   it('renders button with both fork-cta-1 and fork-cta-2 metadata and fork-cta-3 metadata', async () => {
     setDocumentMetadata(true, true);
     const b = setMobileDom();
+    let resolution;
+    document.addEventListener('mobileforkresolved', (event) => {
+      resolution = event.detail;
+    }, { once: true });
 
     await decorate(b);
 
@@ -134,8 +141,38 @@ describe('Mobile Fork Button', () => {
     expect(document.body.style.overflow).to.equal('hidden');
     closeButton.click();
     expect(document.body.style.overflow).to.equal('');
+    expect(resolution).to.deep.equal({ action: 'close' });
+    expect(sessionStorage.getItem(FORK_RESOLVED_PATH_KEY)).to.equal(window.location.pathname);
     const newWrapper = document.querySelector('.floating-button.meta-powered');
     expect(newWrapper).to.exist;
+  });
+
+  it('resolves the fork when the Continue CTA is selected', async () => {
+    setDocumentMetadata(true, true);
+    document.head.querySelector('meta[name="fork-cta-2-link"]').content = '#';
+    const b = setMobileDom();
+    let resolution;
+    document.addEventListener('mobileforkresolved', (event) => {
+      resolution = event.detail;
+    }, { once: true });
+
+    await decorate(b);
+    document.querySelectorAll('.mobile-gating-link')[1].click();
+
+    expect(resolution).to.deep.equal({ action: 'continue' });
+    expect(sessionStorage.getItem(FORK_RESOLVED_PATH_KEY)).to.equal(window.location.pathname);
+    expect(document.body.style.overflow).to.equal('');
+  });
+
+  it('skips the dismissable fork once after a previous resolution', async () => {
+    setDocumentMetadata(true, true);
+    sessionStorage.setItem(FORK_RESOLVED_PATH_KEY, window.location.pathname);
+    const b = setMobileDom();
+
+    await decorate(b);
+
+    expect(document.querySelector('.mweb-close')).to.not.exist;
+    expect(sessionStorage.getItem(FORK_RESOLVED_PATH_KEY)).to.be.null;
   });
 
   it('builds the dismissible close button and overlay on iOS', async () => {
