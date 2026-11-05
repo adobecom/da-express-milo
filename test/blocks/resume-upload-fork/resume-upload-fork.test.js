@@ -172,6 +172,17 @@ describe('resume-upload-fork', () => {
     expect(sharpen.getAttribute('aria-checked')).to.equal('true');
   });
 
+  it('selects the focused card with Space and ignores other keys', async () => {
+    const { block } = render();
+    await decorate(block);
+    const [sharpen, refresh] = block.querySelectorAll('[role="radio"]');
+    refresh.focus();
+    key(refresh, 'Enter');
+    expect(sharpen.getAttribute('aria-checked')).to.equal('true');
+    key(refresh, ' ');
+    expect(refresh.getAttribute('aria-checked')).to.equal('true');
+  });
+
   it('renders the authored links as non-navigating block buttons', async () => {
     const { block } = render();
     await decorate(block);
