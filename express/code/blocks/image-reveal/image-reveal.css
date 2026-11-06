@@ -259,6 +259,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--s2a-spacing-xs);
+  /* Reserves the taller "Change image" panel's height so tab switching
+     doesn't shift layout on mobile/tablet — component size, no token. */
+  min-height: 212px;
 }
 
 .image-reveal-thumb {
@@ -387,6 +390,10 @@
 @media (min-width: 600px) {
   .image-reveal {
     padding-inline: var(--s2a-spacing-xl);
+  }
+
+  .image-reveal-thumbs {
+    min-height: 0; /* 6 thumbs fit one row at ≥600px, nothing to reserve */
   }
 }
 
