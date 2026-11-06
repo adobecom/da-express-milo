@@ -259,8 +259,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--s2a-spacing-xs);
-  /* Reserves the taller "Change image" panel's height so tab switching
-     doesn't shift layout on mobile/tablet — component size, no token. */
+}
+
+/* JS sets .has-thumbs-reflow (below 1200px only) when the longest thumb row
+   wraps; reserve its two-row height so tab switching doesn't shift layout.
+   Component size, no token. */
+.image-reveal.has-thumbs-reflow .image-reveal-thumbs {
   min-height: 212px;
 }
 
@@ -391,10 +395,6 @@
   .image-reveal {
     padding-inline: var(--s2a-spacing-xl);
   }
-
-  .image-reveal-thumbs {
-    min-height: 0; /* 6 thumbs fit one row at ≥600px, nothing to reserve */
-  }
 }
 
 /* ---------- Tablet L, 899–1199px: side-by-side with tabs ---------- */
@@ -408,10 +408,6 @@
   .image-reveal-panel {
     flex: 0 0 256px; /* Figma Action-panel width — component size, not spacing */
     align-self: stretch; /* fills the 372px sandbox so the CTA can pin to its bottom */
-  }
-
-  .image-reveal-thumbs {
-    min-height: 212px; /* 256px panel wraps thumbs to two rows; reserve it across tab switches */
   }
 
   .image-reveal-cta {
@@ -487,7 +483,6 @@
 
   .image-reveal-thumbs {
     gap: var(--s2a-spacing-md);
-    min-height: 0; /* desktop stacks both groups; no tab switching to compensate for */
   }
 
   .image-reveal-grip {

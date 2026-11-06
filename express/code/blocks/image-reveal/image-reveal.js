@@ -283,6 +283,22 @@ export default async function decorate(block) {
   });
 
   const desktopMedia = window.matchMedia(DESKTOP_QUERY);
+  // Reserve the two-row height (CSS .has-thumbs-reflow) only when the longest
+  // thumb row actually wraps at the current width. Thumbs are fixed-width, so
+  // the hidden tab's row is computed from the visible row's metrics.
+  const thumbRows = [effectsRow, swapRow];
+  const maxThumbs = Math.max(...thumbRows.map((row) => row.children.length));
+  const syncReflow = () => {
+    const row = thumbRows.find((r) => r.getClientRects().length);
+    const thumb = row?.firstElementChild;
+    if (desktopMedia.matches || !thumb) {
+      block.classList.remove('has-thumbs-reflow');
+      return;
+    }
+    const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+    const needed = maxThumbs * thumb.offsetWidth + (maxThumbs - 1) * gap;
+    block.classList.toggle('has-thumbs-reflow', needed > row.clientWidth);
+  };
   const syncPanels = () => {
     if (desktopMedia.matches) {
       tabDefs.forEach(({ panel }) => { panel.hidden = false; });
@@ -290,6 +306,7 @@ export default async function decorate(block) {
       const current = tabButtons.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
       activateTab(current === -1 ? 0 : current);
     }
+    syncReflow();
   };
   desktopMedia.addEventListener('change', syncPanels);
 
@@ -314,6 +331,7 @@ export default async function decorate(block) {
 
   paintStage();
   syncPanels();
+  new ResizeObserver(syncReflow).observe(panel);
 
   await decorateButtonsDeprecated(block);
   ctaContainer.querySelectorAll('p:not(.action-area)').forEach((p) => p.classList.add('image-reveal-cta-subtext'));
