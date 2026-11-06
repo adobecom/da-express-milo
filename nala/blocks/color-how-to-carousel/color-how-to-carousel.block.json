@@ -2,48 +2,6 @@
   "block": "color-how-to-carousel",
   "variants": [
     {
-      "tcid": "1",
-      "name": "@color-how-to-carousel-legacy-minimal",
-      "selector": "main .color-how-to-carousel",
-      "path": "/drafts/nala/blocks/color-how-to-carousel-legacy-minimal",
-      "data": {
-        "pageHeading": "Color how-to carousel: minimal legacy fixture",
-        "heading": "How to use black.",
-        "layout": "legacy",
-        "schema": false,
-        "icon": false,
-        "colorName": "Black",
-        "primary": "#000000",
-        "background": "rgb(0, 0, 0)",
-        "foreground": "rgb(255, 255, 255)",
-        "theme": "dark",
-        "cta": null,
-        "steps": [
-          {
-            "heading": "Start with black.",
-            "text": "Use black as the main color in your next design."
-          },
-          {
-            "heading": "Choose a contrasting color.",
-            "text": "Pair black with white to keep your content easy to read."
-          },
-          {
-            "heading": "Add your imagery.",
-            "text": "Choose a photo that remains clear against a black background."
-          },
-          {
-            "heading": "Refine your design.",
-            "text": "Leave space around your headings and check that every detail is visible."
-          },
-          {
-            "heading": "Share your black design.",
-            "text": "Review your finished design before sharing it with your audience."
-          }
-        ]
-      },
-      "tags": ["@color-how-to-carousel", "@legacy", "@minimal", "@express"]
-    },
-    {
       "tcid": "2",
       "name": "@color-how-to-carousel-specs-card",
       "selector": "main .color-how-to-carousel",
