@@ -92,7 +92,6 @@ export function createColorInput(config) {
     class: 'ax-color-input__input',
     value,
     maxlength: '7',
-    readonly: 'readonly',
     'aria-haspopup': 'dialog',
     ...(label ? {} : { 'aria-label': ariaLabel }),
   });
@@ -353,7 +352,20 @@ export function createColorInput(config) {
   field.addEventListener('pointerdown', () => {
     closeActiveColorInputExcept(controllerRef);
   }, { signal, capture: true });
-  field.addEventListener('click', openColorEdit, { signal, capture: true });
+  swatch.addEventListener('click', openColorEdit, { signal });
+  input.addEventListener('input', () => {
+    onInput?.({ value: input.value });
+  }, { signal });
+  input.addEventListener('change', () => {
+    const trimmed = input.value.trim();
+    const hex = trimmed && !trimmed.startsWith('#') ? `#${trimmed}` : trimmed;
+    if (isValidHex(hex)) {
+      input.value = hex;
+      commitCallback?.({ value: hex });
+    } else {
+      input.value = lastValidHex;
+    }
+  }, { signal });
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
