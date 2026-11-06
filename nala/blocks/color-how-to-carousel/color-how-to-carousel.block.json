@@ -2,53 +2,6 @@
   "block": "color-how-to-carousel",
   "variants": [
     {
-      "tcid": "0",
-      "name": "@color-how-to-carousel-legacy",
-      "selector": "main .color-how-to-carousel",
-      "path": "/drafts/nala/blocks/color-how-to-carousel-legacy",
-      "data": {
-        "pageHeading": "Color how-to carousel: legacy fixture",
-        "heading": "How to use yellow.",
-        "layout": "legacy",
-        "schema": true,
-        "icon": true,
-        "colorName": "Yellow",
-        "primary": "#FFCC00",
-        "background": "rgb(255, 204, 0)",
-        "foreground": "rgb(0, 51, 153)",
-        "theme": "light",
-        "cta": {
-          "text": "Explore yellow designs",
-          "visible": false,
-          "href": "#yellow-design-destination",
-          "destinationText": "Yellow design destination"
-        },
-        "steps": [
-          {
-            "heading": "Start with yellow.",
-            "text": "Use yellow as the main color in your next design."
-          },
-          {
-            "heading": "Choose a contrasting color.",
-            "text": "Pair yellow with deep blue to make important details stand out."
-          },
-          {
-            "heading": "Add your imagery.",
-            "text": "Place a photo beside your yellow background and check that its subject remains easy to see."
-          },
-          {
-            "heading": "Refine your design.",
-            "text": "Keep headings clear, leave space around your content, and use the same yellow consistently across your design."
-          },
-          {
-            "heading": "Share your yellow design.",
-            "text": "Review your finished design before sharing it with your audience."
-          }
-        ]
-      },
-      "tags": ["@color-how-to-carousel", "@legacy", "@schema", "@express"]
-    },
-    {
       "tcid": "1",
       "name": "@color-how-to-carousel-legacy-minimal",
       "selector": "main .color-how-to-carousel",
