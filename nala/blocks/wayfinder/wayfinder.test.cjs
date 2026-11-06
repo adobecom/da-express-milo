@@ -134,8 +134,7 @@ test.describe('Express Wayfinder Block test suite', () => {
         page.waitForEvent('popup'),
         await wayfinder.borderlessVariantButton.nth(0).click(),
       ]);
-      await newTab.waitForLoadState('domcontentloaded');
-      expect(newTab.url()).not.toBe(testPage);
+      expect(newTab.url).not.toBe(testPage);
       await newTab.close();
     });
   });

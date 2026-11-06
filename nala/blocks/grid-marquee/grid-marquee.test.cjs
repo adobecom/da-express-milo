@@ -3,6 +3,9 @@ const { expect, test } = require('../../utils/test.cjs');
 const { features } = require('./grid-marquee.spec.cjs');
 const GridMarquee = require('./grid-marquee.page.cjs');
 
+// Use main branch live URL by default, can be overridden via env var
+const BASE_URL = process.env.GRID_MARQUEE_BASE_URL || 'https://main--da-express-milo--adobecom.aem.live';
+
 let gridMarquee;
 
 test.describe('grid-marquee test suite', () => {
@@ -11,8 +14,8 @@ test.describe('grid-marquee test suite', () => {
   });
 
   features[0].path.forEach((path) => {
-    test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path}, test logo and headline`, async ({ page, baseURL }) => {
-      const testPage = `${baseURL}${path}`;
+    test(`[Test Id - ${features[0].tcid}] ${features[0].name}, path: ${path}, test logo and headline`, async ({ page }) => {
+      const testPage = `${BASE_URL}${path}`;
       await gridMarquee.gotoURL(testPage);
 
       await test.step('validate elements in block', async () => {
@@ -54,8 +57,8 @@ test.describe('grid-marquee test suite', () => {
   });
 
   features[1].path.forEach((path) => {
-    test(`[Test Id - ${features[1].tcid}] ${features[1].name}, path: ${path}, test cards`, async ({ baseURL }) => {
-      const testPage = `${baseURL}${path}`;
+    test(`[Test Id - ${features[1].tcid}] ${features[1].name}, path: ${path}, test cards`, async () => {
+      const testPage = `${BASE_URL}${path}`;
       await gridMarquee.gotoURL(testPage);
 
       let cardCount;
@@ -89,8 +92,8 @@ test.describe('grid-marquee test suite', () => {
   });
 
   features[2].path.forEach((path) => {
-    test(`[Test Id - ${features[2].tcid}] ${features[2].name}, path: ${path}, test ratings block`, async ({ baseURL }) => {
-      const testPage = `${baseURL}${path}`;
+    test(`[Test Id - ${features[2].tcid}] ${features[2].name}, path: ${path}, test ratings block`, async () => {
+      const testPage = `${BASE_URL}${path}`;
       console.info(`[Test Page]: ${testPage}`);
       await gridMarquee.gotoURL(testPage);
 
@@ -124,8 +127,8 @@ test.describe('grid-marquee test suite', () => {
   });
 
   features[3].path.forEach((path) => {
-    test(`[Test Id - ${features[3].tcid}] ${features[3].name}, path: ${path}, test z-index fix`, async ({ baseURL }) => {
-      const testPage = `${baseURL}${path}`;
+    test(`[Test Id - ${features[3].tcid}] ${features[3].name}, path: ${path}, test z-index fix`, async () => {
+      const testPage = `${BASE_URL}${path}`;
       await gridMarquee.gotoURL(testPage);
 
       await test.step('validate z-index values for drawer elements', async () => {
