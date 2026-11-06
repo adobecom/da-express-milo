@@ -85,7 +85,7 @@ describe('createColorInput', () => {
     });
 
     document.body.appendChild(input.element);
-    input.element.querySelector('.ax-color-input__field').click();
+    input.element.querySelector('.ax-color-input__swatch').click();
 
     const editor = await waitForElement('color-edit');
     expect(editor).to.exist;
@@ -133,7 +133,7 @@ describe('createColorInput', () => {
     });
 
     document.body.appendChild(input.element);
-    input.element.querySelector('.ax-color-input__field').click();
+    input.element.querySelector('.ax-color-input__swatch').click();
 
     await waitForElement('color-edit');
     await waitFrames(3);
@@ -155,13 +155,62 @@ describe('createColorInput', () => {
     });
 
     document.body.appendChild(input.element);
-    input.element.querySelector('.ax-color-input__field').click();
+    input.element.querySelector('.ax-color-input__swatch').click();
 
     await waitForElement('color-edit');
     await waitFrames(3);
 
     expect(focusInputStub.called).to.be.false;
     expect(shouldAutoFocusColorEditInput()).to.be.false;
+  });
+
+  it('does not open the picker from the text input or field, but opens from the dot', async () => {
+    const input = createColorInput({ label: 'Foreground color', value: '#FFFFFF' });
+    document.body.appendChild(input.element);
+    const textInput = input.element.querySelector('.ax-color-input__input');
+    const field = input.element.querySelector('.ax-color-input__field');
+    const swatch = input.element.querySelector('.ax-color-input__swatch');
+
+    textInput.click();
+    dispatchPointerClick(textInput);
+    dispatchPointerClick(field);
+    await waitFrames(3);
+    expect(document.body.querySelector('color-edit')).to.be.null;
+
+    dispatchPointerClick(swatch);
+    expect(await waitForElement('color-edit')).to.exist;
+  });
+
+  it('opens the picker on Enter from the text input', async () => {
+    const input = createColorInput({ label: 'Foreground color', value: '#FFFFFF' });
+    document.body.appendChild(input.element);
+    input.element.querySelector('.ax-color-input__input')
+      .dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(await waitForElement('color-edit')).to.exist;
+  });
+
+  it('allows direct HEX entry and restores the last valid value on invalid change', () => {
+    const onInput = sinon.spy();
+    const onChange = sinon.spy();
+    const input = createColorInput({
+      label: 'Foreground color', value: '#FFFFFF', onInput, onChange,
+    });
+    document.body.appendChild(input.element);
+    const textInput = input.element.querySelector('.ax-color-input__input');
+
+    expect(textInput.hasAttribute('readonly')).to.be.false;
+
+    textInput.value = '#123456';
+    textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(onInput.lastCall.args[0]).to.deep.equal({ value: '#123456' });
+
+    textInput.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(onChange.lastCall.args[0]).to.deep.equal({ value: '#123456' });
+
+    textInput.value = 'zzz';
+    textInput.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(onChange.callCount).to.equal(1);
+    expect(input.getValue()).to.equal('#FFFFFF');
   });
 
   // Fix test MWPW-192264
@@ -184,7 +233,7 @@ describe('createColorInput', () => {
     const backgroundField = backgroundInput.element.querySelector('.ax-color-input__field');
     const backgroundSwatch = backgroundInput.element.querySelector('.ax-color-input__swatch');
 
-    dispatchPointerClick(foregroundField);
+    dispatchPointerClick(foregroundInput.element.querySelector('.ax-color-input__swatch'));
 
     const foregroundOpened = await waitForCondition(
       () => foregroundField.nextElementSibling?.localName === 'sp-overlay',
