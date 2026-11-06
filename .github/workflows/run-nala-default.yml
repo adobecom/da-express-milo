@@ -101,9 +101,13 @@ jobs:
         if: env.NALA_SKIP_LANE != 'true'
         run: ./nala/utils/pr.run.sh
         env:
-          # PR gate: full cross-browser matrix, sharded across parallel jobs
-          # so wall-clock stays low even with all three browsers.
-          NALA_PROJECTS: ${{ matrix.projects || '--project=express-live-chromium --project=express-live-firefox --project=express-live-webkit' }}
+          # Feature PRs: chromium only. Firefox/WebKit triple the test count
+          # and carry most of the browser-specific timing flakes, which made
+          # the all-or-nothing gate red for reasons unrelated to the PR.
+          # Full cross-browser matrix still runs on the stage -> main release
+          # PR and on pushes to stage/main, so cross-browser regressions are
+          # caught before production.
+          NALA_PROJECTS: ${{ matrix.projects || ((github.event_name != 'pull_request' || (github.base_ref == 'main' && github.head_ref == 'stage')) && '--project=express-live-chromium --project=express-live-firefox --project=express-live-webkit' || '--project=express-live-chromium') }}
           # Sharded lanes: SHARD set + exclude @color. Color lane: no shard,
           # grep only @color, workers=1 (serial).
           SHARD: ${{ matrix.shard }}
