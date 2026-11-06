@@ -87,25 +87,25 @@ async function extractPalette(image) {
   }
 }
 
-function setupPalette(block, image, palette, chips) {
-  const updatePalette = async () => {
-    const colors = await extractPalette(image);
-    if (!colors?.length) return;
-    applyPaletteToChips(colors, chips);
-    palette.classList.add('is-ready');
-  };
-
-  if (image.complete && image.naturalWidth) {
-    queueMicrotask(updatePalette);
-    return;
+async function waitForImage(image) {
+  if (image.complete && image.naturalWidth) return;
+  // decode() settles even when Firefox restarts the request after the
+  // <picture> is moved, in which case a 'load' listener can miss the event.
+  try {
+    await image.decode();
+  } catch {
+    await new Promise((resolve) => {
+      image.addEventListener('load', resolve, { once: true });
+    });
   }
+}
 
-  const handleLoad = (event) => {
-    if (event.target !== image) return;
-    block.removeEventListener('load', handleLoad, true);
-    updatePalette();
-  };
-  block.addEventListener('load', handleLoad, true);
+async function setupPalette(image, palette, chips) {
+  await waitForImage(image);
+  const colors = await extractPalette(image);
+  if (!colors?.length) return;
+  applyPaletteToChips(colors, chips);
+  palette.classList.add('is-ready');
 }
 
 function buildMedia(block, picture) {
@@ -128,7 +128,7 @@ function buildMedia(block, picture) {
     photo.append(palette);
 
     const image = picture.querySelector('img');
-    if (image) setupPalette(block, image, palette, chips);
+    if (image) setupPalette(image, palette, chips);
   }
 
   return media;

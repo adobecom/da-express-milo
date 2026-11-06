@@ -38,25 +38,35 @@ test.describe('ColorImgAccordionBlock Test Suite', () => {
       await expect(block.image).toBeVisible();
       await expect(block.swatches).toHaveCount(6);
       await expect(block.palette).toHaveClass(/is-ready/);
-      const swatchColors = await block.swatches.evaluateAll((swatches) => (
-        swatches.map((swatch) => getComputedStyle(swatch).backgroundColor)
-      ));
-      expect(new Set(swatchColors).size).toBeGreaterThan(1);
+      // Swatches fade in via a background-color transition; poll until they settle.
+      await expect.poll(async () => {
+        const swatchColors = await block.swatches.evaluateAll((swatches) => (
+          swatches.map((swatch) => getComputedStyle(swatch).backgroundColor)
+        ));
+        return new Set(swatchColors).size;
+      }).toBeGreaterThan(1);
+      // Palette height scales with the photo width (see CSS: Figma height / Figma frame width).
       const breakpoints = [
-        { width: 375, imageHeight: 192.9375, paletteHeight: 48 },
-        { width: 899, imageHeight: 228.09375, paletteHeight: 56 },
-        { width: 1440, imageHeight: 375.75, paletteHeight: 88 },
-        { width: 1920, imageHeight: 443.25, paletteHeight: 102 },
+        { width: 375, imageHeight: 192.9375, paletteRatio: 48 / 327 },
+        { width: 899, imageHeight: 228.09375, paletteRatio: 56 / 340 },
+        { width: 1440, imageHeight: 375.75, paletteRatio: 88 / 548 },
+        { width: 1920, imageHeight: 443.25, paletteRatio: 102 / 788 },
       ];
-      for (const { width, imageHeight, paletteHeight } of breakpoints) {
+      for (const { width, imageHeight, paletteRatio } of breakpoints) {
         await page.setViewportSize({ width, height: 1000 });
-        const imageBox = await block.image.boundingBox();
-        const paletteBox = await block.palette.boundingBox();
-        expect(Math.abs(imageBox.height - imageHeight)).toBeLessThan(0.1);
-        expect(Math.abs(paletteBox.height - paletteHeight)).toBeLessThan(0.1);
-        expect(Math.abs(imageBox.x - paletteBox.x)).toBeLessThan(0.1);
-        expect(Math.abs(imageBox.width - paletteBox.width)).toBeLessThan(0.1);
-        expect(Math.abs(imageBox.y + imageBox.height - paletteBox.y - 1)).toBeLessThan(0.1);
+        // Retry until post-resize layout settles (WebKit can report stale geometry under
+        // load); read both rects in one task so nothing shifts between them.
+        await expect(async () => {
+          const [imageBox, paletteBox] = await block.photo.evaluate((photo) => (
+            [photo.querySelector('img'), photo.querySelector('.color-img-accordion-palette')]
+              .map((el) => el.getBoundingClientRect().toJSON())
+          ));
+          expect(Math.abs(imageBox.height - imageHeight)).toBeLessThan(0.1);
+          expect(Math.abs(paletteBox.height - paletteBox.width * paletteRatio)).toBeLessThan(0.1);
+          expect(Math.abs(imageBox.x - paletteBox.x)).toBeLessThan(0.1);
+          expect(Math.abs(imageBox.width - paletteBox.width)).toBeLessThan(0.1);
+          expect(Math.abs(imageBox.y + imageBox.height - paletteBox.y - 1)).toBeLessThan(0.1);
+        }).toPass({ timeout: 5000 });
       }
       await expect(block.buttons).toHaveCount(4);
       await expect(block.buttons.first()).toHaveAttribute('aria-expanded', 'true');

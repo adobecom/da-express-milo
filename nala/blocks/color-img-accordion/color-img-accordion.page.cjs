@@ -3,6 +3,7 @@ class ColorImgAccordionBlock {
     this.page = page;
     this.block = page.locator(selector).nth(nth);
     this.heading = this.block.locator('.color-img-accordion-heading');
+    this.photo = this.block.locator('.color-img-accordion-photo');
     this.image = this.block.locator('.color-img-accordion-photo picture img');
     this.palette = this.block.locator('.color-img-accordion-palette');
     this.swatches = this.block.locator('.color-img-accordion-swatch');
