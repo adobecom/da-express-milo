@@ -141,7 +141,7 @@ class FrictionlessQuickActionMobile {
       loop: video.loop,
       muted: video.muted,
       autoplay: video.autoplay,
-      playsInline: video.playsInline,
+      playsInline: video.hasAttribute('playsinline'),
       error: video.error?.code || null,
       events: window.nalaMobileVideoEvents,
     }));

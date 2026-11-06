@@ -258,6 +258,7 @@ async function exercisePicker(page, block, data, ios) {
   const call = await assertSDKCall(block, 'trim-video', 'trimVideo');
   assertVideoAsset(call.documentConfig.asset);
   await expect(block.dialog).toHaveCount(0);
+  await expect(block.block.locator('.dropzone-container')).toHaveClass(/hidden/);
   await block.invokeSDKCallback('onError', { _customData: 'Simulated processing failure.' });
   await expect(block.upload).toBeVisible();
   await block.chooseFiles(videoPath);
