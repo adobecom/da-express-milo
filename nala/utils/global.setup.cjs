@@ -5,7 +5,29 @@ const { isBranchURLValid } = require('../libs/baseurl.cjs');
 
 const MAIN_BRANCH_LIVE_URL = 'https://main--da-express-milo--adobecom.aem.live';
 const STAGE_BRANCH_URL = 'https://stage--da-express-milo--adobecom.aem.live';
-const EXPRESS_BASE_PATH = '/express/';
+// Probe a code file, not a page: content is shared across branches, so
+// <any-branch>--.../express/ returns 200 even when the branch's code is not
+// published. scripts.js 404s until the branch's code is actually live.
+const BRANCH_CODE_PROBE_PATH = '/express/code/scripts/scripts.js';
+// A freshly pushed branch can take a moment to become live on AEM. Poll
+// instead of failing on the first miss, but never run the suite against a
+// host that isn't serving the branch's code: that tests stale/foreign code
+// and produces flakes that "pass on re-run".
+const BRANCH_URL_ATTEMPTS = 6;
+const BRANCH_URL_RETRY_MS = 20 * 1000;
+
+async function waitForValidUrl(url) {
+  for (let attempt = 1; attempt <= BRANCH_URL_ATTEMPTS; attempt += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await isBranchURLValid(url)) return true;
+    if (attempt < BRANCH_URL_ATTEMPTS) {
+      console.info(`Attempt ${attempt}/${BRANCH_URL_ATTEMPTS} failed for ${url}; retrying in ${BRANCH_URL_RETRY_MS / 1000}s`);
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => { setTimeout(resolve, BRANCH_URL_RETRY_MS); });
+    }
+  }
+  return false;
+}
 
 async function getGitHubPRBranchLiveUrl() {
   // get the pr number and branch name
@@ -37,14 +59,12 @@ async function getGitHubPRBranchLiveUrl() {
   const prBranchLiveUrl = `https://${prBranch}--${prFromRepoName}--${prFromOrg}.aem.live`;
 
   try {
-    const prBranchExpressUrl = `${prBranchLiveUrl}${EXPRESS_BASE_PATH}`;
-    const isValid = await isBranchURLValid(prBranchExpressUrl);
-    process.env.PR_BRANCH_LIVE_URL = prBranchLiveUrl;
+    const prBranchExpressUrl = `${prBranchLiveUrl}${BRANCH_CODE_PROBE_PATH}`;
+    const isValid = await waitForValidUrl(prBranchExpressUrl);
     if (!isValid) {
-      console.warn(
-        `Warning: Branch URL (${prBranchExpressUrl}) returned non-200 or failed HEAD check. Tests will still run against: ${prBranchLiveUrl}`,
-      );
+      throw new Error(`Branch URL (${prBranchExpressUrl}) did not return 200 after ${BRANCH_URL_ATTEMPTS} attempts`);
     }
+    process.env.PR_BRANCH_LIVE_URL = prBranchLiveUrl;
     console.info('GH Ref        : ', prReference);
     console.info('GH Head Ref   : ', prHeadReference);
     console.info('PR Repository : ', repository);
@@ -56,7 +76,7 @@ async function getGitHubPRBranchLiveUrl() {
     console.info('PR Number     : ', prNumber || 'Auto-PR');
     console.info('PR From Branch live url : ', prBranchLiveUrl);
   } catch (err) {
-    console.error(`Error => Error in setting PR Branch test URL : ${prBranchLiveUrl}`);
+    console.error(`Error => Error in setting PR Branch test URL : ${prBranchLiveUrl}\n${err.message}`);
     console.info(`Note: PR branch test url  ${prBranchLiveUrl} is not valid, Exiting test execution.`);
     process.exit(1);
   }
@@ -89,14 +109,12 @@ async function getCircleCIBranchLiveUrl() {
   const stageBranchLiveUrl = STAGE_BRANCH_URL;
 
   try {
-    const stageExpressUrl = `${stageBranchLiveUrl}${EXPRESS_BASE_PATH}`;
-    const isValid = await isBranchURLValid(stageExpressUrl);
-    process.env.PR_BRANCH_LIVE_URL = stageBranchLiveUrl;
+    const stageExpressUrl = `${stageBranchLiveUrl}${BRANCH_CODE_PROBE_PATH}`;
+    const isValid = await waitForValidUrl(stageExpressUrl);
     if (!isValid) {
-      console.warn(
-        `Warning: Stage URL (${stageExpressUrl}) returned non-200 or failed HEAD check. Tests will still run against: ${stageBranchLiveUrl}`,
-      );
+      throw new Error(`Stage URL (${stageExpressUrl}) did not return 200 after ${BRANCH_URL_ATTEMPTS} attempts`);
     }
+    process.env.PR_BRANCH_LIVE_URL = stageBranchLiveUrl;
     console.info('Stage Branch Live URL : ', stageBranchLiveUrl);
   } catch (err) {
     console.error(

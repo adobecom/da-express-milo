@@ -7,8 +7,12 @@ on:
 jobs:
   action:
     name: Running Nala E2E UI Tests
-    # Playwright 1.52 supports Ubuntu 24.04, not 26.04.
     runs-on: ubuntu-24.04
+    # Browsers + OS deps are baked into the image (no install step). Keep the
+    # tag in sync with @playwright/test and run-nala-default.yml.
+    container:
+      image: mcr.microsoft.com/playwright:v1.52.0-noble
+      options: --user 1001
     if: |
       github.event_name == 'workflow_dispatch' ||
       contains(join(github.event.pull_request.labels.*.name, ' '), 'run-nala')
@@ -35,20 +39,19 @@ jobs:
             **/node_modules
           key: npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ms-playwright-${{ runner.os }}-${{ matrix.node-version }}-chromium
-
       - name: Install dependencies
         run: npm ci --no-fund --prefer-offline
 
-      - name: Install Playwright (chromium)
-        # Normally fast; cap above the slow-mirror ceiling so a genuine hang
-        # fails fast (and a re-run recovers) without killing slow-but-fine runs.
-        timeout-minutes: 10
-        run: npx playwright install chromium
+      - name: Verify container browsers match @playwright/test
+        run: |
+          missing=0
+          for dir in $(npx playwright install --dry-run | awk '/Install location:/ {print $3}'); do
+            [[ -d "$dir" ]] || { echo "::error::Missing browser $dir"; missing=1; }
+          done
+          if [[ $missing -ne 0 ]]; then
+            echo "::error::Container image does not match @playwright/test $(npx playwright --version). Bump the mcr.microsoft.com/playwright tag in run-nala-default.yml and run-nala-label.yml."
+            exit 1
+          fi
 
       - name: Set execute permission for nalarun.sh
         run: chmod +x ./nala/utils/pr.run.sh
