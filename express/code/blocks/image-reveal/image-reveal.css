@@ -207,6 +207,7 @@
   cursor: pointer;
   white-space: nowrap;
   color: var(--s2a-color-gray-700);
+  font-family: inherit; /* <button> defaults to the UA font (Arial), not Adobe Clean */
   font-size: var(--s2a-typography-font-size-body-sm);
   line-height: var(--s2a-font-line-height-xs);
 }
