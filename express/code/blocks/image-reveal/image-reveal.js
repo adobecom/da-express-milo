@@ -300,9 +300,7 @@ export default async function decorate(block) {
 
   // --- Assemble ---
   const panel = createTag('div', { class: 'image-reveal-panel' });
-  const groups = createTag('div', { class: 'image-reveal-groups' });
-  groups.append(...tabDefs.map(({ panel: p }) => p));
-  panel.append(tabList, groups, ctaContainer);
+  panel.append(tabList, ...tabDefs.map(({ panel: p }) => p), ctaContainer);
 
   const headerContainer = createTag('div', { class: 'image-reveal-header' });
   const headerCell = headerRow?.querySelector(':scope > div');
