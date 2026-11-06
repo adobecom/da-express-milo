@@ -241,14 +241,23 @@
 }
 
 /* ---------- Control groups ---------- */
+/* Below 1200px the tab panels share one grid cell, so the container is as
+   tall as the tallest panel at the current width (e.g. "Change image" wraps
+   to two rows at 375px but fits one row wider). Switching tabs never shifts
+   layout, and no fixed height leaves a gap when every panel fits one row. */
+.image-reveal-groups {
+  display: grid;
+}
+
 .image-reveal-group {
   display: flex;
   flex-direction: column;
   gap: var(--s2a-spacing-xs);
+  grid-area: 1 / 1;
 }
 
 .image-reveal-group[hidden] {
-  display: none; /* [hidden] loses to display:flex without this */
+  visibility: hidden; /* keeps its box for sizing; still out of the a11y tree and tab order */
 }
 
 .image-reveal-group-title {
@@ -403,10 +412,6 @@
     align-self: stretch; /* fills the 372px sandbox so the CTA can pin to its bottom */
   }
 
-  .image-reveal-thumbs {
-    min-height: 212px; /* 256px panel wraps thumbs to two rows; reserve it across tab switches */
-  }
-
   .image-reveal-cta {
     margin-block-start: auto; /* pins the CTA to the bottom of the sandbox */
   }
@@ -480,7 +485,16 @@
 
   .image-reveal-thumbs {
     gap: var(--s2a-spacing-md);
-    min-height: 0; /* desktop stacks both groups; no tab switching to compensate for */
+  }
+
+  .image-reveal-groups {
+    display: flex; /* both groups are stacked and visible; no shared cell */
+    flex-direction: column;
+    gap: var(--s2a-spacing-lg);
+  }
+
+  .image-reveal-group {
+    grid-area: auto;
   }
 
   .image-reveal-grip {
