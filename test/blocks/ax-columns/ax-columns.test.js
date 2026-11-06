@@ -5,7 +5,6 @@ import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-window.isTestEnv = true;
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
 const { getLibs } = imports[0];
 
@@ -27,10 +26,6 @@ const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList,
 const marqueeNoBackground = await readFile({ path: './mocks/marquee-no-background.html' });
 
 describe('Columns', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Columns exists', async () => {
     const body = await readFile({ path: './mocks/body.html' });
     document.body.innerHTML = body;

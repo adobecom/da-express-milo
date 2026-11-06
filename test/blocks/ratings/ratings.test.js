@@ -5,7 +5,6 @@ import sinon from 'sinon';
 // Set ?nala=ratings so isNalaTestRatings() returns true in ratings-utils.js.
 // This bypasses IMS token validation and returns mock ratings data.
 window.history.replaceState({}, '', '?nala=ratings');
-window.isTestEnv = true;
 window.lana = { log: () => {} };
 
 // Initialize setLibs (same pattern as app-ratings.test.js)

@@ -66,7 +66,6 @@ async function render(userAgent, metadataOverrides = {}) {
 
 describe('Mobile Fork Button OS Split', () => {
   beforeEach(async () => {
-    window.isTestEnv = true;
     window.hlx = {};
     window.floatingCta = [
       {

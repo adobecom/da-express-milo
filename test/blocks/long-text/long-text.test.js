@@ -14,9 +14,6 @@ const noLongTextWrapper = await readFile({ path: './mocks/no-long-text-wrapper.h
 const longTextWrapper = await readFile({ path: './mocks/long-text-wrapper.html' });
 
 describe('Long Text', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
   it('Long Text exists', () => {
     document.body.innerHTML = body;
     const longText = document.querySelector('.long-text');
