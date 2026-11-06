@@ -1,0 +1,40 @@
+{
+  "block": "image-reveal",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@image-reveal-default",
+      "selector": "div.image-reveal",
+      "path": "/drafts/echen/image-reveal",
+      "data": {
+        "semantic": {
+          "texts": [
+            { "selector": ".image-reveal-header h2", "nth": 0, "tag": "h2", "text": "Recolor your image with Adobe Express.", "markup": null },
+            { "selector": ".image-reveal-header p", "nth": 0, "tag": "p", "text": "Pick an effect, then drag the slider to compare it with the original", "markup": null },
+            { "selector": ".image-reveal-group-title", "nth": 0, "tag": "p", "text": "Add an image effect", "markup": null },
+            { "selector": ".image-reveal-group-title", "nth": 1, "tag": "p", "text": "Try a different image", "markup": null },
+            { "selector": ".image-reveal-thumb-label", "nth": 0, "tag": "span", "text": "Greyscale", "markup": null },
+            { "selector": ".image-reveal-thumb-label", "nth": 1, "tag": "span", "text": "Color punch", "markup": null },
+            { "selector": ".image-reveal-thumb-label", "nth": 2, "tag": "span", "text": "Duotone", "markup": null },
+            { "selector": ".image-reveal-thumb-label", "nth": 3, "tag": "span", "text": "Photography", "markup": null },
+            { "selector": ".image-reveal-cta-subtext", "nth": 0, "tag": "p", "text": "Sign in to see more image effects in Adobe Express.", "markup": null }
+          ],
+          "media": [
+            { "selector": ".image-reveal-original img", "nth": 0, "tag": "img", "src": null, "alt": "Alpine lake surrounded by green meadows and mountains under a blue sky" },
+            { "selector": ".image-reveal-thumb-img--grayscale img", "nth": 0, "tag": "img", "src": null, "alt": null },
+            { "selector": ".image-reveal-panel > div:nth-child(3) .image-reveal-thumb-img img", "nth": 0, "tag": "img", "src": null, "alt": null }
+          ],
+          "interactives": [
+            { "selector": ".image-reveal-cta a", "nth": 0, "type": "link", "href": "https://www.adobe.com/express/", "text": "Recolor your image now" },
+            { "selector": ".image-reveal-handle", "nth": 0, "type": "slider", "text": null }
+          ]
+        }
+      },
+      "tags": [
+        "@image-reveal",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}
