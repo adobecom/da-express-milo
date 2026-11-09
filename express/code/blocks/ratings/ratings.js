@@ -138,8 +138,8 @@ export default async function decorate(block) {
       } else {
         commentBox.classList.remove('submit--appear');
         submit.inert = true;
-        stars[index - 1].parentElement.appendChild(timerAnimation);
-        countdown(true);
+        timerAnimation.remove();
+        countdown(false);
       }
       commentBox.classList.add('comment--appear');
       commentBox.inert = false;

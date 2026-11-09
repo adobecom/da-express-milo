@@ -199,6 +199,11 @@ describe('Ratings Block - slider interactions', () => {
   let block;
 
   beforeEach(async () => {
+    if (window.ratingSubmitCountdown) {
+      clearInterval(window.ratingSubmitCountdown);
+    }
+    window.ratingSubmitCountdown = null;
+
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     block = document.querySelector('.ratings');
     localStorage.clear();
@@ -253,29 +258,34 @@ describe('Ratings Block - slider interactions', () => {
     expect(window.ratingSubmitCountdown).to.be.null;
   });
 
-  it('countdown: starts interval for non-feedback-required rating (4 stars)', async () => {
+  it('does not start countdown for non-feedback-required rating (4 stars)', async () => {
     await decorate(block);
     await waitForSlider(block);
 
     const input = block.querySelector('input[type=range]');
+    const commentBox = block.querySelector('.slider-comment');
+
     input.value = '4';
     input.dispatchEvent(new Event('change'));
 
-    expect(window.ratingSubmitCountdown).to.not.be.null;
+    expect(window.ratingSubmitCountdown).to.equal(null);
+    expect(commentBox.classList.contains('comment--appear')).to.be.true;
+    expect(commentBox.classList.contains('submit--appear')).to.be.false;
   });
 
-  it('countdown: clears interval when switching from 4-star to 3-star', async () => {
+  it('keeps countdown stopped when switching from 4-star to 3-star', async () => {
     await decorate(block);
     await waitForSlider(block);
 
     const input = block.querySelector('input[type=range]');
+
     input.value = '4';
     input.dispatchEvent(new Event('change'));
-    expect(window.ratingSubmitCountdown).to.not.be.null;
+    expect(window.ratingSubmitCountdown).to.equal(null);
 
     input.value = '3';
     input.dispatchEvent(new Event('change'));
-    expect(window.ratingSubmitCountdown).to.be.null;
+    expect(window.ratingSubmitCountdown).to.equal(null);
   });
 
   it('updateSliderStyle: called on window resize without error', async () => {
@@ -419,7 +429,7 @@ describe('Ratings Block - slider interactions', () => {
     expect(input.value).to.equal('3');
   });
 
-  it('textarea focus stops countdown and shows submit section', async () => {
+  it('textarea focus shows submit section without countdown', async () => {
     await decorate(block);
     await waitForSlider(block);
 
@@ -427,18 +437,35 @@ describe('Ratings Block - slider interactions', () => {
     const textarea = block.querySelector('textarea');
     const commentBox = block.querySelector('.slider-comment');
 
-    // Start countdown with a non-feedback-required star
     input.value = '4';
     input.dispatchEvent(new Event('change'));
-    expect(window.ratingSubmitCountdown).to.not.be.null;
+    expect(window.ratingSubmitCountdown).to.equal(null);
 
     textarea.dispatchEvent(new Event('focus'));
 
-    const submit = block.querySelector('input[type=submit]');
-    expect(submit.inert).to.be.false;
-    expect(window.ratingSubmitCountdown).to.be.null;
+    expect(window.ratingSubmitCountdown).to.equal(null);
     expect(commentBox.classList.contains('submit--appear')).to.be.true;
   });
+
+  it('does not auto-submit a non-feedback-required rating', async () => {
+    await decorate(block);
+    await waitForSlider(block);
+
+    window.ratingSubmitCountdown = null;
+    
+    const input = block.querySelector('input[type=range]');
+    const commentBox = block.querySelector('.slider-comment');
+    const submit = block.querySelector('input[type=submit]');
+
+    input.value = '4';
+    input.dispatchEvent(new Event('change'));
+
+    expect(window.ratingSubmitCountdown).to.be.null;
+    expect(commentBox.classList.contains('comment--appear')).to.be.true;
+    expect(commentBox.classList.contains('submit--appear')).to.be.false;
+    expect(submit.inert).to.be.true;
+  });
+
 
   it('restores textarea value and slider position from localStorage on init', async () => {
     localStorage.setItem('ccxActionRatingsFeedbacknalaTestRatings', '3,previous feedback');
