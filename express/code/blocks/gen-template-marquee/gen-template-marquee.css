@@ -6,6 +6,8 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
 .gen-template-marquee {
   --gen-template-padding-top: var(--spacing-500);
   --gen-template-card-width: 250px;
+  /* Overridden inline from the `gen-template-card-ratio` page metadata. */
+  --gen-template-card-ratio: 250 / 338;
   --gen-template-column-gap: var(--spacing-600);
   --gen-template-card-gap: 52px;
   --gen-template-gallery-bottom-padding: 40px;
@@ -303,7 +305,7 @@ main .section .gen-template-suggestions-label {
   position: relative;
   flex: none;
   width: 100%;
-  aspect-ratio: 250 / 338;
+  aspect-ratio: var(--gen-template-card-ratio);
   overflow: hidden;
   border-radius: var(--Corner-radius-corner-radius-200);
 }

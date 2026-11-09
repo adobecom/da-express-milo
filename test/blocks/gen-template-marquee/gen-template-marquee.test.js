@@ -246,4 +246,28 @@ describe('gen-template-marquee', () => {
     expect(lcp.loading).to.equal('eager');
     expect(lcp.getAttribute('src')).to.equal('/a-4096x4096.png');
   });
+
+  it('applies the page-metadata card ratio to every card, including authored ones', async () => {
+    addMetadata({ 'gen-template-card-ratio': '2:3' });
+    document.body.innerHTML = fixture;
+    const block = document.querySelector('.gen-template-marquee');
+    block.classList.add('hardcoded-templates');
+    block.children[2].innerHTML = '<div><picture><img src="/a.png"></picture></div>';
+    await decorate(block);
+
+    expect(block.style.getPropertyValue('--gen-template-card-ratio')).to.equal('2 / 3');
+    const card = block.querySelector('.gen-template-card');
+    expect(card.className).to.equal('gen-template-card');
+  });
+
+  it('accepts slash ratios on fetched templates and ignores malformed values', async () => {
+    const block = await prepareBlock({ 'gen-template-card-ratio': '3/4' });
+    expect(block.style.getPropertyValue('--gen-template-card-ratio')).to.equal('3 / 4');
+    expect(block.querySelector('.gen-template-card-portrait, .gen-template-card-square')).to.be.null;
+
+    document.head.querySelectorAll('meta[data-gen-template-test]').forEach((meta) => meta.remove());
+    const fallback = await prepareBlock({ 'gen-template-card-ratio': '0:1' });
+    expect(fallback.style.getPropertyValue('--gen-template-card-ratio')).to.equal('');
+    expect(fallback.querySelector('.gen-template-card-portrait, .gen-template-card-square')).to.exist;
+  });
 });

@@ -211,13 +211,24 @@ function getAuthoredColumns(row) {
   })));
 }
 
-function buildCard({ picture: authoredPicture, src, width, height }, isLcp) {
+// Page metadata `gen-template-card-ratio` (e.g. "1:1", "2:3", "3/4") fixes every card to one
+// shape for use cases whose imagery shares an aspect ratio (logo, poster, flyer).
+function getCardRatio() {
+  const match = getMetadata('gen-template-card-ratio')?.trim().match(/^(\d*\.?\d+)\s*[:/]\s*(\d*\.?\d+)$/);
+  if (!match) return '';
+  const [, width, height] = match;
+  return Number(width) > 0 && Number(height) > 0 ? `${width} / ${height}` : '';
+}
+
+function buildCard({ picture: authoredPicture, src, width, height }, isLcp, hasFixedRatio) {
   const card = createElement('div', 'gen-template-card');
-  // Authored images size the card themselves (EDS drops width/height), so nothing is cropped.
-  const isSquare = width && height && width / height >= 0.85;
-  card.classList.add(authoredPicture
-    ? 'gen-template-card-authored'
-    : `gen-template-card-${isSquare ? 'square' : 'portrait'}`);
+  if (!hasFixedRatio) {
+    // Authored images size the card themselves (EDS drops width/height), so nothing is cropped.
+    const isSquare = width && height && width / height >= 0.85;
+    card.classList.add(authoredPicture
+      ? 'gen-template-card-authored'
+      : `gen-template-card-${isSquare ? 'square' : 'portrait'}`);
+  }
   const picture = authoredPicture || createElement('picture');
   const image = picture.querySelector('img') || createElement('img');
   if (!image.src) image.src = src;
@@ -230,14 +241,14 @@ function buildCard({ picture: authoredPicture, src, width, height }, isLcp) {
   return card;
 }
 
-function buildGallery(columns) {
+function buildGallery(columns, hasFixedRatio) {
   const gallery = createElement('div', 'gen-template-gallery');
   gallery.setAttribute('aria-hidden', 'true');
 
   columns.forEach((items, columnIndex) => {
     const column = createElement('div', 'gen-template-column');
     items.forEach((item, cardIndex) => {
-      column.append(buildCard(item, columnIndex === 2 && cardIndex === 0));
+      column.append(buildCard(item, columnIndex === 2 && cardIndex === 0, hasFixedRatio));
     });
     if (column.children.length) gallery.append(column);
   });
@@ -309,7 +320,9 @@ export default async function decorate(block) {
       : loadTemplates(galleryRow).then(getTemplateColumns),
   ]);
   const content = buildContent(textRow, suggestionsRow, strings);
-  const gallery = buildGallery(columns);
+  const cardRatio = getCardRatio();
+  if (cardRatio) block.style.setProperty('--gen-template-card-ratio', cardRatio);
+  const gallery = buildGallery(columns, !!cardRatio);
 
   block.replaceChildren(content, gallery);
   addInteractions(block);
