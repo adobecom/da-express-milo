@@ -69,6 +69,7 @@ Ask the user to provide the following before proceeding:
 | **Figma URL — Desktop** (≥ 1200 px) | | frame link |
 | **Figma URL — Widescreen** (≥ 1680 px) | | frame link |
 | **Base branch** | No (default: `stage`) | `my-feature`, `methomas/experiment` |
+| **Figma URLs — Interaction states** | Strongly recommended | expanded, loading, hover/tooltip, error, empty frames |
 
 Do not proceed until you have the preview URL and at least one Figma URL.
 
@@ -272,6 +273,48 @@ which do not.  Carry this inventory forward into Phase 4 as a
 checklist — the implementation must match element presence per
 breakpoint exactly.
 
+### Harvest designer annotations
+
+Designer intent that is not visible in a static frame (zoom levels,
+file-output formats, template IDs, loading flows, tooltip copy per
+state) usually lives in **annotations**, not in the frame you were
+handed. `get_design_context` on a single frame does not reliably return
+them. Missing annotations is the leading cause of design-review
+feedback.
+
+1. Call `get_metadata` on the **parent page/section** of each provided
+   frame (not just the frame). Collect every node that is a Dev Mode
+   annotation, sticky, callout, measurement, or a text layer/frame named
+   like `annotation`, `note`, `spec`, `redline`, `behavior`, `states`,
+   or `handoff` near the target frames.
+2. Read each one (`get_design_context` / `get_screenshot` on that node)
+   and record it verbatim with its node ID.
+3. Write the list to `/tmp/build-block-figma/annotations.md` as a
+   checklist. Every item must end the run with a status:
+   `implemented` / `needs designer input` / `out of scope (reason)`.
+4. If an annotation contradicts a frame, the annotation wins; note it.
+
+### Build a state inventory
+
+Extend the element inventory with **states**. For each interactive or
+async element, list every state the design implies:
+
+```
+Element / view   | default | hover/focus | expanded | loading | error | empty
+──────────────────────────────────────────────────────────────────────────
+Image viewer     | ✓ frame | —           | ✓ frame  | annotation | ? | ?
+Expand button    | ✓       | tooltip "Expand" | tooltip "Collapse" | — | — | —
+```
+
+- Locate a Figma frame or annotation for each state via `get_metadata`
+  (look for sibling frames named `Expanded`, `Loading`, `Hover`, etc.).
+- Record per-state copy (labels, tooltips, aria-labels) — toggles must
+  change their label.
+- A state with **no** frame and no annotation goes into an
+  **open-questions list**. Ask the user/designer in one batch before
+  Phase 4 rather than guessing; if you must proceed, implement the most
+  conservative behavior and mark it `needs designer input`.
+
 ### Build the token-mapping table
 
 Using the Figma variable names (`get_variable_defs`) and raw values
@@ -307,6 +350,14 @@ branch.
 Create files at:
 - `express/code/blocks/<name>/<name>.js`
 - `express/code/blocks/<name>/<name>.css`
+
+### Reuse existing components first
+
+Before building any common UI pattern (tooltip, modal/overlay, toggle,
+dropdown, zoom control, loader, toast), grep `express/code/blocks/`,
+`express/code/scripts/`, and milo libs for an existing implementation and
+match its markup and styling. Do not restyle a shared pattern from
+scratch; if you must diverge, note why in the summary.
 
 ### JS and CSS rules + acceptance criteria
 
@@ -552,6 +603,17 @@ all breakpoints. Stop early if fidelity is high.
   See `references/remote-branch-workflow.md` section 5 for the
   batching criteria.
 
+**States**: repeat the comparison for every row of the Phase 3 state
+inventory that has a Figma frame — drive the state with Playwright
+(click expand, hover the tooltip, trigger loading, etc.) and compare
+against that state's frame. Then run the behaviour checks in
+`references/acceptance-criteria.md` (scroll lock, overflow, async
+flows, toggle labels).
+
+**Annotation self-review**: before leaving Phase 5, walk
+`/tmp/build-block-figma/annotations.md` and set a status on every item.
+No item may be left without one.
+
 **Important**: only after the visual loop is complete, proceed to
 Phase 6 and Phase 7.  Do not run accessibility or performance checks
 during visual iteration.
@@ -639,6 +701,12 @@ Output:
 10. **Nala tests** — file paths created, test IDs, what each covers.
 11. **Obstacles Encountered** — aggregated from all subagents, including
     visual discrepancies the user should review manually.
+12. **Annotation checklist** — every harvested annotation with its
+    status (`implemented` / `needs designer input` / `out of scope`).
+13. **State coverage** — the state inventory with pass/fail per state,
+    and states that had no design reference.
+14. **Open questions for the designer** — one consolidated list, ready
+    to paste into the design review thread.
 
 ### Next steps (remote-branch-mode only)
 

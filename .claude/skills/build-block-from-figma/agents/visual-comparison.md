@@ -110,6 +110,21 @@ For each breakpoint:
 
    **Never dismiss a color or spacing difference as "design system default"**
    without first cross-referencing `get_variable_defs` from Phase 3.
+
+   **Container geometry assertion**: for every named container recorded
+   from `get_design_context` in Phase 3, assert computed
+   `padding`, `gap`, and `border-radius` equal the Figma values exactly.
+   Pixel diffs routinely miss a 0 → 8px radius or an extra 16px of
+   side padding; numbers do not.
+   ```js
+   const sel = ['.<block-name>', /* each named container selector */];
+   return sel.map((s) => {
+     const el = document.querySelector(s);
+     if (!el) return { s, missing: true };
+     const cs = getComputedStyle(el);
+     return { s, padding: cs.padding, gap: cs.gap, radius: cs.borderRadius };
+   });
+   ```
 9. **Load the cached Figma frame** for this breakpoint from
    `/tmp/build-block-figma/<viewport>.png` (saved during Phase 3).
    Do **not** re-fetch from the Figma MCP — the cached file is the
@@ -167,6 +182,22 @@ For each breakpoint, evaluate:
 - No missing elements, no extra elements.
 - No overflow or clipping issues.
 
+---
+
+## State pass
+
+After the default state passes at a breakpoint, iterate the Phase 3
+state inventory. For each state that has a Figma frame or annotation:
+
+1. Drive the state with Playwright (click, hover, keyboard, or trigger
+   the async action and screenshot mid-load).
+2. Screenshot and compare against that state's frame using the same
+   criteria above, plus: media centring/fill, tooltip copy and styling,
+   and toggle labels.
+3. Run the behaviour checklist from `references/acceptance-criteria.md`
+   for this state (scroll lock, wheel-induced overflow, etc.).
+
+Report each state as pass / fail / no design reference.
 ---
 
 ## Iteration loop

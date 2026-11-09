@@ -169,3 +169,31 @@ Never use a single-class selector for `<p>` margins — it will lose silently.
   (compositor-friendly, won't hurt CLS).
 - No bare/unqualified tag selectors (`p`, `div`); always scope
   under the block class.
+
+## Behaviour checklist
+
+Static frames rarely show these; designers still expect them. Verify
+each one that applies, in the browser, at every provided breakpoint.
+
+- **Overlays / loading screens lock page scroll.** While a modal,
+  fullscreen view, or loading overlay is open, the page behind must not
+  scroll (wheel, trackpad, touch, keyboard). Release the lock on close.
+- **No unintended overflow in expanded/fullscreen views.** Dispatch a
+  wheel event inside the view and confirm no scrollbar appears and
+  `scrollHeight <= clientHeight` on the view and `document.body`.
+- **Media alignment and fill in every state.** Media stays centred
+  (both axes) when the container grows; "fill"/"cover" modes fill the
+  full available height and width as drawn in Figma.
+- **Async actions show a loading state and apply atomically.** When a
+  user action triggers processing (e.g. changing a mode/filter/colour
+  space), show the designed loading state and never render partial
+  results.
+- **Toggle controls update their label.** Expand ↔ Collapse,
+  Play ↔ Pause, etc. — visible text, tooltip, and `aria-label` /
+  `aria-expanded` all reflect the current state.
+- **Shared patterns match the existing component.** Tooltips, modals,
+  and buttons reuse the established Express styling (no ad-hoc hover
+  backgrounds or extra icons).
+- **Annotated behaviour is implemented** — zoom steps/limits, download
+  file names/formats, template IDs, etc. as specified in
+  `/tmp/build-block-figma/annotations.md`.
