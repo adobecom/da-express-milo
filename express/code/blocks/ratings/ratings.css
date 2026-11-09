@@ -183,19 +183,6 @@
   margin: 0 1px;
 }
 
-.ratings .slider-bottom .timer {
-  position: absolute;
-  left: calc(50% - 1px);
-  transform: translateX(-50%);
-  top: 2px;
-  padding-top: 2px;
-}
-
-.ratings .slider-bottom .lottie {
-  width: 24px;
-  height: 24px;
-}
-
 @media (max-width: 899px) {
   .ratings .slider-bottom {
     padding: 20px 0 50px;
@@ -489,15 +476,6 @@
 
   .ratings .slider-bottom .stars {
     color: var(--color-gray-200);
-  }
-
-  .ratings .slider-bottom .timer {
-    top: 26px;
-  }
-
-  .ratings .slider-bottom .lottie {
-    width: 28px;
-    height: 28px;
   }
 
   .ratings #rate-our-quick-action {
