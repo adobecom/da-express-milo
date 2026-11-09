@@ -38,7 +38,7 @@ describe('color harmony modal content', () => {
   before(async () => {
     style = document.createElement('link');
     style.rel = 'stylesheet';
-    style.href = '/express/code/blocks/color-wheel/color-wheel.css';
+    style.href = '/express/code/blocks/color-wheel/color-harmony-modal.css';
     await new Promise((resolve, reject) => {
       style.onload = resolve;
       style.onerror = reject;
@@ -72,8 +72,9 @@ describe('color harmony modal content', () => {
       RULES.map((rule) => rule.value),
     );
     expect(cards[1].getAttribute('aria-checked')).to.equal('true');
+    // Roving tabindex: only the selected card is in the tab sequence.
     expect(cards[1].tabIndex).to.equal(0);
-    expect(cards.every((card) => card.tabIndex === 0)).to.equal(true);
+    expect(cards.map((card) => card.tabIndex)).to.deep.equal([-1, 0, -1]);
     expect(view.element.querySelectorAll('.color-harmony-card-palette-swatch')).to.have.length(15);
     const configuredPalette = view.element.querySelector('.color-harmony-modal-palette-strip .ax-swatch-strip');
     expect(configuredPalette).to.exist;
@@ -119,13 +120,19 @@ describe('color harmony modal content', () => {
     expect(document.activeElement).to.equal(triad);
     expect(triad.getAttribute('aria-checked')).to.equal('true');
 
+    const tabStops = () => [...view.element.querySelectorAll('[role="radio"]')]
+      .map((card) => card.tabIndex);
+    expect(tabStops()).to.deep.equal([-1, -1, 0]);
+
     triad.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     const custom = view.element.querySelector('[data-harmony-value="CUSTOM"]');
     expect(document.activeElement).to.equal(custom);
     expect(custom.getAttribute('aria-checked')).to.equal('true');
+    expect(tabStops()).to.deep.equal([0, -1, -1]);
 
     custom.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
     expect(document.activeElement).to.equal(triad);
+    expect(tabStops()).to.deep.equal([-1, -1, 0]);
   });
 
   it('uses one card column on mobile and two on larger screens', async () => {

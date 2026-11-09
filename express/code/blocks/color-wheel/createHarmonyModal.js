@@ -1,5 +1,6 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, createSecureUid } from '../../scripts/utils.js';
 import { createColorStrip } from '../../scripts/color-shared/toolbar/colorStrip.js';
+import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 
 const STRIP_DEFAULTS = {
   swatchLabel: 'Color {index}: {hex}',
@@ -7,23 +8,23 @@ const STRIP_DEFAULTS = {
 };
 
 const NAVIGATION_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
-let uidCounter = 0;
 
-function createSecureUid(prefix = 'color-harmony-modal') {
-  const cryptoObj = window.crypto;
-  if (cryptoObj?.randomUUID) {
-    return `${prefix}-${cryptoObj.randomUUID().replace(/-/g, '').slice(0, 12)}`;
-  }
-  if (cryptoObj?.getRandomValues) {
-    const bytes = new Uint8Array(8);
-    cryptoObj.getRandomValues(bytes);
-    const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-    return `${prefix}-${token.slice(0, 12)}`;
-  }
+// Modal styles live in their own sheet so the block only pays for them once the
+// user actually opens the modal (see SHARED-COMPONENT-GUIDANCE.md, loadStyle pattern).
+const STYLE_PATH = 'blocks/color-wheel/color-harmony-modal.css';
+let stylesLoadPromise = null;
 
-  // Last-resort fallback for unusual runtimes that do not expose Web Crypto.
-  uidCounter += 1;
-  return `${prefix}-${Date.now().toString(36)}${uidCounter.toString(36)}`;
+export function ensureHarmonyModalStyles() {
+  if (!stylesLoadPromise) {
+    stylesLoadPromise = loadMiloStyle(STYLE_PATH).catch((error) => {
+      stylesLoadPromise = null;
+      window.lana?.log(`Failed to load color harmony modal styles: ${error?.message}`, {
+        tags: 'color-wheel,harmony-modal',
+        severity: 'error',
+      });
+    });
+  }
+  return stylesLoadPromise;
 }
 
 function createPaletteSummary(colors = []) {
@@ -48,7 +49,7 @@ function createHarmonyModalContent({
 } = {}) {
   const title = strings.title || 'Learn about color harmonies';
   const confirmLabel = strings.confirm || 'Apply harmony';
-  const uid = createSecureUid();
+  const uid = createSecureUid('color-harmony-modal');
   const titleId = `${uid}-title`;
   const element = createTag('div', { class: 'color-harmony-modal' });
   const header = createTag('header', { class: 'color-harmony-modal-header' });
@@ -110,6 +111,9 @@ function createHarmonyModalContent({
     cards.forEach((card) => {
       const selected = card.dataset.harmonyValue === value;
       card.setAttribute('aria-checked', String(selected));
+      // Roving tabindex: only the selected card is in the tab sequence;
+      // arrow keys move selection (and focus) between cards.
+      card.setAttribute('tabindex', selected ? '0' : '-1');
     });
     updateSummary(selectedRule);
     updateConfiguredPalette(selectedRule.previewColors);
@@ -123,7 +127,7 @@ function createHarmonyModalContent({
       role: 'radio',
       'aria-checked': 'false',
       'data-harmony-value': rule.value,
-      tabindex: '0',
+      tabindex: '-1',
     });
     const image = createTag('img', {
       class: 'color-harmony-card-image',

@@ -1,4 +1,4 @@
-import { createTag, getLibs } from '../../scripts/utils.js';
+import { createTag, createSecureUid, getLibs } from '../../scripts/utils.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import { createColorPaletteParamApi, decorateAnalyticsAttributes, PARAM_NAME } from '../../scripts/color-shared/utils/utilities.js';
 import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
@@ -333,7 +333,7 @@ function withHarmonyPreviewColors(Controller, initialState, rules) {
 }
 
 async function buildHarmonySelector(controller, strings = {}) {
-  const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const uid = createSecureUid('cw-h');
   const headingId = `${uid}-heading`;
   const currentNameId = `${uid}-current`;
   const section = createTag('div', { class: 'color-wheel-harmony-section' });
@@ -404,7 +404,12 @@ async function buildHarmonySelector(controller, strings = {}) {
   async function openHarmonyModal() {
     const [modalModule, contentModule] = await Promise.all([
       import('../../scripts/color-shared/modal/createModalManager.js'),
-      import('./createHarmonyModal.js'),
+      // Load the modal's stylesheet in parallel with the modal manager so the
+      // block CSS stays free of modal-only rules until the modal is opened.
+      import('./createHarmonyModal.js').then(async (module) => {
+        await module.ensureHarmonyModalStyles();
+        return module;
+      }),
     ]);
     harmonyModalManager ||= modalModule.createModalManager();
     const initialState = controller.getState();
@@ -434,7 +439,7 @@ async function buildHarmonySelector(controller, strings = {}) {
       title: strings.harmonyModalTitle,
       showTitle: false,
       content: contentView.element,
-      initialFocusSelector: (body) => body.querySelector('.color-harmony-card'),
+      initialFocusSelector: (body) => body.querySelector('.color-harmony-card[aria-checked="true"]'),
     });
   }
 
@@ -442,6 +447,7 @@ async function buildHarmonySelector(controller, strings = {}) {
     openHarmonyModal().catch((error) => {
       window.lana?.log(`Color harmony modal error: ${error.message}`, {
         tags: 'color-wheel,harmony-modal',
+        severity: 'error',
       });
     });
   });
