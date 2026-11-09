@@ -880,10 +880,25 @@
   }
 
   /* Figma zoom-to-fill (desktop): 64px toolbar gutter, images bleed off the bottom edge. */
-  .color-image-contrast-checker .icc-comparison-row.is-fill,
-  .color-image-contrast-checker.icc-dialog .icc-comparison-row.is-fill {
+  .color-image-contrast-checker .icc-comparison-row.is-fill {
     padding-inline-start: var(--spacing-800);
     padding-block-end: 0;
+  }
+}
+
+/* Mobile expanded Fill: images span the full surface height beside the toolbar and
+   run off the end edge (horizontal scroll); resize() sets the start gutter. */
+@media (max-width: 599px) {
+  .color-image-contrast-checker.icc-dialog .icc-comparison-row.is-fill {
+    --icc-fill-beside-toolbar: 1;
+
+    padding-block: 0;
+    padding-inline-end: 0;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-comparison-row.is-fill .icc-comparison {
+    border-start-end-radius: inherit;
+    border-end-end-radius: inherit;
   }
 }
 

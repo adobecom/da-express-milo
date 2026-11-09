@@ -1280,8 +1280,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
                 && Math.min(image.right, clip.right) > toolbar.left
                 && Math.max(image.top, clip.top) < toolbar.bottom
                 && Math.min(image.bottom, clip.bottom) > toolbar.top;
-              // Mobile/tablet Fill intentionally runs under the floating toolbar (Figma).
-              if (mode === 'fit' || width >= 900) {
+              // Mobile/tablet Fill runs under the toolbar, except mobile expanded Fill (Figma).
+              if (mode === 'fit' || width >= 900 || (expanded && width < 600)) {
                 expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
                   .to.equal(false);
               }
@@ -1291,7 +1291,15 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
                 reservations += 1;
               }
             }
-            if (mode === 'fill') expect(surface.style.paddingInlineStart).to.equal('');
+            // Only mobile expanded Fill sits beside the toolbar, edge to edge vertically.
+            if (mode === 'fill') {
+              expect(surface.style.paddingInlineStart !== '').to.equal(expanded && width < 600);
+              if (expanded && width < 600) {
+                expect(clip.top).to.equal(surface.getBoundingClientRect().top);
+                expect(clip.bottom).to.equal(surface.getBoundingClientRect().bottom);
+                expect(clip.right).to.equal(surface.getBoundingClientRect().right);
+              }
+            }
           }
           if (expanded) expand.click();
         }

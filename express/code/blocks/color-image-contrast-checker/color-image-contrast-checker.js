@@ -312,22 +312,28 @@ export default async function decorate(block) {
     hug();
     let { width, height, scale } = measure();
     if (!width || height <= 0) return;
+    const toolbar = zoom.getBoundingClientRect();
+    const reserveGutter = () => {
+      const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
+      const gutter = toolbar.right - comparisonRow.getBoundingClientRect().left + toolbarGap;
+      comparisonRow.style.paddingInlineStart = `${gutter}px`;
+      hug();
+      ({ width, height, scale } = measure());
+    };
     if (mode === 'fit') {
       // The pair is centered; only when it would sit under the toolbar does it get a
       // start gutter beside the toolbar (narrower than the toolbar is tall).
       const frame = comparison.getBoundingClientRect();
-      const toolbar = zoom.getBoundingClientRect();
       const pairWidth = 2 * source.width * scale + gap;
       const imageLeft = frame.left + (frame.width - pairWidth) / 2;
       const imageTop = frame.top + (height - source.height * scale) / 2;
       if (imageLeft < toolbar.right && imageLeft + pairWidth > toolbar.left
         && imageTop < toolbar.bottom && imageTop + source.height * scale > toolbar.top) {
-        const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
-        const gutter = toolbar.right - comparisonRow.getBoundingClientRect().left + toolbarGap;
-        comparisonRow.style.paddingInlineStart = `${gutter}px`;
-        hug();
-        ({ width, height, scale } = measure());
+        reserveGutter();
       }
+    } else if (surfaceStyle.getPropertyValue('--icc-fill-beside-toolbar').trim() === '1') {
+      // Mobile expanded Fill: edge-to-edge height beside the toolbar, scrolling horizontally.
+      reserveGutter();
     }
     // Floor so fitted images never overflow the shared scroller by a sub-pixel.
     view.panel.style.setProperty('--icc-image-width', `${Math.floor(source.width * scale)}px`);
