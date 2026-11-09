@@ -12,15 +12,17 @@ const PROPERTIES = [
   'legend', 'largeText', 'largeTextHelp', 'smallText', 'smallTextHelp', 'green', 'passes',
   'greenLarge', 'greenSmall', 'blue', 'partial', 'blueLarge', 'blueSmall', 'dark', 'fails',
   'darkDescription', 'darkSize', 'unsupportedFile', 'fileTooLarge', 'imageTooLarge',
-  'unsupportedProfile', 'p3Unavailable', 'analysisError', 'saveError', 'saved',
+  'unsupportedProfile', 'p3Unavailable', 'analysisError', 'saveError', 'saved', 'colorSpaceUpdated',
 ];
+// Present only when authored: Adobe RGB enables a selector option, colorSpaceUpdated the toast.
+const OPTIONAL = new Set(['adobeRgb', 'colorSpaceUpdated']);
 
 export const PLACEHOLDER_KEY_MAP = Object.freeze(Object.fromEntries(PROPERTIES.map((property) => [
   property, `color-image-contrast-checker-${property.replace(/[A-Z]/g, '-$&').toLowerCase()}`,
 ])));
 
 export function validatePlaceholders(strings) {
-  const missing = PROPERTIES.filter((property) => (property !== 'adobeRgb' || property in strings)
+  const missing = PROPERTIES.filter((property) => (!OPTIONAL.has(property) || property in strings)
     && (typeof strings[property] !== 'string' || !strings[property].trim()));
   if (missing.length) {
     throw new Error(`Missing image contrast placeholders: ${missing.map((key) => PLACEHOLDER_KEY_MAP[key]).join(', ')}`);

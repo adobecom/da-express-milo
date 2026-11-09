@@ -277,7 +277,12 @@
   border-block-end: 1px dotted currentcolor;
   font: inherit;
   color: var(--Alias-content-typography-Body);
-  cursor: help;
+  cursor: default;
+}
+
+/* Tooltip triggers stay plain text on hover, matching the other Express tooltips. */
+.color-image-contrast-checker .icc-help:hover {
+  background: none;
 }
 
 .color-image-contrast-checker .color-action-button .icon {
@@ -329,7 +334,6 @@
 .color-image-contrast-checker .icc-comparison-row {
   /* Matches the zoom toolbar's top inset so image tops sit flush with it. */
   --icc-comparison-padding-block: 10px;
-  --icc-image-top-inset: var(--icc-comparison-padding-block);
 
   position: relative;
   display: flex;
@@ -338,9 +342,9 @@
   min-block-size: 0;
   aspect-ratio: 311 / 200;
   padding: var(--spacing-100) var(--spacing-300) var(--spacing-100) var(--spacing-700);
-  padding-block-start: var(--icc-image-top-inset);
+  padding-block-start: var(--icc-comparison-padding-block);
   background: var(--S2AC-Palette-gray-75);
-  border-radius: var(--Radius-corner-radius-200);
+  border-radius: var(--Corner-radius-corner-radius-100);
   outline: 1px solid rgb(82 88 228 / 10%);
 }
 
@@ -393,9 +397,10 @@
   min-block-size: 0;
   flex: 1;
   display: grid;
-  /* Tracks grow to the scaled image so both panes share this one scrollbar. */
-  grid-template-columns: repeat(2, minmax(var(--icc-image-width), 1fr));
-  grid-template-rows: minmax(var(--icc-image-height), 1fr);
+  /* Tracks hug the scaled images; the pair stays centered and scrolls from the start when larger. */
+  grid-template-columns: repeat(2, var(--icc-image-width));
+  grid-template-rows: var(--icc-image-height);
+  place-content: safe center;
   gap: var(--spacing-100);
   overflow: auto;
 }
@@ -408,11 +413,41 @@
 
 .color-image-contrast-checker .icc-frame :is(canvas, img) {
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: max(0%, calc((100% - var(--icc-image-width)) / 2));
-  inline-size: var(--icc-image-width);
-  block-size: var(--icc-image-height);
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
   max-inline-size: none;
+}
+
+.color-image-contrast-checker .icc-recalc {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: rgb(0 0 0 / 56%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease-out;
+}
+
+.color-image-contrast-checker .icc-comparison-row.is-recalculating .icc-recalc {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.color-image-contrast-checker .icc-recalc-spinner {
+  inline-size: 79px;
+  block-size: 79px;
+  border: 7px solid var(--color-gray-300-variant);
+  border-block-start-color: var(--S2-Buttons-Accent-Color-Default);
+  border-radius: 50%;
+  animation: icc-spin 1s linear infinite;
+}
+
+@keyframes icc-spin {
+  to { transform: rotate(360deg); }
 }
 
 .color-image-contrast-checker .icc-footer {
@@ -682,7 +717,12 @@
   min-block-size: 0;
   aspect-ratio: auto;
   padding: var(--spacing-100) var(--spacing-300);
-  padding-block-start: var(--icc-image-top-inset);
+  padding-block-start: var(--icc-comparison-padding-block);
+}
+
+/* Figma zoom-to-fill (mobile/tablet): images run under the toolbar from the left edge. */
+.color-image-contrast-checker .icc-comparison-row.is-fill {
+  padding-inline-start: 0;
 }
 
 .icc-overlay {
@@ -821,9 +861,6 @@
 
     aspect-ratio: 881 / 516;
     padding: var(--spacing-300);
-    padding-inline-start: calc(var(--spacing-700) + var(--spacing-300));
-    padding-block-start: var(--icc-image-top-inset);
-    border-radius: var(--Corner-radius-corner-radius-100);
   }
 
   .color-image-contrast-checker .icc-zoom {
@@ -840,9 +877,13 @@
     --icc-hug-height: 0;
 
     padding: var(--spacing-300);
-    padding-inline-start: calc(var(--spacing-700) + var(--spacing-300));
-    padding-block-start: var(--icc-image-top-inset);
-    border-radius: var(--Radius-corner-radius-200);
+  }
+
+  /* Figma zoom-to-fill (desktop): 64px toolbar gutter, images bleed off the bottom edge. */
+  .color-image-contrast-checker .icc-comparison-row.is-fill,
+  .color-image-contrast-checker.icc-dialog .icc-comparison-row.is-fill {
+    padding-inline-start: var(--spacing-800);
+    padding-block-end: 0;
   }
 }
 

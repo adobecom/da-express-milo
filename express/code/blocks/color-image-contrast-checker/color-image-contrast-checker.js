@@ -15,7 +15,16 @@ import createDropdown from '../../scripts/color-shared/components/dropdown/dropd
 const instances = new WeakMap();
 let nextId = 0;
 const HISTORY_KEY = 'colorImageContrastChecker';
-const MIN_FILL_SCALE = 1.5;
+// Figma "Change color space" timing: 100ms ease-out fade in, 200ms hold, 100ms fade out.
+const RECALC_FADE_MS = 100;
+const RECALC_HOLD_MS = 200;
+const COLOR_SPACE_STRINGS = { srgb: 'srgb', 'display-p3': 'p3', 'adobe-rgb': 'adobeRgb' };
+
+const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+
+function colorSpaceLabel(strings, space) {
+  return strings[COLOR_SPACE_STRINGS[space]];
+}
 
 function label(tag, className, value, attributes = {}) {
   const element = createTag(tag, { class: className, ...attributes });
@@ -114,7 +123,10 @@ function createView(content, strings, id, onColorChange) {
   analysisFrame.append(canvas);
   originalFrame.append(original);
   comparison.append(analysisFrame, originalFrame);
-  comparisonRow.append(zoom, comparison);
+  // Figma "Change color space": spinner overlay over the analysis area only.
+  const recalc = createTag('div', { class: 'icc-recalc', 'aria-hidden': 'true' });
+  recalc.append(createTag('div', { class: 'icc-recalc-spinner' }));
+  comparisonRow.append(zoom, comparison, recalc);
   const footer = createTag('div', { class: 'icc-footer' });
   workspace.append(controls, comparisonRow, footer);
   main.append(copy, workspace);
@@ -260,6 +272,7 @@ export default async function decorate(block) {
     block.setAttribute('aria-busy', String(value));
     syncLoadingOverlay();
     if (view) {
+      view.comparisonRow.classList.remove('is-recalculating');
       if (value && view.dialog.open
         && (document.activeElement === view.save
           || view.selector.element.contains(document.activeElement))) {
@@ -271,55 +284,51 @@ export default async function decorate(block) {
   };
   const resize = () => {
     if (!source || !view) return;
-    const { comparisonRow, zoom } = view;
-    const surfaceStyle = getComputedStyle(comparisonRow);
-    // Desktop minimized: hug the fitted image height, capped by the authored aspect ratio.
+    const { comparisonRow, comparison, zoom } = view;
+    comparisonRow.classList.toggle('is-fill', mode === 'fill');
     comparisonRow.style.removeProperty('block-size');
-    if (surfaceStyle.getPropertyValue('--icc-hug-height').trim() === '1') {
+    comparisonRow.style.removeProperty('padding-inline-start');
+    const surfaceStyle = getComputedStyle(comparisonRow);
+    const gap = parseFloat(getComputedStyle(comparison).columnGap) || 0;
+    // Measure against the scroller's border box so fill-mode scrollbars never feed back.
+    const measure = () => {
+      const width = (comparison.offsetWidth - gap) / 2;
+      const height = comparison.offsetHeight;
+      // Fit: whole image visible. Fill: cover the pane (width and height), then scroll.
+      const scale = mode === 'fit'
+        ? Math.min(width / source.width, height / source.height)
+        : Math.max(width / source.width, height / source.height);
+      return { width, height, scale };
+    };
+    // Desktop minimized: hug the fitted image height, capped by the authored aspect ratio.
+    const hug = () => {
+      if (surfaceStyle.getPropertyValue('--icc-hug-height').trim() !== '1') return;
       const [ratioWidth, ratioHeight] = surfaceStyle.aspectRatio.split('/').map(parseFloat);
       const rowWidth = comparisonRow.getBoundingClientRect().width;
-      const imageWidth = (rowWidth - parseFloat(surfaceStyle.paddingLeft)
-        - parseFloat(surfaceStyle.paddingRight)
-        - parseFloat(getComputedStyle(view.comparison).columnGap)) / 2;
-      const chrome = parseFloat(surfaceStyle.getPropertyValue('--icc-comparison-padding-block'))
-        + parseFloat(surfaceStyle.paddingBottom);
-      const hugHeight = imageWidth * (source.height / source.width) + chrome;
+      const chrome = parseFloat(surfaceStyle.paddingTop) + parseFloat(surfaceStyle.paddingBottom);
+      const hugHeight = measure().width * (source.height / source.width) + chrome;
       comparisonRow.style.blockSize = `${Math.min(hugHeight, rowWidth * (ratioHeight / ratioWidth))}px`;
+    };
+    hug();
+    let { width, height, scale } = measure();
+    if (!width || height <= 0) return;
+    if (mode === 'fit') {
+      // The pair is centered; only when it would sit under the toolbar does it get a
+      // start gutter beside the toolbar (narrower than the toolbar is tall).
+      const frame = comparison.getBoundingClientRect();
+      const toolbar = zoom.getBoundingClientRect();
+      const pairWidth = 2 * source.width * scale + gap;
+      const imageLeft = frame.left + (frame.width - pairWidth) / 2;
+      const imageTop = frame.top + (height - source.height * scale) / 2;
+      if (imageLeft < toolbar.right && imageLeft + pairWidth > toolbar.left
+        && imageTop < toolbar.bottom && imageTop + source.height * scale > toolbar.top) {
+        const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
+        const gutter = toolbar.right - comparisonRow.getBoundingClientRect().left + toolbarGap;
+        comparisonRow.style.paddingInlineStart = `${gutter}px`;
+        hug();
+        ({ width, height, scale } = measure());
+      }
     }
-    const basePadding = parseFloat(surfaceStyle.getPropertyValue('--icc-comparison-padding-block'));
-    const extraPadding = parseFloat(surfaceStyle.paddingTop) - basePadding;
-    // Both images share one scroll container; size each against half of its border box so
-    // scrollbars appearing in fill mode never feed back into the scale.
-    const { comparison } = view;
-    const frame = comparison.getBoundingClientRect();
-    const toolbar = zoom.getBoundingClientRect();
-    const width = (comparison.offsetWidth - parseFloat(getComputedStyle(comparison).columnGap)) / 2;
-    const fullHeight = comparison.offsetHeight + extraPadding;
-    if (!width || fullHeight <= 0) return;
-    const imageScale = (height) => (mode === 'fit'
-      ? Math.min(width / source.width, height / source.height)
-      : Math.max(MIN_FILL_SCALE, width / source.width, height / source.height));
-    const fullScale = imageScale(fullHeight);
-    const imageLeft = frame.left + Math.max(0, (width - source.width * fullScale) / 2);
-    // Images are top-aligned in their frames (horizontally centered).
-    const imageTop = frame.top - extraPadding;
-    const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
-    // The 48px/64px side gutters already clear the toolbar; only reserve the top inset
-    // when an image would come within 4px of it, so image tops stay flush with the toolbar.
-    const clearance = mode === 'fill' ? parseFloat(surfaceStyle.getPropertyValue('--spacing-75')) : 0;
-    const overlaps = imageLeft < toolbar.right + clearance
-      && imageLeft + Math.min(width, source.width * fullScale) > toolbar.left - clearance
-      && imageTop < toolbar.bottom + clearance
-      && imageTop + Math.min(fullHeight, source.height * fullScale) > toolbar.top - clearance;
-    const topInset = toolbar.bottom - comparisonRow.getBoundingClientRect().top + toolbarGap;
-    // Reserve toolbar clearance only where needed, without narrowing the images.
-    if (overlaps && fullHeight - (topInset - basePadding) >= view.fit.offsetHeight) {
-      comparisonRow.style.setProperty('--icc-image-top-inset', `${topInset}px`);
-    } else {
-      comparisonRow.style.removeProperty('--icc-image-top-inset');
-    }
-    const height = comparison.offsetHeight;
-    const scale = imageScale(height);
     // Floor so fitted images never overflow the shared scroller by a sub-pixel.
     view.panel.style.setProperty('--icc-image-width', `${Math.floor(source.width * scale)}px`);
     view.panel.style.setProperty('--icc-image-height', `${Math.floor(source.height * scale)}px`);
@@ -439,12 +448,33 @@ export default async function decorate(block) {
     if (destroyed) return;
     view = createView(content, strings, id, async (value) => {
       generation += 1;
+      const version = generation;
+      const current = () => !destroyed && version === generation;
       colorSpace = value;
+      ready = false;
+      view.save.disabled = true;
+      // Figma: overlay fades in, holds while the new space is applied, then fades out.
+      view.comparisonRow.classList.add('is-recalculating');
+      await wait(RECALC_FADE_MS);
+      if (!current()) return;
       try {
         analyze();
       } catch (error) {
+        view.comparisonRow.classList.remove('is-recalculating');
         await report(error, strings.analysisError);
+        return;
       }
+      await wait(RECALC_HOLD_MS);
+      if (!current()) return;
+      view.comparisonRow.classList.remove('is-recalculating');
+      await wait(RECALC_FADE_MS);
+      if (!current() || !strings.colorSpaceUpdated) return;
+      const { showExpressToast } = await import('../../scripts/color-shared/spectrum/components/express-toast.js');
+      if (!current()) return;
+      showExpressToast({
+        message: strings.colorSpaceUpdated.replace('{colorSpace}', colorSpaceLabel(strings, colorSpace)),
+        variant: 'positive',
+      });
     });
     const upload = createTag('div', { class: 'icc-upload', role: 'region', 'aria-label': strings.landingAria });
     background = createTag('div', {

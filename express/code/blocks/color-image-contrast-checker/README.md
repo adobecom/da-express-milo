@@ -235,6 +235,7 @@ existing fallback behavior.
 | color-image-contrast-checker-analysis-error | Unable to analyze this image. Check that WebGL is enabled and try again. |
 | color-image-contrast-checker-save-error | Unable to save the analysis. Please try again. |
 | color-image-contrast-checker-saved | Image contrast analysis downloaded. |
+| color-image-contrast-checker-color-space-updated | Color space updated to {colorSpace} (optional; enables the confirmation toast) |
 
 Legend thresholds use the `≥` glyph. Existing authored `>=` operators render
 as `≥`; numeric thresholds and localized descriptions are preserved.
@@ -310,21 +311,25 @@ headings wrap. Tablet controls share a row from 700px; narrower layouts stack th
 fields and use a full-width Save PNG button. Expanded views remove the card shadow
 and padding, with the compact legend above Save PNG on mobile.
 
-Image panes retain their full width: when the floating view toolbar would cover
-image pixels, the comparison reserves space above the images instead of a side
-gutter. Fill also reserves an 8px token-based clearance from the toolbar.
-Existing empty space is used without changing the layout. If the viewport
-cannot fit that extra space and at least one control-height of image content,
-the toolbar remains layered above the images so Fit/Fill stays usable.
+The comparison surface has an 8px radius. The two panes sit side by side with an
+8px gap and are centered in the surface (horizontally and vertically) in both the
+normal and expanded views. Fit uses 16px padding on desktop; when the floating view
+toolbar would cover image pixels, the panes get a start gutter beside the toolbar
+instead of shrinking below it. Below 900px the surface keeps its toolbar gutter.
 
 Fit is still the initial selection. Fit/Fill retain state across expansion and
-responsive changes. Fit contains the entire image. Fill starts at 150% of the
-image's native pixel dimensions and scales further only if needed to cover the
-available comparison width and height, preserving aspect ratio. The comparison
-area does not grow to browser-screen height in the normal view; expansion uses
-the available screen height. This is display-only zoom, not resampling: analysis
-and PNG exports retain the original resolution.
+responsive changes. Fit contains the entire image. Fill scales each pane to cover
+its half of the comparison height and width, preserving aspect ratio, and runs
+from the toolbar gutter (desktop) or the left edge (mobile/tablet) to the bottom
+edge. The comparison area does not grow to browser-screen height in the normal
+view; expansion uses the available screen height. This is display-only zoom, not
+resampling: analysis and PNG exports retain the original resolution.
 Zoom has one tab stop with arrow/Home/End navigation.
+
+Changing the color space shows a spinner overlay over the comparison (100ms fade
+in, 200ms hold, 100ms fade out), disables Save PNG until the new analysis is drawn,
+and, when `color-space-updated` is authored, confirms with a positive toast.
+
 The contrast and original image panes share one scroll container (`.icc-comparison`),
 so a single scrollbar moves both images together in normal and expanded views.
 Desktop/tablet/mobile controls follow
