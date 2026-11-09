@@ -511,7 +511,7 @@ describe('Ratings Block - hidden comment controls (WCAG 2.4.3)', () => {
 
   it('reveals submit when the textarea receives focus', () => {
     rate(4);
-    block.querySelector('textarea').focus();
+    block.querySelector('textarea').dispatchEvent(new Event('focus'));
     expect(block.querySelector('input[type=submit]').hasAttribute('inert')).to.be.false;
   });
 });
