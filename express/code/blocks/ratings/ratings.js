@@ -1,4 +1,4 @@
-import { getLibs, getFixedTopOffset, getLottie, lazyLoadLottiePlayer, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import { getLibs, getFixedTopOffset, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
 import { splitAndAddVariantsWithDash } from '../../scripts/utils/decorate.js';
 import {
   createStarRating,
@@ -91,65 +91,27 @@ export default async function decorate(block) {
     const submit = block.querySelector('input[type=submit]');
     const scrollAnchor = block.querySelector('.ratings-scroll-anchor');
     const commentBox = block.querySelector('.slider-comment');
-    const timerAnimation = createTag('div', { class: 'timer' });
     const syncSubmitDisabledState = () => {
       const shouldDisable = textarea.hasAttribute('required') && textarea.value.trim() === '';
       if (shouldDisable === (submit.getAttribute('aria-disabled') === 'true')) return;
       if (shouldDisable) submit.setAttribute('aria-disabled', 'true');
       else submit.removeAttribute('aria-disabled');
     };
-    // Countdown timer to auto-submit
-    const countdown = (bool) => {
-      if (bool) {
-        timerAnimation.innerHTML = getLottie(
-          'countdown',
-          '/express/code/blocks/ratings/countdown.json',
-          false,
-          true,
-          false,
-          false,
-        );
-        let counter = 10;
-        window.ratingSubmitCountdown = setInterval(() => {
-          if (counter > 0) {
-            counter -= 1;
-          } else {
-            clearInterval(window.ratingSubmitCountdown);
-            window.ratingSubmitCountdown = null;
-            if (submit.getAttribute('aria-disabled') !== 'true') submit.click();
-          }
-        }, 920);
-      } else if (window.ratingSubmitCountdown) {
-        clearInterval(window.ratingSubmitCountdown);
-        window.ratingSubmitCountdown = null;
-      }
-    };
     // Updates the comment box
-    const updateCommentBoxAndTimer = () => {
+    const updateCommentBox = () => {
       const val = parseFloat(input.value) ?? 0;
-      const index = Math.round(val);
-      if (val !== index) return;
-      if (ratings[index - 1].feedbackRequired || textarea.value !== '') {
-        commentBox.classList.add('submit--appear');
-        timerAnimation.remove();
-        countdown(false);
-      } else {
-        commentBox.classList.remove('submit--appear');
-        stars[index - 1].parentElement.appendChild(timerAnimation);
-        countdown(true);
-      }
+      if (val !== Math.round(val)) return;
+      commentBox.classList.add('submit--appear');
       commentBox.classList.add('comment--appear');
     };
     // Updates the value of the slider and tooltip.
     const updateSliderValue = (snap = true) => {
-      timerAnimation.remove();
-      countdown(false);
       let val = parseFloat(input.value) ?? 0;
       const index = Math.round(val);
       if (snap) {
         val = index;
         input.value = index;
-        updateCommentBoxAndTimer();
+        updateCommentBox();
       }
       tooltipText.textContent = ratings[index - 1].text;
       tooltipImg.innerHTML = '';
@@ -232,8 +194,6 @@ export default async function decorate(block) {
     });
     textarea.addEventListener('focus', () => {
       commentBox.classList.add('submit--appear');
-      timerAnimation.remove();
-      countdown(false);
     });
     // Get text from localStorage if they navigated away after typing then came back
     textarea.addEventListener('keyup', () => {
@@ -423,7 +383,6 @@ export default async function decorate(block) {
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (w, i) => (i === 0 ? w.toLowerCase() : w.toUpperCase()))
     .replace(/\s+|-+|\/+/g, '');
   block.innerHTML = '';
-  lazyLoadLottiePlayer(block);
 
   await regenerateBlockState(actionTitle, CTA, headingTag);
 
