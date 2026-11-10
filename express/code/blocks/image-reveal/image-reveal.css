@@ -75,7 +75,7 @@
   aspect-ratio: 2.09; /* Figma slider ≈ 1254×600 at every breakpoint */
   cursor: ew-resize;
   touch-action: pan-y;
-  user-select:164px;
+  user-select: none;
 }
 
 /* Clips only the image layers to the rounded corners; the slider handle
