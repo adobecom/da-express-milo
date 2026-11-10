@@ -294,7 +294,7 @@ describe('Ratings Block - slider interactions', () => {
     expect(sliderFill.style.width).to.not.equal('');
   });
 
-  it('scrollToScrollAnchor: ArrowLeft keyup decrements slider value (first-time path)', async () => {
+  it('scrollToScrollAnchor: ArrowLeft keyup leaves value to the browser and applies star class (first-time path)', async () => {
     await decorate(block);
     await waitForSlider(block);
 
@@ -302,8 +302,8 @@ describe('Ratings Block - slider interactions', () => {
     input.value = '3';
     input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
 
-    expect(parseFloat(input.value)).to.equal(2);
-    expect(block.classList.contains('two-stars')).to.be.true;
+    expect(parseFloat(input.value)).to.equal(3);
+    expect(block.classList.contains('three-stars')).to.be.true;
   });
 
   it('scrollToScrollAnchor: second ArrowLeft keyup uses direct scroll (non-first-time path)', async () => {
@@ -311,22 +311,23 @@ describe('Ratings Block - slider interactions', () => {
     await waitForSlider(block);
 
     const input = block.querySelector('input[type=range]');
-    input.value = '5';
+    input.value = '4';
     // First keyup — firstTimeInteract=true
     input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
     expect(parseFloat(input.value)).to.equal(4);
     // Second keyup — firstTimeInteract=false (direct scroll path)
-    input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
-    expect(parseFloat(input.value)).to.equal(3);
+    expect(() => input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' })))
+      .to.not.throw();
+    expect(parseFloat(input.value)).to.equal(4);
+    expect(block.classList.contains('four-stars')).to.be.true;
   });
 
-  it('scrollToScrollAnchor: ArrowRight keyup triggers updateSliderValue (value clamped to max)', async () => {
+  it('scrollToScrollAnchor: ArrowRight keyup does not change the value', async () => {
     await decorate(block);
     await waitForSlider(block);
 
     const input = block.querySelector('input[type=range]');
-    input.value = '3';
-    // += 1 concatenates ('3' + 1 = '31'), range input clamps to max=5
+    input.value = '5';
     input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
 
     expect(parseFloat(input.value)).to.equal(5);
@@ -409,11 +410,75 @@ describe('Ratings Block - slider interactions', () => {
     expect(tooltip.style.insetInlineStart).to.equal('140px');
     expect(sliderFill.style.width).to.equal('170px');
 
+    // The browser owns arrow-key stepping (including RTL); keyup must not move the value.
     input.value = '3';
     input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
-    expect(input.value).to.equal('4');
+    expect(input.value).to.equal('3');
     input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
     expect(input.value).to.equal('3');
+  });
+
+  it('exposes min 1, max 5, step 1, current value, aria-valuetext, and keeps aria-labelledby name', async () => {
+    await decorate(block);
+    await waitForSlider(block);
+
+    const input = block.querySelector('input[type=range]');
+    expect(input.getAttribute('min')).to.equal('1');
+    expect(input.getAttribute('max')).to.equal('5');
+    expect(input.getAttribute('step')).to.equal('1');
+    expect(input.value).to.equal('5');
+    expect(input.getAttribute('aria-labelledby')).to.equal('rate-our-quick-action');
+    const label = document.getElementById('rate-our-quick-action');
+    expect(label).to.exist;
+    expect(label.textContent.trim()).to.equal('Rate our Quick Action');
+    const valueText = input.getAttribute('aria-valuetext');
+    expect(valueText).to.not.be.empty;
+    expect(valueText).to.not.equal('undefined');
+  });
+
+  it('updates aria-valuetext on every input/change event, for keyboard and pointer', async () => {
+    await decorate(block);
+    await waitForSlider(block);
+
+    const input = block.querySelector('input[type=range]');
+    const tooltipText = block.querySelector('.tooltip--text');
+    const expectSynced = () => {
+      const valueText = input.getAttribute('aria-valuetext');
+      const label = tooltipText.textContent.trim();
+      const expected = label ? `${input.value} ${label}` : input.value;
+      expect(valueText).to.not.be.empty;
+      expect(valueText).to.equal(expected);
+    };
+
+    for (let v = 1; v <= 5; v += 1) {
+      input.value = String(v);
+      input.dispatchEvent(new Event('input'));
+      expectSynced();
+      input.dispatchEvent(new Event('change'));
+      expectSynced();
+      input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
+      expectSynced();
+    }
+
+    ['one', 'two', 'three', 'four', 'five'].forEach((name) => {
+      block.querySelector(`.${name}-star${name === 'one' ? '' : 's'}`)
+        .dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expectSynced();
+    });
+  });
+
+  it('rating action still fires on change', async () => {
+    await decorate(block);
+    await waitForSlider(block);
+
+    const input = block.querySelector('input[type=range]');
+    input.value = '4';
+    input.dispatchEvent(new Event('change'));
+
+    expect(block.classList.contains('rated')).to.be.true;
+    expect(block.classList.contains('four-stars')).to.be.true;
+    expect(window.ratingSubmitCountdown).to.not.be.null;
+    expect(localStorage.getItem('ccxActionRatingsFeedbacknalaTestRatings')).to.match(/^4,/);
   });
 
   it('textarea focus stops countdown and shows submit section', async () => {
