@@ -5,6 +5,8 @@ let createTag; let getMetadata;
 let getConfig; let loadStyle;
 const EXPRESS_ORIGIN = 'https://express.adobe.com';
 const PREWARM_SESSION_KEY = 'express.prewarm.ready';
+const PREWARM_LOCK_KEY = 'express.prewarm.startedAt';
+const PREWARM_LOCK_TTL = 60 * 60 * 1000;
 const DESKTOP_PLATFORMS = ['Windows', 'macOS', 'Linux', 'Chrome OS'];
 let prewarmScheduled = false;
 
@@ -42,8 +44,21 @@ function isDesktopChromium() {
     && !uaData.mobile && DESKTOP_PLATFORMS.includes(uaData.platform);
 }
 
-// Loads Express's hidden preload page after this page has loaded so the Express Service Worker
-// installs before the user opens the editor. Runs at most once per tab session.
+// Tabs share one Service Worker install, so only the first tab within the TTL pre-warms.
+function claimPrewarmLock() {
+  try {
+    const age = Date.now() - Number(localStorage.getItem(PREWARM_LOCK_KEY));
+    if (age >= 0 && age < PREWARM_LOCK_TTL) return false;
+    localStorage.setItem(PREWARM_LOCK_KEY, String(Date.now()));
+  } catch {
+    // Storage blocked: pre-warm anyway.
+  }
+  return true;
+}
+
+// Loads Express's hidden preload page once this page has loaded and the main thread is idle,
+// so the Express Service Worker installs before the user opens the editor.
+// Runs at most once per tab session.
 function prewarmExpress() {
   if (prewarmScheduled || getMetadata('prewarm-express')?.toLowerCase()?.trim() !== 'on') return;
   if (!isDesktopChromium() || navigator.connection?.saveData) return;
@@ -55,6 +70,7 @@ function prewarmExpress() {
   prewarmScheduled = true;
 
   const start = () => {
+    if (!claimPrewarmLock()) return;
     const iframe = createTag('iframe', {
       src: `${EXPRESS_ORIGIN}/static/preload.html`,
       style: 'display:none',
@@ -90,10 +106,14 @@ function prewarmExpress() {
     document.body.append(iframe);
   };
 
+  // Chromium-only path, so requestIdleCallback is always available.
+  // eslint-disable-next-line compat/compat
+  const startWhenIdle = () => window.requestIdleCallback(start);
+
   if (document.readyState === 'complete') {
-    start();
+    startWhenIdle();
   } else {
-    window.addEventListener('load', start, { once: true });
+    window.addEventListener('load', startWhenIdle, { once: true });
   }
 }
 

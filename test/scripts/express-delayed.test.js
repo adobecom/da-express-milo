@@ -3,6 +3,8 @@ import sinon from 'sinon';
 import { setLibs } from '../../express/code/scripts/utils.js';
 
 const sessionKey = 'express.prewarm.ready';
+const lockKey = 'express.prewarm.startedAt';
+const lockTtl = 60 * 60 * 1000;
 const expressOrigin = 'https://express.adobe.com';
 const frameSelector = 'iframe[title="Adobe Express preload"]';
 let moduleId = 0;
@@ -14,10 +16,12 @@ describe('Express delayed pre-warm', () => {
   let metadata;
   let readyState;
   let saveData;
+  let requestIdle;
 
   beforeEach(async () => {
     sandbox = sinon.createSandbox();
     clock = sandbox.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    requestIdle = sandbox.stub(window, 'requestIdleCallback').callsFake((callback) => callback());
     readyState = 'complete';
     saveData = false;
     sandbox.stub(navigator, 'userAgentData').value({
@@ -28,6 +32,7 @@ describe('Express delayed pre-warm', () => {
     sandbox.stub(navigator.connection, 'saveData').get(() => saveData);
     sandbox.stub(document, 'readyState').get(() => readyState);
     sessionStorage.removeItem(sessionKey);
+    localStorage.removeItem(lockKey);
     metadata = document.createElement('meta');
     metadata.name = 'prewarm-express';
     metadata.content = 'on';
@@ -43,6 +48,7 @@ describe('Express delayed pre-warm', () => {
     document.querySelectorAll(frameSelector).forEach((element) => element.remove());
     metadata.remove();
     sessionStorage.removeItem(sessionKey);
+    localStorage.removeItem(lockKey);
     sandbox.restore();
   });
 
@@ -90,9 +96,32 @@ describe('Express delayed pre-warm', () => {
     expect(document.querySelectorAll(frameSelector).length).to.equal(1);
   });
 
-  it('starts immediately when the page has already loaded', async () => {
+  it('does not wait for load when the page has already loaded', async () => {
     await loadDelayed();
     expect(getFrame()).not.to.equal(null);
+  });
+
+  it('waits for the main thread to be idle before creating the iframe', async () => {
+    let idleCallback;
+    requestIdle.callsFake((callback) => { idleCallback = callback; });
+    await loadDelayed();
+    expect(getFrame()).to.equal(null);
+    idleCallback();
+    expect(getFrame()).not.to.equal(null);
+  });
+
+  it('skips pre-warming while another tab started one within the last hour', async () => {
+    localStorage.setItem(lockKey, String(Date.now() - lockTtl + 1000));
+    await loadDelayed();
+    expect(getFrame()).to.equal(null);
+  });
+
+  it('pre-warms and refreshes the cross-tab marker once the previous one has expired', async () => {
+    const expired = Date.now() - lockTtl - 1000;
+    localStorage.setItem(lockKey, String(expired));
+    await loadDelayed();
+    expect(getFrame()).not.to.equal(null);
+    expect(Number(localStorage.getItem(lockKey))).to.be.greaterThan(expired);
   });
 
   it('accepts only a matching completion message and remembers ready for the session', async () => {
@@ -157,14 +186,15 @@ describe('Express delayed pre-warm', () => {
     expect(getFrame()).not.to.equal(null);
   });
 
-  it('still pre-warms and cleans up when session storage access is denied', async () => {
+  it('still pre-warms and cleans up when storage access is denied', async () => {
+    const blockedKeys = [sessionKey, lockKey];
     const { getItem, setItem } = Storage.prototype;
     sandbox.stub(Storage.prototype, 'getItem').callsFake(function readStorage(storageKey) {
-      if (storageKey === sessionKey) throw new DOMException('Blocked', 'SecurityError');
+      if (blockedKeys.includes(storageKey)) throw new DOMException('Blocked', 'SecurityError');
       return getItem.call(this, storageKey);
     });
     sandbox.stub(Storage.prototype, 'setItem').callsFake(function writeStorage(storageKey, value) {
-      if (storageKey === sessionKey) throw new DOMException('Blocked', 'SecurityError');
+      if (blockedKeys.includes(storageKey)) throw new DOMException('Blocked', 'SecurityError');
       return setItem.call(this, storageKey, value);
     });
     await loadDelayed();
