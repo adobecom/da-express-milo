@@ -102,6 +102,28 @@ describe('Prompt Marquee block', () => {
     expect(blurSpy.calledOnce).to.be.true;
     blurSpy.restore();
   });
+
+  it('selects the RTL logo without changing the injection flag', async () => {
+    const originalDirection = document.documentElement.dir;
+    const metadata = document.createElement('meta');
+    metadata.name = 'marquee-inject-logo';
+    metadata.content = 'on';
+    document.documentElement.dir = 'rtl';
+    try {
+      let block = document.getElementById('prompt-marquee-block');
+      await decorate(block);
+      expect(block.querySelector('.express-logo')).to.not.exist;
+
+      document.body.innerHTML = base;
+      document.head.append(metadata);
+      block = document.getElementById('prompt-marquee-block');
+      await decorate(block);
+      expect(block.querySelector('.express-logo').getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo-rtl.svg');
+    } finally {
+      metadata.remove();
+      document.documentElement.dir = originalDirection;
+    }
+  });
 });
 
 describe('replacePromptTokenInUrl', () => {

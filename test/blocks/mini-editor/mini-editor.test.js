@@ -29,13 +29,14 @@ const defaultTemplateItems = Array.from({ length: 8 }, (_, i) => validTemplate(`
 
 describe('mini-editor', () => {
   let fetchStub;
+  let clock;
 
   beforeEach(() => {
     window.Typekit = { load: ({ active }) => active?.() };
     fetchStub = sinon.stub(window, 'fetch').resolves({ json: async () => ({ items: defaultTemplateItems }) });
-    sinon.stub(window, 'requestAnimationFrame').callsFake((callback) => {
-      callback(performance.now());
-      return 1;
+    clock = sinon.useFakeTimers({
+      toFake: ['requestAnimationFrame', 'cancelAnimationFrame', 'performance'],
+      shouldClearNativeTimers: true,
     });
   });
 
@@ -99,6 +100,7 @@ describe('mini-editor', () => {
     const downloadButton = block.querySelector('.me-action--download');
     downloadButton.click();
     downloadButton.click();
+    await clock.tickAsync(16);
     await waitFor(() => downloadStub.calledOnce);
 
     expect(downloadStub.calledOnce).to.be.true;
@@ -118,14 +120,8 @@ describe('mini-editor', () => {
     await waitFor(() => !!block.querySelector('.me-action--download'));
     block.querySelector('.me-arc-nav--next').click();
     block.querySelector('.me-action--download').click();
-    // The requestAnimationFrame stub above fires synchronously/immediately, so the arc
-    // carousel's snap animation (buildArcCarousel's requestAsyncAnimationFrame, chained via
-    // Promise.resolve().then()) busy-chains microtasks for its ~1s duration instead of
-    // yielding real per-frame gaps the way a real rAF would — starving the macrotask that
-    // resolves downloadCard's dynamic import (see getCardExporter) until the animation
-    // finishes. A real browser's rAF yields between frames, so this is a test-only artifact,
-    // not a production timing risk — the default 1000ms waitFor is too tight for it here.
-    await waitFor(() => downloadStub.calledOnce, 2000);
+    await clock.tickAsync(1200);
+    await waitFor(() => downloadStub.calledOnce);
 
     expect(downloadStub.firstCall.args[0]).to.deep.include({
       quote: '"Adopt the pace of nature: her secret is patience."',
@@ -167,10 +163,8 @@ describe('mini-editor', () => {
 
     block.querySelector('.me-arc-nav--next').click();
     menu.querySelector('sp-menu-item[value="more"]').click();
-    // Same test-only rAF-stub/arc-carousel-animation artifact as the download test above —
-    // the dynamic import backing getCardBlobPromise's card export doesn't resolve until the
-    // carousel's busy-chained snap animation finishes, well past the default 1000ms.
-    await waitFor(() => shareStub.calledTwice, 2000);
+    await clock.tickAsync(1200);
+    await waitFor(() => shareStub.calledTwice);
 
     expect(createBlobStub.calledTwice).to.be.true;
     expect(createBlobStub.secondCall.args[0].backgroundUrl)
@@ -193,6 +187,7 @@ describe('mini-editor', () => {
 
     await waitFor(() => !!block.querySelector('.me-action--download'));
     block.querySelector('.me-action--download').click();
+    await clock.tickAsync(16);
     // Generous timeout: the failure path cold-loads the sp-toast web component
     // (dynamic import + customElements.whenDefined), which can exceed the 1s
     // waitFor default under coverage/CI load.

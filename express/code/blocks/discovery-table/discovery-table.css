@@ -3,7 +3,7 @@
 .discovery-table {
   --color-gray-100: #f9f9f9;
   --border-radius-table: 8px;
-  --gnav-offset-height: 40px;
+  --gnav-offset-height: var(--express-fixed-top-height);
   --dt-sticky-offset: 0px;
   --cell-color: #464646;
   --font-color : #505050;
@@ -439,11 +439,6 @@
   }
 }
 
-@media (min-width: 900px) {
-  .discovery-table {
-    --gnav-offset-height: 63px;
-  }
-}
 
 @media (min-width: 1024px) {
   main .section.long-form .discovery-table {

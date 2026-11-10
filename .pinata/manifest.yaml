@@ -1,0 +1,21 @@
+# Pinata tenant contract — Adobe Express (adobe.com/express) identity and
+# references. Catalog scope: acom:express.
+#
+# The harness reads this at the pinned commit and holds no Express-specific
+# knowledge of its own. Identity ladder: adobe (company) > acom (org) >
+# express (product) > … . Unknown keys are rejected, so a typo fails loudly.
+org: acom
+product: express
+repo: adobecom/da-express-milo
+# .github/CODEOWNERS assigns the Express Core team to the whole tree.
+owners_from: CODEOWNERS
+
+# Which shared mental models the planner should consult for Express work.
+# Express is an EDS + Milo consumer, so it loads Express's own model plus the
+# Milo core model it builds on. Selection is tenant-owned; the model content is
+# resolved from the shared registry (Adobe-acom/pinata-tool-shelf/
+# mental-models/) at run time (see .pinata/README.md).
+mental_models:
+  use:
+    - express-core
+    - milo-core

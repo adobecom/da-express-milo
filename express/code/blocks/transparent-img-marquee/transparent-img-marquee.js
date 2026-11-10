@@ -149,6 +149,15 @@ export default async function decorate(block) {
   }
   block.append(foreground);
 
+  const ctaContainer = mainContainer.querySelector('.cta-container');
+  if (ctaContainer) {
+    const syncCtaGap = () => {
+      mainContainer.style.rowGap = ctaContainer.getBoundingClientRect().height ? '' : '0px';
+    };
+    syncCtaGap();
+    new ResizeObserver(syncCtaGap).observe(ctaContainer);
+  }
+
   fixIcons(block);
 
   // Now the block is in the DOM, classify the CTAs so long ones fill the width

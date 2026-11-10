@@ -18,7 +18,8 @@ permissions:
 jobs:
   run-nala-tests:
     name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
-    runs-on: ubuntu-latest
+    # Playwright 1.52 supports Ubuntu 24.04, not 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       # Don't cancel the other lanes when one fails — we want the full picture.
@@ -110,12 +111,14 @@ jobs:
           NALA_GREP: ${{ matrix.grep }}
           NALA_WORKERS: ${{ matrix.workers }}
           labels: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
-          branch: ${{ github.event.pull_request.head.ref }}
+          branch: ${{ github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name && github.event.pull_request.base.ref || github.event.pull_request.head.ref }}
           repoName: ${{ github.repository }}
           prUrl: ${{ github.event.pull_request.head.repo.html_url }}
-          prOrg: ${{ github.event.pull_request.head.repo.owner.login }}
-          prRepo: ${{ github.event.pull_request.head.repo.name }}
-          prBranch: ${{ github.event.pull_request.head.ref }}
+          # Fork branches don't have an AEM Live host under the fork owner.
+          # Use the published base-branch preview for fork PRs.
+          prOrg: ${{ github.event.pull_request.base.repo.owner.login }}
+          prRepo: ${{ github.event.pull_request.base.repo.name }}
+          prBranch: ${{ github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name && github.event.pull_request.base.ref || github.event.pull_request.head.ref }}
           prBaseBranch: ${{ github.event.pull_request.base.ref }}
           GITHUB_ACTION_PATH: ${{ github.workspace }}
           IMS_EMAIL: ${{ secrets.IMS_EMAIL }}

@@ -20,7 +20,7 @@
 }
 
 .highlight .icon-row .text {
-  padding-left: 0;
+  padding-inline-start: 0;
   margin-top: var(--spacing-100);
   font-size: var(--body-font-size-s);
   font-weight: bold;
@@ -78,13 +78,13 @@
 
   .highlight .icon-row {
     flex-direction: row;
-    text-align: left;
+    text-align: start;
     min-width: 132px;
   }
 
   .highlight .icon-row .text {
     margin-top: 0;
     margin-bottom: 0;
-    padding-left: var(--spacing-100);
+    padding-inline-start: var(--spacing-100);
   }
 }

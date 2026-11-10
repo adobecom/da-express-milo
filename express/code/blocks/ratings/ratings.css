@@ -95,8 +95,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  left: 82.2%;
-  transition: left 0.3s, right 0.3s;
+  inset-inline-start: 82.2%;
+  transition: inset-inline-start 0.3s;
 }
 
 .ratings .slider-fill {
@@ -105,7 +105,7 @@
   width: 86.625%;
   position: absolute;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   background: var(--color-info-accent);
   pointer-events: none;
   border-radius: 60px;
@@ -153,12 +153,13 @@
 .ratings .slider-bottom {
   display: flex;
   justify-content: space-between;
-  padding: 32px 27px 80px 30px;
+  padding: 32px 0 80px;
+  padding-inline: 30px 27px;
 }
 
 .ratings .slider-bottom .vertical-line {
   height: 20px;
-  border-left: 2px solid var(--color-gray-400);
+  border-inline-start: 2px solid var(--color-gray-400);
   position: relative;
 }
 
@@ -197,12 +198,13 @@
 
 @media (max-width: 899px) {
   .ratings .slider-bottom {
-    padding: 20px 25px 50px 28px;
+    padding: 20px 0 50px;
+    padding-inline: 28px 25px;
   }
 
   .ratings .slider-bottom .vertical-line {
     height: 5px;
-    border-left: 2px solid var(--color-gray-300);
+    border-inline-start: 2px solid var(--color-gray-300);
   }
 
   .ratings .slider-bottom .vertical-line .stars {
@@ -222,7 +224,7 @@
   }
 
   .ratings .slider .tooltip {
-    left: 67%;
+    inset-inline-start: 67%;
   }
 
   .ratings .slider-fill {
@@ -312,7 +314,11 @@
   background: var(--color-white);
   width: 100%;
   box-sizing: border-box;
-  text-align: left;
+  text-align: start;
+}
+
+.ratings:dir(rtl) .slider-comment textarea {
+  direction: rtl;
 }
 
 .ratings form [type='submit'] {

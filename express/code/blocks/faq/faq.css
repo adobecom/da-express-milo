@@ -25,7 +25,7 @@
 }
 
 .faq {
-  text-align: left;
+  text-align: start;
   padding-bottom: var(--spacing-900);
 }
 
@@ -42,7 +42,7 @@
   display: block;
   padding: 0 0 var(--spacing-400) 0;
   text-decoration: none;
-  text-align: left;
+  text-align: start;
   font-size: var(--body-font-size-xl);
   line-height: var(--spacing-400);
   font-weight: var(--subheading-font-weight);

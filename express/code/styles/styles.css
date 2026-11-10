@@ -61,6 +61,8 @@
 }
 
 :root {
+  --express-fixed-top-height: var(--global-height-nav, 0px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+
   --color-white: #fff;
 
   --color-light-gray: #E9E9E9;
@@ -1642,7 +1644,7 @@ main .section.long-form.long-form-blog .content :is(h3, h4, h5, h6) {
 
 main .section.long-form .content,
 main .section.long-form .content :is(p:not(.button-container, :has(.con-button)), h1, h2, h3, h4, h5, h6) {
-  text-align: left;
+  text-align: start;
 }
 
 main .section.long-form .content,
@@ -1936,7 +1938,8 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   right: 15px;
 }
 
-.icon.icon-adobe-express-logo {
+.icon.icon-adobe-express-logo,
+.icon.icon-adobe-express-logo-rtl {
   width: initial;
   height: 30px;
   padding: 1rem 0 1rem;
