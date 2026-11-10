@@ -1067,6 +1067,18 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     }
   });
 
+  it('locks page scroll while the expanded view is open', async () => {
+    await setup();
+    await upload();
+    const root = document.documentElement;
+    expect(root.classList.contains('icc-scroll-lock')).to.equal(false);
+    block.querySelector('[data-action="expand"]').click();
+    expect(root.classList.contains('icc-scroll-lock')).to.equal(true);
+    expect(getComputedStyle(root).overflow).to.equal('hidden');
+    block.querySelector('[data-action="expand"]').click();
+    expect(root.classList.contains('icc-scroll-lock')).to.equal(false);
+  });
+
   it('retains Fit scaling, cover Fill, view state and correct maximize/minimize icons', async () => {
     const viewport = { width: window.innerWidth, height: window.innerHeight };
     try {
@@ -1078,9 +1090,10 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       const expand = block.querySelector('[data-action="expand"]');
       const scaleMatches = (mode) => {
         const slot = comparisonSlot(block);
+        const fitScale = Math.min(slot.width / 13, slot.height / 9);
         const scale = mode === 'fit'
-          ? Math.min(slot.width / 13, slot.height / 9)
-          : Math.max(slot.width / 13, slot.height / 9);
+          ? fitScale
+          : Math.max(slot.width / 13, slot.height / 9, 1.5 * fitScale);
         return parseFloat(panel.style.getPropertyValue('--icc-image-width'))
           === Math.floor(13 * scale);
       };
@@ -1142,7 +1155,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
           const slot = comparisonSlot(host);
           const x = slot.width / source.width;
           const y = slot.height / source.height;
-          return mode === 'fit' ? Math.min(x, y) : Math.max(x, y);
+          return mode === 'fit' ? Math.min(x, y) : Math.max(x, y, 1.5 * Math.min(x, y));
         };
         const matches = (mode) => canvas.getBoundingClientRect().width
           === Math.floor(source.width * scaleFor(mode));
@@ -1266,7 +1279,11 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
               const slot = comparisonSlot(host);
               const scale = mode === 'fit'
                 ? Math.min(slot.width / canvas.width, slot.height / canvas.height)
-                : Math.max(slot.width / canvas.width, slot.height / canvas.height);
+                : Math.max(
+                  slot.width / canvas.width,
+                  slot.height / canvas.height,
+                  1.5 * Math.min(slot.width / canvas.width, slot.height / canvas.height),
+                );
               return canvas.getBoundingClientRect().width === Math.floor(canvas.width * scale);
             });
             // Frames hug the scaled image so the pair can be centered with an 8px gap.

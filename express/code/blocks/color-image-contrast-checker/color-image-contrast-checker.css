@@ -1,5 +1,11 @@
 @import url('../../scripts/color-shared/components/dropdown/dropdown.css');
 
+/* Set while the loading overlay or expanded view is open (see syncLoadingOverlay). */
+html.icc-scroll-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .color-image-contrast-checker {
   --icc-image-width: 0px;
   --icc-image-height: 0px;
@@ -871,6 +877,20 @@
 
   .color-image-contrast-checker.icc-dialog {
     padding: var(--spacing-600);
+  }
+
+  /* Figma: expanded fills the viewport with a 40px margin, capped at 1600 x 1000, centered. */
+  .color-image-contrast-checker.icc-dialog[open] {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-panel {
+    inline-size: 100%;
+    max-inline-size: 1600px;
+    max-block-size: 1000px;
   }
 
   .color-image-contrast-checker.icc-dialog .icc-comparison-row {

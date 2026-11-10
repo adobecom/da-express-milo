@@ -19,6 +19,8 @@ const HISTORY_KEY = 'colorImageContrastChecker';
 const RECALC_FADE_MS = 100;
 const RECALC_HOLD_MS = 200;
 const COLOR_SPACE_STRINGS = { srgb: 'srgb', 'display-p3': 'p3', 'adobe-rgb': 'adobeRgb' };
+// Figma Fill frames show the image pair at ~150% of its Fit size on mobile and tablet.
+const FILL_OVER_FIT = 1.5;
 
 const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 
@@ -266,6 +268,8 @@ export default async function decorate(block) {
     const parent = active && view.dialog.open ? view.dialog : document.body;
     if (loadingOverlay.parentElement !== parent) parent.append(loadingOverlay);
     loadingOverlay.classList.toggle('is-loading', active);
+    // Freeze the page behind the loading overlay and the expanded view.
+    document.documentElement.classList.toggle('icc-scroll-lock', active || view.dialog.open);
   };
   const busy = (value) => {
     block.classList.toggle('is-loading', value);
@@ -294,10 +298,12 @@ export default async function decorate(block) {
     const measure = () => {
       const width = (comparison.offsetWidth - gap) / 2;
       const height = comparison.offsetHeight;
-      // Fit: whole image visible. Fill: cover the pane (width and height), then scroll.
+      // Fit: whole image visible. Fill: cover the pane and zoom at least 150% of Fit
+      // (Figma "Zoomed in toggle"), so Fill always magnifies even when Fit already covers.
+      const fit = Math.min(width / source.width, height / source.height);
       const scale = mode === 'fit'
-        ? Math.min(width / source.width, height / source.height)
-        : Math.max(width / source.width, height / source.height);
+        ? fit
+        : Math.max(width / source.width, height / source.height, FILL_OVER_FIT * fit);
       return { width, height, scale };
     };
     // Desktop minimized: hug the fitted image height, capped by the authored aspect ratio.
@@ -403,6 +409,7 @@ export default async function decorate(block) {
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
+    document.documentElement.classList.remove('icc-scroll-lock');
     generation += 1;
     imageGeneration += 1;
     request?.abort();

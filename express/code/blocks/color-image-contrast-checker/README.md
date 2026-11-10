@@ -319,12 +319,17 @@ instead of shrinking below it. Below 900px the surface keeps its toolbar gutter.
 
 Fit is still the initial selection. Fit/Fill retain state across expansion and
 responsive changes. Fit contains the entire image. Fill scales each pane to cover
-its half of the comparison height and width, preserving aspect ratio, and runs
+its half of the comparison height and width and to at least 150% of the Fit size
+(so Fill always zooms, even when Fit already fills the pane), preserving aspect ratio, and runs
 from the toolbar gutter (desktop) or the left edge (mobile/tablet) to the bottom
 edge. The comparison area does not grow to browser-screen height in the normal
 view; expansion uses the available screen height. This is display-only zoom, not
 resampling: analysis and PNG exports retain the original resolution.
 Zoom has one tab stop with arrow/Home/End navigation.
+Expanded views fill the viewport height on mobile and tablet. On desktop they fill the
+viewport with a 40px margin, capped at 1600 x 1000 and centered.
+While the loading overlay or the expanded view is open, page scrolling is locked
+(`html.icc-scroll-lock`), so the content behind them stays frozen above the fold.
 
 Changing the color space shows a spinner overlay over the comparison (100ms fade
 in, 200ms hold, 100ms fade out), disables Save PNG until the new analysis is drawn,
