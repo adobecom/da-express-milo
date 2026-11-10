@@ -20,17 +20,13 @@
   background: var(--s2a-color-gray-50);
 }
 
-.image-reveal-grip svg path {
-  stroke-width: 0px;
-}
-
 /* ---------- Section header ---------- */
 .image-reveal-header {
   display: flex;
   flex-direction: column;
   gap: var(--s2a-spacing-xs);
-   align-items: center;
-    text-align: center;
+  align-items: center;
+  text-align: center;
 }
 
 .image-reveal-header:empty {
@@ -176,7 +172,6 @@
   display: block;
   width: 12px; /* Figma Slide-controls Size S icon */
   height: 12px;
-  stroke: var(--s2a-color-gray-800); /* inherits to the icon path */
 }
 
 .image-reveal-handle:focus-visible .image-reveal-grip {
@@ -186,7 +181,7 @@
   outline-style: solid;
   outline-color: var(--s2a-color-blue-1000);
   outline-offset: 1px;
-  border-radius: 100px;
+  border-radius: var(--s2a-border-radius-round);
 }
 
 /* ---------- Tabs (mobile/tablet) ---------- */
@@ -341,7 +336,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0px;
+  margin: 0;
   gap: var(--s2a-spacing-xs);
 }
 
@@ -368,7 +363,7 @@
   border-color: transparent;
   border-radius: var(--s2a-border-radius-24);
   font-size: var(--s2a-font-size-md);
-  margin: 0px;
+  margin: 0;
 }
 
 .image-reveal .image-reveal-cta a.con-button:any-link:hover {
@@ -426,11 +421,6 @@
   .image-reveal {
     padding-block: var(--s2a-spacing-4xl);
     padding-inline: var(--s2a-spacing-2xl);
-  }
-
-  .image-reveal-header {
-    align-items: center;
-    text-align: center;
   }
 
   .image-reveal .image-reveal-header h2 {

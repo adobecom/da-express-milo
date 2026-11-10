@@ -69,13 +69,20 @@ test.describe('ImageRevealBlock Test Suite', () => {
     });
 
     await test.step('step-4: Effect and image controls update the stage', async () => {
-      await block.effectRadios.nth(2).dispatchEvent('change');
+      const pick = (radio) => radio.locator('xpath=..').click();
+      await pick(block.effectRadios.nth(2));
       await expect(block.stage).toHaveAttribute('data-effect', 'duotone');
-      await block.swapRadios.nth(1).dispatchEvent('change');
-      const originalSrc = await block.originalImage.getAttribute('src');
-      const thumbSrc = await block.block.locator('.image-reveal-thumb-img--grayscale img').getAttribute('src');
-      expect(originalSrc).toBeTruthy();
-      expect(thumbSrc).toBeTruthy();
+
+      const before = await block.originalImage.getAttribute('src');
+      // Below 1200px the image group sits behind the second tab.
+      const swapTab = block.block.locator('[role="tab"]').nth(1);
+      if (await swapTab.isVisible()) await swapTab.click();
+      await pick(block.swapRadios.nth(1));
+      await expect(block.originalImage).not.toHaveAttribute('src', before);
+      const after = await block.originalImage.getAttribute('src');
+      const thumb = block.block.locator('.image-reveal-thumb-img--grayscale img');
+      const sameAsset = (src) => new URL(src, page.url()).pathname;
+      expect(sameAsset(await thumb.getAttribute('src'))).toBe(sameAsset(after));
     });
 
     await test.step('step-5: Accessibility validation', async () => {

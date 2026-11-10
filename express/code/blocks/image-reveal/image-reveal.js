@@ -5,106 +5,21 @@ import {
   convertToInlineSVG,
 } from '../../scripts/utils.js';
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
+import { interpolate } from '../../scripts/color-shared/utils/utilities.js';
+import loadImageRevealPlaceholders from '../../scripts/color-shared/i18n/loadImageRevealPlaceholders.js';
+import { buildDuotoneFilter, initSlider } from './helpers/slider.js';
 
-// Effects apply CSS filters to the single selected image; the filtered copy is
-// clipped to the right of the slider. Duotone needs an SVG filter (see buildDuotoneFilter).
-// Filter values per the designer-approved spec in MWPW-186599 (Jira comments).
 const EFFECTS = [
-  { key: 'grayscale', label: 'Greyscale' },
-  { key: 'color-punch', label: 'Color punch' },
-  { key: 'duotone', label: 'Duotone' },
+  { key: 'grayscale', labelKey: 'effectGrayscale' },
+  { key: 'color-punch', labelKey: 'effectColorPunch' },
+  { key: 'duotone', labelKey: 'effectDuotone' },
 ];
-const DUOTONE_SHADOW = [0x00, 0x13, 0xda];
-const DUOTONE_HIGHLIGHT = [0x10, 0xff, 0xa8];
-const KEY_STEP = 1;
-const PAGE_STEP = 10;
 // ≥1200px the Figma design stacks both control groups in the panel;
 // below that they become tabs.
 const DESKTOP_QUERY = '(min-width: 1200px)';
+const THUMB_SIZE = '80';
 
 let instanceId = 0;
-
-function buildDuotoneFilter(id) {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('aria-hidden', 'true');
-  svg.setAttribute('class', 'image-reveal-defs');
-  const filter = document.createElementNS(ns, 'filter');
-  filter.id = id;
-  filter.setAttribute('color-interpolation-filters', 'sRGB');
-  // Luminance → gray, then map dark→shadow and light→highlight per channel.
-  const matrix = document.createElementNS(ns, 'feColorMatrix');
-  matrix.setAttribute('type', 'matrix');
-  const lum = '0.2126 0.7152 0.0722 0 0';
-  matrix.setAttribute('values', `${lum} ${lum} ${lum} 0 0 0 1 0`);
-  const transfer = document.createElementNS(ns, 'feComponentTransfer');
-  ['R', 'G', 'B'].forEach((channel, i) => {
-    const fn = document.createElementNS(ns, `feFunc${channel}`);
-    fn.setAttribute('type', 'table');
-    fn.setAttribute('tableValues', `${DUOTONE_SHADOW[i] / 255} ${DUOTONE_HIGHLIGHT[i] / 255}`);
-    transfer.append(fn);
-  });
-  filter.append(matrix, transfer);
-  svg.append(filter);
-  return svg;
-}
-
-function initSlider(stage, handle, effectLabel) {
-  let value = 50;
-  const set = (next) => {
-    value = Math.min(100, Math.max(0, Math.round(next)));
-    stage.style.setProperty('--image-reveal-position', `${value}%`);
-    stage.classList.toggle('is-at-edge', value === 0 || value === 100);
-    handle.setAttribute('aria-valuenow', value);
-    handle.setAttribute('aria-valuetext', `${value}% original, ${100 - value}% ${effectLabel()}`);
-  };
-
-  const fromPointer = (event) => {
-    const rect = stage.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const ratio = rect.width ? x / rect.width : 0.5;
-    const rtl = getComputedStyle(stage).direction === 'rtl';
-    set((rtl ? 1 - ratio : ratio) * 100);
-  };
-
-  stage.addEventListener('pointerdown', (event) => {
-    if (event.button !== 0) return;
-    stage.setPointerCapture(event.pointerId);
-    stage.classList.add('is-dragging');
-    fromPointer(event);
-    handle.focus({ preventScroll: true });
-  });
-  stage.addEventListener('pointermove', (event) => {
-    if (stage.hasPointerCapture(event.pointerId)) fromPointer(event);
-  });
-  const end = (event) => {
-    if (stage.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId);
-    stage.classList.remove('is-dragging');
-  };
-  stage.addEventListener('pointerup', end);
-  stage.addEventListener('pointercancel', end);
-
-  handle.addEventListener('keydown', (event) => {
-    const rtl = getComputedStyle(stage).direction === 'rtl';
-    const forward = rtl ? -1 : 1;
-    const steps = {
-      ArrowRight: KEY_STEP * forward,
-      ArrowUp: KEY_STEP,
-      ArrowLeft: -KEY_STEP * forward,
-      ArrowDown: -KEY_STEP,
-      PageUp: PAGE_STEP,
-      PageDown: -PAGE_STEP,
-    };
-    if (event.key in steps) set(value + steps[event.key]);
-    else if (event.key === 'Home') set(0);
-    else if (event.key === 'End') set(100);
-    else return;
-    event.preventDefault();
-  });
-
-  set(value);
-  return { refresh: () => set(value) };
-}
 
 // 80px CSS thumbs at up to 2x DPR; reuse the pipeline's optimizer params when present.
 function thumbSrc(picture) {
@@ -121,10 +36,21 @@ function buildThumb({ name, value, label, imgSrc, checked, thumbClass }) {
   });
   input.checked = checked;
   const thumb = createTag('span', { class: `image-reveal-thumb-img ${thumbClass}`, 'aria-hidden': 'true' });
-  thumb.append(createTag('img', { src: imgSrc, alt: '' }));
+  thumb.append(createTag('img', {
+    src: imgSrc, alt: '', loading: 'lazy', width: THUMB_SIZE, height: THUMB_SIZE,
+  }));
   const option = createTag('label', { class: 'image-reveal-thumb' });
   option.append(input, thumb, createTag('span', { class: 'image-reveal-thumb-label' }, label));
   return { option, input, img: thumb.querySelector('img') };
+}
+
+function buildGroup(id, title, row) {
+  const titleId = `${id}-title`;
+  row.setAttribute('role', 'radiogroup');
+  row.setAttribute('aria-labelledby', titleId);
+  const group = createTag('div', { class: 'image-reveal-group', id });
+  group.append(createTag('p', { class: 'image-reveal-group-title', id: titleId }, title), row);
+  return group;
 }
 
 export default async function decorate(block) {
@@ -137,10 +63,11 @@ export default async function decorate(block) {
       const labelCell = [...row.children].find((cell) => !cell.contains(picture));
       const label = labelCell?.textContent.trim() || picture.querySelector('img')?.alt?.trim() || '';
       images.push({ label, picture });
+    } else if (!headerRow && !images.length && row.textContent.trim()) {
+      // The header precedes the image rows; inline links in it stay part of it.
+      headerRow = row;
     } else if (row.querySelector('a[href]')) {
       ctaRow = row;
-    } else if (row.textContent.trim() && !headerRow) {
-      headerRow = row;
     }
   });
 
@@ -151,11 +78,12 @@ export default async function decorate(block) {
 
   instanceId += 1;
   const id = `image-reveal-${instanceId}`;
-  let effect = EFFECTS[0];
+  const text = await loadImageRevealPlaceholders();
+  const effects = EFFECTS.map(({ key, labelKey }) => ({ key, label: text[labelKey] }));
+  let effect = effects[0];
   let selected = 0;
 
   block.style.setProperty('--image-reveal-duotone', `url(#${id}-duotone)`);
-
   // --- Comparison stage ---
   const stage = createTag('div', { class: 'image-reveal-stage', 'data-effect': effect.key });
   // Layers are clipped by an inner wrapper so the slider grip can overflow the stage edges.
@@ -166,7 +94,7 @@ export default async function decorate(block) {
     class: 'image-reveal-handle',
     role: 'slider',
     tabindex: '0',
-    'aria-label': 'Before and after comparison',
+    'aria-label': text.sliderAria,
     'aria-valuemin': '0',
     'aria-valuemax': '100',
     'aria-orientation': 'horizontal',
@@ -175,7 +103,11 @@ export default async function decorate(block) {
   handle.append(grip);
   clip.append(base, filtered);
   stage.append(clip, handle, buildDuotoneFilter(`${id}-duotone`));
-  const slider = initSlider(stage, handle, () => effect.label.toLowerCase());
+  const slider = initSlider(stage, handle, (value) => interpolate(text.sliderValueText, {
+    original: value,
+    effect: 100 - value,
+    effectName: effect.label.toLowerCase(),
+  }));
 
   const effectThumbImgs = [];
   const paintStage = () => {
@@ -189,22 +121,22 @@ export default async function decorate(block) {
   };
 
   const applyEffect = (key) => {
-    effect = EFFECTS.find((e) => e.key === key) || EFFECTS[0];
+    effect = effects.find((e) => e.key === key) || effects[0];
     stage.dataset.effect = effect.key;
     slider.refresh();
-    announceToScreenReader(`${effect.label} effect applied`);
+    announceToScreenReader(interpolate(text.effectApplied, { effectName: effect.label }));
   };
 
   const swapImage = (index) => {
     if (index === selected || !images[index]) return;
     selected = index;
     paintStage();
-    announceToScreenReader(`${images[selected].label} image selected`);
+    announceToScreenReader(interpolate(text.imageSelected, { imageName: images[selected].label }));
   };
 
   // --- Control groups ---
   const effectsRow = createTag('div', { class: 'image-reveal-thumbs' });
-  EFFECTS.forEach(({ key, label }, i) => {
+  effects.forEach(({ key, label }, i) => {
     const { option, img } = buildThumb({
       name: `${id}-effect`,
       value: key,
@@ -232,24 +164,20 @@ export default async function decorate(block) {
   });
   swapRow.addEventListener('change', (event) => swapImage(Number(event.target.value)));
 
-  const effectsGroup = createTag('div', { class: 'image-reveal-group', id: `${id}-effects`, role: 'tabpanel' });
-  effectsGroup.append(createTag('p', { class: 'image-reveal-group-title' }, 'Add an image effect'), effectsRow);
-  const tabDefs = [{ label: 'Image effects', icon: 'S2_Icon_Filters_20_N', panel: effectsGroup }];
+  const effectsGroup = buildGroup(`${id}-effects`, text.effectsTitle, effectsRow);
+  const tabDefs = [{ label: text.tabEffects, icon: 'S2_Icon_Filters_20_N', panel: effectsGroup }];
   if (images.length > 1) {
-    const swapGroup = createTag('div', { class: 'image-reveal-group', id: `${id}-swap`, role: 'tabpanel' });
-    swapGroup.append(createTag('p', { class: 'image-reveal-group-title' }, 'Try a different image'), swapRow);
-    tabDefs.push({ label: 'Change image', icon: 'S2_Icon_Image_20_N', panel: swapGroup });
+    const swapGroup = buildGroup(`${id}-swap`, text.imagesTitle, swapRow);
+    tabDefs.push({ label: text.tabImages, icon: 'S2_Icon_Image_20_N', panel: swapGroup });
   }
 
-  const tabList = createTag('div', { class: 'image-reveal-tabs', role: 'tablist', 'aria-label': 'Image sandbox controls' });
+  const tabList = createTag('div', { class: 'image-reveal-tabs', role: 'tablist', 'aria-label': text.tablistAria });
   const tabButtons = tabDefs.map(({ label, icon, panel }, i) => {
-    const tabId = `${id}-tab-${i}`;
-    panel.setAttribute('aria-labelledby', tabId);
     const button = createTag('button', {
       class: 'image-reveal-tab',
       type: 'button',
       role: 'tab',
-      id: tabId,
+      id: `${id}-tab-${i}`,
       'aria-selected': String(i === 0),
       'aria-controls': panel.id,
     });
@@ -261,6 +189,20 @@ export default async function decorate(block) {
     return button;
   });
   tabList.hidden = tabDefs.length < 2;
+
+  // Tab semantics only apply while the tablist is shown; otherwise the groups
+  // are plain regions named by their radiogroup titles.
+  const setTabSemantics = (on) => {
+    tabDefs.forEach(({ panel }, i) => {
+      if (on) {
+        panel.setAttribute('role', 'tabpanel');
+        panel.setAttribute('aria-labelledby', tabButtons[i].id);
+      } else {
+        panel.removeAttribute('role');
+        panel.removeAttribute('aria-labelledby');
+      }
+    });
+  };
 
   function activateTab(index, focus = false) {
     tabButtons.forEach((tab, i) => {
@@ -274,12 +216,19 @@ export default async function decorate(block) {
 
   tabButtons.forEach((tab, i) => tab.addEventListener('click', () => activateTab(i)));
   tabList.addEventListener('keydown', (event) => {
-    if (!['ArrowRight', 'ArrowLeft'].includes(event.key)) return;
-    event.preventDefault();
     const current = tabButtons.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
     if (current === -1) return;
-    const next = (current + (event.key === 'ArrowLeft' ? -1 : 1) + tabButtons.length) % tabButtons.length;
-    activateTab(next, true);
+    const last = tabButtons.length - 1;
+    const step = getComputedStyle(tabList).direction === 'rtl' ? -1 : 1;
+    const targets = {
+      ArrowRight: (current + step + tabButtons.length) % tabButtons.length,
+      ArrowLeft: (current - step + tabButtons.length) % tabButtons.length,
+      Home: 0,
+      End: last,
+    };
+    if (!(event.key in targets)) return;
+    event.preventDefault();
+    activateTab(targets[event.key], true);
   });
 
   const desktopMedia = window.matchMedia(DESKTOP_QUERY);
@@ -300,11 +249,13 @@ export default async function decorate(block) {
     block.classList.toggle('has-thumbs-reflow', needed > row.clientWidth);
   };
   const syncPanels = () => {
-    if (desktopMedia.matches) {
-      tabDefs.forEach(({ panel }) => { panel.hidden = false; });
-    } else {
+    const tabsActive = !desktopMedia.matches && !tabList.hidden;
+    setTabSemantics(tabsActive);
+    if (tabsActive) {
       const current = tabButtons.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
       activateTab(current === -1 ? 0 : current);
+    } else {
+      tabDefs.forEach(({ panel }) => { panel.hidden = false; });
     }
     syncReflow();
   };

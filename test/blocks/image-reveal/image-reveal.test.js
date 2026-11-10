@@ -139,7 +139,9 @@ describe('image-reveal', () => {
     const tabs = [...block.querySelectorAll('[role="tab"]')];
     expect(tabs.length).to.equal(2);
     expect(tabs[0].getAttribute('aria-selected')).to.equal('true');
-    const [effectsPanel, swapPanel] = [...block.querySelectorAll('[role="tabpanel"]')];
+    const [effectsPanel, swapPanel] = [...block.querySelectorAll('.image-reveal-group')];
+    expect(effectsPanel.getAttribute('role')).to.equal('tabpanel');
+    expect(effectsPanel.getAttribute('aria-labelledby')).to.equal(tabs[0].id);
     expect(effectsPanel.hidden).to.be.false;
     expect(swapPanel.hidden).to.be.true;
     tabs[1].click();
@@ -151,10 +153,72 @@ describe('image-reveal', () => {
     expect(effectsPanel.hidden).to.be.false;
   });
 
+  it('supports Home/End in the tablist and mirrors arrows in RTL', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const tabs = [...block.querySelectorAll('[role="tab"]')];
+    pressKey(tabs[0], 'End');
+    expect(tabs[1].getAttribute('aria-selected')).to.equal('true');
+    pressKey(tabs[1], 'Home');
+    expect(tabs[0].getAttribute('aria-selected')).to.equal('true');
+    block.dir = 'rtl';
+    pressKey(tabs[0], 'ArrowLeft');
+    expect(tabs[1].getAttribute('aria-selected')).to.equal('true');
+  });
+
+  it('names each radio group by its visible title', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const groups = [...block.querySelectorAll('[role="radiogroup"]')];
+    expect(groups.length).to.equal(2);
+    groups.forEach((group) => {
+      const title = block.querySelector(`#${group.getAttribute('aria-labelledby')}`);
+      expect(title.classList.contains('image-reveal-group-title')).to.be.true;
+      expect(title.textContent).to.not.be.empty;
+    });
+  });
+
+  it('drags the slider with a pointer, inverted in RTL', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const stage = block.querySelector('.image-reveal-stage');
+    const handle = block.querySelector('.image-reveal-handle');
+    stage.setPointerCapture = () => {};
+    stage.hasPointerCapture = () => true;
+    stage.releasePointerCapture = () => {};
+    stage.getBoundingClientRect = () => ({ left: 0, width: 200 });
+    const fire = (type, clientX) => stage.dispatchEvent(new PointerEvent(type, {
+      clientX, button: 0, pointerId: 1, bubbles: true,
+    }));
+    fire('pointerdown', 50);
+    expect(handle.getAttribute('aria-valuenow')).to.equal('25');
+    expect(stage.classList.contains('is-dragging')).to.be.true;
+    fire('pointermove', 400);
+    expect(handle.getAttribute('aria-valuenow')).to.equal('100');
+    expect(stage.classList.contains('is-at-edge')).to.be.true;
+    fire('pointerup', 400);
+    expect(stage.classList.contains('is-dragging')).to.be.false;
+    block.dir = 'rtl';
+    fire('pointerdown', 50);
+    expect(handle.getAttribute('aria-valuenow')).to.equal('75');
+  });
+
+  it('drops tabs when only one image is authored', async () => {
+    const block = await prepBlock('./mocks/single-image.html');
+    expect(block.querySelector('.image-reveal-tabs').hidden).to.be.true;
+    expect(block.querySelector('input[name$="-image"]')).to.not.exist;
+    const group = block.querySelector('.image-reveal-group');
+    expect(group.hidden).to.be.false;
+    expect(group.hasAttribute('role')).to.be.false;
+  });
+
+  it('keeps a header with an inline link as the header', async () => {
+    const block = await prepBlock('./mocks/single-image.html');
+    expect(block.querySelector('.image-reveal-header a[href="https://mock.example.com/learn"]')).to.exist;
+    expect(block.querySelector('.image-reveal-cta a[href="https://mock.example.com/express/"]')).to.exist;
+  });
+
   it('moves the CTA into the panel and marks the subtext', async () => {
     const block = await prepBlock('./mocks/default.html');
     const cta = block.querySelector('.image-reveal-cta');
-    expect(cta.querySelector('a[href="https://www.adobe.com/express/"]')).to.exist;
+    expect(cta.querySelector('a[href="https://mock.example.com/express/"]')).to.exist;
     expect(cta.querySelector('.image-reveal-cta-subtext').textContent).to.include('Sign in');
   });
 
