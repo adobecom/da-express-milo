@@ -458,3 +458,59 @@ describe('Ratings Block - slider interactions', () => {
     expect(block.querySelector('.no-slider')).to.exist;
   });
 });
+
+describe('Ratings Block - status announcement (WCAG 4.1.3)', () => {
+  let block;
+
+  beforeEach(async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/body.html' });
+    block = document.querySelector('.ratings');
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    sinon.restore();
+    if (window.ratingSubmitCountdown) {
+      clearInterval(window.ratingSubmitCountdown);
+      window.ratingSubmitCountdown = null;
+    }
+  });
+
+  it('adds an empty polite status region next to the block before submit', async () => {
+    await decorate(block);
+    await waitForSlider(block);
+
+    const region = block.nextElementSibling;
+    expect(region.getAttribute('role')).to.equal('status');
+    expect(region.getAttribute('aria-live')).to.equal('polite');
+    expect(region.textContent).to.equal('');
+  });
+
+  it('puts the thank-you title in the same status region after submit', async () => {
+    sinon.stub(window, 'fetch').resolves(new Response('{}', { status: 200 }));
+    await decorate(block);
+    await waitForSlider(block);
+    const region = block.nextElementSibling;
+
+    const textarea = block.querySelector('textarea');
+    textarea.removeAttribute('required');
+    textarea.value = 'Great';
+    block.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await waitForNoSlider(block);
+
+    expect(region.isConnected).to.be.true;
+    expect(block.nextElementSibling).to.equal(region);
+    const title = block.querySelector('h1, h2, h3, h4');
+    expect(region.textContent).to.not.equal('');
+    expect(region.textContent).to.equal(title.textContent);
+  });
+
+  it('keeps the status region empty in the already-rated state', async () => {
+    localStorage.setItem('ccxActionRatings', 'nala-test-ratings');
+    await decorate(block);
+    await waitForNoSlider(block);
+
+    expect(block.nextElementSibling.getAttribute('role')).to.equal('status');
+    expect(block.nextElementSibling.textContent).to.equal('');
+  });
+});

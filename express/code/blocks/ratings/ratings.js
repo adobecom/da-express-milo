@@ -56,6 +56,7 @@ export default async function decorate(block) {
   let actionSegments;
   let ratingTotal;
   let ratingAverage;
+  let statusRegion;
   const showRatingAverage = block.classList.contains('show-average')
     || (block.classList.contains('show') && block.classList.contains('average'));
 
@@ -345,6 +346,7 @@ export default async function decorate(block) {
         <p>${submissionText}</p>
       </div>`;
       block.classList.add('submitted');
+      statusRegion.textContent = submissionTitle;
       if (window.scrollY > section.offsetTop) {
         window.scrollTo(0, section.offsetTop - getFixedTopOffset());
       }
@@ -423,6 +425,18 @@ export default async function decorate(block) {
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (w, i) => (i === 0 ? w.toLowerCase() : w.toUpperCase()))
     .replace(/\s+|-+|\/+/g, '');
   block.innerHTML = '';
+  // Live region lives outside the block so rebuilds of the block never remove it.
+  statusRegion = createTag('div', { role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' });
+  Object.assign(statusRegion.style, {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    overflow: 'hidden',
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    whiteSpace: 'nowrap',
+  });
+  block.after(statusRegion);
   lazyLoadLottiePlayer(block);
 
   await regenerateBlockState(actionTitle, CTA, headingTag);
