@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getBrandingLogoElement } from '../../scripts/utils.js';
 
 let getMetadata;
 let loadStyle;
@@ -230,7 +230,7 @@ export default async function decorate(block) {
   classifyAndOptimizeCells(block, Array.from(block.children));
 
   if (['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
-    const logo = getIconElementDeprecated('adobe-express-logo');
+    const logo = getBrandingLogoElement();
     logo.classList.add('express-logo');
     block.querySelector('.column')?.prepend(logo);
   }

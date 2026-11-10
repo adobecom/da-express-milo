@@ -1,5 +1,5 @@
 /* eslint-disable import/named, import/extensions */
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getFixedTopOffset, getIconElementDeprecated } from '../../scripts/utils.js';
 import {
   FACEBOOK_ICON_PATH_D,
   LINKEDIN_ICON_PATH_D,
@@ -258,18 +258,7 @@ function scrollToTOC(tocContainer) {
   const tocRect = tocContainer.getBoundingClientRect();
   const tocAbsoluteTop = window.pageYOffset + tocRect.top;
 
-  // Find the navigation header to calculate proper offset
-  const navElement = document.querySelector(CONFIG.selectors.navigation);
-
-  let offset = 20; // Default small offset if no nav found
-
-  if (navElement) {
-    // Get the height of the navigation header
-    const navRect = navElement.getBoundingClientRect();
-    const navHeight = navRect.height;
-    // Position TOC just below the nav with small buffer
-    offset = navHeight + 10;
-  }
+  const offset = getFixedTopOffset() + 10;
 
   const scrollDistance = tocAbsoluteTop - offset;
 

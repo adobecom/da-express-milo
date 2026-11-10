@@ -21,6 +21,10 @@ export const DCTX_ID_MAP = {
     stage: 'v:2,s,bg:CCEX2026,fc1e76f0-9167-11f1-a9b0-29d697c01ae6',
     prod: 'v:2,s,bg:CCEX2026,ea8e92e0-9166-11f1-a9b9-d34066769dc6',
   },
+  'context-color-palette': {
+    stage: 'v:2,s,bg:colorSUSI,ac006510-c872-11f1-bbd0-c169ec4f4554',
+    prod: 'v:2,s,bg:colorSUSI,f30b9580-d144-11f1-b05d-b5538e129034',
+  },
 };
 
 const usp = new URLSearchParams(window.location.search);
@@ -632,8 +636,10 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
       destURL.hash = '';
     } catch { /* ignore — destURL fallback is already set */ }
   }
+  // token hands the session back to the opener page, so it only applies to popup mode;
+  // the same-tab redirect flow uses code, like every other susi-light variant
   const params = buildSUSIParams({
-    client_id, variant, destURL, locale, title, popup, responseType: 'token',
+    client_id, variant, destURL, locale, title, popup, responseType: popup ? 'token' : 'code', el,
   });
   if (!noRedirect && !isColor) {
     redirectIfLoggedIn(params.destURL);
@@ -642,7 +648,7 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const titleDiv = createTag('div', { class: 'title' }, title);
   const susiWrapper = createTag('div', { class: 'susi-wrapper' }, createSUSIComponent({
     ...params,
-    onSuccessfulToken: () => window.location.assign(destURL.toString()),
+    onSuccessfulToken: popup ? () => window.location.assign(destURL.toString()) : undefined,
   }));
   if (mobileTitle) {
     titleDiv.classList.add('desktop-only');

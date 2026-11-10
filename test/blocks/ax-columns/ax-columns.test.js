@@ -231,6 +231,25 @@ describe('Logo injection', () => {
     expect(logo.classList.contains('icon-adobe-express-photos-logo')).to.be.true;
   });
 
+  it('Should select the RTL logo only when logo injection is enabled', async () => {
+    const originalDirection = document.documentElement.dir;
+    document.documentElement.dir = 'rtl';
+    try {
+      document.body.innerHTML = injectLogo;
+      let block = document.querySelector('.ax-columns');
+      await decorate(block);
+      expect(block.querySelector('.express-logo')).to.not.exist;
+
+      document.body.innerHTML = injectLogo;
+      addMeta('marquee-inject-logo', 'on');
+      block = document.querySelector('.ax-columns');
+      await decorate(block);
+      expect(block.querySelector('.express-logo').getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo-rtl.svg');
+    } finally {
+      document.documentElement.dir = originalDirection;
+    }
+  });
+
   it('Should inject the acrobat co-brand logo when marquee-inject-acrobat-logo is on', async () => {
     document.body.innerHTML = injectLogo;
     addMeta('marquee-inject-acrobat-logo', 'on');

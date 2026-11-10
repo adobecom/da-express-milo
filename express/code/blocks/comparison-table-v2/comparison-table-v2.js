@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, getFixedTopOffset } from '../../scripts/utils.js';
 import { ComparisonTableState, initComparisonTableState } from './comparison-table-state.js';
 import handleTooltip, { adjustElementPosition, getTooltipMatch } from '../../scripts/widgets/tooltip.js';
 import { createStickyHeader, initStickyBehavior, synchronizePlanCellHeights, setCreateTag } from './sticky-header.js';
@@ -21,17 +21,9 @@ const POSITIONING = {
   ARIA_LIVE_SIZE: '1px',
 };
 
-const DEFAULT_GNAV_OFFSET = 64;
 const ACCORDION_TRANSITION_DURATION = 400;
 const ACCORDION_SCROLL_TIMEOUT = 1200;
 const SCROLL_COMPLETION_THRESHOLD = 2;
-
-const getNumericCSSCustomProperty = (element, property, fallback = 0) => {
-  if (!element) return fallback;
-  const value = window.getComputedStyle(element).getPropertyValue(property);
-  const parsed = Number.parseFloat(value);
-  return Number.isNaN(parsed) ? fallback : parsed;
-};
 
 const TOOLTIP_PATTERN = /\[\[([^]+)\]\]([^]+)\[\[\/([^]+)\]\]/g;
 
@@ -44,10 +36,7 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
   const anchorTop = anchorTarget.getBoundingClientRect().top + window.scrollY;
 
   const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
-  const isDesktop = window.matchMedia(BREAKPOINTS.DESKTOP).matches;
-  const gnavOffset = isDesktop
-    ? getNumericCSSCustomProperty(comparisonBlock, '--gnav-offset-height', DEFAULT_GNAV_OFFSET)
-    : 0;
+  const gnavOffset = getFixedTopOffset();
   const tableGap = 16;
 
   const clampTarget = (offset) => {
@@ -65,7 +54,7 @@ const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
     const headerSentinel = comparisonBlock.previousElementSibling;
     if (headerSentinel) {
       const headerSentinelTop = headerSentinel.getBoundingClientRect().top;
-      const stickyTriggerOffset = isDesktop ? gnavOffset : 0;
+      const stickyTriggerOffset = gnavOffset;
 
       const targetScrollPosition = clampTarget(tableGap);
       const scrollDelta = targetScrollPosition - window.scrollY;
@@ -721,8 +710,9 @@ function synchronizeIconWrapperTextHeights(comparisonBlock) {
  * Setup event listeners and observers for the comparison table
  * @param {HTMLElement} comparisonBlock - The comparison table block element
  * @param {Function} updateTabindexOnResize - The tabindex update handler
+ * @param {Object} stickyControls - The sticky behavior lifecycle controls
  */
-function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
+function setupEventListeners(comparisonBlock, updateTabindexOnResize, stickyControls) {
   const handleResize = () => {
     updateTabindexOnResize();
     synchronizePlanCellHeights(comparisonBlock);
@@ -738,6 +728,8 @@ function setupEventListeners(comparisonBlock, updateTabindexOnResize) {
       resizeFrame = null;
       if (!comparisonBlock.isConnected) {
         resizeObserver.disconnect();
+        stickyControls?.destroy?.();
+        window.removeEventListener('resize', handleResize);
         return;
       }
       synchronizePlanCellHeights(comparisonBlock);
@@ -807,7 +799,7 @@ export default async function decorate(comparisonBlock) {
 
     const updateTabindexOnResize = createTabindexUpdateHandler(comparisonBlock, colTitles);
 
-    setupEventListeners(comparisonBlock, updateTabindexOnResize);
+    setupEventListeners(comparisonBlock, updateTabindexOnResize, stickyControls);
     document.addEventListener('content-toggle:activated', (e) => {
       const panel = e?.detail?.panel;
       if (panel && panel.contains(comparisonBlock)) {
