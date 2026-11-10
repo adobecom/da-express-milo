@@ -403,10 +403,11 @@ html.icc-scroll-lock {
   min-block-size: 0;
   flex: 1;
   display: grid;
-  /* The track hugs the scaled composite; it stays centered and scrolls from the start when larger. */
-  grid-template-columns: var(--icc-image-width);
+  /* Tracks hug the scaled images; the pair stays centered and scrolls from the start when larger. */
+  grid-template-columns: repeat(2, var(--icc-image-width));
   grid-template-rows: var(--icc-image-height);
   place-content: safe center;
+  gap: var(--spacing-100);
   overflow: auto;
 }
 
@@ -416,7 +417,7 @@ html.icc-scroll-lock {
   min-inline-size: 0;
 }
 
-.color-image-contrast-checker .icc-frame canvas {
+.color-image-contrast-checker .icc-frame :is(canvas, img) {
   position: absolute;
   inset: 0;
   inline-size: 100%;

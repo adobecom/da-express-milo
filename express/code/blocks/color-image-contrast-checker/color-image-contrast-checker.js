@@ -118,15 +118,13 @@ function createView(content, strings, id, onColorChange) {
   const comparison = createTag('div', {
     class: 'icc-comparison', tabindex: '0', role: 'region', 'aria-label': strings.comparison,
   });
-  // Figma "Save PNG": the preview is the export, the analysis and the original composited
-  // side by side into one image. The analysis renders into the hidden WebGL `canvas`.
-  const frame = createTag('div', { class: 'icc-frame' });
-  const composite = createTag('canvas', {
-    role: 'img', 'aria-label': `${strings.analysis} ${strings.original}`,
-  });
-  const canvas = createTag('canvas', { class: 'icc-analysis', hidden: '' });
-  frame.append(composite, canvas);
-  comparison.append(frame);
+  const analysisFrame = createTag('div', { class: 'icc-frame' });
+  const originalFrame = createTag('div', { class: 'icc-frame' });
+  const canvas = createTag('canvas', { role: 'img', 'aria-label': strings.analysis });
+  const original = createTag('img', { alt: strings.original, draggable: 'false' });
+  analysisFrame.append(canvas);
+  originalFrame.append(original);
+  comparison.append(analysisFrame, originalFrame);
   // Figma "Change color space": spinner overlay over the analysis area only.
   const recalc = createTag('div', { class: 'icc-recalc', 'aria-hidden': 'true' });
   recalc.append(createTag('div', { class: 'icc-recalc-spinner' }));
@@ -212,7 +210,7 @@ function createView(content, strings, id, onColorChange) {
     fill,
     footer,
     canvas,
-    composite,
+    original,
     dialog,
     tips,
   };
@@ -295,17 +293,17 @@ export default async function decorate(block) {
     comparisonRow.style.removeProperty('block-size');
     comparisonRow.style.removeProperty('padding-inline-start');
     const surfaceStyle = getComputedStyle(comparisonRow);
+    const gap = parseFloat(getComputedStyle(comparison).columnGap) || 0;
     // Measure against the scroller's border box so fill-mode scrollbars never feed back.
-    // The composite is the analysis and the original side by side: twice the source width.
     const measure = () => {
-      const width = comparison.offsetWidth;
+      const width = (comparison.offsetWidth - gap) / 2;
       const height = comparison.offsetHeight;
       // Fit: whole image visible. Fill: cover the pane and zoom at least 150% of Fit
       // (Figma "Zoomed in toggle"), so Fill always magnifies even when Fit already covers.
-      const fit = Math.min(width / (2 * source.width), height / source.height);
+      const fit = Math.min(width / source.width, height / source.height);
       const scale = mode === 'fit'
         ? fit
-        : Math.max(width / (2 * source.width), height / source.height, FILL_OVER_FIT * fit);
+        : Math.max(width / source.width, height / source.height, FILL_OVER_FIT * fit);
       return { width, height, scale };
     };
     // Desktop minimized: hug the fitted image height, capped by the authored aspect ratio.
@@ -314,7 +312,7 @@ export default async function decorate(block) {
       const [ratioWidth, ratioHeight] = surfaceStyle.aspectRatio.split('/').map(parseFloat);
       const rowWidth = comparisonRow.getBoundingClientRect().width;
       const chrome = parseFloat(surfaceStyle.paddingTop) + parseFloat(surfaceStyle.paddingBottom);
-      const hugHeight = measure().width * (source.height / (2 * source.width)) + chrome;
+      const hugHeight = measure().width * (source.height / source.width) + chrome;
       comparisonRow.style.blockSize = `${Math.min(hugHeight, rowWidth * (ratioHeight / ratioWidth))}px`;
     };
     hug();
@@ -329,10 +327,10 @@ export default async function decorate(block) {
       ({ width, height, scale } = measure());
     };
     if (mode === 'fit') {
-      // The composite is centered; only when it would sit under the toolbar does it get a
+      // The pair is centered; only when it would sit under the toolbar does it get a
       // start gutter beside the toolbar (narrower than the toolbar is tall).
       const frame = comparison.getBoundingClientRect();
-      const pairWidth = 2 * source.width * scale;
+      const pairWidth = 2 * source.width * scale + gap;
       const imageLeft = frame.left + (frame.width - pairWidth) / 2;
       const imageTop = frame.top + (height - source.height * scale) / 2;
       if (imageLeft < toolbar.right && imageLeft + pairWidth > toolbar.left
@@ -344,7 +342,7 @@ export default async function decorate(block) {
       reserveGutter();
     }
     // Floor so fitted images never overflow the shared scroller by a sub-pixel.
-    view.panel.style.setProperty('--icc-image-width', `${Math.floor(2 * source.width * scale)}px`);
+    view.panel.style.setProperty('--icc-image-width', `${Math.floor(source.width * scale)}px`);
     view.panel.style.setProperty('--icc-image-height', `${Math.floor(source.height * scale)}px`);
   };
   const arrange = () => {
@@ -371,11 +369,6 @@ export default async function decorate(block) {
     ready = false;
     view.save.disabled = true;
     renderer.render(source, colorSpace);
-    const { width, height } = view.canvas;
-    Object.assign(view.composite, { width: width * 2, height });
-    const context = view.composite.getContext('2d');
-    context.drawImage(view.canvas, 0, 0);
-    context.drawImage(source.display, width, 0, width, height);
     ready = true;
     view.selector.setValue(colorSpace);
     view.save.disabled = block.classList.contains('is-loading');
@@ -527,20 +520,6 @@ export default async function decorate(block) {
         }
         const previous = source;
         const previousSpace = colorSpace;
-        // The displayed original keeps its embedded profile (source.image may be unmanaged).
-        const display = new Image();
-        display.src = candidate.url;
-        try {
-          await display.decode();
-        } catch (error) {
-          candidate.destroy();
-          throw error;
-        }
-        if (destroyed || imageGeneration !== version) {
-          candidate.destroy();
-          return;
-        }
-        candidate.display = display;
         source = candidate;
         colorSpace = candidate.colorSpace;
         try {
@@ -555,6 +534,7 @@ export default async function decorate(block) {
         }
         previous?.destroy();
         sourceName = file.name.replace(/\.[^.]+$/, '');
+        view.original.src = source.url;
         selectSample(selectedSample);
         block.classList.add('has-image');
         content.headline.hidden = true;
@@ -678,8 +658,14 @@ export default async function decorate(block) {
         try {
           const version = generation;
           const filename = `${sourceName}-contrast-${colorSpace}.png`;
+          const { width, height } = view.canvas;
+          const output = createTag('canvas', { width: width * 2, height });
+          const context = output.getContext('2d');
+          if (!context) throw new Error('saveError');
+          context.drawImage(view.canvas, 0, 0);
+          context.drawImage(view.original, width, 0, width, height);
           const blob = await new Promise((resolve) => {
-            view.composite.toBlob(resolve, 'image/png');
+            output.toBlob(resolve, 'image/png');
           });
           if (destroyed || version !== generation) return;
           if (!blob) throw new Error('saveError');

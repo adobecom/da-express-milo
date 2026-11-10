@@ -311,18 +311,16 @@ headings wrap. Tablet controls share a row from 700px; narrower layouts stack th
 fields and use a full-width Save PNG button. Expanded views remove the card shadow
 and padding, with the compact legend above Save PNG on mobile.
 
-The comparison surface has an 8px radius. The preview is a single image: the
-analysis and the original composited side by side (no gap) into one canvas, which
-is exactly what Save PNG downloads. It is centered in the surface (horizontally and
-vertically) in both the normal and expanded views. Fit uses 16px padding on desktop;
-when the floating view toolbar would cover image pixels, the image gets a start
-gutter beside the toolbar instead of shrinking below it. Below 900px the surface
-keeps its toolbar gutter.
+The comparison surface has an 8px radius. The two panes sit side by side with an
+8px gap and are centered in the surface (horizontally and vertically) in both the
+normal and expanded views. Fit uses 16px padding on desktop; when the floating view
+toolbar would cover image pixels, the panes get a start gutter beside the toolbar
+instead of shrinking below it. Below 900px the surface keeps its toolbar gutter.
 
 Fit is still the initial selection. Fit/Fill retain state across expansion and
-responsive changes. Fit contains the entire image. Fill scales the composite so each
-half covers half of the comparison width and the full height, and to at least 150% of
-the Fit size (so Fill always zooms, even when Fit already fills the area), preserving aspect ratio, and runs
+responsive changes. Fit contains the entire image. Fill scales each pane to cover
+its half of the comparison height and width and to at least 150% of the Fit size
+(so Fill always zooms, even when Fit already fills the pane), preserving aspect ratio, and runs
 from the toolbar gutter (desktop) or the left edge (mobile/tablet) to the bottom
 edge. The comparison area does not grow to browser-screen height in the normal
 view; expansion uses the available screen height. This is display-only zoom, not
@@ -337,8 +335,8 @@ Changing the color space shows a spinner overlay over the comparison (100ms fade
 in, 200ms hold, 100ms fade out), disables Save PNG until the new analysis is drawn,
 and, when `color-space-updated` is authored, confirms with a positive toast.
 
-The composite scrolls in one container (`.icc-comparison`), so the analysis and the
-original always move together in normal and expanded views.
+The contrast and original image panes share one scroll container (`.icc-comparison`),
+so a single scrollbar moves both images together in normal and expanded views.
 Desktop/tablet/mobile controls follow
 the annotated DOM focus order; the native modal shows the compact legend, contains
 focus, dismisses an open tooltip before closing on Escape, and restores focus
