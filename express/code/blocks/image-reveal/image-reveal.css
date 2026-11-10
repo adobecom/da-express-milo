@@ -187,6 +187,7 @@
 /* ---------- Tabs (mobile/tablet) ---------- */
 .image-reveal-tabs {
   display: flex;
+  flex-wrap: wrap; /* long localized labels wrap instead of overflowing */
   gap: var(--s2a-spacing-xl);
 }
 
@@ -195,12 +196,11 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-80); /* 6px icon gap — no s2a token (scale jumps 4→8) */
-  height: 48px;
+  min-height: 48px;
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
-  white-space: nowrap;
   color: var(--s2a-color-gray-700);
   font-family: inherit; /* <button> defaults to the UA font (Arial), not Adobe Clean */
   font-size: var(--s2a-typography-font-size-body-sm);
@@ -284,14 +284,22 @@
 }
 
 .image-reveal-thumb-img {
+  position: relative;
   display: block;
-  box-sizing: border-box;
   width: 80px;
   height: 80px;
   overflow: hidden;
-  border: var(--s2a-border-width-md) solid transparent;
   border-radius: var(--s2a-border-radius-xs);
   background: var(--s2a-color-gray-50); /* Figma "Bg for transparent assets" */
+}
+
+/* Selection ring is painted above the image so the image stays a full 80×80. */
+.image-reveal-thumb-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .image-reveal-thumb-img img {
@@ -313,9 +321,11 @@
   filter: var(--image-reveal-duotone);
 }
 
-.image-reveal-thumb:has(:checked) .image-reveal-thumb-img {
-  border-color: var(--s2a-color-gray-800);
-  box-shadow: inset 0 0 0 3px var(--s2a-color-gray-25); /* Figma inner white ring (3px — no s2a width token) */
+.image-reveal-thumb:has(:checked) .image-reveal-thumb-img::after {
+  /* Figma: 2px gray-800 border, then a 3px inner white ring (no s2a width token for 3px) */
+  box-shadow:
+    inset 0 0 0 var(--s2a-border-width-md) var(--s2a-color-gray-800),
+    inset 0 0 0 calc(var(--s2a-border-width-md) + 3px) var(--s2a-color-gray-25);
 }
 
 .image-reveal-thumb:has(:focus-visible) .image-reveal-thumb-img {
