@@ -273,10 +273,8 @@ as `≥`; numeric thresholds and localized descriptions are preserved.
   below 3:1. **Large-text AAA is 4.5:1**, not 7:1. Small-text AAA requires
   7:1 and is not certified by the green classification.
 - Save exports the analyzed canvas as a native-resolution PNG, not the UI.
-  Filenames retain the original basename and include the selected analysis space:
-  `photo-contrast-srgb.png`, `photo-contrast-display-p3.png`, or
-  `photo-contrast-adobe-rgb.png`. This identifies the analysis space,
-  not a conversion or an embedded PNG profile.
+  The file is always named `image-contrast-analysis.png`; the analysis space
+  is not a conversion or an embedded PNG profile.
   Changing the image or analysis space during export discards the stale download.
 
 This is **local pixel-contrast analysis**, not certification that an entire

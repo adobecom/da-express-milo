@@ -6,6 +6,15 @@ html.icc-scroll-lock {
   overscroll-behavior: none;
 }
 
+html.icc-scroll-lock body {
+  position: fixed;
+  inset-block-start: calc(-1 * var(--icc-scroll-y));
+  inset-inline: 0;
+  inline-size: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .color-image-contrast-checker {
   --icc-image-width: 0px;
   --icc-image-height: 0px;
@@ -196,6 +205,7 @@ html.icc-scroll-lock {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--spacing-300);
   max-inline-size: calc(var(--block-wd-max-width) - 2 * var(--spacing-600));
+  inline-size: 100%;
   margin-inline: auto;
   padding-block: var(--spacing-600);
 }
@@ -433,6 +443,7 @@ html.icc-scroll-lock {
   place-items: center;
   border-radius: inherit;
   background: rgb(0 0 0 / 56%);
+  backdrop-filter: blur(6px);
   opacity: 0;
   pointer-events: none;
   transition: opacity 100ms ease-out;
@@ -730,9 +741,19 @@ html.icc-scroll-lock {
   padding-block-start: var(--icc-comparison-padding-block);
 }
 
-/* Figma zoom-to-fill (mobile/tablet): images run under the toolbar from the left edge. */
+/* Figma zoom-to-fill: images sit beside the toolbar (resize() sets the start gutter) and
+   run off the end and bottom edges. The top offset lives inside the scroller so scrolled
+   content clips against the surface's own top edge. */
 .color-image-contrast-checker .icc-comparison-row.is-fill {
-  padding-inline-start: 0;
+  --icc-fill-beside-toolbar: 1;
+
+  padding-block: 0;
+  padding-inline-end: 0;
+}
+
+.color-image-contrast-checker .icc-comparison-row.is-fill .icc-comparison {
+  padding-block-start: var(--icc-comparison-padding-block);
+  border-radius: inherit;
 }
 
 .icc-overlay {
@@ -903,26 +924,12 @@ html.icc-scroll-lock {
     padding: var(--spacing-300);
   }
 
-  /* Figma zoom-to-fill (desktop): 64px toolbar gutter, images bleed off the bottom edge. */
+  /* Figma zoom-to-fill (desktop): fixed 64px toolbar gutter. */
   .color-image-contrast-checker .icc-comparison-row.is-fill {
-    padding-inline-start: var(--spacing-800);
-    padding-block-end: 0;
-  }
-}
-
-/* Mobile expanded Fill: images span the full surface height beside the toolbar and
-   run off the end edge (horizontal scroll); resize() sets the start gutter. */
-@media (max-width: 599px) {
-  .color-image-contrast-checker.icc-dialog .icc-comparison-row.is-fill {
-    --icc-fill-beside-toolbar: 1;
+    --icc-fill-beside-toolbar: 0;
 
     padding-block: 0;
-    padding-inline-end: 0;
-  }
-
-  .color-image-contrast-checker.icc-dialog .icc-comparison-row.is-fill .icc-comparison {
-    border-start-end-radius: inherit;
-    border-end-end-radius: inherit;
+    padding-inline: var(--spacing-800) 0;
   }
 }
 

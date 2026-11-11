@@ -14,6 +14,23 @@ import createDropdown from '../../scripts/color-shared/components/dropdown/dropd
 
 const instances = new WeakMap();
 let nextId = 0;
+const scrollLockOwners = new Set();
+let lockedScrollY = 0;
+
+function setPageScrollLock(owner, locked) {
+  if (locked) scrollLockOwners.add(owner);
+  else scrollLockOwners.delete(owner);
+  const root = document.documentElement;
+  if (scrollLockOwners.size && !root.classList.contains('icc-scroll-lock')) {
+    lockedScrollY = window.scrollY;
+    root.style.setProperty('--icc-scroll-y', `${lockedScrollY}px`);
+    root.classList.add('icc-scroll-lock');
+  } else if (!scrollLockOwners.size && root.classList.contains('icc-scroll-lock')) {
+    root.classList.remove('icc-scroll-lock');
+    root.style.removeProperty('--icc-scroll-y');
+    window.scrollTo(0, lockedScrollY);
+  }
+}
 const HISTORY_KEY = 'colorImageContrastChecker';
 // Figma "Change color space" timing: 100ms ease-out fade in, 200ms hold, 100ms fade out.
 const RECALC_FADE_MS = 100;
@@ -234,7 +251,6 @@ export default async function decorate(block) {
   let view;
   let renderer;
   let source;
-  let sourceName;
   let dropzone;
   let loadingOverlay;
   let detachDrag;
@@ -275,8 +291,8 @@ export default async function decorate(block) {
     const parent = active && view.dialog.open ? view.dialog : document.body;
     if (loadingOverlay.parentElement !== parent) parent.append(loadingOverlay);
     loadingOverlay.classList.toggle('is-loading', active);
-    // Freeze the page behind the loading overlay and the expanded view.
-    document.documentElement.classList.toggle('icc-scroll-lock', active || view.dialog.open);
+    // Freeze the document behind either transition without moving its scroll position.
+    setPageScrollLock(block, active || view.dialog.open);
   };
   const busy = (value) => {
     block.classList.toggle('is-loading', value);
@@ -358,6 +374,10 @@ export default async function decorate(block) {
     view.panel.style.setProperty('--icc-image-width', `${Math.floor(source.width * scale)}px`);
     view.panel.style.setProperty('--icc-image-height', `${Math.floor(source.height * scale)}px`);
   };
+  const scheduleResize = () => {
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(resize);
+  };
   const arrange = () => {
     if (!view) return;
     const active = document.activeElement;
@@ -422,7 +442,7 @@ export default async function decorate(block) {
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
-    document.documentElement.classList.remove('icc-scroll-lock');
+    setPageScrollLock(block, false);
     generation += 1;
     imageGeneration += 1;
     request?.abort();
@@ -546,7 +566,6 @@ export default async function decorate(block) {
           throw error;
         }
         previous?.destroy();
-        sourceName = file.name.replace(/\.[^.]+$/, '');
         view.original.src = source.url;
         selectSample(selectedSample);
         block.classList.add('has-image');
@@ -630,12 +649,13 @@ export default async function decorate(block) {
     block.closest('.section').prepend(background);
     detachDrag = attachImageDragHandlers(block, dropzone, dragOverlay, loadingOverlay, destroy);
     arrange();
-    resizeObserver = new ResizeObserver(() => {
-      cancelAnimationFrame(resizeFrame);
-      resizeFrame = requestAnimationFrame(resize);
-    });
+    resizeObserver = new ResizeObserver(scheduleResize);
+    resizeObserver.observe(view.panel);
+    resizeObserver.observe(view.comparisonRow);
     resizeObserver.observe(view.comparison);
     media.addEventListener('change', arrange, { signal });
+    window.addEventListener('resize', scheduleResize, { signal });
+    window.visualViewport?.addEventListener('resize', scheduleResize, { signal });
     window.addEventListener('popstate', () => {
       if (window.history.state?.[HISTORY_KEY] !== id) landing();
     }, { signal });
@@ -670,7 +690,7 @@ export default async function decorate(block) {
       if (action === 'save' && ready && !view.save.disabled) {
         try {
           const version = generation;
-          const filename = `${sourceName}-contrast-${colorSpace}.png`;
+          const filename = 'image-contrast-analysis.png';
           const { width, height } = view.canvas;
           // Side-by-side doubles the width; stay within the strictest browser canvas
           // limits (iOS Safari: 16,777,216 px area; 16,384 px per side).

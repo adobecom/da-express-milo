@@ -742,14 +742,20 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(getComputedStyle(overlay).opacity).to.equal('1');
     expect(document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2)
       .closest('.color-extract-loading-overlay')).to.equal(overlay);
+    expect(document.documentElement.classList.contains('icc-scroll-lock')).to.equal(true);
+    expect(getComputedStyle(document.body).position).to.equal('fixed');
     expect(block.querySelector('[data-action="save"]').disabled).to.equal(true);
     dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
     expect(dialog.open).to.equal(false);
     expect(overlay.parentElement).to.equal(document.body);
     expect(getComputedStyle(overlay).opacity).to.equal('1');
+    expect(document.documentElement.classList.contains('icc-scroll-lock')).to.equal(true);
+    expect(getComputedStyle(document.body).position).to.equal('fixed');
     finish(bytes);
     await waitFor(() => block.getAttribute('aria-busy') === 'false');
     expect(getComputedStyle(overlay).opacity).to.equal('0');
+    expect(document.documentElement.classList.contains('icc-scroll-lock')).to.equal(false);
+    expect(getComputedStyle(document.body).position).not.to.equal('fixed');
     expect(block.querySelector('[data-action="save"]').disabled).to.equal(false);
   });
 
@@ -841,6 +847,8 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       chooseSpace(space);
       // Spinner overlay covers the stale analysis and Save waits for the new one.
       expect(surface.classList.contains('is-recalculating')).to.equal(true);
+      expect(getComputedStyle(surface.querySelector('.icc-recalc')).backdropFilter)
+        .to.equal('blur(6px)');
       expect(save.disabled).to.equal(true);
       await waitFor(() => readySpace() === space);
       await waitFor(() => !surface.classList.contains('is-recalculating'));
@@ -1075,8 +1083,33 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     block.querySelector('[data-action="expand"]').click();
     expect(root.classList.contains('icc-scroll-lock')).to.equal(true);
     expect(getComputedStyle(root).overflow).to.equal('hidden');
+    expect(getComputedStyle(document.body).position).to.equal('fixed');
     block.querySelector('[data-action="expand"]').click();
     expect(root.classList.contains('icc-scroll-lock')).to.equal(false);
+    expect(getComputedStyle(document.body).position).not.to.equal('fixed');
+  });
+
+  it('hugs short images on desktop above the toolbar floor and caps tall ones', async () => {
+    const viewport = { width: window.innerWidth, height: window.innerHeight };
+    try {
+      await setViewport({ width: 1440, height: 1000 });
+      await setup();
+      const surface = block.querySelector('.icc-comparison-row');
+      const zoom = block.querySelector('.icc-zoom');
+      for (const [width, height] of [[1000, 100], [100, 1000]]) {
+        await upload(await imageFile(width, height));
+        const cap = () => surface.getBoundingClientRect().width / (881 / 516);
+        await waitFor(() => (width > height
+          ? surface.getBoundingClientRect().height < cap() - 1
+          : Math.abs(surface.getBoundingClientRect().height - cap()) < 0.5));
+        const floor = zoom.offsetHeight + 2 * zoom.offsetTop;
+        expect(surface.getBoundingClientRect().height).to.be.at.least(floor - 0.5);
+        expect(surface.getBoundingClientRect().height).to.be.at.most(cap() + 0.1);
+        if (width > height) expect(surface.getBoundingClientRect().height).to.be.below(240);
+      }
+    } finally {
+      await setViewport(viewport);
+    }
   });
 
   it('retains Fit scaling, cover Fill, view state and correct maximize/minimize icons', async () => {
@@ -1168,6 +1201,16 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
             const scale = scaleFor('fill');
             const toolbar = zoom.getBoundingClientRect();
             const clip = comparison.getBoundingClientRect();
+            if (width >= 900) {
+              const row = surface.getBoundingClientRect();
+              const surfaceStyle = getComputedStyle(surface);
+              expect(parseFloat(surfaceStyle.paddingTop)).to.equal(0);
+              expect(parseFloat(surfaceStyle.paddingBottom)).to.equal(0);
+              expect(clip.top).to.equal(row.top);
+              expect(clip.bottom).to.equal(row.bottom);
+              expect(getComputedStyle(comparison).borderTopRightRadius)
+                .to.equal(surfaceStyle.borderTopRightRadius);
+            }
             for (const frame of frames) {
               const image = frame.firstElementChild.getBoundingClientRect();
               expect(image.width).to.equal(Math.floor(source.width * scale));
@@ -1297,25 +1340,22 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
                 && Math.min(image.right, clip.right) > toolbar.left
                 && Math.max(image.top, clip.top) < toolbar.bottom
                 && Math.min(image.bottom, clip.bottom) > toolbar.top;
-              // Mobile/tablet Fill runs under the toolbar, except mobile expanded Fill (Figma).
-              if (mode === 'fit' || width >= 900 || (expanded && width < 600)) {
-                expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
-                  .to.equal(false);
-              }
+              expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
+                .to.equal(false);
               expect(getComputedStyle(pane).overflow).to.equal('visible');
               if (surface.style.paddingInlineStart) {
                 expect(image.left - toolbar.right).to.be.at.least(8 - 0.1);
                 reservations += 1;
               }
             }
-            // Only mobile expanded Fill sits beside the toolbar, edge to edge vertically.
+            // Fill sits beside the toolbar (JS gutter below 900px, CSS 64px on desktop) and
+            // the scroller meets the surface's top, end and bottom edges.
             if (mode === 'fill') {
-              expect(surface.style.paddingInlineStart !== '').to.equal(expanded && width < 600);
-              if (expanded && width < 600) {
-                expect(clip.top).to.equal(surface.getBoundingClientRect().top);
-                expect(clip.bottom).to.equal(surface.getBoundingClientRect().bottom);
-                expect(clip.right).to.equal(surface.getBoundingClientRect().right);
-              }
+              expect(surface.style.paddingInlineStart !== '').to.equal(width < 900);
+              const edges = surface.getBoundingClientRect();
+              expect(clip.top).to.equal(edges.top);
+              expect(clip.bottom).to.equal(edges.bottom);
+              expect(clip.right).to.equal(edges.right);
             }
           }
           if (expanded) expand.click();
@@ -1328,7 +1368,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       surface.style.blockSize = '75px';
       surface.style.aspectRatio = 'auto';
       block.querySelector('[data-action="fill"]').click();
-      await waitFor(() => surface.style.paddingInlineStart === '');
+      await waitFor(() => surface.style.paddingInlineStart !== '');
       expect(getComputedStyle(zoom).zIndex).to.equal('1');
       expect(getComputedStyle(frame.parentElement).zIndex).to.equal('0');
       zoom.scrollIntoView();
@@ -1577,7 +1617,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       expect([...bytes.slice(0, 8)]).to.deep.equal([137, 80, 78, 71, 13, 10, 26, 10]);
       const view = new DataView(bytes.buffer);
       expect([view.getUint32(16), view.getUint32(20)]).to.deep.equal([26, 9]);
-      expect(click.lastCall.thisValue.download).to.equal(`authored-test-contrast-${space}.png`);
+      expect(click.lastCall.thisValue.download).to.equal('image-contrast-analysis.png');
     }
   });
 
@@ -1605,7 +1645,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(click.called).to.equal(false);
   });
 
-  it('discards a pending export after a color-space change and names the new analysis correctly', async () => {
+  it('discards a pending export after a color-space change and exports the new analysis', async () => {
     await setup();
     const file = await imageFile();
     await upload(new File([file], 'photograph.v2.PNG', { type: file.type }));
@@ -1621,7 +1661,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     await applySpace('adobe-rgb');
     block.querySelector('[data-action="save"]').click();
     await waitFor(() => click.called);
-    expect(click.firstCall.thisValue.download).to.equal('photograph.v2-contrast-adobe-rgb.png');
+    expect(click.firstCall.thisValue.download).to.equal('image-contrast-analysis.png');
   });
 
   it('supports redecoration and tears down resources when the whole section is removed', async () => {
