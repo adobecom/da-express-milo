@@ -123,7 +123,9 @@ describe('Universal heading size variants', () => {
       <main>
         <div class="test-block ax-heading-l">
           <p>Body copy</p>
+          <span data-body-copy>Body copy span</span>
         </div>
+        <span data-body-control>Body control span</span>
         <h3 class="ax-heading-xxl">Direct AX heading</h3>
         <h3 class="heading-xl">Direct Milo heading</h3>
       </main>`;
@@ -137,5 +139,11 @@ describe('Universal heading size variants', () => {
     expect(getComputedStyle(document.querySelector('.heading-xl')).fontSize).to.equal('28px');
     expect(getComputedStyle(block.querySelector('p')).fontSize).to.equal('17px');
     expect(getComputedStyle(block.querySelector('p')).fontWeight).to.equal('400');
+
+    const bodyCopyStyles = getComputedStyle(document.querySelector('[data-body-copy]'));
+    const bodyControlStyles = getComputedStyle(document.querySelector('[data-body-control]'));
+    ['fontSize', 'lineHeight', 'fontWeight', 'fontFamily'].forEach((property) => {
+      expect(bodyCopyStyles[property], property).to.equal(bodyControlStyles[property]);
+    });
   });
 });

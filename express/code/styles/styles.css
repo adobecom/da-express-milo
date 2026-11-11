@@ -2024,47 +2024,47 @@ main .section.no-h2-margin .content h2 {
   font-family: var(--body-font-family);
 }
 
-.ax-heading-xxxxl {
+.ax-heading-xxxxl:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-variant-xxxxl-size);
   line-height: var(--ax-heading-variant-xxxxl-lh);
 }
 
-.ax-heading-xxxl {
+.ax-heading-xxxl:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xxxl-size);
   line-height: var(--ax-heading-xxxl-lh);
 }
 
-.ax-heading-xxl {
+.ax-heading-xxl:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xxl-size);
   line-height: var(--ax-heading-xxl-lh);
 }
 
-.ax-heading-xl {
+.ax-heading-xl:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xl-size);
   line-height: var(--ax-heading-xl-lh);
 }
 
-.ax-heading-l {
+.ax-heading-l:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-l-size);
   line-height: var(--ax-heading-l-lh);
 }
 
-.ax-heading-m {
+.ax-heading-m:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-m-size);
   line-height: var(--ax-heading-m-lh);
 }
 
-.ax-heading-s {
+.ax-heading-s:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-s-size);
   line-height: var(--ax-heading-s-lh);
 }
 
-.ax-heading-xs {
+.ax-heading-xs:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xs-size);
   line-height: var(--ax-heading-xs-lh);
 }
 
-.ax-heading-xxs {
+.ax-heading-xxs:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xxs-size);
   line-height: var(--ax-heading-xxs-lh);
 }
