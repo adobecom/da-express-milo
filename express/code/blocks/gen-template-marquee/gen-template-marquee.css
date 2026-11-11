@@ -415,6 +415,12 @@ main .section .gen-template-suggestions-label {
   }
 }
 
+@media (max-width: 1199px) {
+  .gen-template-column > .gen-template-card:nth-child(n + 3) {
+    display: none;
+  }
+}
+
 @media (min-width: 600px) {
   .gen-template-marquee {
     --gen-template-padding-top: var(--spacing-700);
