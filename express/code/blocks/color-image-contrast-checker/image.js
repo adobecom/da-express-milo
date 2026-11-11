@@ -279,6 +279,11 @@ function unmanagedBlob(bytes, type) {
   return new Blob(parts, { type });
 }
 
+function supportsCanvasColorSpace(space) {
+  const context = document.createElement('canvas').getContext('2d', { colorSpace: space });
+  return context?.getContextAttributes?.()?.colorSpace === space;
+}
+
 export async function decodeImage(file, textureLimit = Infinity) {
   const type = file?.type?.split(';')[0].trim().toLowerCase();
   if (!file || !TYPES.includes(type)) throw new Error('unsupportedFile');
@@ -289,8 +294,13 @@ export async function decodeImage(file, textureLimit = Infinity) {
   const url = URL.createObjectURL(file);
   const urls = [url];
   try {
-    const canvasSpace = colorSpace === 'adobe-rgb' ? 'srgb' : colorSpace;
-    if (colorSpace === 'adobe-rgb') {
+    // Browsers without a Display P3 canvas (e.g. Firefox) decode P3 like Adobe RGB:
+    // unmanaged channels into an sRGB canvas. The shader applies the selected space's
+    // transfer and weights, so the encoded values are what it needs.
+    const nativeP3 = colorSpace === 'display-p3' && supportsCanvasColorSpace('display-p3');
+    const unmanaged = colorSpace === 'adobe-rgb' || (colorSpace === 'display-p3' && !nativeP3);
+    const canvasSpace = nativeP3 ? 'display-p3' : 'srgb';
+    if (unmanaged) {
       // Decode unchanged encoded channels; keep the profiled original for display.
       urls.push(URL.createObjectURL(unmanagedBlob(bytes, type)));
     }
@@ -302,17 +312,11 @@ export async function decodeImage(file, textureLimit = Infinity) {
     canvas.width = image.naturalWidth;
     canvas.height = image.naturalHeight;
     const context = canvas.getContext('2d', { colorSpace: canvasSpace, willReadFrequently: true });
-    if (!context || (colorSpace === 'display-p3'
-      && context.getContextAttributes()?.colorSpace !== colorSpace)) {
-      throw new Error('p3Unavailable');
-    }
+    if (!context) throw new Error('analysisError');
     context.drawImage(image, 0, 0);
     const data = context.getImageData(0, 0, canvas.width, canvas.height, {
       colorSpace: canvasSpace,
     });
-    if (colorSpace === 'display-p3' && data.colorSpace !== colorSpace) {
-      throw new Error('p3Unavailable');
-    }
     return {
       url,
       image,

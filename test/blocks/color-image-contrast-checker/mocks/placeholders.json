@@ -40,7 +40,6 @@
   "color-image-contrast-checker-file-too-large": "Choose an image no larger than 40 MiB.",
   "color-image-contrast-checker-image-too-large": "This image exceeds the analysis limit. Choose a smaller image.",
   "color-image-contrast-checker-unsupported-profile": "Export this image in sRGB, Display P3 or Adobe RGB (1998).",
-  "color-image-contrast-checker-p3-unavailable": "This browser cannot accurately decode Display P3 images.",
   "color-image-contrast-checker-analysis-error": "Unable to analyze this image. Check that WebGL is enabled and try again.",
   "color-image-contrast-checker-save-error": "Unable to save the analysis. Please try again.",
   "color-image-contrast-checker-saved": "Image contrast analysis downloaded.",

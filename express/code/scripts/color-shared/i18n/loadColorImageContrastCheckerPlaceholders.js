@@ -12,7 +12,7 @@ const PROPERTIES = [
   'legend', 'largeText', 'largeTextHelp', 'smallText', 'smallTextHelp', 'green', 'passes',
   'greenLarge', 'greenSmall', 'blue', 'partial', 'blueLarge', 'blueSmall', 'dark', 'fails',
   'darkDescription', 'darkSize', 'unsupportedFile', 'fileTooLarge', 'imageTooLarge',
-  'unsupportedProfile', 'p3Unavailable', 'analysisError', 'saveError', 'saved', 'colorSpaceUpdated',
+  'unsupportedProfile', 'analysisError', 'saveError', 'saved', 'colorSpaceUpdated',
 ];
 // Present only when authored: Adobe RGB enables a selector option, colorSpaceUpdated the toast.
 const OPTIONAL = new Set(['adobeRgb', 'colorSpaceUpdated']);

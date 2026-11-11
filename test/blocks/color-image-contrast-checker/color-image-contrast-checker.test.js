@@ -331,7 +331,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     window.placeholders['color-image-contrast-checker-color-space'] = 'Author color space';
     expect((await loadUploadStrings()).uploadButtonText).to.equal('Author upload label');
     expect((await loadStrings()).colorSpace).to.equal('Author color space');
-    expect(Object.keys(PLACEHOLDER_KEY_MAP)).to.have.length(46);
+    expect(Object.keys(PLACEHOLDER_KEY_MAP)).to.have.length(45);
     await setup();
     expect(block.querySelector('.image-upload-dropzone-upload-label').textContent)
       .to.equal('Author upload label');
