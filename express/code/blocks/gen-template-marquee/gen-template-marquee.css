@@ -101,12 +101,12 @@ main .section .gen-template-text > p {
 }
 
 .gen-template-prompt-field:has(.gen-template-prompt-input:focus-visible:placeholder-shown) {
-  outline: 2px solid #131313;
+  outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 0;
 }
 
 .gen-template-prompt-field:has(.gen-template-prompt-input:not(:placeholder-shown)) {
-  outline: 2px solid #131313;
+  outline: 2px solid var(--color-gray-950);
   outline-offset: 0;
 }
 
@@ -146,6 +146,11 @@ main .section .gen-template-text > p {
   line-height: var(--spacing-325);
 }
 
+/* Figma: 12px label-to-prompt, 8px prompt-to-button. */
+.gen-template-prompt-input + .gen-template-prompt-submit {
+  margin-top: calc(var(--spacing-100) - var(--spacing-200));
+}
+
 .gen-template-prompt-input::placeholder {
   color: var(--gen-template-body-subtle);
   opacity: 1;
@@ -163,14 +168,14 @@ main .section .gen-template-text > p {
   margin: 0;
   padding: 5px 1.2em var(--spacing-80);
   border: 2px solid var(--color-info-primary);
-  border-radius: 18px;
+  border-radius: var(--spacing-400);
   background: var(--color-gray-800-variant);
   color: var(--color-white);
   cursor: pointer;
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-s);
-  font-weight: 600;
-  line-height: var(--body-line-height);
+  font-size: var(--body-font-size-m);
+  font-weight: 700;
+  line-height: var(--spacing-325);
   transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -200,8 +205,8 @@ main .section .gen-template-text > p {
 }
 
 .gen-template-prompt-submit .icon {
-  width: var(--spacing-325);
-  height: var(--spacing-325);
+  width: var(--spacing-350);
+  height: var(--spacing-350);
   margin: 0;
   filter: brightness(0) invert(1);
 }
@@ -212,7 +217,6 @@ main .section .gen-template-text > p {
 }
 
 .gen-template-suggestion:hover {
-  border-radius: var(--spacing-80);
   background: var(--color-gray-300-variant);
 }
 
@@ -284,8 +288,13 @@ main .section .gen-template-suggestions-label {
   width: max-content;
   margin-top: var(--spacing-600);
   /* Wider than the viewport by design: center on the middle column. */
-  margin-left: 50%;
+  margin-inline-start: 50%;
   translate: -50% 0;
+}
+
+/* RTL overflows toward the left, so the start edge sits at the center and shifts right. */
+[dir="rtl"] .gen-template-gallery {
+  translate: 50% 0;
 }
 
 .gen-template-column {
@@ -296,7 +305,7 @@ main .section .gen-template-suggestions-label {
 }
 
 .gen-template-column:nth-child(3) {
-  padding-top: 45px;
+  padding-top: 60px;
 }
 
 .gen-template-card {
@@ -429,10 +438,6 @@ main .section .gen-template-suggestions-label {
     padding-inline: var(--spacing-500);
   }
 
-  .gen-template-gallery {
-    margin-top: 60px;
-  }
-
   .gen-template-prompt-form {
     padding: var(--spacing-200);
   }
@@ -460,7 +465,7 @@ main .section .gen-template-suggestions-label {
   }
 
   .gen-template-column:nth-child(3) {
-    padding-top: 105px;
+    padding-top: 61px;
   }
 }
 
@@ -470,6 +475,15 @@ main .section .gen-template-suggestions-label {
     --gen-template-padding-top: var(--spacing-800);
     --gen-template-heading-line-height: 56px;
     --gen-template-gallery-bottom-padding: var(--spacing-900);
+    --gen-template-column-gap: 98px;
+  }
+
+  .gen-template-gallery {
+    margin-top: 60px;
+  }
+
+  .gen-template-column:nth-child(3) {
+    padding-top: 105px;
   }
 
   .gen-template-marquee .gen-template-logo.icon {
