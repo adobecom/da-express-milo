@@ -323,14 +323,20 @@ document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile'
 preDecorateSections(document);
 
 // Milo's decorateHeader only runs after personalization, so a hero shown before it would be
-// pushed down when the nav reserves its height. Mirror its className (Milo overwrites it with
-// the same value) and its localnav check (isLocalNav; Express defaults gnav-source to
-// localnav-express).
+// pushed down when the nav reserves its height. Mirror its C1/C2 className and localnav
+// behavior before revealing the hero.
 function reserveGnavSpace() {
   const header = document.querySelector('body > header');
   const headerMeta = getMetadata('header');
   if (!header || header.className || headerMeta === 'off') return;
   header.className = headerMeta || 'global-navigation';
+  const isC2GnavOnC1Host = getMetadata('foundation') !== 'c2'
+    && getMetadata('gnav-foundation') === 'c2';
+  if (isC2GnavOnC1Host) {
+    header.classList.add('c2-gnav-c1-host');
+    header.dataset.reserveC2Gnav = '';
+    return;
+  }
   const gnavSource = getMetadata('gnav-source') || 'localnav-express';
   const newNav = new URLSearchParams(window.location.search).get('newNav');
   const newNavEnabled = newNav ? newNav !== 'false' : getMetadata('mobile-gnav-v2') !== 'off';
