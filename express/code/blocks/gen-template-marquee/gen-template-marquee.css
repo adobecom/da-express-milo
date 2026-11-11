@@ -415,7 +415,7 @@ main .section .gen-template-suggestions-label {
   }
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 599px) {
   .gen-template-column > .gen-template-card:nth-child(n + 3) {
     display: none;
   }
