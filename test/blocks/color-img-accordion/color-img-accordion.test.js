@@ -125,15 +125,15 @@ describe('color-img-accordion', () => {
     ids.forEach((id) => expect(document.getElementById(id)).to.exist);
   });
 
-  it('leaves the palette unfilled when the image fails to load', async () => {
-    document.body.innerHTML = await readFile({ path: './mocks/default.html' });
-    const block = document.querySelector('.color-img-accordion');
-    block.querySelector('img').src = '/does-not-exist.png';
-    block.querySelectorAll('source').forEach((s) => s.remove());
-    await decorate(block);
-    const img = block.querySelector('img');
-    await waitFor(() => img.complete);
-    await new Promise((resolve) => { setTimeout(resolve, 50); });
-    expect(block.querySelector('.color-img-accordion-palette').classList.contains('is-ready')).to.be.false;
+  it('settles to false instead of hanging when the image fails to load', async () => {
+    const { waitForImage } = await import('../../../express/code/blocks/color-img-accordion/color-img-accordion.js');
+    const timeout = new Promise((resolve) => { setTimeout(() => resolve('timeout'), 2000); });
+    const pending = document.createElement('img');
+    pending.src = '/does-not-exist-pending.png';
+    expect(await Promise.race([waitForImage(pending), timeout])).to.equal(false);
+    const failed = document.createElement('img');
+    failed.src = '/does-not-exist-failed.png';
+    await waitFor(() => failed.complete, 2000);
+    expect(await Promise.race([waitForImage(failed), timeout])).to.equal(false);
   });
 });

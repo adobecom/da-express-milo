@@ -91,17 +91,21 @@ async function extractPalette(image) {
 }
 
 // Resolves true once the image has pixels, false if it failed to load.
-async function waitForImage(image) {
-  if (image.complete) return image.naturalWidth > 0;
+export async function waitForImage(image) {
+  if (image.complete && image.naturalWidth) return true;
   // decode() settles even when Firefox restarts the request after the
   // <picture> is moved, in which case a 'load' listener can miss the event.
   try {
     await image.decode();
   } catch {
-    await new Promise((resolve) => {
-      image.addEventListener('load', resolve, { once: true });
-      image.addEventListener('error', resolve, { once: true });
-    });
+    // A failed load has already fired 'error' and set complete; only wait
+    // when the request is still pending (e.g. the Firefox restart above).
+    if (!image.complete) {
+      await new Promise((resolve) => {
+        image.addEventListener('load', resolve, { once: true });
+        image.addEventListener('error', resolve, { once: true });
+      });
+    }
   }
   return image.naturalWidth > 0;
 }
