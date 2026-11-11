@@ -376,14 +376,22 @@ export function createColorInput(config) {
   input.addEventListener('mouseup', (e) => {
     if (!selectOnMouseUp) return;
     selectOnMouseUp = false;
+    if (input.selectionStart !== input.selectionEnd) return; // keep a drag-selection
     e.preventDefault();
     input.select();
   }, { signal });
 
   // Live-preview only complete values; '#FFF' mid-way through '#FFF000' is not intent.
+  // Like the picker's onColorChange, keep the commit baseline so Enter still commits.
+  function previewTypedValue(hex) {
+    if (syncEditorHexValue(hex)) {
+      runWithEditorSync(() => onInput?.({ value: hex }));
+    }
+  }
+
   input.addEventListener('input', () => {
     if (FULL_HEX.test(input.value.trim())) {
-      onInput?.({ value: normalizeHex(input.value) });
+      previewTypedValue(normalizeHex(input.value));
     }
   }, { signal });
 
@@ -406,7 +414,8 @@ export function createColorInput(config) {
       e.preventDefault();
       commitTypedValue();
       input.select();
-    } else if (e.key === 'Escape' && input.value !== lastValidHex) {
+    } else if (e.key === 'Escape' && !activeEditor && !pendingOpen) {
+      if (lastValidHex !== editorOpenValue) previewTypedValue(editorOpenValue);
       input.value = lastValidHex;
       input.select();
     }

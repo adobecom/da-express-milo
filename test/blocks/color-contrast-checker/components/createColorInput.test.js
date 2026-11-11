@@ -253,6 +253,40 @@ describe('createColorInput', () => {
     expect([textInput.selectionStart, textInput.selectionEnd]).to.deep.equal([0, 7]);
   });
 
+  it('still commits on Enter after the renderer echoes a live preview back via setValue', () => {
+    const onChange = sinon.spy();
+    const api = createColorInput({
+      label: 'Foreground color',
+      value: '#FFFFFF',
+      onInput: ({ value }) => api.setValue(value), // what createCheckerRenderer does
+      onChange,
+    });
+    document.body.appendChild(api.element);
+    const textInput = api.element.querySelector('.ax-color-input__input');
+    textInput.value = '#123456';
+    textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    textInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(onChange.callCount).to.equal(1);
+    expect(onChange.lastCall.args[0]).to.deep.equal({ value: '#123456' });
+  });
+
+  it('reverts a previewed but uncommitted value on Escape', () => {
+    const onInput = sinon.spy();
+    const api = createColorInput({
+      label: 'Foreground color',
+      value: '#FFFFFF',
+      onInput: (detail) => { onInput(detail); api.setValue(detail.value); },
+    });
+    document.body.appendChild(api.element);
+    const textInput = api.element.querySelector('.ax-color-input__input');
+    textInput.value = '#123456';
+    textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    textInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(onInput.lastCall.args[0]).to.deep.equal({ value: '#FFFFFF' });
+    expect(textInput.value).to.equal('#FFFFFF');
+    expect(api.getValue()).to.equal('#FFFFFF');
+  });
+
   // Fix test MWPW-192264
   it.skip('switches from one desktop color input to the other without immediately closing', async () => {
     stubViewport(matchMediaStub, { mobile: false, tablet: false });
