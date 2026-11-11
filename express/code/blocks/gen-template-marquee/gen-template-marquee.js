@@ -250,7 +250,8 @@ function buildGallery(columns, hasFixedRatio) {
     items.forEach((item, cardIndex) => {
       column.append(buildCard(item, columnIndex === 2 && cardIndex === 0, hasFixedRatio));
     });
-    if (column.children.length) gallery.append(column);
+    // Keep empty columns so nth-child layout and the eager LCP card stay centered.
+    gallery.append(column);
   });
   return gallery;
 }
@@ -301,7 +302,13 @@ function addInteractions(block) {
     const destination = form.dataset.href;
     if (!destination) return;
 
-    const trackedDestination = await appendTracking(destination);
+    const trackedDestination = await appendTracking(destination).catch((error) => {
+      window.lana?.log(`gen-template-marquee tracking failed: ${error?.message || error}`, {
+        tags: 'gen-template-marquee',
+        severity: 'warning',
+      });
+      return destination;
+    });
 
     const url = new URL(trackedDestination, window.location.href);
     url.searchParams.set('prompt', prompt);

@@ -62,7 +62,14 @@ async function prepareBlock(metadata = {}, templateSource = '') {
 }
 
 describe('gen-template-marquee', () => {
+  let originalLocationAssign;
+  let originalTrackingAppender;
+
   beforeEach(() => {
+    window.isTestEnv = true;
+    originalLocationAssign = window.t_locationAssign;
+    originalTrackingAppender = window.t_getTrackingAppendedURL;
+    window.t_getTrackingAppendedURL = (url) => Promise.resolve(url);
     fetchedUrl = '';
     window.fetch = (url) => {
       fetchedUrl = url;
@@ -72,6 +79,8 @@ describe('gen-template-marquee', () => {
 
   afterEach(() => {
     window.fetch = originalFetch;
+    window.t_locationAssign = originalLocationAssign;
+    window.t_getTrackingAppendedURL = originalTrackingAppender;
     document.body.replaceChildren();
     document.head.querySelectorAll('meta[data-gen-template-test]').forEach((meta) => meta.remove());
   });
@@ -204,22 +213,33 @@ describe('gen-template-marquee', () => {
     const block = await prepareBlock();
     const form = block.querySelector('.gen-template-prompt-form');
     const input = block.querySelector('.gen-template-prompt-input');
-    const originalLocationAssign = window.t_locationAssign;
-    const originalTrackingAppender = window.t_getTrackingAppendedURL;
-    window.t_getTrackingAppendedURL = (url) => Promise.resolve(url);
-
-    const redirectPromise = new Promise((resolve) => {
+    const redirectPromise = new Promise((resolve, reject) => {
       window.t_locationAssign = resolve;
+      setTimeout(() => reject(new Error('Submit did not redirect')), 2000);
     });
     input.value = 'A + B & #1';
     form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
     const routedUrl = new URL(await redirectPromise);
 
-    window.t_locationAssign = originalLocationAssign;
-    window.t_getTrackingAppendedURL = originalTrackingAppender;
     expect(routedUrl.pathname).to.equal('/neural-pixel-editor');
     expect(routedUrl.searchParams.get('entry')).to.equal('create-menu');
     expect(routedUrl.searchParams.get('prompt')).to.equal('A + B & #1');
+  });
+
+  it('routes to the untracked destination when tracking fails', async () => {
+    const block = await prepareBlock();
+    const form = block.querySelector('.gen-template-prompt-form');
+    window.t_getTrackingAppendedURL = () => Promise.reject(new Error('offline'));
+    const redirectPromise = new Promise((resolve, reject) => {
+      window.t_locationAssign = resolve;
+      setTimeout(() => reject(new Error('Submit did not redirect')), 2000);
+    });
+    block.querySelector('.gen-template-prompt-input').value = 'Poster';
+    form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
+    const routedUrl = new URL(await redirectPromise);
+
+    expect(routedUrl.pathname).to.equal('/neural-pixel-editor');
+    expect(routedUrl.searchParams.get('prompt')).to.equal('Poster');
   });
 
   it('hardcoded-templates builds columns from authored images without fetching', async () => {
@@ -238,7 +258,7 @@ describe('gen-template-marquee', () => {
 
     expect(fetchedUrl).to.equal('');
     const columns = [...block.querySelectorAll('.gen-template-column')];
-    expect(columns.map((c) => c.children.length)).to.deep.equal([2, 1, 2, 1]);
+    expect(columns.map((c) => c.children.length)).to.deep.equal([2, 1, 2, 0, 1]);
     const cards = [...block.querySelectorAll('.gen-template-card')];
     expect(cards.every((card) => card.classList.contains('gen-template-card-authored'))).to.be.true;
     expect(block.querySelector('.gen-template-card-portrait, .gen-template-card-square')).to.be.null;

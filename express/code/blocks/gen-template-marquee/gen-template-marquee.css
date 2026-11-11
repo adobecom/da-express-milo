@@ -255,7 +255,6 @@ main .section .gen-template-suggestions-label {
   background: linear-gradient(to right, var(--color-white) 26%, transparent);
 }
 
-
 .gen-template-suggestion {
   flex: none;
   box-sizing: border-box;
@@ -263,7 +262,7 @@ main .section .gen-template-suggestions-label {
   padding: var(--spacing-200) var(--spacing-300);
   border: 1px solid var(--color-gray-300-variant);
   border-radius: var(--corner-radius-80);
-  /* background: var(--color-gray-100); */
+  background: var(--color-gray-100);
   color: var(--Alias-content-typography-Heading);
   cursor: pointer;
   font-family: var(--body-font-family);
@@ -272,7 +271,6 @@ main .section .gen-template-suggestions-label {
   line-height: var(--spacing-325);
   white-space: nowrap;
   scroll-snap-align: start;
-  background: var(--color-gray-100);
 }
 
 .gen-template-suggestion:focus-visible {
