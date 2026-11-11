@@ -1,7 +1,10 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../express/code/scripts/utils.js';
-import martechLoadedCB from '../../express/code/scripts/instrument.js';
+import martechLoadedCB, {
+  trackPrintPdpClick,
+  trackPrintPdpView,
+} from '../../express/code/scripts/instrument.js';
 
 const TEST_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
 const TEST_PLATFORM = 'MacIntel';
@@ -219,5 +222,102 @@ describe('instrument mini-editor analytics', () => {
       propertyType: 'string',
     });
     expect(findProperty(custom, 'custom.ui.location')).to.equal(undefined);
+  });
+});
+
+describe('instrument print PDP analytics', () => {
+  const PDP_PATH = '/express/print/flyer/red-and-black-restaurant-opening-flyer';
+  let trackStub;
+  let fetchStub;
+  let originalPath;
+
+  beforeEach(() => {
+    originalPath = `${window.location.pathname}${window.location.search}`;
+    window.history.replaceState({}, '', PDP_PATH);
+    trackStub = sinon.stub();
+    // eslint-disable-next-line no-underscore-dangle
+    window._satellite = { track: trackStub };
+    fetchStub = sinon.stub(window, 'fetch').resolves({
+      ok: true,
+      json: async () => ({ country: 'US' }),
+    });
+    setMeta('print-batch', '2');
+  });
+
+  afterEach(() => {
+    window.history.replaceState({}, '', originalPath);
+    document.head.querySelectorAll('meta[name^="print-"]').forEach((meta) => meta.remove());
+    // eslint-disable-next-line no-underscore-dangle
+    delete window._satellite;
+    delete window.alloy_all;
+    fetchStub.restore();
+    sinon.restore();
+  });
+
+  it('fires view-acom-express-features with the print PDP properties', async () => {
+    await trackPrintPdpView({ productType: 'hoodie', templateId: 'tpl-123' });
+
+    expect(trackStub.calledOnce).to.be.true;
+    const [, payload] = trackStub.firstCall.args;
+    expect(payload.data.web.webInteraction.name).to.equal('view-acom-express-features');
+    const { sdm, event: { custom } } = getCorpnewPayload(payload);
+    expect(sdm.event).to.deep.include({ pagename: 'view-acom-express-features', type: 'render' });
+    expect(sdm.custom.link).to.deep.equal({
+      page_url: window.location.href,
+      page_type: 'print-product-detail',
+    });
+    expect(sdm.custom.ui).to.deep.equal({ location: 'print-pdp' });
+    expect(sdm.custom.print).to.deep.equal({
+      page_class: 'pdp',
+      category: 'flyer',
+      product_type: 'hoodie',
+      template_id: 'tpl-123',
+      batch: '2',
+    });
+    expect(findProperty(custom, 'custom.print.product_type').propertyValue).to.equal('hoodie');
+    expect(findProperty(custom, 'custom.ui.location').propertyValue).to.equal('print-pdp');
+    // eslint-disable-next-line no-underscore-dangle
+    expect(window.alloy_all.data._adobe_corpnew.digitalData.page.pageInfo.print)
+      .to.deep.equal(sdm.custom.print);
+  });
+
+  it('fires the click event with the link name and destination', async () => {
+    await trackPrintPdpClick({
+      linkName: 'customize-and-print',
+      linkUrl: 'https://express.example.com/edit',
+      productType: 'hoodie',
+      templateId: 'tpl-123',
+    });
+
+    const [, payload] = trackStub.firstCall.args;
+    expect(payload.documentUnloading).to.be.true;
+    const { sdm } = getCorpnewPayload(payload);
+    expect(sdm.event).to.deep.include({ pagename: 'click-acom-express-features', type: 'click' });
+    expect(sdm.custom.link).to.deep.include({
+      name: 'customize-and-print',
+      url: 'https://express.example.com/edit',
+      page_type: 'print-product-detail',
+    });
+  });
+
+  it('does not fire a click event without a link name', async () => {
+    await trackPrintPdpClick({ productType: 'hoodie' });
+    expect(trackStub.called).to.be.false;
+  });
+
+  it('sets category page dimensions in the data layer on print pages', async () => {
+    window.history.replaceState({}, '', '/express/print/flyer');
+    setMeta('print-subcategory', 'restaurant');
+    setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
+
+    await martechLoadedCB();
+
+    // eslint-disable-next-line no-underscore-dangle
+    expect(window.alloy_all.data._adobe_corpnew.digitalData.page.pageInfo.print).to.deep.equal({
+      page_class: 'category',
+      category: 'flyer',
+      subcategory: 'restaurant',
+      batch: '2',
+    });
   });
 });
