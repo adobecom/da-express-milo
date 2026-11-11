@@ -21,6 +21,8 @@ const RECALC_HOLD_MS = 200;
 const COLOR_SPACE_STRINGS = { srgb: 'srgb', 'display-p3': 'p3', 'adobe-rgb': 'adobeRgb' };
 // Figma Fill frames show the image pair at ~150% of its Fit size on mobile and tablet.
 const FILL_OVER_FIT = 1.5;
+const EXPORT_MAX_AREA = 16777216;
+const EXPORT_MAX_SIDE = 16384;
 
 const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
 
@@ -670,11 +672,21 @@ export default async function decorate(block) {
           const version = generation;
           const filename = `${sourceName}-contrast-${colorSpace}.png`;
           const { width, height } = view.canvas;
-          const output = createTag('canvas', { width: width * 2, height });
+          // Side-by-side doubles the width; stay within the strictest browser canvas
+          // limits (iOS Safari: 16,777,216 px area; 16,384 px per side).
+          const fit = Math.min(
+            1,
+            Math.sqrt(EXPORT_MAX_AREA / (2 * width * height)),
+            EXPORT_MAX_SIDE / (2 * width),
+            EXPORT_MAX_SIDE / height,
+          );
+          const pane = Math.floor(width * fit);
+          const paneHeight = Math.floor(height * fit);
+          const output = createTag('canvas', { width: pane * 2, height: paneHeight });
           const context = output.getContext('2d');
           if (!context) throw new Error('saveError');
-          context.drawImage(view.canvas, 0, 0);
-          context.drawImage(view.original, width, 0, width, height);
+          context.drawImage(view.canvas, 0, 0, pane, paneHeight);
+          context.drawImage(view.original, pane, 0, pane, paneHeight);
           const blob = await new Promise((resolve) => {
             output.toBlob(resolve, 'image/png');
           });
