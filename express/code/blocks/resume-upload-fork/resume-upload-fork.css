@@ -314,7 +314,6 @@
   }
 
   .resume-upload-fork-card-content {
-    gap: 6px;
     padding: 16px;
   }
 
@@ -378,7 +377,7 @@
   }
 
   .dialog-modal.resume-upload-fork-modal button.dialog-close {
-    top: -20px;
+    top: -15px;
     right: -20px;
   }
 
