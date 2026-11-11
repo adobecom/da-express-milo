@@ -10,8 +10,8 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
   --gen-template-card-ratio: 250 / 338;
   --gen-template-column-gap: var(--spacing-600);
   --gen-template-card-gap: 52px;
-  --gen-template-gallery-bottom-padding: 40px;
-  --gen-template-heading-line-height: 32px;
+  --gen-template-gallery-bottom-padding: var(--spacing-600);
+  --gen-template-heading-line-height: var(--spacing-500);
   --gen-template-body-subtle: rgb(0 0 0 / 64%);
   position: relative;
   box-sizing: border-box;
@@ -54,7 +54,7 @@ main .section:has(.gen-template-marquee) > div:has(> .gen-template-marquee) {
 .gen-template-marquee .gen-template-logo.icon {
   display: block;
   width: 124px;
-  height: 16px;
+  height: var(--spacing-300);
   margin: 0;
   padding: 0;
 }
@@ -164,7 +164,7 @@ main .section .gen-template-text > p {
   padding: 5px 1.2em var(--spacing-80);
   border: 2px solid var(--color-info-primary);
   border-radius: 18px;
-  background:  #292929;
+  background: var(--color-gray-800-variant);
   color: var(--color-white);
   cursor: pointer;
   font-family: var(--body-font-family);
@@ -176,18 +176,18 @@ main .section .gen-template-text > p {
 
 .gen-template-prompt-submit:hover {
   border-color: var(--color-info-primary-hover);
-  background: #131313
+  background: var(--color-gray-950);
 }
 
 .gen-template-prompt-submit:active {
   border-color: var(--color-info-primary-down);
-  background: #131313 
+  background: var(--color-gray-950);
 }
 
 .gen-template-prompt-submit:focus-visible {
   border-color: var(--color-info-primary-hover);
   outline: none;
-  background: #131313;
+  background: var(--color-gray-950);
   box-shadow: 0 0 0 2px var(--color-white),
     0 0 0 4px var(--color-info-accent-hover);
 }
@@ -200,8 +200,8 @@ main .section .gen-template-text > p {
 }
 
 .gen-template-prompt-submit .icon {
-  width: 18px;
-  height: 18px;
+  width: var(--spacing-325);
+  height: var(--spacing-325);
   margin: 0;
   filter: brightness(0) invert(1);
 }
@@ -270,9 +270,9 @@ main .section .gen-template-suggestions-label {
   font-size: var(--body-font-size-s);
   font-weight: var(--subheading-font-weight);
   line-height: var(--spacing-325);
-  white-space: nowrap; 
+  white-space: nowrap;
   scroll-snap-align: start;
-  background: #F8F8F8;
+  background: var(--color-gray-100);
 }
 
 .gen-template-suggestion:focus-visible {
@@ -284,7 +284,7 @@ main .section .gen-template-suggestions-label {
   display: flex;
   gap: var(--gen-template-column-gap);
   width: max-content;
-  margin-top: 40px;
+  margin-top: var(--spacing-600);
   /* Wider than the viewport by design: center on the middle column. */
   margin-left: 50%;
   translate: -50% 0;
@@ -411,7 +411,7 @@ main .section .gen-template-suggestions-label {
 
 @keyframes gen-template-gallery-gap-shrink {
   to {
-    gap: 24px;
+    gap: var(--spacing-400);
   }
 }
 
@@ -427,7 +427,7 @@ main .section .gen-template-suggestions-label {
     --gen-template-card-width: 291px;
     --gen-template-column-gap: 69px;
     --gen-template-card-gap: 100px;
-    --gen-template-gallery-bottom-padding: 64px;
+    --gen-template-gallery-bottom-padding: var(--spacing-800);
     padding-inline: var(--spacing-500);
   }
 
@@ -471,7 +471,7 @@ main .section .gen-template-suggestions-label {
     /* Exact desktop spacing from Figma frame 363:71100. */
     --gen-template-padding-top: var(--spacing-800);
     --gen-template-heading-line-height: 56px;
-    --gen-template-gallery-bottom-padding: 80px;
+    --gen-template-gallery-bottom-padding: var(--spacing-900);
   }
 
   .gen-template-marquee .gen-template-logo.icon {
