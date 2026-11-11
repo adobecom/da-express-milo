@@ -45,14 +45,15 @@ test.describe('ColorImgAccordionBlock Test Suite', () => {
         ));
         return new Set(swatchColors).size;
       }).toBeGreaterThan(1);
-      // Palette height scales with the photo width (see CSS: Figma height / Figma frame width).
+      // Photo is 16:9; palette height scales with the photo width
+      // (Figma palette height / Figma photo width at that frame).
       const breakpoints = [
-        { width: 375, imageHeight: 192.9375, paletteRatio: 48 / 327 },
-        { width: 899, imageHeight: 228.09375, paletteRatio: 56 / 340 },
-        { width: 1440, imageHeight: 375.75, paletteRatio: 88 / 548 },
-        { width: 1920, imageHeight: 443.25, paletteRatio: 102 / 788 },
+        { width: 375, paletteRatio: 48 / 343 },
+        { width: 899, paletteRatio: 56 / 405.5 },
+        { width: 1440, paletteRatio: 88 / 668 },
+        { width: 1920, paletteRatio: 102 / 788 },
       ];
-      for (const { width, imageHeight, paletteRatio } of breakpoints) {
+      for (const { width, paletteRatio } of breakpoints) {
         await page.setViewportSize({ width, height: 1000 });
         // Retry until post-resize layout settles (WebKit can report stale geometry under
         // load); read both rects in one task so nothing shifts between them.
@@ -61,7 +62,7 @@ test.describe('ColorImgAccordionBlock Test Suite', () => {
             [photo.querySelector('img'), photo.querySelector('.color-img-accordion-palette')]
               .map((el) => el.getBoundingClientRect().toJSON())
           ));
-          expect(Math.abs(imageBox.height - imageHeight)).toBeLessThan(0.1);
+          expect(Math.abs(imageBox.width / imageBox.height - 16 / 9)).toBeLessThan(0.01);
           expect(Math.abs(paletteBox.height - paletteBox.width * paletteRatio)).toBeLessThan(0.1);
           expect(Math.abs(imageBox.x - paletteBox.x)).toBeLessThan(0.1);
           expect(Math.abs(imageBox.width - paletteBox.width)).toBeLessThan(0.1);
@@ -78,6 +79,15 @@ test.describe('ColorImgAccordionBlock Test Suite', () => {
       await expect(block.buttons.nth(1)).toHaveAttribute('aria-expanded', 'true');
       await expect(block.panels.first()).toHaveAttribute('aria-hidden', 'false');
       await expect(block.panels.nth(1)).toHaveAttribute('aria-hidden', 'false');
+    });
+
+    await test.step('step-3b: Toggle with the keyboard', async () => {
+      const second = block.buttons.nth(1);
+      await second.focus();
+      await page.keyboard.press('Enter');
+      await expect(second).toHaveAttribute('aria-expanded', 'false');
+      await page.keyboard.press('Space');
+      await expect(second).toHaveAttribute('aria-expanded', 'true');
     });
 
     await test.step('step-4: SEO validation', async () => {

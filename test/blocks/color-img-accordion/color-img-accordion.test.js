@@ -106,4 +106,34 @@ describe('color-img-accordion', () => {
     expect(block.querySelector('.color-img-accordion-photo > picture')).to.exist;
     expect(block.querySelector('.color-img-accordion-palette')).to.not.exist;
   });
+
+  it('wraps each item button in an h3 heading', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const buttons = [...block.querySelectorAll('.color-img-accordion-button')];
+    expect(buttons.length).to.be.greaterThan(0);
+    buttons.forEach((button) => expect(button.parentElement.tagName).to.equal('H3'));
+  });
+
+  it('gives two blocks on one page distinct ids', async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/default.html' });
+    const first = document.querySelector('.color-img-accordion');
+    first.after(first.cloneNode(true));
+    const blocks = [...document.querySelectorAll('.color-img-accordion')];
+    await Promise.all(blocks.map((b) => decorate(b)));
+    const ids = [...document.querySelectorAll('[aria-controls]')].map((b) => b.getAttribute('aria-controls'));
+    expect(new Set(ids).size).to.equal(ids.length);
+    ids.forEach((id) => expect(document.getElementById(id)).to.exist);
+  });
+
+  it('leaves the palette unfilled when the image fails to load', async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/default.html' });
+    const block = document.querySelector('.color-img-accordion');
+    block.querySelector('img').src = '/does-not-exist.png';
+    block.querySelectorAll('source').forEach((s) => s.remove());
+    await decorate(block);
+    const img = block.querySelector('img');
+    await waitFor(() => img.complete);
+    await new Promise((resolve) => { setTimeout(resolve, 50); });
+    expect(block.querySelector('.color-img-accordion-palette').classList.contains('is-ready')).to.be.false;
+  });
 });

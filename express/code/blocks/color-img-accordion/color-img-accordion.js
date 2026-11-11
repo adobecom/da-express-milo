@@ -24,6 +24,8 @@ function buildAccordionItem(row, index, instanceId, openByDefault) {
   const buttonId = `color-img-accordion-button-${instanceId}-${index}`;
   const panelId = `color-img-accordion-panel-${instanceId}-${index}`;
   const item = createTag('div', { class: 'color-img-accordion-item' });
+  // APG accordion: each header button sits in a heading below the block's h2.
+  const header = createTag('h3', { class: 'color-img-accordion-header' });
   const button = createTag('button', {
     class: 'color-img-accordion-button',
     type: 'button',
@@ -51,7 +53,8 @@ function buildAccordionItem(row, index, instanceId, openByDefault) {
   panelContent.append(...contentCell.childNodes);
   panel.append(panelContent);
   button.append(titleElement, icon);
-  item.append(button, panel);
+  header.append(button);
+  item.append(header, panel);
 
   if (openByDefault) setExpanded(button, panel, true);
   return item;
@@ -87,8 +90,9 @@ async function extractPalette(image) {
   }
 }
 
+// Resolves true once the image has pixels, false if it failed to load.
 async function waitForImage(image) {
-  if (image.complete && image.naturalWidth) return;
+  if (image.complete) return image.naturalWidth > 0;
   // decode() settles even when Firefox restarts the request after the
   // <picture> is moved, in which case a 'load' listener can miss the event.
   try {
@@ -96,12 +100,14 @@ async function waitForImage(image) {
   } catch {
     await new Promise((resolve) => {
       image.addEventListener('load', resolve, { once: true });
+      image.addEventListener('error', resolve, { once: true });
     });
   }
+  return image.naturalWidth > 0;
 }
 
 async function setupPalette(image, palette, chips) {
-  await waitForImage(image);
+  if (!await waitForImage(image)) return;
   const colors = await extractPalette(image);
   if (!colors?.length) return;
   applyPaletteToChips(colors, chips);

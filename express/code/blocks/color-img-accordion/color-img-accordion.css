@@ -35,6 +35,7 @@
   font-weight: var(--heading-font-weight-extra);
   line-height: 1.04;
   overflow-wrap: break-word;
+  hyphens: none; /* global main h* hyphens:auto breaks "col-or" below 1200px */
 }
 
 .color-img-accordion .color-img-accordion-items {
@@ -45,6 +46,11 @@
   border-top: 1px solid var(--Palette-gray-200);
 }
 
+.color-img-accordion .color-img-accordion-header {
+  margin: 0;
+  font: inherit;
+}
+
 .color-img-accordion .color-img-accordion-button {
   display: flex;
   align-items: center;
@@ -52,7 +58,8 @@
   gap: var(--spacing-300);
   width: 100%;
   min-height: var(--spacing-800);
-  padding: var(--spacing-200) 0;
+  padding-block: var(--spacing-200);
+  padding-inline: 0 calc(var(--spacing-100) + var(--spacing-50)); /* Figma: 10px icon inset */
   border: 0;
   color: var(--Alias-content-typography-Title);
   background: transparent;
@@ -167,8 +174,8 @@
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   width: 100%;
-  /* 48px at the 327px mobile frame width. */
-  height: calc(100cqw * 48 / 327);
+  /* 48px at the 343px mobile photo width (375 frame − 2×16). */
+  height: calc(100cqw * 48 / 343);
   margin-top: -1px;
   overflow: hidden;
   background: var(--Palette-gray-200);
@@ -197,7 +204,7 @@
 
   .color-img-accordion .color-img-accordion-media {
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* Figma keeps the photo top-aligned with the heading */
     order: 2;
     align-self: stretch;
   }
@@ -226,8 +233,8 @@
   }
 
   .color-img-accordion .color-img-accordion-palette {
-    /* 56px at the 340px tablet frame width. */
-    height: calc(100cqw * 56 / 340);
+    /* 56px at the 405.5px tablet photo width (899 frame). */
+    height: calc(100cqw * 56 / 405.5);
   }
 }
 
@@ -248,8 +255,8 @@
   }
 
   .color-img-accordion .color-img-accordion-palette {
-    /* 88px at the 548px desktop frame width. */
-    height: calc(100cqw * 88 / 548);
+    /* 88px at the 668px desktop photo width (1440 frame). */
+    height: calc(100cqw * 88 / 668);
   }
 }
 
