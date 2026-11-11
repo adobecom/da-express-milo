@@ -886,6 +886,16 @@ html.icc-scroll-lock body {
 }
 
 @media (min-width: 900px) {
+  /* The workspace keeps a 570px floor; the comparison surface absorbs the extra height so
+     resize()'s hugged block-size acts only as a flex basis. */
+  .color-image-contrast-checker .icc-workspace {
+    min-block-size: 570px;
+  }
+
+  .color-image-contrast-checker .icc-workspace > .icc-comparison-row {
+    flex-grow: 1;
+  }
+
   .color-image-contrast-checker .icc-comparison-row {
     --icc-comparison-padding-block: var(--spacing-300);
     --icc-hug-height: 1;
@@ -924,12 +934,12 @@ html.icc-scroll-lock body {
     padding: var(--spacing-300);
   }
 
-  /* Figma zoom-to-fill (desktop): fixed 64px toolbar gutter. */
+  /* Figma zoom-to-fill (desktop, node 2682-30062): no surface padding; images start at the
+     surface's inline-start edge and run under the toolbar. */
   .color-image-contrast-checker .icc-comparison-row.is-fill {
     --icc-fill-beside-toolbar: 0;
 
-    padding-block: 0;
-    padding-inline: var(--spacing-800) 0;
+    padding: 0;
   }
 }
 

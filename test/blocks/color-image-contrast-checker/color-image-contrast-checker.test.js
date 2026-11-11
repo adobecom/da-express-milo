@@ -1002,7 +1002,12 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         if (width >= 600) ratio = 787 / 513;
         if (width >= 900) ratio = 881 / 516;
         if (width >= 900) {
-          expect(surfaceBox.height).to.be.at.most(surfaceBox.width / ratio + 0.1);
+          // Desktop hugs below the aspect cap, but the workspace never drops under 570px.
+          const workspaceHeight = workspace.getBoundingClientRect().height;
+          expect(workspaceHeight).to.be.at.least(570 - 0.5);
+          if (workspaceHeight > 570 + 0.5) {
+            expect(surfaceBox.height).to.be.at.most(surfaceBox.width / ratio + 0.1);
+          }
         } else {
           expect(surfaceBox.height).to.be.closeTo(surfaceBox.width / ratio, 0.1);
         }
@@ -1037,7 +1042,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
           expect(image.left >= toolbar.right + 8 - 0.1 || image.top >= toolbar.bottom)
             .to.equal(true);
           const maxHeight = surfaceBox.width / ratio;
-          await waitFor(() => surface.getBoundingClientRect().height < maxHeight - 1);
+          await waitFor(() => parseFloat(surface.style.blockSize) < maxHeight - 1);
         }
         expect(zoomBox.width).to.equal(width >= 900 ? 40 : 32);
         expect(zoomBox.height).to.equal(width >= 900 ? 68 : 60);
@@ -1089,23 +1094,30 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(getComputedStyle(document.body).position).not.to.equal('fixed');
   });
 
-  it('hugs short images on desktop above the toolbar floor and caps tall ones', async () => {
+  it('keeps a 570px desktop workspace floor that the surface fills for short images', async () => {
     const viewport = { width: window.innerWidth, height: window.innerHeight };
     try {
       await setViewport({ width: 1440, height: 1000 });
       await setup();
+      const workspace = block.querySelector('.icc-workspace');
       const surface = block.querySelector('.icc-comparison-row');
-      const zoom = block.querySelector('.icc-zoom');
+      let previous = '';
       for (const [width, height] of [[1000, 100], [100, 1000]]) {
         await upload(await imageFile(width, height));
-        const cap = () => surface.getBoundingClientRect().width / (881 / 516);
-        await waitFor(() => (width > height
-          ? surface.getBoundingClientRect().height < cap() - 1
-          : Math.abs(surface.getBoundingClientRect().height - cap()) < 0.5));
-        const floor = zoom.offsetHeight + 2 * zoom.offsetTop;
-        expect(surface.getBoundingClientRect().height).to.be.at.least(floor - 0.5);
-        expect(surface.getBoundingClientRect().height).to.be.at.most(cap() + 0.1);
-        if (width > height) expect(surface.getBoundingClientRect().height).to.be.below(240);
+        const stale = previous;
+        await waitFor(() => surface.style.blockSize && surface.style.blockSize !== stale);
+        previous = surface.style.blockSize;
+        const basis = parseFloat(surface.style.blockSize);
+        const cap = surface.getBoundingClientRect().width / (881 / 516);
+        expect(basis).to.be.at.most(cap + 0.1);
+        expect(workspace.getBoundingClientRect().height).to.be.at.least(570 - 0.5);
+        // The hugged block-size is only a flex basis; the surface grows to the floor.
+        expect(surface.getBoundingClientRect().height).to.be.at.least(basis - 0.5);
+        if (width > height) {
+          expect(basis).to.be.below(240);
+          expect(workspace.getBoundingClientRect().height).to.be.closeTo(570, 0.5);
+          expect(surface.getBoundingClientRect().height).to.be.above(basis + 100);
+        }
       }
     } finally {
       await setViewport(viewport);
@@ -1217,8 +1229,10 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
               expect(image.height).to.equal(Math.floor(source.height * scale));
               expect(image.height).to.be.at.least(comparisonSlot(host).height - 1);
             }
-            // Desktop Fill keeps a toolbar gutter; mobile/tablet Fill runs under the toolbar.
+            // Desktop Fill has no surface padding: the scroller starts at the surface edge.
             if (width >= 900) {
+              expect(clip.left).to.equal(surface.getBoundingClientRect().left);
+            } else {
               for (const frame of frames) {
                 const image = frame.firstElementChild.getBoundingClientRect();
                 expect(Math.max(image.left, clip.left)).to.be.at.least(toolbar.right + 8 - 0.1);
@@ -1340,16 +1354,19 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
                 && Math.min(image.right, clip.right) > toolbar.left
                 && Math.max(image.top, clip.top) < toolbar.bottom
                 && Math.min(image.bottom, clip.bottom) > toolbar.top;
-              expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
-                .to.equal(false);
+              // Desktop Fill has no surface padding and runs under the toolbar (Figma).
+              if (mode === 'fit' || width < 900) {
+                expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
+                  .to.equal(false);
+              }
               expect(getComputedStyle(pane).overflow).to.equal('visible');
               if (surface.style.paddingInlineStart) {
                 expect(image.left - toolbar.right).to.be.at.least(8 - 0.1);
                 reservations += 1;
               }
             }
-            // Fill sits beside the toolbar (JS gutter below 900px, CSS 64px on desktop) and
-            // the scroller meets the surface's top, end and bottom edges.
+            // Fill sits beside the toolbar below 900px (JS gutter) and starts at the surface
+            // edge on desktop; the scroller meets the surface's top, end and bottom edges.
             if (mode === 'fill') {
               expect(surface.style.paddingInlineStart !== '').to.equal(width < 900);
               const edges = surface.getBoundingClientRect();
