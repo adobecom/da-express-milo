@@ -1572,8 +1572,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding: var(--spacing-600);
   }
 
-  main:has(.section.ax-max-entitled) .ax-columns.highlight.dark.width-2-columns .column-picture img {
-    object-position: left;
+  main:has(.section.ax-max-entitled) .ax-columns.highlight.dark.width-2-columns > div {
+    padding: 0;
   }
 
   .ax-columns.fullsize .column.hero-animation-overlay {
