@@ -200,11 +200,11 @@ describe('createCheckerRenderer', () => {
 
     await renderer.render();
 
-    const backgroundField = container.querySelectorAll('.ax-color-input__field')[1];
+    const backgroundSwatch = container.querySelectorAll('.ax-color-input__swatch')[1];
     const tintInputs = [...container.querySelectorAll('.cc-tint-value-input')];
     const sliders = [...container.querySelectorAll('color-channel-slider')];
 
-    backgroundField.click();
+    backgroundSwatch.click();
 
     const editor = await waitForElement('color-edit');
     expect(editor).to.exist;
@@ -246,8 +246,8 @@ describe('createCheckerRenderer', () => {
 
     await renderer.render();
 
-    const backgroundField = container.querySelectorAll('.ax-color-input__field')[1];
-    backgroundField.click();
+    const backgroundSwatch = container.querySelectorAll('.ax-color-input__swatch')[1];
+    backgroundSwatch.click();
 
     const editor = await waitForElement('color-edit');
     expect(editor).to.exist;

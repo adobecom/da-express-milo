@@ -7,8 +7,11 @@ import {
   isMobileOrTabletViewport,
   isMobileViewport,
   isValidHex,
+  normalizeHex,
 } from '../../../../scripts/color-shared/utils/utilities.js';
 import { createColorEditAdapter } from '../../../../scripts/color-shared/adapters/litComponentAdapters.js';
+
+const FULL_HEX = /^#?[0-9a-f]{6}$/i;
 
 function labelToId(labelText) {
   return `color-input-${labelText.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')}`;
@@ -69,8 +72,10 @@ export function createColorInput(config) {
 
   const inputId = label ? labelToId(label) : `color-input-${Date.now()}`;
 
+  const labelId = `${inputId}-label`;
   if (label) {
     const labelEl = createTag('label', {
+      id: labelId,
       class: 'ax-color-input__label',
       for: inputId,
     }, label);
@@ -79,10 +84,13 @@ export function createColorInput(config) {
 
   const field = createTag('div', { class: 'ax-color-input__field' });
 
-  const swatch = createTag('div', {
+  const swatch = createTag('button', {
+    type: 'button',
     class: 'ax-color-input__swatch',
     style: `background: ${value}`,
-    'aria-hidden': 'true',
+    'aria-haspopup': 'dialog',
+    'aria-expanded': 'false',
+    ...(label ? { 'aria-labelledby': labelId } : { 'aria-label': ariaLabel }),
   });
 
   const input = createTag('input', {
@@ -92,7 +100,8 @@ export function createColorInput(config) {
     class: 'ax-color-input__input',
     value,
     maxlength: '7',
-    'aria-haspopup': 'dialog',
+    spellcheck: 'false',
+    autocomplete: 'off',
     ...(label ? {} : { 'aria-label': ariaLabel }),
   });
 
@@ -225,6 +234,7 @@ export function createColorInput(config) {
     if (activeEditor) {
       activeEditor = null;
     }
+    swatch.setAttribute('aria-expanded', 'false');
     if (restoreFocus && hadOpenUI) {
       input.focus();
     }
@@ -330,6 +340,7 @@ export function createColorInput(config) {
 
     const requestId = beginOpenRequest();
     claimActiveColorInput(controllerRef);
+    swatch.setAttribute('aria-expanded', 'true');
 
     try {
       const colorEdit = createColorEdit();
@@ -343,6 +354,7 @@ export function createColorInput(config) {
     } catch (error) {
       if (isCurrentOpenRequest(requestId)) {
         pendingOpen = false;
+        swatch.setAttribute('aria-expanded', 'false');
         releaseActiveColorInput(controllerRef);
       }
       throw error;
@@ -353,23 +365,50 @@ export function createColorInput(config) {
     closeActiveColorInputExcept(controllerRef);
   }, { signal, capture: true });
   swatch.addEventListener('click', openColorEdit, { signal });
-  input.addEventListener('input', () => {
-    onInput?.({ value: input.value });
+
+  // A focused value already fills maxlength, so select it or typing is blocked.
+  // The click that focuses the field would otherwise collapse that selection.
+  let selectOnMouseUp = false;
+  input.addEventListener('mousedown', () => {
+    selectOnMouseUp = document.activeElement !== input;
   }, { signal });
-  input.addEventListener('change', () => {
-    const trimmed = input.value.trim();
-    const hex = trimmed && !trimmed.startsWith('#') ? `#${trimmed}` : trimmed;
-    if (isValidHex(hex)) {
-      input.value = hex;
-      commitCallback?.({ value: hex });
-    } else {
-      input.value = lastValidHex;
+  input.addEventListener('focus', () => input.select(), { signal });
+  input.addEventListener('mouseup', (e) => {
+    if (!selectOnMouseUp) return;
+    selectOnMouseUp = false;
+    e.preventDefault();
+    input.select();
+  }, { signal });
+
+  // Live-preview only complete values; '#FFF' mid-way through '#FFF000' is not intent.
+  input.addEventListener('input', () => {
+    if (FULL_HEX.test(input.value.trim())) {
+      onInput?.({ value: normalizeHex(input.value) });
     }
   }, { signal });
+
+  function commitTypedValue() {
+    const hex = normalizeHex(input.value);
+    if (!hex) {
+      input.value = lastValidHex;
+      return;
+    }
+    syncEditorHexValue(hex);
+    if (hex !== editorOpenValue) {
+      editorOpenValue = hex;
+      commitCallback?.({ value: hex });
+    }
+  }
+
+  input.addEventListener('change', commitTypedValue, { signal });
   input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      openColorEdit();
+      commitTypedValue();
+      input.select();
+    } else if (e.key === 'Escape' && input.value !== lastValidHex) {
+      input.value = lastValidHex;
+      input.select();
     }
   }, { signal });
 
@@ -377,7 +416,7 @@ export function createColorInput(config) {
     element: theme,
 
     getValue() {
-      return input.value;
+      return lastValidHex;
     },
 
     setValue(hex, { resetCommitBaseline = !syncingFromEditor } = {}) {

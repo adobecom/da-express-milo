@@ -181,36 +181,76 @@ describe('createColorInput', () => {
     expect(await waitForElement('color-edit')).to.exist;
   });
 
-  it('opens the picker on Enter from the text input', async () => {
-    const input = createColorInput({ label: 'Foreground color', value: '#FFFFFF' });
-    document.body.appendChild(input.element);
-    input.element.querySelector('.ax-color-input__input')
-      .dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-    expect(await waitForElement('color-edit')).to.exist;
-  });
-
-  it('allows direct HEX entry and restores the last valid value on invalid change', () => {
-    const onInput = sinon.spy();
+  it('commits on Enter without opening the picker', async () => {
     const onChange = sinon.spy();
-    const input = createColorInput({
-      label: 'Foreground color', value: '#FFFFFF', onInput, onChange,
-    });
+    const input = createColorInput({ label: 'Foreground color', value: '#FFFFFF', onChange });
     document.body.appendChild(input.element);
     const textInput = input.element.querySelector('.ax-color-input__input');
+    textInput.value = 'ff0000';
+    textInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await waitFrames(3);
+    expect(document.body.querySelector('color-edit')).to.be.null;
+    expect(onChange.lastCall.args[0]).to.deep.equal({ value: '#FF0000' });
+    expect(textInput.value).to.equal('#FF0000');
+  });
+
+  it('opens the picker from an accessible dot button', async () => {
+    const input = createColorInput({ label: 'Foreground color', value: '#FFFFFF' });
+    document.body.appendChild(input.element);
+    const swatch = input.element.querySelector('.ax-color-input__swatch');
+    const labelEl = input.element.querySelector('.ax-color-input__label');
+    expect(swatch.tagName).to.equal('BUTTON');
+    expect(swatch.getAttribute('type')).to.equal('button');
+    expect(swatch.getAttribute('aria-labelledby')).to.equal(labelEl.id);
+    expect(swatch.getAttribute('aria-expanded')).to.equal('false');
+    swatch.click();
+    await waitForElement('color-edit');
+    expect(swatch.getAttribute('aria-expanded')).to.equal('true');
+  });
+
+  it('previews only complete hex values while typing', () => {
+    const onInput = sinon.spy();
+    const input = createColorInput({ label: 'Foreground color', value: '#000000', onInput });
+    document.body.appendChild(input.element);
+    const textInput = input.element.querySelector('.ax-color-input__input');
+    ['#F', '#FF', '#FFF', '#FFF0', '#FFF00'].forEach((partial) => {
+      textInput.value = partial;
+      textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    expect(onInput.called).to.be.false;
+    textInput.value = 'fff000';
+    textInput.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(onInput.lastCall.args[0]).to.deep.equal({ value: '#FFF000' });
+  });
+
+  it('normalizes a committed value, syncs the swatch, and reverts invalid input to it', () => {
+    const onChange = sinon.spy();
+    const input = createColorInput({ label: 'Foreground color', value: '#FFFFFF', onChange });
+    document.body.appendChild(input.element);
+    const textInput = input.element.querySelector('.ax-color-input__input');
+    const swatch = input.element.querySelector('.ax-color-input__swatch');
 
     expect(textInput.hasAttribute('readonly')).to.be.false;
 
-    textInput.value = '#123456';
-    textInput.dispatchEvent(new Event('input', { bubbles: true }));
-    expect(onInput.lastCall.args[0]).to.deep.equal({ value: '#123456' });
-
+    textInput.value = 'abc';
     textInput.dispatchEvent(new Event('change', { bubbles: true }));
-    expect(onChange.lastCall.args[0]).to.deep.equal({ value: '#123456' });
+    expect(onChange.lastCall.args[0]).to.deep.equal({ value: '#AABBCC' });
+    expect(textInput.value).to.equal('#AABBCC');
+    expect(swatch.style.background).to.equal('rgb(170, 187, 204)');
 
     textInput.value = 'zzz';
     textInput.dispatchEvent(new Event('change', { bubbles: true }));
     expect(onChange.callCount).to.equal(1);
-    expect(input.getValue()).to.equal('#FFFFFF');
+    expect(textInput.value).to.equal('#AABBCC');
+    expect(input.getValue()).to.equal('#AABBCC');
+  });
+
+  it('selects the value on focus so typing replaces it', () => {
+    const input = createColorInput({ label: 'Foreground color', value: '#FFFFFF' });
+    document.body.appendChild(input.element);
+    const textInput = input.element.querySelector('.ax-color-input__input');
+    textInput.focus();
+    expect([textInput.selectionStart, textInput.selectionEnd]).to.deep.equal([0, 7]);
   });
 
   // Fix test MWPW-192264
