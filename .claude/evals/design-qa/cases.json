@@ -1,0 +1,567 @@
+{
+  "schemaVersion": 1,
+  "generatedFrom": {
+    "jiraUser": "web06240",
+    "ticketScope": "2026 completed tickets assigned to all42238 with substantive design feedback",
+    "method": "Git history aligned to Jira design-comment timestamps; inferred boundaries carry confidence and rationale"
+  },
+  "cases": [
+    {
+      "id": "mwpw-203933-jp-typography",
+      "ticket": "MWPW-203933",
+      "title": "JP Discover page font styling",
+      "implementationBranch": "jp-discover-font-styling",
+      "initial": {
+        "commit": "16018b5f54c7eb69b023f2100ede5262acc037e2",
+        "timestamp": "2026-08-13T10:16:39-07:00",
+        "confidence": "high",
+        "rationale": "Last ticket-specific stylesheet commit before the first design QA comment on 2026-08-18."
+      },
+      "final": {
+        "commit": "d65004b5d99854e6a62ed9d924a34856c305bd79",
+        "timestamp": "2026-08-18T11:32:52-07:00",
+        "confidence": "medium",
+        "rationale": "Last stylesheet commit in the branch after Julia confirmed the headline correction; the PR later merged as #698."
+      },
+      "checkpoints": [
+        {
+          "commit": "62cc895385de4390a3c466dc05f8a2190f81b7c5",
+          "label": "headline correction visible before approval comment"
+        }
+      ],
+      "scope": {
+        "paths": ["express/code/styles/font-styling-jp.css"],
+        "candidateUrl": "https://jp-discover-font-styling--da-express-milo--adobecom.aem.live/drafts/echen/jp-font-page",
+        "browsers": ["chromium"],
+        "locales": ["jp"]
+      },
+      "figma": [
+        {
+          "fileKey": "7FqFRFff85hPkBNpU2WFrc",
+          "nodeId": "7101:70835",
+          "label": "Discover page reference",
+          "round": 1
+        }
+      ],
+      "feedbackRounds": [
+        {
+          "round": 1,
+          "created": "2026-08-18T15:49:51.287Z",
+          "summary": "Desktop hero H1 must be 36px and tablet/mobile 28px; verify that the implementation uses the latest Discover Figma."
+        },
+        {
+          "round": 2,
+          "created": "2026-08-18T18:25:33.779Z",
+          "summary": "Headline fix accepted, but JP semantic heading hierarchy still requires review by a Japanese-language owner."
+        }
+      ],
+      "oracle": {
+        "findings": [
+          {
+            "id": "jp-hero-type-tiers",
+            "round": 1,
+            "category": "typography",
+            "severity": "high",
+            "viewport": "desktop/tablet/mobile",
+            "ownership": "implementation",
+            "description": "Hero H1 is 36px on desktop and 28px on tablet/mobile.",
+            "keywords": ["h1", "36px", "28px", "desktop", "tablet", "mobile"]
+          },
+          {
+            "id": "jp-source-version",
+            "round": 1,
+            "category": "source-of-truth",
+            "severity": "high",
+            "ownership": "design",
+            "description": "The reviewed page must be tied to the current exact Discover Figma node rather than an older page design.",
+            "keywords": ["latest", "figma", "source", "version", "discover"]
+          },
+          {
+            "id": "jp-semantic-hierarchy",
+            "round": 2,
+            "category": "localization",
+            "severity": "medium",
+            "ownership": "localization",
+            "description": "A Japanese-language owner must validate semantic headline hierarchy before final approval.",
+            "keywords": ["japanese", "jp", "hierarchy", "headline", "reviewer"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "mwpw-192501-how-to-padding",
+      "ticket": "MWPW-192501",
+      "title": "Contrast Checker how-to block padding",
+      "implementationBranch": "how-to-inline-start-fix",
+      "initial": {
+        "commit": "a4e855c72872d1e074d2e533d417a1ab021fbc4e",
+        "timestamp": "2026-05-28T09:50:59-05:00",
+        "confidence": "high",
+        "rationale": "Last branch commit immediately before the developer posted the review URL."
+      },
+      "final": {
+        "commit": "187dc4014dac5faf09f35af90398737f994a24b2",
+        "timestamp": "2026-06-03T14:19:02-05:00",
+        "confidence": "medium",
+        "rationale": "Last branch commit after both Julia comments; no explicit final Julia approval was recorded on the ticket."
+      },
+      "checkpoints": [
+        {
+          "commit": "8d6ce7263634a55810502a0415f656e0257e6170",
+          "label": "first response to mobile padding feedback"
+        }
+      ],
+      "scope": {
+        "paths": ["express/code/blocks/how-to-v2/how-to-v2.css"],
+        "candidateUrl": "https://how-to-inline-start-fix--express-color--adobecom.aem.page/create/color-contrast-analyzer",
+        "browsers": ["chromium"],
+        "locales": ["en"]
+      },
+      "figma": [],
+      "referenceGap": "No Figma node was attached to the Jira description or Julia comments; screenshots and explicit measurements are the historical oracle.",
+      "feedbackRounds": [
+        {
+          "round": 1,
+          "created": "2026-06-03T18:14:35.603Z",
+          "summary": "Mobile headline requires 16px left and right padding."
+        },
+        {
+          "round": 2,
+          "created": "2026-06-03T18:59:40.636Z",
+          "summary": "Remove the line word-break occurring inside the word color."
+        }
+      ],
+      "oracle": {
+        "findings": [
+          {
+            "id": "howto-mobile-inline-padding",
+            "round": 1,
+            "category": "spacing",
+            "severity": "high",
+            "viewport": "mobile",
+            "ownership": "implementation",
+            "description": "Headline has 16px inline padding on mobile.",
+            "keywords": ["headline", "mobile", "16px", "left", "right", "padding"]
+          },
+          {
+            "id": "howto-word-break",
+            "round": 2,
+            "category": "typography",
+            "severity": "medium",
+            "viewport": "mobile",
+            "ownership": "implementation",
+            "description": "The word color does not break or hyphenate across lines.",
+            "keywords": ["color", "word", "break", "hyphen", "wrap"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "mwpw-199897-blog-category",
+      "ticket": "MWPW-199897",
+      "title": "Blog category master authoring document",
+      "implementationBranch": "blog-page-integration",
+      "historyMode": "squash",
+      "initial": {
+        "commit": "e3d81939e31b3613a3164becd3cf6d7dbb489aca",
+        "timestamp": "2026-05-20T10:05:37-05:00",
+        "confidence": "medium",
+        "rationale": "Tip of the historical integration branch that supplied the page later submitted for design QA. Authoring continued after this code snapshot."
+      },
+      "final": {
+        "commit": "d7af6686ecb5e3f029270502f2a163f807ec0a1b",
+        "timestamp": "2026-09-03T12:28:50-07:00",
+        "confidence": "medium",
+        "rationale": "PR #644 was linked on the ticket and the ticket was released after the shared blog fixes."
+      },
+      "checkpoints": [
+        {
+          "commit": "6f2c2a815476554be1b8e8f8aed1f0c28c0ce129",
+          "label": "first consolidated blog fix"
+        },
+        {
+          "commit": "75ad7c7cfa5ac224618c37ec36b4ce1c8c1c54b2",
+          "label": "post-review responsive styling checkpoint"
+        }
+      ],
+      "scope": {
+        "paths": [
+          "express/code/blocks/blog-feature-marquee",
+          "express/code/blocks/blog-posts-v2"
+        ],
+        "candidateUrl": "https://www.stage.adobe.com/express/learn/blog/tags",
+        "browsers": ["chromium"],
+        "locales": ["en"]
+      },
+      "figma": [
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "2990:14112", "label": "Ticket-level category page", "round": 0},
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "2897:17297", "label": "Hero image crop", "round": 1},
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "2990:12441", "label": "Mobile hero spacing", "round": 1},
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "4973:5598", "label": "Tablet hero spacing", "round": 1},
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "4391:5899", "label": "Blog grid and load more", "round": 1},
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "4973:5267", "label": "Tablet card grid", "round": 1},
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "2895:9619", "label": "Explore more heading", "round": 1},
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "2873:8970", "label": "Bottom banner", "round": 1}
+      ],
+      "feedbackRounds": [
+        {
+          "round": 1,
+          "created": "2026-07-06T19:39:33.054Z",
+          "summary": "Ten design issues across the hero, responsive grid, missing/extra content, widescreen background, load-more behavior and heading alignment."
+        }
+      ],
+      "oracle": {
+        "findings": [
+          {"id": "blogcat-hero-crop", "round": 1, "category": "visual", "severity": "medium", "viewport": "all", "ownership": "implementation", "description": "Hero featured image is positioned lower so the top is not incorrectly cropped.", "keywords": ["hero", "image", "crop", "top", "position"]},
+          {"id": "blogcat-mobile-hero-space", "round": 1, "category": "spacing", "severity": "high", "viewport": "mobile", "ownership": "authoring-or-implementation", "description": "Remove extra whitespace above the hero on mobile.", "keywords": ["mobile", "hero", "space", "whitespace", "above"]},
+          {"id": "blogcat-tablet-hero-gap", "round": 1, "category": "spacing", "severity": "high", "viewport": "tablet", "ownership": "implementation", "description": "Text-to-featured-card spacing is 16px on tablet.", "keywords": ["tablet", "text", "featured", "card", "16px", "gap"]},
+          {"id": "blogcat-grid-title", "round": 1, "category": "content-authoring", "severity": "high", "ownership": "authoring", "description": "Blog grid includes the Figma title at the top of the block.", "keywords": ["grid", "title", "heading", "missing", "top"]},
+          {"id": "blogcat-wide-background", "round": 1, "category": "responsive", "severity": "high", "viewport": "widescreen", "ownership": "implementation", "description": "Gray background spans the viewport while cards remain centered.", "keywords": ["widescreen", "background", "full", "width", "cards", "center"]},
+          {"id": "blogcat-floating-cta", "round": 1, "category": "content-authoring", "severity": "medium", "ownership": "authoring", "description": "Unexpected floating CTA is absent from blog category pages.", "keywords": ["floating", "cta", "extra", "remove"]},
+          {"id": "blogcat-load-more", "round": 1, "category": "content-authoring", "severity": "high", "ownership": "implementation-or-authoring", "description": "Load More appears after the first four rows and reveals the next set of articles.", "keywords": ["load", "more", "four", "rows", "articles", "missing"]},
+          {"id": "blogcat-tablet-columns", "round": 1, "category": "responsive", "severity": "high", "viewport": "tablet below 897px", "ownership": "implementation", "description": "Card grid changes from three to two columns below 897px with 297px minimum cards.", "keywords": ["897px", "tablet", "three", "two", "columns", "297px"]},
+          {"id": "blogcat-explore-heading", "round": 1, "category": "spacing", "severity": "medium", "ownership": "implementation-or-authoring", "description": "Explore more heading is center aligned.", "keywords": ["explore", "heading", "center", "align"]},
+          {"id": "blogcat-banner-heading", "round": 1, "category": "spacing", "severity": "medium", "ownership": "implementation-or-authoring", "description": "Bottom CTA banner heading is center aligned.", "keywords": ["bottom", "banner", "heading", "center", "align"]}
+        ]
+      }
+    },
+    {
+      "id": "mwpw-200020-blog-home",
+      "ticket": "MWPW-200020",
+      "title": "Blog homepage master document",
+      "implementationBranch": "mwpw-200020-blog-bugs",
+      "historyMode": "squash",
+      "initial": {
+        "commit": "e3d81939e31b3613a3164becd3cf6d7dbb489aca",
+        "timestamp": "2026-05-20T10:05:37-05:00",
+        "confidence": "medium",
+        "rationale": "Historical integration snapshot underlying the authored page before Julia's first consolidated feedback."
+      },
+      "final": {
+        "commit": "d7af6686ecb5e3f029270502f2a163f807ec0a1b",
+        "timestamp": "2026-09-03T12:28:50-07:00",
+        "confidence": "high",
+        "rationale": "Ticket-linked PR #644 merge commit; Julia accepted the development fixes before release."
+      },
+      "checkpoints": [
+        {"commit": "6f2c2a815476554be1b8e8f8aed1f0c28c0ce129", "label": "initial consolidated fix"},
+        {"commit": "75ad7c7cfa5ac224618c37ec36b4ce1c8c1c54b2", "label": "responsive review checkpoint"},
+        {"commit": "03b4bb45c44d7a3ff39e4cd252f644379c554b3d", "label": "image and header correction"}
+      ],
+      "scope": {
+        "paths": [
+          "express/code/blocks/blog-feature-marquee",
+          "express/code/blocks/blog-posts-v2"
+        ],
+        "candidateUrl": "https://mwpw-200020-blog-bugs--da-express-milo--adobecom.aem.page/drafts/blog/blog-main?martech=off",
+        "baselineUrl": "https://main--da-express-milo--adobecom.aem.page/drafts/blog/blog-main?martech=off",
+        "browsers": ["chromium"],
+        "locales": ["en"]
+      },
+      "figma": [
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "2540:3615", "label": "Ticket-level blog homepage", "round": 0},
+        {"fileKey": "DuASlS323ApSTmtzuZCcih", "nodeId": "4952:7680", "label": "Mobile three-up cards", "round": 1},
+        {"fileKey": "oEKwLBikshx4BgPmhtm7K9", "nodeId": "75931:3347", "label": "Express type scale", "round": 1}
+      ],
+      "feedbackRounds": [
+        {
+          "round": 1,
+          "created": "2026-07-13T21:18:29.855Z",
+          "summary": "Seven findings covering card background, desktop padding, tablet gaps, mobile alignment/type, tablet hero spacing and widescreen width."
+        },
+        {
+          "round": 2,
+          "created": "2026-09-02T21:05:46.649Z",
+          "summary": "Development fixes accepted; first Small Business article image remained broken and was classified as likely authoring."
+        }
+      ],
+      "oracle": {
+        "findings": [
+          {"id": "bloghome-white-background", "round": 1, "category": "visual", "severity": "high", "ownership": "authoring", "description": "Three-up blog sections use a white background rather than gray.", "keywords": ["three", "card", "white", "background", "gray"]},
+          {"id": "bloghome-desktop-top-padding", "round": 1, "category": "spacing", "severity": "medium", "viewport": "desktop", "ownership": "implementation-or-authoring", "description": "Three-up sections use 80px top padding on desktop.", "keywords": ["desktop", "top", "padding", "80px"]},
+          {"id": "bloghome-tablet-card-gap", "round": 1, "category": "spacing", "severity": "high", "viewport": "tablet", "ownership": "implementation", "description": "Three-up card spacing is 16px on tablet.", "keywords": ["tablet", "card", "gap", "16px"]},
+          {"id": "bloghome-mobile-text-alignment", "round": 1, "category": "spacing", "severity": "high", "viewport": "mobile", "ownership": "implementation", "description": "Mobile card text alignment matches the Figma frame.", "keywords": ["mobile", "text", "alignment", "figma"]},
+          {"id": "bloghome-responsive-heading", "round": 1, "category": "typography", "severity": "high", "viewport": "mobile/tablet", "ownership": "implementation", "description": "Three-up card headlines use the 24px type-scale value on mobile and tablet.", "keywords": ["headline", "24px", "mobile", "tablet", "type", "scale"]},
+          {"id": "bloghome-tablet-hero-gap", "round": 1, "category": "spacing", "severity": "high", "viewport": "tablet", "ownership": "implementation", "description": "Hero copy-to-featured-article spacing is 16px on tablet.", "keywords": ["tablet", "hero", "copy", "featured", "16px", "spacing"]},
+          {"id": "bloghome-widescreen-width", "round": 1, "category": "responsive", "severity": "high", "viewport": "widescreen", "ownership": "implementation", "description": "Three-up cards expand inside a 1600px maximum container.", "keywords": ["widescreen", "1600px", "maximum", "container", "cards"]},
+          {"id": "bloghome-broken-image", "round": 2, "category": "content-authoring", "severity": "high", "ownership": "authoring", "description": "The first Small Business article image loads successfully.", "keywords": ["small", "business", "first", "article", "image", "broken"]}
+        ]
+      }
+    },
+    {
+      "id": "mwpw-202514-how-to-cards",
+      "ticket": "MWPW-202514",
+      "title": "How To Cards responsive width",
+      "implementationBranch": "how-to-cards-w-fix",
+      "initial": {
+        "commit": "eeadb5dfcb3ccfc58fb2a48417d908f39b1095fa",
+        "timestamp": "2026-07-29T14:07:47-07:00",
+        "confidence": "high",
+        "rationale": "Last how-to-cards commit before Julia's first feedback at 14:50 Pacific."
+      },
+      "final": {
+        "commit": "f557b93b766639ebb1e767446304a4bafa269532",
+        "timestamp": "2026-08-04T16:04:39-07:00",
+        "confidence": "high",
+        "rationale": "Last component code commit before Sal's design approval; later branch changes were fixture/merge maintenance."
+      },
+      "checkpoints": [
+        {"commit": "0dc5cd03e9743fe53a6a2195c28b28376140c04a", "label": "after round-two responsive feedback"},
+        {"commit": "e1b2c8e0fff8d20ef4ead8883170bd8f985b516e", "label": "before round-three boundary feedback"}
+      ],
+      "scope": {
+        "paths": ["express/code/blocks/how-to-cards"],
+        "candidateUrl": "https://how-to-cards-w-fix--da-express-milo--adobecom.aem.page/drafts/echen/how-to-cards",
+        "browsers": ["chromium"],
+        "locales": ["en"]
+      },
+      "figma": [
+        {"fileKey": "oEKwLBikshx4BgPmhtm7K9", "nodeId": "22765:3109", "label": "Desktop/mobile card geometry", "round": 1},
+        {"fileKey": "oEKwLBikshx4BgPmhtm7K9", "nodeId": "22765:3119", "label": "Tablet card geometry", "round": 2},
+        {"fileKey": "oEKwLBikshx4BgPmhtm7K9", "nodeId": "22765:3118", "label": "Desktop responsiveness annotations", "round": 4},
+        {"fileKey": "oEKwLBikshx4BgPmhtm7K9", "nodeId": "81195:3058", "label": "1600px maximum container", "round": 4}
+      ],
+      "feedbackRounds": [
+        {"round": 1, "created": "2026-07-29T21:50:19.641Z", "summary": "Align the first card with the headline and subcopy across breakpoints."},
+        {"round": 2, "created": "2026-07-30T15:13:43.758Z", "summary": "Specify desktop/tablet/mobile card widths, gaps and terminal carousel padding."},
+        {"round": 3, "created": "2026-07-31T18:14:30.936Z", "summary": "1440px overflow, 1601-1679px edge gap and mobile terminal gap remained."},
+        {"round": 4, "created": "2026-08-04T15:26:51.983Z", "summary": "Clarify desktop stretch behavior, 295-385px limits, 1247px control transition and 1600px max width."}
+      ],
+      "oracle": {
+        "findings": [
+          {"id": "cards-leading-alignment", "round": 1, "category": "spacing", "severity": "high", "viewport": "all", "ownership": "implementation", "description": "First card aligns with the headline and subcopy leading edge.", "keywords": ["first", "card", "align", "headline", "subcopy", "edge"]},
+          {"id": "cards-desktop-size-gap", "round": 2, "category": "responsive", "severity": "high", "viewport": "desktop", "ownership": "implementation", "description": "Desktop cards are 322px with 24px gaps and do not clip.", "keywords": ["desktop", "322px", "24px", "gap", "clip"]},
+          {"id": "cards-narrow-desktop-tail", "round": 2, "category": "spacing", "severity": "high", "viewport": "narrow desktop", "ownership": "implementation", "description": "Narrow desktop carousel ends with 40px device-margin padding.", "keywords": ["desktop", "carousel", "end", "40px", "padding"]},
+          {"id": "cards-tablet-size-gap", "round": 2, "category": "responsive", "severity": "high", "viewport": "tablet", "ownership": "implementation", "description": "Tablet cards are 295px with 16px gaps.", "keywords": ["tablet", "295px", "16px", "gap"]},
+          {"id": "cards-tablet-tail", "round": 2, "category": "spacing", "severity": "high", "viewport": "tablet", "ownership": "implementation", "description": "Tablet carousel ends with 32px device-margin padding.", "keywords": ["tablet", "carousel", "end", "32px", "padding"]},
+          {"id": "cards-mobile-size-gap", "round": 2, "category": "responsive", "severity": "high", "viewport": "mobile", "ownership": "implementation", "description": "Mobile cards are 295px with 8px gaps.", "keywords": ["mobile", "295px", "8px", "gap"]},
+          {"id": "cards-mobile-tail", "round": 2, "category": "spacing", "severity": "high", "viewport": "mobile", "ownership": "implementation", "description": "Mobile carousel ends with exactly 16px padding.", "keywords": ["mobile", "carousel", "end", "16px", "padding"]},
+          {"id": "cards-1440-overflow", "round": 3, "category": "responsive", "severity": "high", "viewport": "1440px", "ownership": "implementation", "description": "At 1440px cards remain 322px rather than expanding to 382px and bleeding offscreen.", "keywords": ["1440px", "322px", "382px", "overflow", "bleed"]},
+          {"id": "cards-1601-edge-gap", "round": 3, "category": "responsive", "severity": "high", "viewport": "1601-1679px", "ownership": "implementation", "description": "No unintended edge gap appears between 1601px and 1679px.", "keywords": ["1601", "1679", "edge", "gap", "carousel"]},
+          {"id": "cards-fluid-min-max", "round": 4, "category": "responsive", "severity": "high", "viewport": "desktop", "ownership": "implementation", "description": "Four cards stretch within margins from 295px minimum to 385px maximum.", "keywords": ["four", "stretch", "295px", "385px", "minimum", "maximum"]},
+          {"id": "cards-control-breakpoint", "round": 4, "category": "responsive", "severity": "high", "viewport": "1247px", "ownership": "implementation", "description": "Carousel controls activate at 1247px before cards overlap 40px margins.", "keywords": ["controls", "1247px", "overlap", "40px", "margin"]},
+          {"id": "cards-max-container", "round": 4, "category": "responsive", "severity": "high", "viewport": "widescreen", "ownership": "implementation", "description": "Four-card container stops growing at 1600px.", "keywords": ["1600px", "maximum", "container", "widescreen"]}
+        ]
+      }
+    },
+    {
+      "id": "mwpw-197454-font-generator",
+      "ticket": "MWPW-197454",
+      "title": "Font Generator card grid",
+      "implementationBranch": "font-generator-design-qa",
+      "historyMode": "squash",
+      "initial": {
+        "commit": "150c5aa99a5a9ac8437c602f80385fe6524f2c8a",
+        "timestamp": "2026-06-25T11:45:55-05:00",
+        "confidence": "high",
+        "rationale": "Last implementation commit before Julia's first design QA review on 2026-06-26."
+      },
+      "final": {
+        "commit": "c23619761159fc99fbdfaa1ded8e4210a86fdd83",
+        "timestamp": "2026-07-23T15:54:56-07:00",
+        "confidence": "high",
+        "rationale": "Squash/merge commit explicitly titled MWPW-197454 Font Generator Design QA (#633), after the R2 fix commit."
+      },
+      "checkpoints": [
+        {"commit": "9a041a1961733b8be221db5a69b956797cf4ac42", "label": "round-one feedback implementation"},
+        {"commit": "0ba1f1bb795c83406937959e50563f7a9c19f602", "label": "round-two design QA implementation"}
+      ],
+      "scope": {
+        "paths": ["express/code/blocks/font-generator", "express/code/icons/font-generator-checkmark.svg"],
+        "candidateUrl": "https://font-generator-engine-2-update--da-express-milo--adobecom.aem.page/drafts/echen/font-generator?text=Realigned+equestrian+fez+bewilders+picky+monarch&layout=list&fontSize=22",
+        "browsers": ["chromium", "webkit"],
+        "locales": ["en"]
+      },
+      "figma": [
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3739:164284", "label": "Desktop sticky panel", "round": 1},
+        {"fileKey": "oEKwLBikshx4BgPmhtm7K9", "nodeId": "71860:174", "label": "Express grid", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2781:19265", "label": "Desktop layout", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3932:28396", "label": "Card icon/text alignment", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3932:54627", "label": "List spacing", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3739:95354", "label": "Tablet layout", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3739:110624", "label": "Tablet filter panel", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "5482:73464", "label": "Close button", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2765:16089", "label": "Mobile filter drawer", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2781:20556", "label": "Mobile layout", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "5486:73806", "label": "Copied fallback graphic", "round": 1},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2781:19313", "label": "Desktop R2 annotated frame", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2781:21527", "label": "Mobile R2 annotated frame", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2518:32422", "label": "Card hover", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2518:32413", "label": "Card default state", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3939:51177", "label": "Large card truncation", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3939:50987", "label": "Small card truncation", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3739:95403", "label": "Tablet R2 spacing", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2676:71870", "label": "Accordion closed state", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2518:32434", "label": "Copied card state", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2637:12435", "label": "Resizable text field", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "2676:85178", "label": "Pill focus", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "4429:41985", "label": "Pill keyboard bluelines", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "6014:79778", "label": "Slider focus", "round": 2},
+        {"fileKey": "oEKwLBikshx4BgPmhtm7K9", "nodeId": "75143:36985", "label": "CTA focus", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "3939:23249", "label": "Font card focus", "round": 2},
+        {"fileKey": "siBbUphJ29AE8v2nKRAEdf", "nodeId": "4429:48163", "label": "Font card focus bluelines", "round": 2},
+        {"fileKey": "oEKwLBikshx4BgPmhtm7K9", "nodeId": "75143:37017", "label": "Load-more focus", "round": 2}
+      ],
+      "feedbackRounds": [
+        {"round": 1, "created": "2026-06-26T17:34:43.102Z", "summary": "Desktop, tablet, mobile and all-breakpoint review covering layout, grid, spacing, drawer behavior, copy, motion and visual treatment."},
+        {"round": 2, "created": "2026-07-13T17:06:57.725Z", "summary": "Follow-up review covering remaining responsive spacing, placeholder/default values, card states, truncation, copied behavior, filtering copy and accessibility/focus contracts."}
+      ],
+      "oracle": {
+        "findings": [
+          {"id": "font-sticky-panel", "round": 1, "category": "interaction", "severity": "high", "viewport": "desktop", "ownership": "implementation", "description": "Left control panel remains sticky while scrolling.", "keywords": ["left", "panel", "sticky", "scroll"]},
+          {"id": "font-desktop-grid-margin", "round": 1, "category": "spacing", "severity": "high", "viewport": "desktop", "ownership": "implementation", "description": "Desktop grid uses 40px left and right margins.", "keywords": ["desktop", "grid", "40px", "margin"]},
+          {"id": "font-panel-padding", "round": 1, "category": "spacing", "severity": "medium", "viewport": "desktop", "ownership": "implementation", "description": "Remove unintended inline padding from the 477px left panel.", "keywords": ["left", "panel", "477px", "padding", "remove"]},
+          {"id": "font-grid-padding", "round": 1, "category": "spacing", "severity": "medium", "ownership": "implementation", "description": "Remove unintended padding around the card grid.", "keywords": ["card", "grid", "padding", "remove"]},
+          {"id": "font-card-gap", "round": 1, "category": "spacing", "severity": "medium", "ownership": "implementation", "description": "Font cards use an 8px gap.", "keywords": ["font", "cards", "8px", "gap"]},
+          {"id": "font-bottom-padding", "round": 1, "category": "spacing", "severity": "medium", "ownership": "implementation", "description": "Block bottom padding is 80px.", "keywords": ["bottom", "padding", "80px"]},
+          {"id": "font-column-breakpoints", "round": 1, "category": "responsive", "severity": "high", "ownership": "implementation", "description": "Grid is two-up from 1200-1679px, three-up at 1680px+, and capped at 1600px.", "keywords": ["two", "three", "1200", "1679", "1680", "1600px"]},
+          {"id": "font-copy-icon-alignment", "round": 1, "category": "spacing", "severity": "medium", "ownership": "implementation", "description": "Copy icon is not aligned to the text baseline; card text begins 64px down.", "keywords": ["copy", "icon", "text", "64px", "align"]},
+          {"id": "font-list-padding", "round": 1, "category": "spacing", "severity": "medium", "ownership": "implementation", "description": "List-view vertical padding matches Figma and is not overly tall.", "keywords": ["list", "vertical", "padding", "tall"]},
+          {"id": "font-tablet-margin", "round": 1, "category": "spacing", "severity": "high", "viewport": "tablet", "ownership": "implementation", "description": "Tablet page and filter content use 32px inline margins.", "keywords": ["tablet", "32px", "margin", "filter"]},
+          {"id": "font-close-button", "round": 1, "category": "visual", "severity": "medium", "viewport": "tablet", "ownership": "implementation", "description": "Filter close control matches the S2 size-L button and states.", "keywords": ["close", "button", "s2", "state", "tablet"]},
+          {"id": "font-filter-overlay", "round": 1, "category": "visual", "severity": "high", "viewport": "tablet/mobile", "ownership": "implementation", "description": "Open filter panel displays the dark blurred background overlay.", "keywords": ["filter", "panel", "dark", "blur", "overlay"]},
+          {"id": "font-panel-radii", "round": 1, "category": "visual", "severity": "medium", "viewport": "tablet", "ownership": "implementation", "description": "Filter panel omits the top-right and bottom-left corner radii.", "keywords": ["panel", "radius", "top", "right", "bottom", "left"]},
+          {"id": "font-mobile-drawer-handle", "round": 1, "category": "visual", "severity": "high", "viewport": "mobile", "ownership": "implementation", "description": "Mobile drawer uses a top handle rather than an X button.", "keywords": ["mobile", "drawer", "handle", "line", "x", "button"]},
+          {"id": "font-swipe-dismiss", "round": 1, "category": "interaction", "severity": "high", "viewport": "mobile", "ownership": "implementation", "description": "Mobile filter drawer supports swipe-down dismissal.", "keywords": ["mobile", "swipe", "down", "dismiss", "drawer"]},
+          {"id": "font-mobile-view-toggle", "round": 1, "category": "responsive", "severity": "medium", "viewport": "mobile", "ownership": "implementation", "description": "Grid/list view switch is removed on mobile and summary text remains.", "keywords": ["mobile", "grid", "list", "switch", "remove", "summary"]},
+          {"id": "font-mobile-input-gap", "round": 1, "category": "spacing", "severity": "medium", "viewport": "mobile", "ownership": "implementation", "description": "Text input to card spacing is 24px on mobile.", "keywords": ["mobile", "input", "cards", "24px", "spacing"]},
+          {"id": "font-placeholder-copy", "round": 1, "category": "typography", "severity": "high", "ownership": "implementation", "description": "Initial placeholder reads Type the preview text you want to get started..., and card default text is synchronized.", "keywords": ["placeholder", "preview", "text", "started", "card"]},
+          {"id": "font-copied-motion", "round": 1, "category": "interaction", "severity": "medium", "ownership": "implementation", "description": "Copied-state fallback graphic fades in and out with 300ms ease timing.", "keywords": ["copied", "fallback", "graphic", "300ms", "fade"]},
+          {"id": "font-summary-copy", "round": 1, "category": "typography", "severity": "medium", "ownership": "implementation", "description": "Summary says XX unicode fonts instead of XX styles.", "keywords": ["unicode", "fonts", "styles", "summary"]},
+          {"id": "font-card-shadow", "round": 1, "category": "visual", "severity": "medium", "ownership": "implementation", "description": "Font cards have no drop shadow; only the input field is shadowed.", "keywords": ["font", "card", "shadow", "input"]},
+          {"id": "font-r2-top-padding", "round": 2, "category": "spacing", "severity": "medium", "viewport": "desktop", "ownership": "implementation", "description": "Desktop block top padding and sticky offset are 40px.", "keywords": ["desktop", "top", "padding", "sticky", "40px"]},
+          {"id": "font-slider-contract", "round": 2, "category": "interaction", "severity": "high", "ownership": "implementation", "description": "Preview slider spans 8-100px and defaults to 40px desktop and 28px mobile.", "keywords": ["slider", "8", "100", "40px", "28px", "default"]},
+          {"id": "font-card-hover", "round": 2, "category": "interaction", "severity": "medium", "ownership": "implementation", "description": "Font cards expose the Figma hover state.", "keywords": ["font", "card", "hover", "state"]},
+          {"id": "font-card-separator", "round": 2, "category": "visual", "severity": "medium", "ownership": "implementation", "description": "No separator stroke appears above the font name and CTA.", "keywords": ["stroke", "separator", "font", "name", "cta", "remove"]},
+          {"id": "font-card-truncation", "round": 2, "category": "typography", "severity": "high", "ownership": "implementation", "description": "Long preview text truncates after four lines on large cards and two lines on small cards.", "keywords": ["truncate", "four", "two", "lines", "large", "small"]},
+          {"id": "font-responsive-input-width", "round": 2, "category": "responsive", "severity": "high", "viewport": "tablet/mobile", "ownership": "implementation", "description": "Input fills available width with 32px tablet and 16px mobile margins.", "keywords": ["input", "width", "32px", "tablet", "16px", "mobile"]},
+          {"id": "font-copied-tooltip", "round": 2, "category": "interaction", "severity": "high", "viewport": "tablet/mobile", "ownership": "implementation", "description": "Copied tooltip does not remain open on touch breakpoints.", "keywords": ["copied", "tooltip", "remain", "tablet", "mobile"]},
+          {"id": "font-accordion-underline", "round": 2, "category": "visual", "severity": "medium", "viewport": "tablet/mobile", "ownership": "implementation", "description": "Closed category accordion displays the Figma underline.", "keywords": ["accordion", "closed", "underline", "tablet", "mobile"]},
+          {"id": "font-filter-summary", "round": 2, "category": "typography", "severity": "medium", "ownership": "implementation", "description": "Results summary includes the active category, for example 4 Cool unicode fonts.", "keywords": ["summary", "category", "cool", "unicode", "fonts", "filter"]},
+          {"id": "font-copied-icon", "round": 2, "category": "visual", "severity": "medium", "ownership": "implementation", "description": "Copy icon is hidden in the copied card state.", "keywords": ["copy", "icon", "hidden", "copied", "state"]},
+          {"id": "font-fourth-preset", "round": 2, "category": "content-authoring", "severity": "medium", "ownership": "implementation", "description": "Fourth Roger hungry preset text is available.", "keywords": ["roger", "hungry", "236", "peaches", "preset", "fourth"]},
+          {"id": "font-character-limit", "round": 2, "category": "interaction", "severity": "high", "ownership": "implementation", "description": "Text field enforces 2200 characters, truncates visually, and can be resized to reveal content.", "keywords": ["2200", "character", "limit", "resize", "truncate"]},
+          {"id": "font-pill-focus", "round": 2, "category": "accessibility", "severity": "high", "ownership": "implementation", "description": "Tag pills use the designed focus state.", "keywords": ["tag", "pill", "focus", "state"]},
+          {"id": "font-pill-arrow-nav", "round": 2, "category": "accessibility", "severity": "high", "ownership": "implementation", "description": "Arrow keys navigate between tag pills.", "keywords": ["arrow", "keys", "navigate", "tag", "pills"]},
+          {"id": "font-slider-focus", "round": 2, "category": "accessibility", "severity": "high", "ownership": "implementation", "description": "Slider exposes the S2 focus state.", "keywords": ["slider", "focus", "state", "s2"]},
+          {"id": "font-cta-focus", "round": 2, "category": "accessibility", "severity": "high", "ownership": "implementation", "description": "Card CTAs use the SoT button focus state.", "keywords": ["cta", "button", "focus", "state"]},
+          {"id": "font-card-focus", "round": 2, "category": "accessibility", "severity": "high", "ownership": "implementation", "description": "Font card focus styling matches Figma and Bluelines.", "keywords": ["font", "card", "focus", "figma", "bluelines"]},
+          {"id": "font-load-more-focus", "round": 2, "category": "accessibility", "severity": "high", "ownership": "implementation", "description": "Load More button uses the SoT focus state.", "keywords": ["load", "more", "button", "focus", "state"]}
+        ]
+      }
+    },
+    {
+      "id": "mwpw-194378-ios-tooltip",
+      "ticket": "MWPW-194378",
+      "title": "Contrast Checker tooltip persistence on iOS Safari",
+      "implementationBranch": "color-minor-fixes-round-2",
+      "initial": {
+        "commit": "bee2eb7774b2062de5435ce98f9bb981d97d1b65",
+        "timestamp": "2026-05-18T10:10:25-05:00",
+        "confidence": "high",
+        "rationale": "First attempted ticket fix existed before Julia supplied the phone recording on 2026-05-19."
+      },
+      "final": {
+        "commit": "4df500c03dc5dbd2a9dad0f3efc4fc38dade1203",
+        "timestamp": "2026-05-22T11:48:52-05:00",
+        "confidence": "high",
+        "rationale": "Follow-up ticket commit after the reproduction evidence; mobile QA later passed before release."
+      },
+      "checkpoints": [],
+      "scope": {
+        "paths": ["express/code/blocks/color-contrast-checker/renderers/createCheckerRenderer.js"],
+        "candidateUrl": "https://color-minor-fixes-round-2--express-color--adobecom.aem.live/create/color-wheel",
+        "browsers": ["ios-safari"],
+        "locales": ["en"]
+      },
+      "figma": [],
+      "referenceGap": "Behavioral bug with phone video evidence; no Figma node was attached.",
+      "feedbackRounds": [
+        {"round": 1, "created": "2026-05-19T13:48:53.523Z", "summary": "On iOS Safari, tooltips disappear automatically before their contents can be read; they must remain until dismissed."}
+      ],
+      "oracle": {
+        "findings": [
+          {"id": "ios-tooltip-persistence", "round": 1, "category": "interaction", "severity": "high", "viewport": "mobile", "state": "tooltip open", "ownership": "implementation", "description": "On real iOS Safari, tooltip content remains visible until the user dismisses it.", "keywords": ["ios", "safari", "tooltip", "remain", "visible", "dismiss", "read"]}
+        ]
+      }
+    },
+    {
+      "id": "mwpw-194371-ios-font",
+      "ticket": "MWPW-194371",
+      "title": "Contrast Checker preview font on iOS Safari",
+      "implementationBranch": "color-minor-fixes-round-2",
+      "initial": {
+        "commit": "fe8fd6db09c27d111077dd51f4c68a554fcd999c",
+        "timestamp": "2026-05-18T10:10:05-05:00",
+        "confidence": "high",
+        "rationale": "First attempted font correction before Julia attached the mobile screenshot."
+      },
+      "final": {
+        "commit": "c1b75d883d874fad94d472f3da2076b107af4300",
+        "timestamp": "2026-05-22T14:55:39-05:00",
+        "confidence": "high",
+        "rationale": "Last ticket-specific commit immediately before Julia confirmed the corrected preview looked good."
+      },
+      "checkpoints": [
+        {"commit": "da99b9d82aa1f42bcf81f0fd9d6b0ca26d3a5709", "label": "font-loading follow-up attempt"}
+      ],
+      "scope": {
+        "paths": ["express/code/blocks/color-contrast-checker/color-contrast-checker.css"],
+        "candidateUrl": "https://color-minor-fixes-round-2--express-color--adobecom.aem.live/create/color-contrast-analyzer",
+        "browsers": ["ios-safari"],
+        "locales": ["en", "jp"]
+      },
+      "figma": [],
+      "referenceGap": "Browser-specific bug with screenshot evidence; no Figma node was attached.",
+      "feedbackRounds": [
+        {"round": 1, "created": "2026-05-22T17:42:17.387Z", "summary": "Phone screenshot demonstrates the preview font discrepancy on iOS Safari."},
+        {"round": 2, "created": "2026-05-22T21:40:16.348Z", "summary": "Julia confirmed the corrected font rendering looked good."}
+      ],
+      "oracle": {
+        "findings": [
+          {"id": "ios-preview-font", "round": 1, "category": "typography", "severity": "high", "viewport": "mobile", "ownership": "implementation", "description": "Preview uses the intended Poppins font on iOS Safari, including localized pages.", "keywords": ["poppins", "font", "preview", "ios", "safari", "localized"]}
+        ]
+      }
+    },
+    {
+      "id": "mwpw-194122-localized-tags",
+      "ticket": "MWPW-194122",
+      "title": "Localized Save-to-Libraries tag capitalization",
+      "implementationBranch": "color-minor-fixes-round-2",
+      "initial": {
+        "commit": "a20d5308322c63ee2d4f849c5c95c25158458b09",
+        "timestamp": "2026-05-14T16:33:25-07:00",
+        "confidence": "medium",
+        "rationale": "Direct parent of the ticket fix; used as the reproducible pre-fix state."
+      },
+      "final": {
+        "commit": "9f1c6ef2a5d7e981e2f9003ab206a06508a7d901",
+        "timestamp": "2026-05-15T10:25:41-05:00",
+        "confidence": "high",
+        "rationale": "Ticket-specific implementation and tests; localized QA passed before release."
+      },
+      "checkpoints": [],
+      "scope": {
+        "paths": [
+          "express/code/scripts/color-shared/toolbar/createDrawerComponent.js",
+          "express/code/scripts/color-shared/toolbar/createTagField.js",
+          "test/scripts/color-shared/toolbar/createTagField.test.js"
+        ],
+        "candidateUrl": "https://color-minor-fixes-round-2--express-color--adobecom.aem.live/fr/create/color-wheel",
+        "browsers": ["chromium"],
+        "locales": ["fr", "de", "es", "dk"]
+      },
+      "figma": [
+        {"fileKey": "mcJuQTxJdWsL0dMmqaecpn", "nodeId": "3246:374063", "label": "Save-to-Libraries tags", "round": 1}
+      ],
+      "feedbackRounds": [
+        {"round": 1, "created": "2026-05-11T16:35:14.541Z", "summary": "Tag presentation follows the original Color experience and Figma; historical behavior later required screenshot evidence because it had changed."}
+      ],
+      "oracle": {
+        "findings": [
+          {"id": "localized-tag-capitalization", "round": 1, "category": "typography", "severity": "high", "ownership": "implementation", "description": "Localized Save-to-Libraries tag labels use the required capitalization across supported locales.", "keywords": ["localized", "tag", "labels", "capitalization", "libraries", "locale"]}
+        ]
+      }
+    }
+  ]
+}
