@@ -633,8 +633,12 @@ html.icc-scroll-lock {
 
 .color-image-contrast-checker .icc-legend-mini {
   display: none;
-  min-inline-size: 0;
-  inline-size: 337px;
+  /* Figma width is the floor; grow to fit the row so font metrics or longer copy
+     don't wrap it, and only wrap once the container itself is too narrow. */
+  --icc-legend-mini-min: 337px;
+
+  min-inline-size: min(var(--icc-legend-mini-min), 100%);
+  inline-size: max-content;
   max-inline-size: 100%;
   justify-self: start;
   align-items: center;
@@ -847,7 +851,7 @@ html.icc-scroll-lock {
 
 @media (min-width: 700px) and (max-width: 899px) {
   .color-image-contrast-checker.icc-dialog .icc-legend-mini {
-    inline-size: 341px;
+    --icc-legend-mini-min: 341px;
     gap: var(--spacing-200);
   }
 

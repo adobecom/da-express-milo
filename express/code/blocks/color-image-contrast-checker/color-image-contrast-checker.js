@@ -165,8 +165,13 @@ function createView(content, strings, id, onColorChange) {
       const smallTrigger = help(strings.smallText, strings.smallTextHelp);
       const largeValue = strings[`${kind}Large`].replace(/>=/g, '\u2265');
       const smallValue = strings[`${kind}Small`].replace(/>=/g, '\u2265');
-      large.append(largeTrigger, label('span', '', largeValue));
-      small.append(smallTrigger, label('span', '', smallValue));
+      // dir=auto keeps "≥ 4.5:1 (AAA)" from being mirrored inside RTL pages.
+      const largeLabel = label('span', '', largeValue);
+      const smallLabel = label('span', '', smallValue);
+      largeLabel.dir = 'auto';
+      smallLabel.dir = 'auto';
+      large.append(largeTrigger, largeLabel);
+      small.append(smallTrigger, smallLabel);
       rows.append(large, small);
     }
     card.append(rows);
@@ -313,7 +318,10 @@ export default async function decorate(block) {
       const rowWidth = comparisonRow.getBoundingClientRect().width;
       const chrome = parseFloat(surfaceStyle.paddingTop) + parseFloat(surfaceStyle.paddingBottom);
       const hugHeight = measure().width * (source.height / source.width) + chrome;
-      comparisonRow.style.blockSize = `${Math.min(hugHeight, rowWidth * (ratioHeight / ratioWidth))}px`;
+      // Never shorter than the zoom toolbar plus its inset, so it stays inside the row.
+      const toolbarFloor = zoom.offsetHeight + 2 * zoom.offsetTop;
+      const capped = Math.min(hugHeight, rowWidth * (ratioHeight / ratioWidth));
+      comparisonRow.style.blockSize = `${Math.max(capped, toolbarFloor)}px`;
     };
     hug();
     let { width, height, scale } = measure();
@@ -321,7 +329,10 @@ export default async function decorate(block) {
     const toolbar = zoom.getBoundingClientRect();
     const reserveGutter = () => {
       const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
-      const gutter = toolbar.right - comparisonRow.getBoundingClientRect().left + toolbarGap;
+      const row = comparisonRow.getBoundingClientRect();
+      // Inline-start gutter: measured from the row's start edge in either direction.
+      const rtl = surfaceStyle.direction === 'rtl';
+      const gutter = (rtl ? row.right - toolbar.left : toolbar.right - row.left) + toolbarGap;
       comparisonRow.style.paddingInlineStart = `${gutter}px`;
       hug();
       ({ width, height, scale } = measure());
