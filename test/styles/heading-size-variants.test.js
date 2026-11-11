@@ -97,6 +97,26 @@ describe('Universal heading size variants', () => {
     expectSizes(c2Variants, 2);
   });
 
+  it('preserves existing AX heading tokens for unrelated consumers', async () => {
+    await setViewport({ width: 375, height: 800 });
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ax-heading-xxl-size').trim())
+      .to.equal('36px');
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ax-heading-xl-lh').trim())
+      .to.equal('35px');
+
+    await setViewport({ width: 1200, height: 800 });
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ax-heading-xxl-size').trim())
+      .to.equal('44px');
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ax-heading-xl-lh').trim())
+      .to.equal('45px');
+
+    await setViewport({ width: 1680, height: 900 });
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ax-heading-xxl-size').trim())
+      .to.equal('44px');
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ax-heading-xl-lh').trim())
+      .to.equal('45px');
+  });
+
   it('applies to direct and dynamically-created headings without affecting body copy', async () => {
     await setViewport({ width: 375, height: 800 });
     document.body.innerHTML = `
@@ -116,5 +136,6 @@ describe('Universal heading size variants', () => {
     expect(getComputedStyle(document.querySelector('.ax-heading-xxl')).fontSize).to.equal('32px');
     expect(getComputedStyle(document.querySelector('.heading-xl')).fontSize).to.equal('28px');
     expect(getComputedStyle(block.querySelector('p')).fontSize).to.equal('17px');
+    expect(getComputedStyle(block.querySelector('p')).fontWeight).to.equal('400');
   });
 });
