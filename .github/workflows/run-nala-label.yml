@@ -43,6 +43,7 @@ jobs:
         run: npm ci --no-fund --prefer-offline
 
       - name: Verify container browsers match @playwright/test
+        shell: bash
         run: |
           missing=0
           for dir in $(npx playwright install --dry-run | awk '/Install location:/ {print $3}'); do

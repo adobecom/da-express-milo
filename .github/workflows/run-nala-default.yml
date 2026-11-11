@@ -88,6 +88,7 @@ jobs:
 
       - name: Verify container browsers match @playwright/test
         if: env.NALA_SKIP_LANE != 'true'
+        shell: bash
         # Fails in seconds (instead of every test failing on launch) when a
         # @playwright/test bump lands without bumping the container image tag.
         run: |
