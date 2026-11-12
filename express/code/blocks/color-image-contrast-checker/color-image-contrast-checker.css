@@ -994,3 +994,10 @@ html.icc-scroll-lock body {
     block-size: auto;
   }
 }
+
+
+@media (min-width: 1600px) {
+  .color-image-contrast-checker .icc-panel { 
+    max-inline-size: 1600px;
+}
+}
