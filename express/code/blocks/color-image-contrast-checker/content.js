@@ -8,7 +8,9 @@ function parseSamples(cell) {
   const walker = document.createTreeWalker(cell, NodeFilter.SHOW_ALL, {
     acceptNode: (node) => {
       if (node.nodeName === 'PICTURE') return NodeFilter.FILTER_ACCEPT;
-      if (node.closest?.('picture') || node.parentElement?.closest('picture')) {
+      // Picture internals and the text of a link wrapping a picture are not IDs.
+      if (node.closest?.('picture') || node.parentElement?.closest('picture')
+        || node.parentElement?.closest('a[href]')?.querySelector('picture')) {
         return NodeFilter.FILTER_REJECT;
       }
       return node.nodeType === Node.TEXT_NODE ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;

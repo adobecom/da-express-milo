@@ -489,7 +489,7 @@ export default async function decorate(block) {
     if (destroyed) return;
     content = parseContent(block);
     const templateIds = content.samples.flatMap(({ templateId }) => templateId ?? []);
-    // Resolve template samples alongside the remaining setup instead of after it.
+    // Resolve template samples alongside setup; they slot in after the block renders.
     const templates = templateIds.length
       ? resolveTemplates(templateIds).catch((error) => {
         window.lana?.log(`color-image-contrast-checker: template samples failed: ${error.message}`, { tags: 'color-image-contrast-checker' });
@@ -509,13 +509,13 @@ export default async function decorate(block) {
       generation += 1;
       const version = generation;
       const current = () => !destroyed && version === generation;
-      colorSpace = value;
-      ready = false;
       view.save.disabled = true;
       // Figma: overlay fades in, holds while the new space is applied, then fades out.
       view.comparisonRow.classList.add('is-recalculating');
       await wait(RECALC_FADE_MS);
+      // Commit the space only when it is applied, so a superseding load keeps state consistent.
       if (!current()) return;
+      colorSpace = value;
       try {
         analyze();
       } catch (error) {
@@ -592,6 +592,8 @@ export default async function decorate(block) {
         announceReady();
       } catch (error) {
         if (!destroyed && version === imageGeneration) {
+          // A color-space change superseded by this load never applied; resync its selector.
+          if (source) view.selector.setValue(colorSpace);
           await report(error, strings[error.message] || uploadStrings.loadError);
         }
       } finally {
@@ -602,67 +604,83 @@ export default async function decorate(block) {
       strings: uploadStrings, loadingText: strings.analyzingImage, onFileSelected: load,
     });
     upload.append(dropzone.container);
-    const resolved = await templates;
-    const sampleEntries = content.samples.flatMap((entry) => {
-      if (!entry.templateId) return [entry];
-      const template = resolved.get(entry.templateId);
-      return template ? [{ template }] : [];
-    });
-    if (destroyed) return;
-    if (sampleEntries.length) {
-      const suggestions = createTag('div', { class: 'icc-suggestions' });
-      suggestions.append(label('p', '', strings.noImageTryOurs));
-      const samples = createTag('div', { class: 'icc-sample-list' });
-      sampleEntries.forEach(({ picture: authored, template }) => {
-        const picture = authored ?? createTag('picture');
-        if (template) picture.append(createTag('img', { src: template.preview, alt: template.title, loading: 'lazy' }));
-        const image = picture.querySelector('img');
-        const anchor = picture.closest('a[href]');
-        const src = template?.src || anchor?.href || getPictureSource(picture);
-        if (!image || !src) throw new Error('Sample requires an authored image source');
-        const url = new URL(src, document.baseURI);
-        if (!template && !anchor && /\/media_[^/]+$/.test(url.pathname)) {
-          ['width', 'height', 'format', 'optimize', 'fit'].forEach((key) => url.searchParams.delete(key));
-        }
-        const description = image.alt.trim();
-        const sample = button(description
-          ? `${strings.useThisImage}: ${description}` : strings.useThisImage);
-        sample.classList.add('icc-sample');
-        sample.setAttribute('aria-pressed', 'false');
-        sampleButtons.push(sample);
-        const preview = picture.cloneNode(true);
-        const previewImage = preview.querySelector('img');
-        previewImage.alt = description;
-        previewImage.draggable = false;
-        sample.replaceChildren(preview);
-        sample.addEventListener('click', async () => {
-          request?.abort();
-          generation += 1;
-          imageGeneration += 1;
-          const version = imageGeneration;
-          busy(true);
-          const controller = new AbortController();
-          request = controller;
-          try {
-            const response = await fetch(url.href, { signal: controller.signal });
-            if (!response.ok) throw new Error(`Sample HTTP ${response.status}`);
-            const blob = await response.blob();
-            if (!destroyed && !controller.signal.aborted && imageGeneration === version) {
-              await load(new File([blob], url.pathname.split('/').pop(), { type: blob.type }), sample);
-            }
-          } catch (error) {
-            if (!controller.signal.aborted && !destroyed && imageGeneration === version) {
-              await report(error, uploadStrings.loadError);
-            }
-          } finally {
-            if (!destroyed && imageGeneration === version) busy(false);
+    const buildSample = ({ picture: authored, template }) => {
+      const picture = authored ?? createTag('picture');
+      if (template) {
+        picture.append(createTag('img', { src: template.preview, alt: template.title, loading: 'lazy' }));
+      }
+      const image = picture.querySelector('img');
+      const anchor = picture.closest('a[href]');
+      const src = template?.src || anchor?.href || getPictureSource(picture);
+      if (!image || !src) throw new Error('Sample requires an authored image source');
+      const url = new URL(src, document.baseURI);
+      if (!template && !anchor && /\/media_[^/]+$/.test(url.pathname)) {
+        ['width', 'height', 'format', 'optimize', 'fit'].forEach((key) => url.searchParams.delete(key));
+      }
+      const description = image.alt.trim();
+      const sample = button(description
+        ? `${strings.useThisImage}: ${description}` : strings.useThisImage);
+      sample.classList.add('icc-sample');
+      sample.setAttribute('aria-pressed', 'false');
+      sampleButtons.push(sample);
+      const preview = picture.cloneNode(true);
+      const previewImage = preview.querySelector('img');
+      previewImage.alt = description;
+      previewImage.draggable = false;
+      sample.replaceChildren(preview);
+      sample.addEventListener('click', async () => {
+        request?.abort();
+        generation += 1;
+        imageGeneration += 1;
+        const version = imageGeneration;
+        busy(true);
+        const controller = new AbortController();
+        request = controller;
+        try {
+          const response = await fetch(url.href, { signal: controller.signal });
+          if (!response.ok) throw new Error(`Sample HTTP ${response.status}`);
+          const blob = await response.blob();
+          if (!destroyed && !controller.signal.aborted && imageGeneration === version) {
+            await load(new File([blob], url.pathname.split('/').pop(), { type: blob.type }), sample);
           }
-        }, { signal });
-        samples.append(sample);
+        } catch (error) {
+          if (!controller.signal.aborted && !destroyed && imageGeneration === version) {
+            await report(error, uploadStrings.loadError);
+          }
+        } finally {
+          if (!destroyed && imageGeneration === version) busy(false);
+        }
+      }, { signal });
+      return sample;
+    };
+    const suggestions = createTag('div', { class: 'icc-suggestions' });
+    suggestions.append(label('p', '', strings.noImageTryOurs));
+    const samples = createTag('div', { class: 'icc-sample-list' });
+    suggestions.append(samples);
+    // Show suggestions only once they hold a sample (template-only rows wait for the search).
+    const showSuggestions = () => {
+      if (samples.querySelector('.icc-sample') && !suggestions.isConnected) upload.append(suggestions);
+    };
+    // Template IDs hold their authored slot until the search resolves after first render.
+    const templateSlots = content.samples.flatMap((entry) => {
+      if (entry.picture) {
+        samples.append(buildSample(entry));
+        return [];
+      }
+      const slot = document.createComment(entry.templateId);
+      samples.append(slot);
+      return [{ slot, templateId: entry.templateId }];
+    });
+    showSuggestions();
+    templates?.then((resolved) => {
+      if (destroyed) return;
+      templateSlots.forEach(({ slot, templateId }) => {
+        const template = resolved.get(templateId);
+        if (template) slot.replaceWith(buildSample({ template }));
+        else slot.remove();
       });
-      suggestions.append(samples);
-      upload.append(suggestions);
-    }
+      showSuggestions();
+    });
     const dragOverlay = buildDragOverlay(strings);
     loadingOverlay = buildLoadingOverlay({ uploadingImage: strings.analyzingImage });
     [dragOverlay, loadingOverlay].forEach((overlay) => overlay.classList.add('icc-overlay'));
@@ -713,6 +731,11 @@ export default async function decorate(block) {
         try {
           const version = generation;
           const filename = 'image-contrast-analysis.png';
+          // The original pane is drawn from the displayed <img>; it may still be decoding.
+          if (!view.original.complete) {
+            await view.original.decode();
+            if (destroyed || version !== generation) return;
+          }
           const { width, height } = view.canvas;
           // Side-by-side doubles the width; stay within the strictest browser canvas
           // limits (iOS Safari: 16,777,216 px area; 16,384 px per side).

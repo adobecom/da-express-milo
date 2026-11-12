@@ -1823,30 +1823,75 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       },
     });
     const original = await imageFile();
+    let releaseSearch;
     const fetchStub = sinon.stub(window, 'fetch').callsFake(async (url) => (
       String(url).includes('express-search-api-v3')
-        ? new Response(JSON.stringify({
-          items: [template('urn:aaid:sc:VA6C2:b', 'Second'), template('urn:aaid:sc:VA6C2:a', 'First')],
-        }))
+        ? new Promise((resolve) => { releaseSearch = resolve; })
         : new Response(original)));
     await setup((checker) => {
       authorSamples(checker, `
         <p>urn:aaid:sc:VA6C2:a</p>
-        <picture><img src="/nala/assets/test-image.jpg" alt="Authored"></picture>
+        <a href="/mock/linked.png">Linked sample<picture><img src="/nala/assets/test-image.jpg" alt="Authored"></picture></a>
         <p>urn:aaid:sc:VA6C2:missing, urn:aaid:sc:VA6C2:b</p>
       `);
     });
+    // The pending search never blocks decoration: the authored sample is already usable.
+    expect(block.querySelector('input[type="file"]')).to.exist;
+    expect([...block.querySelectorAll('.icc-sample img')].map((image) => image.alt))
+      .to.deep.equal(['Authored']);
     const search = new URL(fetchStub.firstCall.args[0]);
     expect(search.searchParams.get('filters'))
       .to.equal('id==urn:aaid:sc:VA6C2:a,urn:aaid:sc:VA6C2:missing,urn:aaid:sc:VA6C2:b');
+    releaseSearch(new Response(JSON.stringify({
+      items: [template('urn:aaid:sc:VA6C2:b', 'Second'), template('urn:aaid:sc:VA6C2:a', 'First')],
+    })));
+    await waitFor(() => block.querySelectorAll('.icc-sample').length === 3);
     const samples = [...block.querySelectorAll('.icc-sample')];
     expect(samples.map((sample) => sample.querySelector('img').alt))
       .to.deep.equal(['First', 'Authored', 'Second']);
-    expect(samples[0].querySelector('img').getAttribute('src')).to.include('size=1000');
+    // Buttons use the small thumbnail (webp via the component link), not the full rendition.
+    expect(samples[0].querySelector('img').getAttribute('src')).to.include('component_id=t');
     samples[2].click();
     await waitFor(() => block.classList.contains('has-image')
       && block.getAttribute('aria-busy') === 'false');
     expect(fetchStub.lastCall.args[0]).to.include(':b/').and.include('size=1350&type=image/jpeg');
+  });
+
+  it('keeps authored samples and logs when the template search fails', async () => {
+    window.lana = { log: sinon.spy() };
+    sinon.stub(window, 'fetch').callsFake(async (url) => {
+      if (String(url).includes('express-search-api-v3')) throw new Error('offline');
+      return new Response(await imageFile());
+    });
+    try {
+      await setup((checker) => {
+        authorSamples(checker, `
+          <p>urn:aaid:sc:VA6C2:a</p>
+          <picture><img src="/nala/assets/test-image.jpg" alt="Authored"></picture>
+        `);
+      });
+      await waitFor(() => window.lana.log.called);
+      expect(window.lana.log.firstCall.args[0]).to.include('offline');
+      expect([...block.querySelectorAll('.icc-sample img')].map((image) => image.alt))
+        .to.deep.equal(['Authored']);
+      expect(block.querySelector('.icc-sample-list').childNodes).to.have.length(1);
+    } finally {
+      delete window.lana;
+    }
+  });
+
+  it('keeps the applied color space when a superseding upload fails', async () => {
+    await setup();
+    await upload();
+    const trigger = block.querySelector('.color-dropdown-trigger');
+    const save = block.querySelector('[data-action="save"]');
+    expect(trigger.value).to.equal('srgb');
+    chooseSpace('display-p3');
+    await upload(new File(['not an image'], 'broken.png', { type: 'image/png' }));
+    await waitFor(() => block.getAttribute('aria-busy') === 'false');
+    await new Promise((resolve) => { setTimeout(resolve, 500); });
+    expect(trigger.value).to.equal('srgb');
+    expect(save.disabled).to.equal(false);
   });
 
   it('matches Figma sample dimensions and crops authored images without stretching', async () => {

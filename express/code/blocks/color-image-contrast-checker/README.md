@@ -87,10 +87,12 @@ Optional checker rows:
 
 The samples cell also accepts Express template IDs (`urn:aaid:sc:…`) as text, one or more per
 paragraph separated by commas or whitespace, mixed freely with pictures; samples keep authored
-order. IDs are resolved in one Express search API request (`templateIds`) while the block
-loads: the button shows the template's preview rendition, its accessible name uses the
-template title, and selecting it analyzes the native-size JPEG rendition. IDs that are
-unknown, unapproved, or fail to load are skipped; any other text in the cell fails explicitly.
+order. IDs are resolved in one Express search API request (`templateIds`) that never blocks
+the block: authored pictures render immediately and template samples slot into their authored
+positions when the search answers (8s timeout). The button shows the template's thumbnail
+rendition, its accessible name uses the template title, and selecting it analyzes the
+native-size JPEG rendition. IDs that are unknown, unapproved, or fail to load are skipped.
+Text of a link wrapping a picture is ignored; any other non-ID text fails explicitly.
 
 No other rows are supported. Duplicate rows, missing headings/accuracy guidance,
 invalid samples, and missing required checker placeholders fail explicitly.
@@ -279,7 +281,9 @@ as `≥`; numeric thresholds and localized descriptions are preserved.
 - Maximum local contrast produces green at >= 4.5:1, blue at >= 3:1, or black
   below 3:1. **Large-text AAA is 4.5:1**, not 7:1. Small-text AAA requires
   7:1 and is not certified by the green classification.
-- Save exports the analyzed canvas as a native-resolution PNG, not the UI.
+- Save exports one PNG with the analysis and the original side by side (not the UI),
+  at native resolution unless that exceeds iOS Safari's canvas limits
+  (16,777,216 px area, 16,384 px per side), in which case both panes scale down.
   The file is always named `image-contrast-analysis.png`; the analysis space
   is not a conversion or an embedded PNG profile.
   Changing the image or analysis space during export discards the stale download.
