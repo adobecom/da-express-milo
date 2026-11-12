@@ -157,7 +157,7 @@ main .seo-nav-wrapper.v2-wrapper {
 
 @media (min-width: 768px) {
   main .seo-nav .carousel-platform {
-    scroll-padding: 0;
+    scroll-padding: 60px;
   }
 
 
