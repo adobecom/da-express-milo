@@ -996,7 +996,7 @@ html.icc-scroll-lock body {
 }
 
 
-@media (min-width: 1600px) {
+@media (min-width: 1440px) {
   .color-image-contrast-checker .icc-panel { 
     max-inline-size: 1600px;
 }
