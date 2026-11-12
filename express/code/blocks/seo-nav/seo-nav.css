@@ -99,6 +99,9 @@ main .seo-nav .carousel-container .carousel-fader-right {
 
 
 main .seo-nav .carousel-container {
+  --seo-nav-arrow-safe: 70px;
+  --seo-nav-left-space: 0px;
+  --seo-nav-right-space: 0px;
   margin-left: 0;
   margin-right: 0;
   margin-bottom: 0;
@@ -185,12 +188,6 @@ main .seo-nav-wrapper.v2-wrapper {
   main .seo-nav.v2 h3 {
     font-size: var(--ax-heading-xl-size);
   }
-}
-
-main .seo-nav .carousel-container {
-  --seo-nav-arrow-safe: 70px;
-  --seo-nav-left-space: 0px;
-  --seo-nav-right-space: 0px;
 }
 
 /* Reserve space on the left when the left arrow is visible. */
