@@ -741,18 +741,16 @@ html.icc-scroll-lock body {
   padding-block-start: var(--icc-comparison-padding-block);
 }
 
-/* Figma zoom-to-fill: images sit beside the toolbar (resize() sets the start gutter) and
-   run off the end and bottom edges. The top offset lives inside the scroller so scrolled
-   content clips against the surface's own top edge. */
+/* Figma zoom-to-fill: the surface has no padding; all offsets live inside the scroller so
+   scrolled content clips against the surface's own edges. resize() sets the start gutter
+   beside the toolbar as scroller padding, so images can still scroll under the toolbar. */
 .color-image-contrast-checker .icc-comparison-row.is-fill {
-  --icc-fill-beside-toolbar: 1;
-
-  padding-block: 0;
-  padding-inline-end: 0;
+  padding: 0;
 }
 
 .color-image-contrast-checker .icc-comparison-row.is-fill .icc-comparison {
   padding-block-start: var(--icc-comparison-padding-block);
+  padding-inline-end: var(--icc-comparison-padding-block);
   border-radius: inherit;
 }
 
@@ -934,11 +932,9 @@ html.icc-scroll-lock body {
     padding: var(--spacing-300);
   }
 
-  /* Figma zoom-to-fill (desktop, node 2682-30062): no surface padding; images start at the
-     surface's inline-start edge and run under the toolbar. */
+  /* Zoom-to-fill: restate the base fill padding over the desktop row/dialog padding; the
+     start gutter beside the toolbar comes from resize(), as on smaller breakpoints. */
   .color-image-contrast-checker .icc-comparison-row.is-fill {
-    --icc-fill-beside-toolbar: 0;
-
     padding: 0;
   }
 }

@@ -1229,14 +1229,10 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
               expect(image.height).to.equal(Math.floor(source.height * scale));
               expect(image.height).to.be.at.least(comparisonSlot(host).height - 1);
             }
-            // Desktop Fill has no surface padding: the scroller starts at the surface edge.
-            if (width >= 900) {
-              expect(clip.left).to.equal(surface.getBoundingClientRect().left);
-            } else {
-              for (const frame of frames) {
-                const image = frame.firstElementChild.getBoundingClientRect();
-                expect(Math.max(image.left, clip.left)).to.be.at.least(toolbar.right + 8 - 0.1);
-              }
+            // Fill sits beside the toolbar with an 8px gap at every breakpoint.
+            for (const frame of frames) {
+              const image = frame.firstElementChild.getBoundingClientRect();
+              expect(Math.max(image.left, clip.left)).to.be.at.least(toolbar.right + 8 - 0.1);
             }
             expect([canvas.width, canvas.height]).to.deep.equal([source.width, source.height]);
             comparison.scrollTo(comparison.scrollWidth, comparison.scrollHeight);
@@ -1354,25 +1350,31 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
                 && Math.min(image.right, clip.right) > toolbar.left
                 && Math.max(image.top, clip.top) < toolbar.bottom
                 && Math.min(image.bottom, clip.bottom) > toolbar.top;
-              // Desktop Fill has no surface padding and runs under the toolbar (Figma).
-              if (mode === 'fit' || width < 900) {
-                expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
-                  .to.equal(false);
-              }
+              expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
+                .to.equal(false);
               expect(getComputedStyle(pane).overflow).to.equal('visible');
-              if (surface.style.paddingInlineStart) {
+              const reserved = surface.style.paddingInlineStart
+                || frame.parentElement.style.paddingInlineStart;
+              if (reserved) {
                 expect(image.left - toolbar.right).to.be.at.least(8 - 0.1);
                 reservations += 1;
               }
             }
-            // Fill sits beside the toolbar below 900px (JS gutter) and starts at the surface
-            // edge on desktop; the scroller meets the surface's top, end and bottom edges.
+            // Fill: the toolbar gutter is scroller padding (not surface padding), the scroller
+            // meets every surface edge, and scrolling past the gutter reaches the start edge.
             if (mode === 'fill') {
-              expect(surface.style.paddingInlineStart !== '').to.equal(width < 900);
+              const scroller = frame.parentElement;
+              expect(surface.style.paddingInlineStart).to.equal('');
+              expect(scroller.style.paddingInlineStart).to.not.equal('');
               const edges = surface.getBoundingClientRect();
+              expect(clip.left).to.equal(edges.left);
               expect(clip.top).to.equal(edges.top);
               expect(clip.bottom).to.equal(edges.bottom);
               expect(clip.right).to.equal(edges.right);
+              const gutter = parseFloat(scroller.style.paddingInlineStart);
+              scroller.scrollLeft = gutter;
+              expect(frame.getBoundingClientRect().left).to.be.closeTo(edges.left, 1);
+              scroller.scrollLeft = 0;
             }
           }
           if (expanded) expand.click();
@@ -1385,7 +1387,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       surface.style.blockSize = '75px';
       surface.style.aspectRatio = 'auto';
       block.querySelector('[data-action="fill"]').click();
-      await waitFor(() => surface.style.paddingInlineStart !== '');
+      await waitFor(() => frame.parentElement.style.paddingInlineStart !== '');
       expect(getComputedStyle(zoom).zIndex).to.equal('1');
       expect(getComputedStyle(frame.parentElement).zIndex).to.equal('0');
       zoom.scrollIntoView();

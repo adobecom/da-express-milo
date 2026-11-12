@@ -315,6 +315,7 @@ export default async function decorate(block) {
     comparisonRow.classList.toggle('is-fill', mode === 'fill');
     comparisonRow.style.removeProperty('block-size');
     comparisonRow.style.removeProperty('padding-inline-start');
+    comparison.style.removeProperty('padding-inline-start');
     const surfaceStyle = getComputedStyle(comparisonRow);
     const gap = parseFloat(getComputedStyle(comparison).columnGap) || 0;
     // Measure against the scroller's border box so fill-mode scrollbars never feed back.
@@ -345,13 +346,15 @@ export default async function decorate(block) {
     let { width, height, scale } = measure();
     if (!width || height <= 0) return;
     const toolbar = zoom.getBoundingClientRect();
-    const reserveGutter = () => {
+    // Inline-start gutter beside the toolbar, measured from the row's start edge either way.
+    const toolbarGutter = () => {
       const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
       const row = comparisonRow.getBoundingClientRect();
-      // Inline-start gutter: measured from the row's start edge in either direction.
       const rtl = surfaceStyle.direction === 'rtl';
-      const gutter = (rtl ? row.right - toolbar.left : toolbar.right - row.left) + toolbarGap;
-      comparisonRow.style.paddingInlineStart = `${gutter}px`;
+      return (rtl ? row.right - toolbar.left : toolbar.right - row.left) + toolbarGap;
+    };
+    const reserveGutter = (target) => {
+      target.style.paddingInlineStart = `${toolbarGutter()}px`;
       hug();
       ({ width, height, scale } = measure());
     };
@@ -364,11 +367,12 @@ export default async function decorate(block) {
       const imageTop = frame.top + (height - source.height * scale) / 2;
       if (imageLeft < toolbar.right && imageLeft + pairWidth > toolbar.left
         && imageTop < toolbar.bottom && imageTop + source.height * scale > toolbar.top) {
-        reserveGutter();
+        reserveGutter(comparisonRow);
       }
-    } else if (surfaceStyle.getPropertyValue('--icc-fill-beside-toolbar').trim() === '1') {
-      // Mobile expanded Fill: edge-to-edge height beside the toolbar, scrolling horizontally.
-      reserveGutter();
+    } else {
+      // Fill: the gutter is scroller padding, so the initial view clears the toolbar while
+      // scrolling still carries the images under it to the surface's start edge.
+      reserveGutter(comparison);
     }
     // Floor so fitted images never overflow the shared scroller by a sub-pixel.
     view.panel.style.setProperty('--icc-image-width', `${Math.floor(source.width * scale)}px`);
