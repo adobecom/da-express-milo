@@ -186,3 +186,28 @@ main .seo-nav-wrapper.v2-wrapper {
     font-size: var(--ax-heading-xl-size);
   }
 }
+
+main .seo-nav .carousel-container {
+  --seo-nav-arrow-safe: 70px;
+  --seo-nav-left-space: 0px;
+  --seo-nav-right-space: 0px;
+}
+
+/* Reserve space on the left when the left arrow is visible. */
+main .seo-nav .carousel-container:has(> .carousel-fader-left:not(.arrow-hidden)) {
+  --seo-nav-left-space: var(--seo-nav-arrow-safe);
+}
+/* Reserve space on the right when the right arrow is visible. */
+main .seo-nav .carousel-container:has(> .carousel-fader-right:not(.arrow-hidden)) {
+  --seo-nav-right-space: var(--seo-nav-arrow-safe);
+}
+/* Keep carousel items within the space between the visible arrow/fade areas. */
+main .seo-nav .carousel-platform {
+  box-sizing: border-box;
+  width: calc(100% - var(--seo-nav-left-space) - var(--seo-nav-right-space));
+  max-width: calc(100% - var(--seo-nav-left-space) - var(--seo-nav-right-space));
+  margin-inline-start: var(--seo-nav-left-space);
+  margin-inline-end: var(--seo-nav-right-space);
+  scroll-padding-inline: var(--seo-nav-left-space) var(--seo-nav-right-space);
+}
+
