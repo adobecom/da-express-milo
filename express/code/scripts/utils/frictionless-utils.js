@@ -786,6 +786,10 @@ export async function preloadQuickAction(quickAction, block, options) {
     const id = `${quickAction}-container`;
     const quickActionContainer = block.querySelector(`#${id}`)
       ?? createTag('div', { id, class: 'quick-action-container hidden' });
+    // A hidden preloaded iframe must not contribute tab stops.
+    if (quickActionContainer.classList.contains('hidden')) {
+      quickActionContainer.inert = true;
+    }
     if (!quickActionContainer.isConnected) block.append(quickActionContainer);
     sdk?.quickAction.warmup(getQuickActionId(quickAction), 'preload', createContainerConfig(quickAction));
     return sdk;

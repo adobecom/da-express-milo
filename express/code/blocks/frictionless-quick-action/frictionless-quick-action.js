@@ -234,12 +234,8 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
   // (no fade) since the dropzone's own fadeOut below already animates the visible transition.
   quickActionContainer = block.querySelector(`#${id}`)
     ?? createTag('div', { id, class: 'quick-action-container' });
-
-  if (quickActionContainer.classList.contains('hidden')) {
-    quickActionContainer.inert = true;
-  }
-  quickActionContainer.inert = false;
   quickActionContainer.classList.remove('hidden');
+  quickActionContainer.inert = false;
   if (!quickActionContainer.isConnected) block.append(quickActionContainer);
   const divs = block.querySelectorAll(':scope > div');
   if (divs[1]) [, uploadContainer] = divs;
