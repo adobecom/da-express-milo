@@ -85,6 +85,13 @@ Optional checker rows:
 | background | One decorative collage picture containing the Figma left/right artwork. Use responsive picture sources where needed. Like Color Extract, it stays at its natural size, top-aligned and horizontally centered behind the desktop upload marquee, with overflow cropped rather than stretched to the viewport. A 143px CSS overlay fades the bottom from transparent to white at 80.29%. It is hidden below 1200px and in results, and excluded from assistive technology. |
 | samples | Authored pictures, displayed as 5:7 portrait sample buttons cropped to fill their frames. The Figma row is 343px wide with 6px gaps: four samples are 81.25 x 113.75px each, shrinking proportionally on narrower screens. Links and alt text are optional. When alt text is absent, the button uses the `color-image-contrast-checker-use-this-image` placeholder as its accessible name. Selecting an unlinked DA image fetches its original media URL without image-optimization parameters; an optional wrapping link overrides that URL and should point to the original full-resolution PNG/JPEG/WebP. |
 
+The samples cell also accepts Express template IDs (`urn:aaid:sc:…`) as text, one or more per
+paragraph separated by commas or whitespace, mixed freely with pictures; samples keep authored
+order. IDs are resolved in one Express search API request (`templateIds`) while the block
+loads: the button shows the template's preview rendition, its accessible name uses the
+template title, and selecting it analyzes the native-size JPEG rendition. IDs that are
+unknown, unapproved, or fail to load are skipped; any other text in the cell fails explicitly.
+
 No other rows are supported. Duplicate rows, missing headings/accuracy guidance,
 invalid samples, and missing required checker placeholders fail explicitly.
 The previous `hero` and UI-string rows are not an alternate authoring API.

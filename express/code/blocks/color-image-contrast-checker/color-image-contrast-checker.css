@@ -749,7 +749,7 @@ html.icc-scroll-lock body {
 }
 
 .color-image-contrast-checker .icc-comparison-row.is-fill .icc-comparison {
-  padding-block-start: var(--icc-comparison-padding-block);
+  padding-block: var(--icc-comparison-padding-block);
   padding-inline-end: var(--icc-comparison-padding-block);
   border-radius: inherit;
 }

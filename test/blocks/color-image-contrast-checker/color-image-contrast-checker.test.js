@@ -1800,6 +1800,55 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(block.querySelector('canvas').width).to.equal(13);
   });
 
+  it('resolves authored template IDs to samples in authored order, skipping unknown IDs', async () => {
+    const rendition = 'https://design-assets.adobeprojectm.com/content/download/express/public/urn:aaid:sc:VA6C2:a/component?assetType=TEMPLATE{&page,size,type,fragment}';
+    const template = (id, title) => ({
+      id,
+      status: 'approved',
+      behaviors: ['still'],
+      customLinks: { branchUrl: 'https://adobesparkpost.app.link/x' },
+      'dc:title': { 'i-default': title },
+      pages: [{
+        task: { size: { name: '1080x1350px' } },
+        rendition: {
+          image: {
+            thumbnail: { componentId: 't', mediaType: 'image/webp', width: 400, height: 500 },
+            preview: { componentId: 'p', mediaType: 'image/webp', width: 800, height: 1000 },
+          },
+        },
+      }],
+      _links: {
+        'http://ns.adobe.com/adobecloud/rel/rendition': { href: rendition.replace(':a/', `:${id.slice(-1)}/`) },
+        'http://ns.adobe.com/adobecloud/rel/component': { href: 'https://example.com/{&revision,component_id}' },
+      },
+    });
+    const original = await imageFile();
+    const fetchStub = sinon.stub(window, 'fetch').callsFake(async (url) => (
+      String(url).includes('express-search-api-v3')
+        ? new Response(JSON.stringify({
+          items: [template('urn:aaid:sc:VA6C2:b', 'Second'), template('urn:aaid:sc:VA6C2:a', 'First')],
+        }))
+        : new Response(original)));
+    await setup((checker) => {
+      authorSamples(checker, `
+        <p>urn:aaid:sc:VA6C2:a</p>
+        <picture><img src="/nala/assets/test-image.jpg" alt="Authored"></picture>
+        <p>urn:aaid:sc:VA6C2:missing, urn:aaid:sc:VA6C2:b</p>
+      `);
+    });
+    const search = new URL(fetchStub.firstCall.args[0]);
+    expect(search.searchParams.get('filters'))
+      .to.equal('id==urn:aaid:sc:VA6C2:a,urn:aaid:sc:VA6C2:missing,urn:aaid:sc:VA6C2:b');
+    const samples = [...block.querySelectorAll('.icc-sample')];
+    expect(samples.map((sample) => sample.querySelector('img').alt))
+      .to.deep.equal(['First', 'Authored', 'Second']);
+    expect(samples[0].querySelector('img').getAttribute('src')).to.include('size=1000');
+    samples[2].click();
+    await waitFor(() => block.classList.contains('has-image')
+      && block.getAttribute('aria-busy') === 'false');
+    expect(fetchStub.lastCall.args[0]).to.include(':b/').and.include('size=1350&type=image/jpeg');
+  });
+
   it('matches Figma sample dimensions and crops authored images without stretching', async () => {
     const { innerWidth: width, innerHeight: height } = window;
     try {

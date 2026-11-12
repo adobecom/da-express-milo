@@ -8,6 +8,7 @@ import loadColorImageContrastCheckerPlaceholders, { loadColorImageContrastUpload
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { getPictureSource } from '../../scripts/color-shared/utils/imageExtractUtils.js';
 import parseContent from './content.js';
+import resolveTemplates from './templates.js';
 import { decodeImage } from './image.js';
 import createRenderer from './analysis.js';
 import createDropdown from '../../scripts/color-shared/components/dropdown/dropdown.js';
@@ -487,6 +488,14 @@ export default async function decorate(block) {
     uploadStrings = await loadColorImageContrastUploadPlaceholders();
     if (destroyed) return;
     content = parseContent(block);
+    const templateIds = content.samples.flatMap(({ templateId }) => templateId ?? []);
+    // Resolve template samples alongside the remaining setup instead of after it.
+    const templates = templateIds.length
+      ? resolveTemplates(templateIds).catch((error) => {
+        window.lana?.log(`color-image-contrast-checker: template samples failed: ${error.message}`, { tags: 'color-image-contrast-checker' });
+        return new Map();
+      })
+      : null;
     strings = await loadColorImageContrastCheckerPlaceholders();
     if (destroyed) return;
     const { loadStyle } = await import(`${getLibs()}/utils/utils.js`);
@@ -593,17 +602,26 @@ export default async function decorate(block) {
       strings: uploadStrings, loadingText: strings.analyzingImage, onFileSelected: load,
     });
     upload.append(dropzone.container);
-    if (content.samples) {
+    const resolved = await templates;
+    const sampleEntries = content.samples.flatMap((entry) => {
+      if (!entry.templateId) return [entry];
+      const template = resolved.get(entry.templateId);
+      return template ? [{ template }] : [];
+    });
+    if (destroyed) return;
+    if (sampleEntries.length) {
       const suggestions = createTag('div', { class: 'icc-suggestions' });
       suggestions.append(label('p', '', strings.noImageTryOurs));
       const samples = createTag('div', { class: 'icc-sample-list' });
-      [...content.samples.querySelectorAll('picture')].forEach((picture) => {
+      sampleEntries.forEach(({ picture: authored, template }) => {
+        const picture = authored ?? createTag('picture');
+        if (template) picture.append(createTag('img', { src: template.preview, alt: template.title, loading: 'lazy' }));
         const image = picture.querySelector('img');
         const anchor = picture.closest('a[href]');
-        const src = anchor?.href || getPictureSource(picture);
+        const src = template?.src || anchor?.href || getPictureSource(picture);
         if (!image || !src) throw new Error('Sample requires an authored image source');
         const url = new URL(src, document.baseURI);
-        if (!anchor && /\/media_[^/]+$/.test(url.pathname)) {
+        if (!template && !anchor && /\/media_[^/]+$/.test(url.pathname)) {
           ['width', 'height', 'format', 'optimize', 'fit'].forEach((key) => url.searchParams.delete(key));
         }
         const description = image.alt.trim();
