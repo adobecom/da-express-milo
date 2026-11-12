@@ -93,7 +93,7 @@ main .section .simple-marquee .headline :is(h1, h2, h3, h4, h5, h6) {
   margin-top: var(--spacing-300);
 }
 
-.simple-marquee .headline a.button:any-link {
+.simple-marquee .headline a.con-button:any-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -122,13 +122,33 @@ main .section .simple-marquee .headline :is(h1, h2, h3, h4, h5, h6) {
   border-color: var(--S2-Buttons-Accent-Color-Hover);
 }
 
-.simple-marquee .headline a.button .text-group {
+.simple-marquee .headline a.con-button.gradient:any-link {
+  border: none;
+  background: var(--S2-Buttons-Premium);
+  background-size: 400% 400%;
+  color: var(--color-white);
+  animation: buttonGradient 45s ease infinite;
+}
+
+.simple-marquee .headline a.con-button.gradient:any-link:hover {
+  background: var(--S2-Buttons-Premium-Hover);
+}
+
+.simple-marquee .headline a.con-button.gradient:any-link:focus {
+  background: var(--S2-Buttons-Premium);
+}
+
+.simple-marquee .headline a.con-button.gradient:any-link:active {
+  background: var(--S2-Buttons-Premium-Down);
+}
+
+.simple-marquee .headline a.con-button .text-group {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-100);
 }
 
-.simple-marquee .headline a.button .icon {
+.simple-marquee .headline a.con-button .icon {
   display: inline-flex;
   width: var(--spacing-300);
   height: var(--spacing-300);
@@ -152,7 +172,7 @@ main .section .simple-marquee .headline :is(h1, h2, h3, h4, h5, h6) {
   color: color-mix(in srgb, var(--color-black) 93%, transparent);
 }
 
-.simple-marquee .headline a.button:any-link:focus {
+.simple-marquee .headline a.con-button:any-link:focus {
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
@@ -238,7 +258,7 @@ main .section .simple-marquee .headline :is(h1, h2, h3, h4, h5, h6) {
 }
 
 @media (max-width: 767px) {
-  main div.simple-marquee.keep-cta-mobile[data-block-status] a.button.same-fcta {
+  main div.simple-marquee.keep-cta-mobile[data-block-status] a.con-button.same-fcta {
     display: inline-flex;
   }
 }

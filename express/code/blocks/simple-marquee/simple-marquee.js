@@ -2,6 +2,7 @@ import {
   createTag,
   formatDynamicCartLink,
   getIconElementDeprecated,
+  getLibs,
   getMetadata,
 } from '../../scripts/utils.js';
 import trackBranchParameters from '../../scripts/branchlinks.js';
@@ -48,18 +49,18 @@ function decorateCtaIcon(cta, iconNameOverride) {
 async function decorateHeadline(block, headline) {
   headline.classList.add('headline');
   const heading = headline.querySelector('h1, h2, h3, h4, h5, h6');
-  const ctas = [...headline.querySelectorAll('a')];
+  const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+  decorateButtons(headline, 'button-l');
+  const ctas = [...headline.querySelectorAll('a.con-button')];
   if (!ctas.length) {
     headline.classList.add('no-cta');
-    return;
+    return ctas;
   }
 
   const ctaContainer = createTag('div', { class: 'ctas' });
   const wrappers = new Set();
   ctas.forEach((cta, index) => {
-    const wrapper = cta.closest('p') || cta.parentElement;
-    wrappers.add(wrapper);
-    cta.classList.add('button', 'button-l');
+    wrappers.add(cta.parentElement);
     cta.classList.toggle('primaryCTA', index === 0);
     cta.classList.toggle('secondaryCTA', index > 0);
     const isPremiumPrimary = index === 0 && block.classList.contains('premium-cta');
@@ -77,9 +78,7 @@ async function decorateHeadline(block, headline) {
     if (wrapper && wrapper !== ctaContainer && !wrapper.textContent.trim()
       && !wrapper.querySelector('img, picture, svg')) wrapper.remove();
   });
-
-  await trackBranchParameters(ctas);
-  await Promise.all(ctas.map((cta) => formatDynamicCartLink(cta)));
+  return ctas;
 }
 
 export default async function init(block) {
@@ -100,8 +99,15 @@ export default async function init(block) {
     });
   }
 
-  await decorateHeadline(block, headline);
+  const ctas = await decorateHeadline(block, headline);
   const foreground = createTag('div', { class: 'foreground' });
   foreground.append(getBrandingLogo(block), headline);
   block.replaceChildren(...(background ? [background] : []), foreground);
+
+  if (!ctas.length) return;
+  // Link enrichment is non-critical; let it settle after the block is painted.
+  trackBranchParameters(ctas).catch((error) => {
+    window.lana?.log(`simple-marquee branch tracking failed: ${error}`, { tags: 'simple-marquee', severity: 'error' });
+  });
+  ctas.forEach((cta) => formatDynamicCartLink(cta));
 }

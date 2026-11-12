@@ -30,7 +30,7 @@ describe('Simple Marquee', () => {
 
   it('decorates the headline, body copy, and CTA row', async () => {
     const block = await render();
-    const buttons = block.querySelectorAll('.headline a.button');
+    const buttons = block.querySelectorAll('.headline a.con-button');
 
     expect(block.querySelector('.foreground > .headline h1')).to.exist;
     expect(block.querySelector('.headline p')).to.exist;
@@ -39,6 +39,8 @@ describe('Simple Marquee', () => {
     expect(buttons[0].classList.contains('primaryCTA')).to.be.true;
     expect(buttons[1].classList.contains('secondaryCTA')).to.be.true;
     expect([...buttons].every((button) => button.classList.contains('button-l'))).to.be.true;
+    expect(buttons[0].classList.contains('blue')).to.be.true;
+    expect(buttons[1].classList.contains('outline')).to.be.true;
   });
 
   it('injects an authored CTA icon into the button', async () => {

@@ -10,10 +10,10 @@ The required first row contains a heading, optional body copy, and up to two CTA
 
 | simple-marquee |
 | --- |
-| # The quick and easy create-anything app. <br> Make stunning social posts, images, videos, flyers, and more. <br> [Start free trial](#) [Get Adobe Express](#) |
+| # The quick and easy create-anything app. <br> Make stunning social posts, images, videos, flyers, and more. <br> **[Start free trial](#)** _[Get Adobe Express](#)_ |
 | ![background](media.png) |
 
-The first link is the primary CTA. The second link is the outlined secondary CTA. CTAs remain visible on mobile. Add the `keep-cta-mobile` variant when the CTA must also remain visible if its URL matches the page's floating CTA.
+CTAs are decorated with Milo's `decorateButtons`, so author them as bold (`**link**`) or italic (`_link_`) links; plain links stay inline text. The first button is the primary CTA; the second is the outlined secondary CTA. CTAs remain visible on mobile. Add the `keep-cta-mobile` variant when the CTA must also remain visible if its URL matches the page's floating CTA.
 
 ## Variants
 
