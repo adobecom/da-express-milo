@@ -38,10 +38,6 @@ main .seo-nav p {
   line-height: 0;
 }
 
-main .seo-nav .carousel-platform {
-  gap: 10px;
-}
-
 main .seo-nav p.current {
   pointer-events: none;
 }
@@ -200,6 +196,7 @@ main .seo-nav .carousel-container:has(> .carousel-fader-right:not(.arrow-hidden)
 }
 /* Keep carousel items within the space between the visible arrow/fade areas. */
 main .seo-nav .carousel-platform {
+  gap: 10px;
   box-sizing: border-box;
   width: calc(100% - var(--seo-nav-left-space) - var(--seo-nav-right-space));
   max-width: calc(100% - var(--seo-nav-left-space) - var(--seo-nav-right-space));
