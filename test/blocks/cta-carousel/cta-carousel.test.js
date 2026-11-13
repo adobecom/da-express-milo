@@ -14,7 +14,6 @@ const genAiUpload = await readFile({ path: './mocks/gen-ai-upload.html' });
 
 describe('CTA Carousel - Create Variant', () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = create;
     window.placeholders = { 'search-branch-links': 'https://adobesparkpost.app.link/c4bWARQhWAb' };
   });
@@ -73,7 +72,6 @@ describe('CTA Carousel - Create Variant', () => {
 
 describe('CTA Carousel - Quick Action Variant', () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = quickAction;
   });
 
@@ -93,7 +91,6 @@ describe('CTA Carousel - Quick Action Variant', () => {
 
 describe('CTA Carousel - Gen AI variant', async () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = genAI;
   });
 
@@ -131,7 +128,6 @@ describe('CTA Carousel - Gen AI variant', async () => {
 
 describe('CTA Carousel - Quick Action + Gen AI combo', async () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = genAiQuickAction;
   });
 
@@ -151,7 +147,6 @@ describe('CTA Carousel - Quick Action + Gen AI combo', async () => {
 
 describe('Gen AI + Upload Combo', async () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = genAiUpload;
   });
 

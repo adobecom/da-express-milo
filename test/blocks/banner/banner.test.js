@@ -14,10 +14,6 @@ const cool = await readFile({ path: './mocks/cool.html' });
 const multiButton = await readFile({ path: './mocks/multi-button.html' });
 
 describe('Banner', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Banner exists', async () => {
     document.body.innerHTML = body;
     const banner = document.querySelector('.banner');

@@ -35,7 +35,6 @@ function removeMainDivDisplayNone() {
 describe('Content Toggle V2', async () => {
   let contentToggleV2;
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = testBody;
     window.placeholders = { 'search-branch-links':
        'https://adobesparkpost.app.link/c4bWARQhWAb' };

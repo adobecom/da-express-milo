@@ -12,10 +12,6 @@ const { default: decorate } = await import(
 document.body.innerHTML = await readFile({ path: './mocks/body.html' });
 
 describe('Browse-by-category', () => {
-  before(() => {
-    window.istestEnv = true;
-  });
-
   it('Browse by category exists', async () => {
     const categories = document.querySelector('#browse-by-category-pure');
     await decorate(categories);
