@@ -1,0 +1,202 @@
+{
+  "block": "frictionless-quick-action-mobile",
+  "assets": {
+    "image": "nala/assets/test-image.png",
+    "video": "nala/assets/test-video.mp4"
+  },
+  "fallback": {
+    "path": "/drafts/nala/blocks/frictionless-quick-action-mobile/fragments/fallback",
+    "heading": "Mobile quick-action fallback.",
+    "description": "This fixture shows the fallback experience when mobile quick actions are unavailable.",
+    "destination": "Fixture destination reached. No app store was opened.",
+    "link": "Return to image upload fixture"
+  },
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@frictionless-quick-action-mobile-crop-image",
+      "selector": ".frictionless-quick-action-mobile",
+      "path": "/drafts/nala/blocks/frictionless-quick-action-mobile/crop-image",
+      "data": {
+        "action": "crop-image",
+        "group": "image",
+        "title": "Crop your image for free | Nala fixture",
+        "postUploadHeading": "Your image is ready to crop.",
+        "accept": [".jpg", ".jpeg", ".png"],
+        "modern": true,
+        "semantic": {
+          "texts": [
+            { "selector": "h1", "text": "Crop your image for free." },
+            { "selector": ".subheading", "text": "Choose an image to crop on your phone." },
+            { "selector": ".extra-container", "text": "Choose a JPG, JPEG, or PNG image up to 40 MiB." },
+            { "selector": ".legal", "text": "By uploading your image or video, you agree to the Adobe Terms of Use and Privacy Policy." }
+          ],
+          "media": [
+            { "selector": ".animation-container img", "alt": "Blue passenger train at a station.", "width": 301 }
+          ],
+          "interactives": [
+            { "selector": "#mobile-fqa-upload", "text": "Tap to upload an image." },
+            { "selector": ".legal a", "nth": 0, "text": "Terms of Use", "href": "/legal/terms.html" },
+            { "selector": ".legal a", "nth": 1, "text": "Privacy Policy", "href": "/privacy/policy.html" }
+          ]
+        }
+      },
+      "tags": ["@frictionless-quick-action-mobile", "@crop-image", "@express"]
+    },
+    {
+      "tcid": "1",
+      "name": "@frictionless-quick-action-mobile-crop-image-legacy",
+      "selector": ".frictionless-quick-action-mobile",
+      "path": "/drafts/nala/blocks/frictionless-quick-action-mobile/crop-image-legacy",
+      "data": {
+        "action": "crop-image",
+        "group": "image",
+        "title": "Crop your image for free | Nala fixture",
+        "postUploadHeading": "Your image is ready to crop.",
+        "accept": [".jpg", ".jpeg", ".png"],
+        "modern": false,
+        "semantic": {
+          "texts": [
+            { "selector": "h1", "text": "Crop your image for free." },
+            { "selector": ".subheading", "text": "Choose an image to crop on your phone." },
+            { "selector": ".extra-container", "text": "Choose a JPG, JPEG, or PNG image up to 40 MiB." },
+            { "selector": ".legal", "text": "By uploading your image or video, you agree to the Adobe Terms of Use and Privacy Policy." }
+          ],
+          "media": [
+            { "selector": ".animation-container img", "alt": "Blue passenger train at a station.", "width": 301 }
+          ],
+          "interactives": [
+            { "selector": "#mobile-fqa-upload", "text": "Tap to upload an image." },
+            { "selector": ".legal a", "nth": 0, "text": "Terms of Use", "href": "/legal/terms.html" },
+            { "selector": ".legal a", "nth": 1, "text": "Privacy Policy", "href": "/privacy/policy.html" }
+          ]
+        }
+      },
+      "tags": ["@frictionless-quick-action-mobile", "@legacy", "@express"]
+    },
+    {
+      "tcid": "2",
+      "name": "@frictionless-quick-action-mobile-caption-video",
+      "selector": ".frictionless-quick-action-mobile",
+      "path": "/drafts/nala/blocks/frictionless-quick-action-mobile/caption-video",
+      "data": {
+        "action": "caption-video",
+        "group": "video",
+        "title": "Add captions to your video | Nala fixture",
+        "postUploadHeading": "Your video is ready for captions.",
+        "accept": [".mov", ".mp4", ".crm", ".avi", ".m2ts", ".3gp", ".f4v", ".mpeg", ".m2t", ".m2p", ".m1v", ".mpg", ".wmv", ".tts", ".264"],
+        "modern": true,
+        "language": { "pointer": "German", "keyboard": "French", "code": "fr-fr" },
+        "semantic": {
+          "texts": [
+            { "selector": "h1", "text": "Add captions to your video." },
+            { "selector": ".subheading", "text": "Choose a video, then select the language spoken in it." },
+            { "selector": ".extra-container", "text": "Choose a supported video file up to 1 GiB." },
+            { "selector": ".legal", "text": "By uploading your image or video, you agree to the Adobe Terms of Use and Privacy Policy." }
+          ],
+          "media": [
+            { "selector": ".animation-container video", "width": 1126, "duration": 2.6 }
+          ],
+          "interactives": [
+            { "selector": "#mobile-fqa-upload", "text": "Tap to upload a video." },
+            { "selector": ".legal a", "nth": 0, "text": "Terms of Use", "href": "/legal/terms.html" },
+            { "selector": ".legal a", "nth": 1, "text": "Privacy Policy", "href": "/privacy/policy.html" }
+          ]
+        }
+      },
+      "tags": ["@frictionless-quick-action-mobile", "@caption-video", "@express"]
+    },
+    {
+      "tcid": "3",
+      "name": "@frictionless-quick-action-mobile-merge-videos",
+      "selector": ".frictionless-quick-action-mobile",
+      "path": "/drafts/nala/blocks/frictionless-quick-action-mobile/merge-videos",
+      "data": {
+        "action": "merge-videos",
+        "group": "video",
+        "title": "Merge your videos and images | Nala fixture",
+        "accept": [".mov", ".mp4", ".crm", ".avi", ".m2ts", ".3gp", ".f4v", ".mpeg", ".m2t", ".m2p", ".m1v", ".mpg", ".wmv", ".tts", ".264", ".jpg", ".jpeg", ".png"],
+        "modern": true,
+        "semantic": {
+          "texts": [
+            { "selector": "h1", "text": "Merge your videos and images." },
+            { "selector": ".extra-container", "text": "Choose supported videos or JPG, JPEG, or PNG images, up to 1 GiB per file." },
+            { "selector": ".legal", "text": "By uploading your image or video, you agree to the Adobe Terms of Use and Privacy Policy." }
+          ],
+          "media": [
+            { "selector": ".animation-container img", "alt": "Blue passenger train at a station.", "width": 301 }
+          ],
+          "interactives": [
+            { "selector": "#mobile-fqa-upload", "text": "Tap to upload videos and images." },
+            { "selector": ".legal a", "nth": 0, "text": "Terms of Use", "href": "/legal/terms.html" },
+            { "selector": ".legal a", "nth": 1, "text": "Privacy Policy", "href": "/privacy/policy.html" }
+          ]
+        }
+      },
+      "tags": ["@frictionless-quick-action-mobile", "@merge-videos", "@express"]
+    },
+    {
+      "tcid": "4",
+      "name": "@frictionless-quick-action-mobile-generate-qr-code",
+      "selector": ".frictionless-quick-action-mobile",
+      "path": "/drafts/nala/blocks/frictionless-quick-action-mobile/generate-qr-code",
+      "data": {
+        "action": "generate-qr-code",
+        "group": "image",
+        "title": "Create a QR code | Nala fixture",
+        "postUploadHeading": "Your QR code workspace is ready.",
+        "accept": [".jpg", ".jpeg", ".png"],
+        "modern": true,
+        "semantic": {
+          "texts": [
+            { "selector": "h1", "text": "Create a QR code." },
+            { "selector": ".extra-container", "text": "No file upload is required." },
+            { "selector": ".legal", "text": "By using this quick action, you agree to the Adobe Terms of Use and Privacy Policy." }
+          ],
+          "media": [
+            { "selector": ".animation-container img", "alt": "Blue passenger train at a station.", "width": 301 }
+          ],
+          "interactives": [
+            { "selector": "#mobile-fqa-upload", "text": "Tap to create a QR code." },
+            { "selector": ".legal a", "nth": 0, "text": "Terms of Use", "href": "/legal/terms.html" },
+            { "selector": ".legal a", "nth": 1, "text": "Privacy Policy", "href": "/privacy/policy.html" }
+          ]
+        }
+      },
+      "tags": ["@frictionless-quick-action-mobile", "@generate-qr-code", "@express"]
+    },
+    {
+      "tcid": "5",
+      "name": "@frictionless-quick-action-mobile-edit-video-ios",
+      "selector": ".frictionless-quick-action-mobile",
+      "path": "/drafts/nala/blocks/frictionless-quick-action-mobile/edit-video-ios",
+      "data": {
+        "action": "edit-video",
+        "group": "video",
+        "title": "Start with your video | Nala fixture",
+        "postUploadHeading": "Your video quick action is ready.",
+        "accept": [".mov", ".mp4", ".crm", ".avi", ".m2ts", ".3gp", ".f4v", ".mpeg", ".m2t", ".m2p", ".m1v", ".mpg", ".wmv", ".tts", ".264"],
+        "modern": true,
+        "pickerActions": ["Edit video", "Convert video to GIF", "Crop video", "Trim video", "Resize video", "Caption video"],
+        "pickerBadge": "iOS App only",
+        "semantic": {
+          "texts": [
+            { "selector": "h1", "text": "Start with your video." },
+            { "selector": ".subheading", "text": "Choose a video to explore quick actions on your phone." },
+            { "selector": ".extra-container", "text": "Choose a supported video file up to 1 GiB." },
+            { "selector": ".legal", "text": "By uploading your image or video, you agree to the Adobe Terms of Use and Privacy Policy." }
+          ],
+          "media": [
+            { "selector": ".animation-container img", "alt": "Blue passenger train at a station.", "width": 301 }
+          ],
+          "interactives": [
+            { "selector": "#mobile-fqa-upload", "text": "Tap to upload a video." },
+            { "selector": ".legal a", "nth": 0, "text": "Terms of Use", "href": "/legal/terms.html" },
+            { "selector": ".legal a", "nth": 1, "text": "Privacy Policy", "href": "/privacy/policy.html" }
+          ]
+        }
+      },
+      "tags": ["@frictionless-quick-action-mobile", "@edit-video-ios", "@express"]
+    }
+  ]
+}
