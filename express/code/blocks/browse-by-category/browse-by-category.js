@@ -38,6 +38,13 @@ export function decorateHeading(block, payload) {
   block.append(headingSection);
 }
 
+function markImagesDecorative(picture) {
+  picture?.querySelectorAll('img').forEach((img) => {
+    img.setAttribute('alt', '');
+    ['title', 'aria-label', 'aria-labelledby'].forEach((attr) => img.removeAttribute(attr));
+  });
+}
+
 export function decorateCategories(block, payload) {
   const categoriesWrapper = createTag('div', { class: 'browse-by-category-categories-wrapper' });
 
@@ -47,6 +54,7 @@ export function decorateCategories(block, payload) {
     const categoryImageShadowWrapper = createTag('div', { class: 'browse-by-category-image-shadow-wrapper' });
     const categoryImageShadow = createTag('div', { class: 'browse-by-category-image-shadow' });
     const categoryImage = categoryCard.image;
+    markImagesDecorative(categoryImage);
     const categoryTitle = createTag('p', { class: 'browse-by-category-card-title' });
     const categoryAnchor = createTag('a', { class: 'browse-by-category-card-link' });
 
