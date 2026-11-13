@@ -1,0 +1,513 @@
+/* MWPW-186599 — Image Reveal (Color Extract page sandbox).
+   Layout per Figma "Adobe-Color-Component-Library / image-reveal":
+   stacked slider-over-panel <899px (Tablet S 600–898px widens gutters),
+   panel+slider row 899–1199px (Tablet L, tabbed controls),
+   white sandbox card with stacked groups ≥1200px.
+   Tokens: S2A (www.adobe.com/libs/c2/styles/s2a-tokens.css) wherever a value
+   matches; legacy Express tokens and commented raw values for the rest. */
+
+.image-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2a-spacing-lg);
+  padding-block: var(--s2a-spacing-2xl);
+  padding-inline: var(--s2a-spacing-md); /* Figma Grid/container-padding-side: 16 mobile, 32 tablet, 40 desktop */
+}
+
+/* Authorable "grey" variant: paints the Figma section background (#F8F8F8)
+   independent of section-metadata styles. */
+.image-reveal.grey {
+  background: var(--s2a-color-gray-50);
+}
+
+/* ---------- Section header ---------- */
+.image-reveal-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2a-spacing-xs);
+  align-items: center;
+  text-align: center;
+}
+
+.image-reveal-header:empty {
+  display: none;
+}
+
+.image-reveal .image-reveal-header h2 {
+  margin: 0;
+  color: var(--s2a-color-gray-900);
+  font-size: var(--ax-heading-xl-size); /* 28px — no s2a token (scale jumps 24→32) */
+  font-weight: var(--heading-font-weight-extra); /* 900 — no s2a weight tokens */
+  line-height: 1.04; /* Figma headings/xl — no unitless lh in s2a (29px @28 is off-scale) */
+}
+
+.image-reveal .image-reveal-header p {
+  margin: 0;
+  color: var(--color-gray-700-variant); /* Figma neutral-subdued #464646 — not in the s2a gray scale */
+  font-size: var(--s2a-typography-font-size-body-sm);
+  line-height: var(--s2a-font-line-height-xs); /* 18px ≈ Figma lh 1.3 @14px (18.2) */
+}
+
+/* ---------- Sandbox container ---------- */
+.image-reveal-sandbox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2a-spacing-md);
+}
+
+.image-reveal-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2a-spacing-md);
+  min-width: 0;
+}
+
+/* ---------- Comparison stage ---------- */
+.image-reveal-stage {
+  --image-reveal-position: 50%;
+  position: relative;
+  order: -1; /* slider sits above the panel on mobile */
+  width: 100%;
+  aspect-ratio: 2.09; /* Figma slider ≈ 1254×600 at every breakpoint */
+  cursor: ew-resize;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+/* Clips only the image layers to the rounded corners; the slider handle
+   stays a sibling so the grip is never clipped at the stage edges. */
+.image-reveal-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--s2a-border-radius-xs);
+}
+
+.image-reveal-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.image-reveal-layer picture,
+.image-reveal-layer img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.image-reveal-filtered {
+  clip-path: inset(0 0 0 var(--image-reveal-position));
+}
+
+[dir="rtl"] .image-reveal-filtered {
+  clip-path: inset(0 var(--image-reveal-position) 0 0);
+}
+
+.image-reveal-stage[data-effect="grayscale"] .image-reveal-filtered img {
+  filter: grayscale(1);
+}
+
+.image-reveal-stage[data-effect="color-punch"] .image-reveal-filtered img {
+  filter: saturate(2) contrast(1.2) brightness(1.1);
+}
+
+.image-reveal-stage[data-effect="duotone"] .image-reveal-filtered img {
+  filter: var(--image-reveal-duotone);
+}
+
+/* ---------- Slider handle ---------- */
+.image-reveal-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: var(--image-reveal-position);
+  width: var(--s2a-border-width-md);
+  translate: -50% 0;
+}
+
+/* The visible divider line; fades out when the slider reaches either edge. */
+.image-reveal-handle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--s2a-color-gray-25);
+  box-shadow: 0 0 4px rgb(0 0 0 / 40%); /* keeps the line visible over light images — utility value, no token */
+  transition: opacity 0.2s ease-out;
+}
+
+.image-reveal-stage.is-at-edge .image-reveal-handle::before {
+  opacity: 0;
+}
+
+[dir="rtl"] .image-reveal-handle {
+  translate: 50% 0;
+}
+
+.image-reveal-handle:focus-visible {
+  outline: none;
+}
+
+.image-reveal-grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box; /* Figma sizes include the 2px border */
+  width: 24px; /* Figma Slide-controls Size S — component size, not spacing */
+  height: 24px;
+  translate: -50% -50%;
+  border: var(--s2a-border-width-md) solid var(--s2a-color-blue-900);
+  border-radius: var(--s2a-border-radius-round);
+  background: var(--s2a-color-gray-25);
+  color: var(--s2a-color-gray-800); /* #292929 — drives the icon's fill via currentColor */
+  box-shadow: var(--s2a-shadow-level-2-x) var(--s2a-shadow-level-2-y) var(--s2a-shadow-level-2-blur) var(--s2a-shadow-level-2-spread) var(--s2a-shadow-level-2-color);
+}
+
+.image-reveal-grip svg {
+  display: block;
+  width: 12px; /* Figma Slide-controls Size S icon */
+  height: 12px;
+}
+
+.image-reveal-handle:focus-visible .image-reveal-grip {
+  /* repo stylelint bans var() fallbacks; --S2AC-Color-background-accent-focus isn't
+     defined in any loaded token sheet — #274DEA lives in s2a as blue-1000 */
+  outline-width: 1px;
+  outline-style: solid;
+  outline-color: var(--s2a-color-blue-1000);
+  outline-offset: 1px;
+  border-radius: var(--s2a-border-radius-round);
+}
+
+/* ---------- Tabs (mobile/tablet) ---------- */
+.image-reveal-tabs {
+  display: flex;
+  flex-wrap: wrap; /* long localized labels wrap instead of overflowing */
+  gap: var(--s2a-spacing-xl);
+}
+
+.image-reveal-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-80); /* 6px icon gap — no s2a token (scale jumps 4→8) */
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--s2a-color-gray-700);
+  font-family: inherit; /* <button> defaults to the UA font (Arial), not Adobe Clean */
+  font-size: var(--s2a-typography-font-size-body-sm);
+  line-height: var(--s2a-font-line-height-xs);
+}
+
+.image-reveal-tab[aria-selected="true"] {
+  color: var(--s2a-color-gray-800);
+}
+
+.image-reveal-tab[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: var(--s2a-border-width-md);
+  border-radius: var(--s2a-border-radius-3xs);
+  background: var(--s2a-color-gray-800);
+}
+
+.image-reveal-tab:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.image-reveal-tab-icon {
+  display: inline-flex;
+}
+
+.image-reveal-tab-icon svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------- Control groups ---------- */
+.image-reveal-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2a-spacing-xs);
+}
+
+.image-reveal-group[hidden] {
+  display: none; /* [hidden] loses to display:flex without this */
+}
+
+.image-reveal-group-title {
+  display: none; /* group titles only exist ≥1200px; tabs label the panels below that */
+}
+
+.image-reveal-thumbs {
+  display: flex;
+  align-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--s2a-spacing-xs);
+}
+
+/* JS sets .has-thumbs-reflow (below 1200px only) when the longest thumb row
+   wraps; reserve its two-row height so tab switching doesn't shift layout.
+   Component size, no token. */
+.image-reveal.has-thumbs-reflow .image-reveal-thumbs {
+  min-height: 212px;
+}
+
+.image-reveal-thumb {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s2a-spacing-2xs);
+  width: 80px; /* Figma Thumbnail-Button fixed size — not a spacing value */
+  cursor: pointer;
+}
+
+/* Native radios stay in the a11y tree; the whole label is the visual target. */
+.image-reveal-thumb-input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.image-reveal-thumb-img {
+  position: relative;
+  display: block;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: var(--s2a-border-radius-xs);
+  background: var(--s2a-color-gray-50); /* Figma "Bg for transparent assets" */
+}
+
+/* Selection ring is painted above the image so the image stays a full 80×80. */
+.image-reveal-thumb-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .image-reveal-thumb:hover:not(:has(:checked)) .image-reveal-thumb-img::after {
+    box-shadow: inset 0 0 0 var(--s2a-border-width-md) var(--s2a-color-gray-900);
+  }
+}
+
+.image-reveal-thumb-img img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-reveal-thumb-img--grayscale img {
+  filter: grayscale(1);
+}
+
+.image-reveal-thumb-img--color-punch img {
+  filter: saturate(2) contrast(1.2) brightness(1.1);
+}
+
+.image-reveal-thumb-img--duotone img {
+  filter: var(--image-reveal-duotone);
+}
+
+.image-reveal-thumb:has(:checked) .image-reveal-thumb-img::after {
+  /* Figma: 2px gray-800 border, then a 1px inner white ring. */
+  box-shadow:
+    inset 0 0 0 var(--s2a-border-width-md) var(--s2a-color-gray-800),
+    inset 0 0 0 calc(var(--s2a-border-width-md) + 1px) var(--s2a-color-gray-25);
+}
+
+.image-reveal-thumb:has(:focus-visible) .image-reveal-thumb-img {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.image-reveal .image-reveal-thumb-label {
+  color: var(--s2a-color-gray-800);
+  /* primitive, not the semantic body-xs — that one shifts to 14px ≥1024px */
+  font-size: var(--s2a-font-size-xs);
+  line-height: var(--s2a-font-line-height-xs);
+  text-align: center;
+}
+
+/* ---------- CTA ---------- */
+.image-reveal-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  margin-block-start: var(--s2a-spacing-md);
+  gap: var(--s2a-spacing-xs);
+}
+
+.image-reveal-cta:empty {
+  display: none;
+}
+
+.image-reveal .image-reveal-cta p {
+  margin: 0; /* beats main .section p { margin: 32px 0 } */
+}
+
+.image-reveal .image-reveal-cta p.action-area {
+  /* inline-block button sits on the text baseline of the p's 27px line box,
+     leaving descender space below it; flex makes the p hug the button. */
+  display: flex;
+  width: 100%;
+}
+
+.image-reveal .image-reveal-cta a.con-button:any-link {
+  box-sizing: border-box;
+  width: 100%;
+  background: rgb(0 0 0 / 84%); /* Figma transparent-black/800 @84% — s2a only offers 80%/88% */
+  color: var(--s2a-color-gray-25);
+  border-color: transparent;
+  border-radius: var(--s2a-border-radius-24);
+  font-size: var(--s2a-font-size-md);
+  margin: 0;
+}
+
+.image-reveal .image-reveal-cta a.con-button:any-link:hover {
+  background: var(--s2a-color-gray-1000);
+  color: var(--s2a-color-gray-25);
+}
+
+.image-reveal .image-reveal-cta-subtext {
+  margin: 0;
+  color: var(--s2a-color-gray-700);
+  font-size: var(--s2a-font-size-xs); /* primitive — semantic body-xs shifts ≥1024px */
+  line-height: var(--s2a-font-line-height-2xs); /* 16px ≈ Figma lh 1.3 @12px (15.6) */
+  text-align: center;
+}
+
+/* ---------- SVG filter defs ---------- */
+.image-reveal-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* ---------- Tablet S, 600–898px: stacked like mobile, wider gutters ---------- */
+@media (min-width: 600px) {
+  .image-reveal {
+    padding-inline: var(--s2a-spacing-xl);
+  }
+}
+
+/* ---------- Tablet L, 899–1199px: side-by-side with tabs ---------- */
+@media (min-width: 899px) {
+  .image-reveal-sandbox {
+    flex-direction: row;
+    align-items: flex-start;
+    min-height: 372px; /* Figma tablet Action-panel height — component size, no token */
+  }
+
+  .image-reveal-panel {
+    flex: 0 0 256px; /* Figma Action-panel width — component size, not spacing */
+    align-self: stretch; /* fills the 372px sandbox so the CTA can pin to its bottom */
+  }
+
+  .image-reveal-cta {
+    margin-block-start: auto; /* pins the CTA to the bottom of the sandbox */
+  }
+
+  .image-reveal-stage {
+    order: 0;
+    flex: 1 1 auto;
+  }
+}
+
+/* ---------- ≥1200px: white card, stacked groups ---------- */
+@media (min-width: 1200px) {
+  .image-reveal {
+    padding-block: var(--section-padding-xl);
+    padding-inline: var(--s2a-spacing-2xl);
+  }
+
+  .image-reveal .image-reveal-header h2 {
+    font-size: var(--s2a-font-size-4xl); /* 36px */
+  }
+
+  .image-reveal .image-reveal-header p {
+    max-width: 700px; /* Figma text max-width — not a spacing value */
+    font-size: var(--s2a-typography-font-size-body-md);
+    line-height: var(--s2a-font-line-height-21); /* 21px ≈ Figma lh 1.3 @16px (20.8) */
+  }
+
+  .image-reveal-sandbox {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1600px; /* Figma Grid/container-max-width — not a spacing value */
+    margin-inline: auto;
+    padding: var(--s2a-spacing-lg);
+    gap: var(--s2a-spacing-lg);
+    border-radius: var(--s2a-border-radius-md);
+    background: var(--s2a-color-gray-25);
+  }
+
+  .image-reveal-panel {
+    flex: 0 0 274px; /* Figma desktop Action-panel width */
+    gap: var(--s2a-spacing-lg);
+    align-self: stretch;
+    justify-content: flex-start;
+  }
+
+  .image-reveal-clip {
+    border-radius: var(--s2a-border-radius-md);
+  }
+
+  .image-reveal-stage {
+    align-self: stretch; /* matches the panel height so the card has no dead space under the CTA */
+  }
+
+  .image-reveal-tabs {
+    display: none; /* both groups are stacked and always visible at ≥1200px */
+  }
+
+  .image-reveal .image-reveal-group-title {
+    display: block;
+    margin: 0;
+    color: var(--s2a-color-gray-900);
+    font-size: var(--s2a-typography-font-size-body-md);
+    font-weight: var(--subheading-font-weight); /* 700 — no s2a weight tokens */
+    line-height: var(--s2a-font-line-height-sm); /* 20px */
+  }
+
+  .image-reveal-thumbs {
+    gap: var(--s2a-spacing-md);
+  }
+
+  .image-reveal-grip {
+    width: 40px; /* Figma Slide-controls Size L */
+    height: 40px;
+  }
+
+  .image-reveal-grip svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-reveal-handle::before {
+    transition: none;
+  }
+}
