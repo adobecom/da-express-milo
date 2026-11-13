@@ -155,7 +155,7 @@ export default async function decorate(block) {
     AssuranceLockup,
   } = componentsModule;
   const { CustomizationInputs } = customizationModule;
-  const { trackViewTemplatePage } = instrumentModule;
+  const { trackViewTemplatePage, trackPrintPdpView } = instrumentModule;
   const useSeo = seoModule.default;
 
   function PDPContent({ templateId: tId, authoredImageUrl: authoredUrl }) {
@@ -193,6 +193,7 @@ export default async function decorate(block) {
           attributeObject,
           true,
         );
+        trackPrintPdpView({ productType: state.productType, templateId: tId });
       } catch (error) {
         window.lana?.log(`Failed to track PDP pageload: ${error}`, { tags: 'print-product-detail', severity: 'warning' });
       }

@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../express/code/scripts/utils.js';
-import martechLoadedCB from '../../express/code/scripts/instrument.js';
+import martechLoadedCB, { trackPrintPdpView } from '../../express/code/scripts/instrument.js';
 
 const TEST_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
 const TEST_PLATFORM = 'MacIntel';
@@ -219,5 +219,89 @@ describe('instrument mini-editor analytics', () => {
       propertyType: 'string',
     });
     expect(findProperty(custom, 'custom.ui.location')).to.equal(undefined);
+  });
+});
+
+describe('instrument print PDP analytics', () => {
+  const PDP_PATH = '/express/print/hoodie/red-and-black-restaurant-opening-hoodie';
+  const TEMPLATE_ID = 'urn:aaid:sc:VA6C2:tpl-123';
+  let trackStub;
+  let fetchStub;
+  let originalPath;
+
+  beforeEach(() => {
+    originalPath = `${window.location.pathname}${window.location.search}`;
+    window.history.replaceState({}, '', PDP_PATH);
+    trackStub = sinon.stub();
+    // eslint-disable-next-line no-underscore-dangle
+    window._satellite = { track: trackStub };
+    fetchStub = sinon.stub(window, 'fetch').resolves({
+      ok: true,
+      json: async () => ({ country: 'US' }),
+    });
+    setMeta('print-batch', '2');
+  });
+
+  afterEach(() => {
+    window.history.replaceState({}, '', originalPath);
+    document.head.querySelectorAll('meta[name^="print-"]').forEach((meta) => meta.remove());
+    // eslint-disable-next-line no-underscore-dangle
+    delete window._satellite;
+    delete window.alloy_all;
+    fetchStub.restore();
+    sinon.restore();
+  });
+
+  it('fires an Express-format view-template-page hit with the print PDP properties', async () => {
+    await trackPrintPdpView({ productType: 'zazzle_hoodie', templateId: TEMPLATE_ID });
+
+    expect(trackStub.calledOnce).to.be.true;
+    const [, payload] = trackStub.firstCall.args;
+    expect(payload.data.eventType).to.equal('web.webinteraction.linkClicks');
+    expect(payload.data.web.webInteraction.name).to.equal('view-template-page');
+    const { sdm, event: { custom } } = getCorpnewPayload(payload);
+    expect(sdm.event).to.deep.include({
+      pagename: 'view-template-page',
+      category: 'WEB',
+      subcategory: 'operations',
+      subtype: 'template-page',
+      type: 'load',
+      workflow: 'lifecycle',
+    });
+    const value = (name) => findProperty(custom, name)?.propertyValue;
+    expect(value('custom.event.is_mau')).to.equal(true);
+    expect(value('custom.link.pdp_page_flag')).to.equal(true);
+    expect(value('custom.link.page_type')).to.equal('print-template-pdp');
+    expect(value('custom.link.use_case')).to.equal('hoodie');
+    expect(value('custom.task.name')).to.equal('hoodie');
+    expect(value('custom.link.page_url')).to.equal(window.location.href);
+    expect(value('custom.link.content_id')).to.equal(TEMPLATE_ID);
+    expect(value('content.id')).to.equal(TEMPLATE_ID);
+    expect(value('source.name')).to.equal('CCEX');
+    expect(findProperty(custom, 'custom.ui.location')).to.equal(undefined);
+    // eslint-disable-next-line no-underscore-dangle
+    expect(window.alloy_all.data._adobe_corpnew.digitalData.page.pageInfo.print).to.deep.equal({
+      page_class: 'pdp',
+      category: 'hoodie',
+      product_type: 'zazzle_hoodie',
+      template_id: TEMPLATE_ID,
+      batch: '2',
+    });
+  });
+
+  it('sets category page dimensions in the data layer on print pages', async () => {
+    window.history.replaceState({}, '', '/express/print/flyer');
+    setMeta('print-subcategory', 'restaurant');
+    setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
+
+    await martechLoadedCB();
+
+    // eslint-disable-next-line no-underscore-dangle
+    expect(window.alloy_all.data._adobe_corpnew.digitalData.page.pageInfo.print).to.deep.equal({
+      page_class: 'category',
+      category: 'flyer',
+      subcategory: 'restaurant',
+      batch: '2',
+    });
   });
 });
