@@ -14,21 +14,20 @@ concurrency:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   run-nala-tests:
     name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
     runs-on: ubuntu-24.04
-    # Browsers and their OS dependencies are baked into the official image, so
-    # there is no `playwright install --with-deps` step. That step pulled apt
-    # packages from Ubuntu mirrors on every run and was the main cause of red
-    # Nala runs (10-min step timeouts with zero tests executed). The tag MUST
-    # match @playwright/test in package-lock.json; the "Verify Playwright
-    # version" step fails fast if they drift.
-    # --user 1001 is the image's non-root user (Firefox refuses to run as root
-    # under GitHub's container HOME).
+    # Chrome and the locked Playwright browsers are baked into this verified
+    # private image. Rebuild and update both workflow digests on version changes.
+    # Keep browsers non-root; the verifier checks UID, versions and H.264 decoding.
     container:
-      image: mcr.microsoft.com/playwright:v1.52.0-noble
+      image: ghcr.io/adobecom/da-express-milo-nala@sha256:deb7608a0bd3c1060113c76fbcc5588c5a8c418229e629024a1827587f46bf64
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       options: --user 1001
     timeout-minutes: 30
     strategy:
@@ -65,6 +64,8 @@ jobs:
         if: env.NALA_SKIP_LANE != 'true'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          # Match the deployed preview, not undeployed changes in the merge ref.
+          ref: ${{ github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name && github.event.pull_request.base.ref || github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 2
 
       - name: Set up Node.js ${{ matrix.node }}
@@ -86,20 +87,9 @@ jobs:
         if: env.NALA_SKIP_LANE != 'true'
         run: npm ci --no-fund --prefer-offline
 
-      - name: Verify container browsers match @playwright/test
+      - name: Verify container browsers and H.264 decoding
         if: env.NALA_SKIP_LANE != 'true'
-        shell: bash
-        # Fails in seconds (instead of every test failing on launch) when a
-        # @playwright/test bump lands without bumping the container image tag.
-        run: |
-          missing=0
-          for dir in $(npx playwright install --dry-run | awk '/Install location:/ {print $3}'); do
-            [[ -d "$dir" ]] || { echo "::error::Missing browser $dir"; missing=1; }
-          done
-          if [[ $missing -ne 0 ]]; then
-            echo "::error::Container image does not match @playwright/test $(npx playwright --version). Bump the mcr.microsoft.com/playwright tag in run-nala-default.yml and run-nala-label.yml."
-            exit 1
-          fi
+        run: node nala/utils/verify-ci-browsers.cjs
 
       - name: Set execute permission for pr.run.sh
         if: env.NALA_SKIP_LANE != 'true'
