@@ -1,0 +1,283 @@
+.color-img-accordion {
+  width: 100%;
+  padding: var(--section-padding-xl) var(--Grid-container-padding-side);
+  box-sizing: border-box;
+  background: var(--color-white);
+}
+
+.color-img-accordion *,
+.color-img-accordion *::before,
+.color-img-accordion *::after {
+  box-sizing: border-box;
+}
+
+.color-img-accordion .color-img-accordion-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  width: 100%;
+  max-width: var(--block-wd-grid-max-width);
+  margin: 0 auto;
+}
+
+.color-img-accordion .color-img-accordion-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  min-width: 0;
+}
+
+.color-img-accordion .color-img-accordion-heading :is(h1, h2, h3, h4, h5, h6, p) {
+  margin: 0;
+  color: var(--Alias-content-typography-Title);
+  font-family: var(--body-font-family);
+  font-size: var(--typography-headings-xl);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 1.04;
+  overflow-wrap: break-word;
+  hyphens: none; /* global main h* hyphens:auto breaks "col-or" below 1200px */
+}
+
+.color-img-accordion .color-img-accordion-items {
+  width: 100%;
+}
+
+.color-img-accordion .color-img-accordion-item:not(:first-child) {
+  border-top: 1px solid var(--Palette-gray-200);
+}
+
+.color-img-accordion .color-img-accordion-header {
+  margin: 0;
+  font: inherit;
+}
+
+.color-img-accordion .color-img-accordion-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-300);
+  width: 100%;
+  min-height: var(--spacing-800);
+  padding-block: var(--spacing-200);
+  padding-inline: 0 calc(var(--spacing-100) + var(--spacing-50)); /* Figma: 10px icon inset */
+  border: 0;
+  color: var(--Alias-content-typography-Title);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--body-font-family);
+  text-align: start;
+}
+
+.color-img-accordion .color-img-accordion-button:focus-visible {
+  border-radius: var(--Corner-radius-corner-radius-100);
+  outline: var(--border-width-2) solid var(--color-focus-ring-strong);
+  outline-offset: var(--border-width-2);
+}
+
+.color-img-accordion .color-img-accordion-title {
+  min-width: 0;
+  font-size: var(--ax-heading-s-size);
+  font-weight: var(--ax-body-weight-bold);
+  line-height: var(--ax-body-s-lh);
+  overflow-wrap: break-word;
+}
+
+.color-img-accordion .color-img-accordion-icon {
+  flex: 0 0 var(--spacing-350);
+  width: var(--spacing-350);
+  height: var(--spacing-350);
+  background: center / contain no-repeat url('./plus.svg');
+}
+
+.color-img-accordion .color-img-accordion-button[aria-expanded='true'] .color-img-accordion-icon {
+  background-image: url('./minus.svg');
+}
+
+.color-img-accordion .color-img-accordion-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  color: var(--Alias-content-typography-Body);
+  font-family: var(--body-font-family);
+  font-size: var(--typography-body-s);
+  font-weight: var(--body-font-weight);
+  line-height: 1.3;
+  opacity: 0;
+  transition: grid-template-rows 300ms ease-out, opacity 150ms ease-out;
+}
+
+.color-img-accordion .color-img-accordion-panel[aria-hidden='false'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.color-img-accordion .color-img-accordion-panel-content {
+  min-height: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  transition: padding-bottom 300ms ease-out;
+}
+
+.color-img-accordion .color-img-accordion-panel[aria-hidden='false'] .color-img-accordion-panel-content {
+  padding-bottom: var(--spacing-500);
+}
+
+.color-img-accordion .color-img-accordion-panel-content > :first-child {
+  margin-top: 0;
+}
+
+.color-img-accordion .color-img-accordion-panel-content > :last-child {
+  margin-bottom: 0;
+}
+
+.color-img-accordion .color-img-accordion-panel-content p {
+  margin: 0 0 var(--spacing-200);
+  color: inherit;
+  font: inherit;
+}
+
+.color-img-accordion .color-img-accordion-panel-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.color-img-accordion .color-img-accordion-media {
+  width: 100%;
+  min-width: 0;
+}
+
+.color-img-accordion .color-img-accordion-photo {
+  display: grid;
+  grid-template-rows: auto auto;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--Corner-radius-corner-radius-200);
+  /* Palette height scales with photo width so image + palette keep one aspect ratio. */
+  container-type: inline-size;
+}
+
+.color-img-accordion .color-img-accordion-photo > picture {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.color-img-accordion .color-img-accordion-photo > picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.color-img-accordion .color-img-accordion-palette {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  width: 100%;
+  /* 48px at the 343px mobile photo width (375 frame − 2×16). */
+  height: calc(100cqw * 48 / 343);
+  margin-top: -1px;
+  overflow: hidden;
+  background: var(--Palette-gray-200);
+}
+
+.color-img-accordion .color-img-accordion-swatch {
+  transition: background-color 150ms ease-out;
+}
+
+@media (min-width: 600px) {
+  .color-img-accordion .color-img-accordion-inner {
+    flex-direction: row;
+    align-items: stretch;
+    /* Figma tablet frame keeps both columns at a 411px minimum. */
+    min-height: 411px;
+  }
+
+  .color-img-accordion .color-img-accordion-content,
+  .color-img-accordion .color-img-accordion-media {
+    flex: 1 1 0;
+  }
+
+  .color-img-accordion .color-img-accordion-content {
+    order: 1;
+  }
+
+  .color-img-accordion .color-img-accordion-media {
+    display: flex;
+    align-items: flex-start; /* Figma keeps the photo top-aligned with the heading */
+    order: 2;
+    align-self: stretch;
+  }
+
+  .color-img-accordion.image-left .color-img-accordion-media {
+    order: 1;
+  }
+
+  .color-img-accordion.image-left .color-img-accordion-content {
+    order: 2;
+  }
+
+
+  .color-img-accordion .color-img-accordion-photo > picture {
+    min-height: 0;
+    position: relative;
+  }
+
+  .color-img-accordion .color-img-accordion-photo > picture img {
+    position: absolute;
+    inset: 0;
+  }
+
+  .color-img-accordion .color-img-accordion-title {
+    line-height: var(--ax-heading-s-lh);
+  }
+
+  .color-img-accordion .color-img-accordion-palette {
+    /* 56px at the 405.5px tablet photo width (899 frame). */
+    height: calc(100cqw * 56 / 405.5);
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-img-accordion .color-img-accordion-inner {
+    min-height: 462.75px;
+  }
+
+  .color-img-accordion.simple-image .color-img-accordion-inner {
+    min-height: 386px;
+  }
+  .color-img-accordion .color-img-accordion-content {
+    gap: var(--spacing-300);
+  }
+
+  .color-img-accordion .color-img-accordion-title {
+    line-height: 1.3;
+  }
+
+  .color-img-accordion .color-img-accordion-palette {
+    /* 88px at the 668px desktop photo width (1440 frame). */
+    height: calc(100cqw * 88 / 668);
+  }
+}
+
+@media (min-width: 1680px) {
+  .color-img-accordion .color-img-accordion-inner {
+    min-height: 544.25px;
+  }
+
+  .color-img-accordion.simple-image .color-img-accordion-inner {
+    min-height: 443.25px;
+  }
+  .color-img-accordion .color-img-accordion-palette {
+    /* 102px at the 788px widescreen frame width. */
+    height: calc(100cqw * 102 / 788);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .color-img-accordion .color-img-accordion-panel,
+  .color-img-accordion .color-img-accordion-panel-content,
+  .color-img-accordion .color-img-accordion-swatch {
+    transition: none;
+  }
+}

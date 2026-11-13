@@ -7,7 +7,6 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-window.isTestEnv = true;
 
 const s2aTokens = document.createElement('link');
 s2aTokens.rel = 'stylesheet';

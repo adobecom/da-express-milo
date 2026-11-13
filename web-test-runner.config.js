@@ -49,6 +49,10 @@ export default {
     <html>
       <head>
         <script type='module'>
+          // This must precede the test framework: importing scripts.js starts loadPage() at module
+          // scope, and individual test hooks are too late to prevent the production bootstrap.
+          window.isTestEnv = true;
+
           const oldFetch = window.fetch;
           window.fetch = async (resource, options) => {
             if (!resource.startsWith('/') && !resource.startsWith('http://localhost')) {

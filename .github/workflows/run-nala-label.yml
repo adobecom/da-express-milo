@@ -4,11 +4,21 @@ on:
   pull_request:
     types: [ labeled, opened, synchronize, reopened ]
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   action:
     name: Running Nala E2E UI Tests
-    # Playwright 1.52 supports Ubuntu 24.04, not 26.04.
     runs-on: ubuntu-24.04
+    # Use the same verified private browser image as the default workflow.
+    container:
+      image: ghcr.io/adobecom/da-express-milo-nala@sha256:deb7608a0bd3c1060113c76fbcc5588c5a8c418229e629024a1827587f46bf64
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user 1001
     if: |
       github.event_name == 'workflow_dispatch' ||
       contains(join(github.event.pull_request.labels.*.name, ' '), 'run-nala')
@@ -20,6 +30,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          # Use the same deployed-preview revision as the default workflow.
+          ref: ${{ github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name && github.event.pull_request.base.ref || github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 2
 
       - name: Set up Node.js ${{ matrix.node-version }}
@@ -35,20 +47,11 @@ jobs:
             **/node_modules
           key: npm-${{ runner.os }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ms-playwright-${{ runner.os }}-${{ matrix.node-version }}-chromium
-
       - name: Install dependencies
         run: npm ci --no-fund --prefer-offline
 
-      - name: Install Playwright (chromium)
-        # Normally fast; cap above the slow-mirror ceiling so a genuine hang
-        # fails fast (and a re-run recovers) without killing slow-but-fine runs.
-        timeout-minutes: 10
-        run: npx playwright install chromium
+      - name: Verify container browsers and H.264 decoding
+        run: node nala/utils/verify-ci-browsers.cjs
 
       - name: Set execute permission for nalarun.sh
         run: chmod +x ./nala/utils/pr.run.sh
