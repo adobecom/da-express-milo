@@ -12,6 +12,7 @@ import { addAnimationToggle, createOptimizedPicture, linkImage } from '../../scr
 import { fetchRelevantRows } from '../../scripts/utils/relevant.js';
 
 import { decorateSocialIcons } from '../../scripts/utils/icons.js';
+import { appendEventIntent } from '../../scripts/branchlinks.js';
 
 import { Masonry } from '../../scripts/widgets/masonry.js';
 import buildBasicCarousel from '../../scripts/widgets/basic-carousel.js';
@@ -220,7 +221,7 @@ async function processResponse(props) {
       });
       const buttonWrapper = createTag('div', { class: 'button-container' });
       const button = createTag('a', {
-        href: template.branchURL,
+        href: appendEventIntent(template.branchURL),
         title: await replaceKey('edit-this-template', getConfig()) ?? 'Edit this template',
         class: 'button accent',
       });
