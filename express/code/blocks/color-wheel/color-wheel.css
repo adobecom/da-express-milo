@@ -330,10 +330,17 @@ color-wheel-express {
 
 .color-wheel-harmony-title-row {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-100);
+  margin-bottom: var(--spacing-200);
+}
+
+.color-wheel-harmony-title-text {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-50);
-  margin-bottom: 0.75rem;
+  min-width: 0;
 }
 
 .color-wheel-harmony-title-static {
@@ -347,6 +354,29 @@ color-wheel-express {
   color: var(--Alias-content-typography-Body);
   font-size: var(--Global-Typography-Size-Label-Label-L);
   line-height: var(--Global-Typography-Line-height-Label-Label-L);
+}
+.color-wheel-harmony-learn-more {
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  color: var(--Alias-content-typography-Heading);
+  background: transparent;
+  font: inherit;
+  font-size: var(--ax-body-xs-size);
+  font-weight: 700;
+  line-height: var(--ax-body-xs-lh);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.color-wheel-harmony-learn-more:hover {
+  color: var(--Alias-content-typography-Heading);
+}
+
+.color-wheel-harmony-learn-more:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
 }
 
 .color-wheel-sr-only {
