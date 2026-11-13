@@ -172,6 +172,11 @@ their read-only repository token. Before running tests, each lane launches
 all four browsers as UID 1001 and checks actual H.264 frame decoding with
 `node nala/utils/verify-ci-browsers.cjs`.
 
+For same-repository PRs, Nala checks out the PR head SHA to match the code served
+by its AEM preview, rather than testing undeployed base-branch changes from
+GitHub's synthetic merge ref. Fork PRs check out the base branch to match their
+existing base-preview fallback. Push and manual runs use the event's commit SHA.
+
 The **Build Nala Browser Image** workflow runs when its recipe, verifier or
 Playwright lockfile changes are pushed to this repository, including a feature
 branch for first-image bootstrap. Forks never publish images. It uses a
