@@ -189,6 +189,29 @@ describe('gen-template-marquee', () => {
     expect(block.querySelectorAll('.gen-template-card-portrait')).to.have.length(7);
   });
 
+  it('renders the prompt experience before remote templates finish loading', async () => {
+    let resolveTemplates;
+    window.fetch = () => new Promise((resolve) => {
+      resolveTemplates = resolve;
+    });
+    document.body.innerHTML = fixture;
+    const block = document.querySelector('.gen-template-marquee');
+    const decoration = decorate(block);
+
+    await new Promise((resolve) => { setTimeout(resolve, 0); });
+    const renderedBeforeTemplates = !!block.querySelector('.gen-template-content');
+    const initialColumnCount = block.querySelectorAll('.gen-template-column').length;
+    const initialCardCount = block.querySelectorAll('.gen-template-card').length;
+
+    resolveTemplates({ json: () => Promise.resolve({ items: MOCK_TEMPLATES }) });
+    await decoration;
+
+    expect(renderedBeforeTemplates).to.be.true;
+    expect(initialColumnCount).to.equal(5);
+    expect(initialCardCount).to.equal(0);
+    expect(block.querySelectorAll('.gen-template-card')).to.have.length(14);
+  });
+
   it('loads templates from an authored collection ID', async () => {
     const collectionId = 'urn:aaid:sc:VA6C2:custom-template-collection';
     const block = await prepareBlock({}, collectionId);

@@ -320,19 +320,25 @@ export default async function decorate(block) {
   const rows = [...block.children];
   const [textRow, suggestionsRow, galleryRow] = rows;
   const isHardcoded = block.classList.contains('hardcoded-templates');
-  const [strings, columns] = await Promise.all([
-    loadPlaceholders(),
-    isHardcoded
-      ? getAuthoredColumns(galleryRow)
-      : loadTemplates(galleryRow).then(getTemplateColumns),
-  ]);
+  const columnsPromise = isHardcoded
+    ? Promise.resolve(getAuthoredColumns(galleryRow))
+    : loadTemplates(galleryRow).then(getTemplateColumns);
+  const strings = await loadPlaceholders();
   const content = buildContent(textRow, suggestionsRow, strings);
   const cardRatio = getCardRatio();
   if (cardRatio) block.style.setProperty('--gen-template-card-ratio', cardRatio);
-  const gallery = buildGallery(columns, !!cardRatio);
+  // Remote templates should not block the above-the-fold prompt experience from rendering.
+  // Keep five empty columns initially so the centered gallery layout is stable while they load.
+  const initialColumns = isHardcoded ? await columnsPromise : getTemplateColumns([]);
+  const gallery = buildGallery(initialColumns, !!cardRatio);
 
   block.replaceChildren(content, gallery);
   addInteractions(block);
   trackScrollEnd(block.querySelector('.gen-template-suggestion-list'));
   resizePrompt(block.querySelector('.gen-template-prompt-input'));
+
+  if (!isHardcoded) {
+    const columns = await columnsPromise;
+    gallery.replaceWith(buildGallery(columns, !!cardRatio));
+  }
 }
