@@ -131,14 +131,17 @@ export default async function decorate(block) {
       if (val !== index) return;
       if (ratings[index - 1].feedbackRequired || textarea.value !== '') {
         commentBox.classList.add('submit--appear');
+        submit.removeAttribute('inert');
         timerAnimation.remove();
         countdown(false);
       } else {
         commentBox.classList.remove('submit--appear');
+        submit.setAttribute('inert', '');
         stars[index - 1].parentElement.appendChild(timerAnimation);
         countdown(true);
       }
       commentBox.classList.add('comment--appear');
+      commentBox.removeAttribute('inert');
     };
     // Updates the value of the slider and tooltip.
     const updateSliderValue = (snap = true) => {
@@ -232,6 +235,7 @@ export default async function decorate(block) {
     });
     textarea.addEventListener('focus', () => {
       commentBox.classList.add('submit--appear');
+      submit.removeAttribute('inert');
       timerAnimation.remove();
       countdown(false);
     });
@@ -255,6 +259,7 @@ export default async function decorate(block) {
         textarea.value = localStoragetext;
         input.value = localStorageRating;
         commentBox.classList.add('comment--appear');
+        commentBox.removeAttribute('inert');
         updateSliderValue();
       }
     }
@@ -317,10 +322,10 @@ export default async function decorate(block) {
         <div class="vertical-line"><button type="button" aria-label="4" class="stars four-stars"></button></div>
         <div class="vertical-line"><button type="button" aria-label="5" class="stars five-stars"></button></div>
       </div>
-      <div class="slider-comment">
+      <div class="slider-comment" inert>
         <label for="comment"></label>
         <textarea id="comment" name="comment" rows="4" placeholder=""></textarea>
-        <input type="submit" value="${submitButtonText}">
+        <input type="submit" inert value="${submitButtonText}">
       </div>
       <div class="ratings-scroll-anchor"></div>
     `,
