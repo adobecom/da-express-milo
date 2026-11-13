@@ -6,6 +6,49 @@ Official repo for adobe.com/express
 1. Run `aem up` this repo's folder. (opens your browser at `http://localhost:3000`)
 1. Open this repo's folder in your favorite editor and start coding.
 
+### Scout search evaluation
+
+`.scout/scout.config.yaml` contains shared indexing rules. Scout must be installed,
+running, and attached to the current checkout before evaluating search quality:
+
+```sh
+scout admin refresh-config .
+scout admin flush .
+scout evaluate -q .scout/evaluations/autotune-query-set.toml -r . --json
+```
+
+The starter evaluation contains 20 source-reviewed queries: eight identifier,
+seven natural-language, and five path/extension-filtered cases. Tests and mocks
+are explicitly included in retrieval. This is a search benchmark, not a unit or
+browser test; it does not execute the website.
+
+Run the same query set at least twice before and after a configuration change.
+Compare NDCG@5/@10, MRR, and individual queries as well as per-class results.
+Higher relevance scores are better. Unlisted files are unjudged, not necessarily
+irrelevant; inspect unexpected results before changing judgments or tuning.
+Repeated runs can reuse caches, so they do not establish independent statistical
+confidence or a page-performance improvement. Keep Scout version, repository
+revision, and query judgments fixed during a comparison.
+
+This small set is a development baseline, not proof of globally optimal settings.
+Review and extend it as workflows change. Avoid committing experimental tuning,
+local daemon state, or unreviewed session memories.
+
+The configuration uses calibrated learned-ranker blending at 0.75 for
+natural-language queries only; identifier and filtered queries keep the defaults.
+This setting improved the development set without degrading the additional
+validation queries. It is not a guarantee of improvement for every question.
+Re-evaluate after Scout model upgrades or major repository changes.
+
+The eight additional validation queries were not used to select that candidate:
+
+```sh
+scout evaluate -q .scout/evaluations/validation-query-set.toml -r . --json
+```
+
+They share some source files with the development set, so they check additional
+formulations rather than provide an independent whole-repository benchmark.
+
 ### Color Wheel responsive layout
 
 The Color Wheel initializes its layout, tabs, controller, and image panel once.
@@ -116,6 +159,42 @@ npm run nala help
 
 #### 4. Nala Documentation
 For detailed guides and documentation on Nala, please visit the [Nala GitHub Wiki](https://github.com/adobecom/milo/wiki/Nala#nala-introduction).
+
+#### CI browser image
+
+Nala needs branded Google Chrome to decode the approved H.264 fixtures, in
+addition to Playwright's bundled Chromium, Firefox and WebKit. The Dockerfile in
+`.github/docker/nala/` installs Chrome as root at build time and runs as UID 1001
+so Firefox remains non-root. No browser installation is needed in test jobs.
+
+Both Nala test workflows pull the verified image by immutable digest using
+their read-only repository token. Before running tests, each lane launches
+all four browsers as UID 1001 and checks actual H.264 frame decoding with
+`node nala/utils/verify-ci-browsers.cjs`.
+
+For same-repository PRs, Nala checks out the PR head SHA to match the code served
+by its AEM preview, rather than testing undeployed base-branch changes from
+GitHub's synthetic merge ref. Fork PRs check out the base branch to match their
+existing base-preview fallback. Push and manual runs use the event's commit SHA.
+
+The **Build Nala Browser Image** workflow runs when its recipe, verifier or
+Playwright lockfile changes are pushed to this repository, including a feature
+branch for first-image bootstrap. Forks never publish images. It uses a
+repository `GITHUB_TOKEN` with `packages: write`, refuses existing non-private
+packages, verifies browser launches and actual H.264 decoding before publishing,
+and confirms private visibility and repository linkage afterward. A separate
+job verifies the image with only `packages: read`.
+
+After a successful build, pin the digest from its job summary in **both**
+`run-nala-default.yml` and `run-nala-label.yml`. Never activate an unpublished
+image or use a mutable `latest` tag. A Playwright upgrade requires rebuilding
+from the new locked version and updating both digests. The CI verifier fails
+early if the image version, browser executables or H.264 decoding no longer
+match. Packages must remain **private** and grant this repository Actions read
+access; if organization policy disables automatic access, a package admin must
+grant that access before updating the consumers. PR jobs use their automatic,
+read-only `GITHUB_TOKEN`, including fork PRs; no custom registry secret or
+write-enabled PR trigger is required.
 
 -----
 

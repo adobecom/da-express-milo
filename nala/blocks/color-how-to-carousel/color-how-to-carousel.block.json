@@ -1,0 +1,64 @@
+{
+  "block": "color-how-to-carousel",
+  "variants": [
+    {
+      "tcid": "2",
+      "name": "@color-how-to-carousel-specs-card",
+      "selector": "main .color-how-to-carousel",
+      "path": "/drafts/nala/blocks/color-how-to-carousel-specs-card",
+      "data": {
+        "pageHeading": "Color how-to carousel: specs-card fixture",
+        "heading": "How to use jade color.",
+        "layout": "specs-card",
+        "schema": true,
+        "icon": false,
+        "colorName": "Jade",
+        "primary": "#1FA774",
+        "background": "rgb(31, 167, 116)",
+        "foreground": "rgb(255, 255, 255)",
+        "cta": {
+          "text": "Create with jade",
+          "visible": true,
+          "query": {
+            "q": "jade",
+            "category": "templates",
+            "searchCategory": "templates"
+          }
+        },
+        "specsHeading": "Color specs",
+        "specs": [
+          { "label": "HEX", "value": "#1FA774" },
+          { "label": "RGB", "value": "31, 167, 116" },
+          { "label": "CMYK", "value": "81, 0, 31, 35" },
+          { "label": "HSL", "value": "158\u00b0, 69%, 39%" }
+        ],
+        "copyLabel": "Copy {label} value",
+        "copied": "{value} copied to clipboard",
+        "copyFailed": "Unable to copy value.",
+        "steps": [
+          {
+            "heading": "Information about jade color.",
+            "text": "The jade HEX code is #1FA774."
+          },
+          {
+            "heading": "Combine jade with other colors.",
+            "text": "Pair jade with warm neutrals for a balanced palette. Use a dark accent for headings, leave generous space around your content, and repeat the same jade across your background, illustrations, and small details so the finished design feels consistent."
+          },
+          {
+            "heading": "Explore the character of jade.",
+            "text": "Use jade to give your design a fresh, nature-inspired feel."
+          },
+          {
+            "heading": "Compare jade and emerald.",
+            "text": "Compare the two greens side by side before choosing the shade for your design."
+          },
+          {
+            "heading": "Finish your jade design.",
+            "text": "Check your palette and share your finished work."
+          }
+        ]
+      },
+      "tags": ["@color-how-to-carousel", "@specs-card", "@schema", "@express"]
+    }
+  ]
+}

@@ -13,10 +13,6 @@ const { default: decorate } = imports[1];
 const basic = await readFile({ path: './mocks/basic.html' });
 
 describe('Grid Marquee Hero', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Renders logo and headline; adds CTA classes', async () => {
     document.body.innerHTML = basic;
     const hero = document.querySelector('.grid-marquee-hero');

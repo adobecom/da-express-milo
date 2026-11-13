@@ -1,0 +1,38 @@
+{
+  "block": "color-img-accordion",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-img-accordion-default",
+      "selector": "div.color-img-accordion",
+      "path": "/drafts/nala/test-gen/color-img-accordion",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".color-img-accordion-heading",
+              "text": "Make the most of your color palette."
+            }
+          ],
+          "media": [
+            {
+              "selector": ".color-img-accordion-photo picture",
+              "tag": "picture"
+            }
+          ],
+          "interactives": [
+            {
+              "selector": ".color-img-accordion-button",
+              "text": "Getting accurate colors"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@color-img-accordion",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}
