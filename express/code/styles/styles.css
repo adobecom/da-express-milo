@@ -260,6 +260,26 @@
   --ax-heading-xxs-size: 14px;
   --ax-heading-xxs-lh: 18px;
 
+  /* Authored heading variant sizes */
+  --ax-heading-variant-xxxxl-size: 48px;
+  --ax-heading-variant-xxxxl-lh: 110%;
+  --ax-heading-variant-xxxl-size: 40px;
+  --ax-heading-variant-xxxl-lh: 110%;
+  --ax-heading-variant-xxl-size: 32px;
+  --ax-heading-variant-xxl-lh: 110%;
+  --ax-heading-variant-xl-size: 28px;
+  --ax-heading-variant-xl-lh: 110%;
+  --ax-heading-variant-l-size: 24px;
+  --ax-heading-variant-l-lh: 110%;
+  --ax-heading-variant-m-size: 20px;
+  --ax-heading-variant-m-lh: 115%;
+  --ax-heading-variant-s-size: 18px;
+  --ax-heading-variant-s-lh: 115%;
+  --ax-heading-variant-xs-size: 16px;
+  --ax-heading-variant-xs-lh: 115%;
+  --ax-heading-variant-xxs-size: 14px;
+  --ax-heading-variant-xxs-lh: 115%;
+
   /* Express Body Typography Variables */
   --ax-body-xxl-size: 28px;
   --ax-body-xxl-lh: 42px;
@@ -483,6 +503,15 @@
     --ax-heading-xs-size: 18px;
     --ax-heading-xs-lh: 22.5px;
 
+    --ax-heading-variant-xxxxl-size: 73px;
+    --ax-heading-variant-xxxl-size: 52px;
+    --ax-heading-variant-xxl-size: 44px;
+    --ax-heading-variant-xl-size: 36px;
+    --ax-heading-variant-l-size: 28px;
+    --ax-heading-variant-m-size: 24px;
+    --ax-heading-variant-s-size: 20px;
+    --ax-heading-variant-xs-size: 18px;
+
     --Global-Typography-Size-Headings-Heading-2XL: 44px;
     --Global-Typography-Size-Headings-Heading-XL: 36px;
     --Global-Typography-Size-Headings-Heading-L: 28px;
@@ -507,6 +536,15 @@
 @media (min-width: 1680px) {
   :root {
     --ax-grid-container-width: min(1600px, 100%);
+    /* Express Typography XL Desktop Overrides */
+    --ax-heading-variant-xxxxl-size: 82px;
+    --ax-heading-variant-xxxl-size: 58px;
+    --ax-heading-variant-xxl-size: 52px;
+    --ax-heading-variant-xl-size: 40px;
+    --ax-heading-variant-l-size: 32px;
+    --ax-heading-variant-m-size: 28px;
+    --ax-heading-variant-s-size: 22px;
+    --ax-heading-variant-xs-size: 20px;
   }
 }
 
@@ -1970,58 +2008,124 @@ main .section.no-h2-margin .content h2 {
 /* Based on Figma design system values - matches Milo's consonant typography pattern */
 
 /* Express Heading Classes */
-.ax-heading-xxxl,
-.ax-heading-xxl,
-.ax-heading-xl,
-.ax-heading-l,
-.ax-heading-m,
-.ax-heading-s,
-.ax-heading-xs,
-.ax-heading-xxs {
+:is(
+  .ax-heading-xxxxl,
+  .ax-heading-xxxl,
+  .ax-heading-xxl,
+  .ax-heading-xl,
+  .ax-heading-l,
+  .ax-heading-m,
+  .ax-heading-s,
+  .ax-heading-xs,
+  .ax-heading-xxs
+):not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   margin: 0;
   font-weight: var(--ax-heading-weight);
   font-family: var(--body-font-family);
 }
 
-.ax-heading-xxxl {
+.ax-heading-xxxxl:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
+  font-size: var(--ax-heading-variant-xxxxl-size);
+  line-height: var(--ax-heading-variant-xxxxl-lh);
+}
+
+.ax-heading-xxxl:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xxxl-size);
   line-height: var(--ax-heading-xxxl-lh);
 }
 
-.ax-heading-xxl {
+.ax-heading-xxl:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xxl-size);
   line-height: var(--ax-heading-xxl-lh);
 }
 
-.ax-heading-xl {
+.ax-heading-xl:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xl-size);
   line-height: var(--ax-heading-xl-lh);
 }
 
-.ax-heading-l {
+.ax-heading-l:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-l-size);
   line-height: var(--ax-heading-l-lh);
 }
 
-.ax-heading-m {
+.ax-heading-m:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-m-size);
   line-height: var(--ax-heading-m-lh);
 }
 
-.ax-heading-s {
+.ax-heading-s:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-s-size);
   line-height: var(--ax-heading-s-lh);
 }
 
-.ax-heading-xs {
+.ax-heading-xs:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xs-size);
   line-height: var(--ax-heading-xs-lh);
 }
 
-.ax-heading-xxs {
+.ax-heading-xxs:not(:has(:is(h1, h2, h3, h4, h5, h6))) {
   font-size: var(--ax-heading-xxs-size);
   line-height: var(--ax-heading-xxs-lh);
 }
+
+/* An explicit author override must win block CSS, which loads after this stylesheet. */
+/* stylelint-disable declaration-no-important */
+/* Authored heading-size variants override block defaults without changing document semantics. */
+:is(.xxxxl-heading, .heading-xxxxl, .ax-heading-xxxxl, .heading-super) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xxxxl-heading, .heading-xxxxl, .ax-heading-xxxxl, .heading-super) {
+  font-size: var(--ax-heading-variant-xxxxl-size) !important;
+  line-height: var(--ax-heading-variant-xxxxl-lh) !important;
+}
+
+:is(.xxxl-heading, .heading-xxxl, .ax-heading-xxxl, .heading-1) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xxxl-heading, .heading-xxxl, .ax-heading-xxxl, .heading-1) {
+  font-size: var(--ax-heading-variant-xxxl-size) !important;
+  line-height: var(--ax-heading-variant-xxxl-lh) !important;
+}
+
+:is(.xxl-heading, .heading-xxl, .ax-heading-xxl, .heading-2) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xxl-heading, .heading-xxl, .ax-heading-xxl, .heading-2) {
+  font-size: var(--ax-heading-variant-xxl-size) !important;
+  line-height: var(--ax-heading-variant-xxl-lh) !important;
+}
+
+:is(.xl-heading, .heading-xl, .ax-heading-xl, .heading-3) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xl-heading, .heading-xl, .ax-heading-xl, .heading-3) {
+  font-size: var(--ax-heading-variant-xl-size) !important;
+  line-height: var(--ax-heading-variant-xl-lh) !important;
+}
+
+:is(.l-heading, .heading-l, .ax-heading-l, .heading-4) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.l-heading, .heading-l, .ax-heading-l, .heading-4) {
+  font-size: var(--ax-heading-variant-l-size) !important;
+  line-height: var(--ax-heading-variant-l-lh) !important;
+}
+
+:is(.m-heading, .heading-m, .ax-heading-m, .heading-5) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.m-heading, .heading-m, .ax-heading-m, .heading-5) {
+  font-size: var(--ax-heading-variant-m-size) !important;
+  line-height: var(--ax-heading-variant-m-lh) !important;
+}
+
+:is(.s-heading, .heading-s, .ax-heading-s, .heading-6) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.s-heading, .heading-s, .ax-heading-s, .heading-6) {
+  font-size: var(--ax-heading-variant-s-size) !important;
+  line-height: var(--ax-heading-variant-s-lh) !important;
+}
+
+:is(.xs-heading, .heading-xs, .ax-heading-xs) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xs-heading, .heading-xs, .ax-heading-xs) {
+  font-size: var(--ax-heading-variant-xs-size) !important;
+  line-height: var(--ax-heading-variant-xs-lh) !important;
+}
+
+:is(.xxs-heading, .heading-xxs, .ax-heading-xxs) :is(h1, h2, h3, h4, h5, h6),
+:is(h1, h2, h3, h4, h5, h6):is(.xxs-heading, .heading-xxs, .ax-heading-xxs) {
+  font-size: var(--ax-heading-variant-xxs-size) !important;
+  line-height: var(--ax-heading-variant-xxs-lh) !important;
+}
+/* stylelint-enable declaration-no-important */
 
 /* Express Body Classes */
 .ax-body-xxl,
