@@ -4,14 +4,20 @@ on:
   pull_request:
     types: [ labeled, opened, synchronize, reopened ]
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   action:
     name: Running Nala E2E UI Tests
     runs-on: ubuntu-24.04
-    # Browsers + OS deps are baked into the image (no install step). Keep the
-    # tag in sync with @playwright/test and run-nala-default.yml.
+    # Use the same verified private browser image as the default workflow.
     container:
-      image: mcr.microsoft.com/playwright:v1.52.0-noble
+      image: ghcr.io/adobecom/da-express-milo-nala@sha256:deb7608a0bd3c1060113c76fbcc5588c5a8c418229e629024a1827587f46bf64
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       options: --user 1001
     if: |
       github.event_name == 'workflow_dispatch' ||
@@ -42,17 +48,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-fund --prefer-offline
 
-      - name: Verify container browsers match @playwright/test
-        shell: bash
-        run: |
-          missing=0
-          for dir in $(npx playwright install --dry-run | awk '/Install location:/ {print $3}'); do
-            [[ -d "$dir" ]] || { echo "::error::Missing browser $dir"; missing=1; }
-          done
-          if [[ $missing -ne 0 ]]; then
-            echo "::error::Container image does not match @playwright/test $(npx playwright --version). Bump the mcr.microsoft.com/playwright tag in run-nala-default.yml and run-nala-label.yml."
-            exit 1
-          fi
+      - name: Verify container browsers and H.264 decoding
+        run: node nala/utils/verify-ci-browsers.cjs
 
       - name: Set execute permission for nalarun.sh
         run: chmod +x ./nala/utils/pr.run.sh

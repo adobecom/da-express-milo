@@ -167,6 +167,11 @@ addition to Playwright's bundled Chromium, Firefox and WebKit. The Dockerfile in
 `.github/docker/nala/` installs Chrome as root at build time and runs as UID 1001
 so Firefox remains non-root. No browser installation is needed in test jobs.
 
+Both Nala test workflows pull the verified image by immutable digest using
+their read-only repository token. Before running tests, each lane launches
+all four browsers as UID 1001 and checks actual H.264 frame decoding with
+`node nala/utils/verify-ci-browsers.cjs`.
+
 The **Build Nala Browser Image** workflow runs when its recipe, verifier or
 Playwright lockfile changes are pushed to this repository, including a feature
 branch for first-image bootstrap. Forks never publish images. It uses a
