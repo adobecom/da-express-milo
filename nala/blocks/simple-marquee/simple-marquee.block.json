@@ -1,0 +1,272 @@
+{
+  "block": "simple-marquee",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@simple-marquee-default",
+      "selector": "div.simple-marquee:not(.left-aligned, .right-aligned, .keep-cta-mobile)",
+      "path": "/drafts/nala/blocks/simple-marquee/simple-marquee",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Centered light marquee",
+              "markup": null
+            },
+            {
+              "selector": ".headline p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Default layout with an outlined secondary action.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".express-logo",
+              "nth": 0,
+              "tag": "img"
+            }
+          ],
+          "interactives": [
+            {
+              "selector": "a.con-button.primaryCTA",
+              "nth": 0,
+              "type": "link",
+              "text": "Get started",
+              "href": "/express/"
+            },
+            {
+              "selector": "a.con-button.secondaryCTA",
+              "nth": 0,
+              "type": "link",
+              "text": "Learn more",
+              "href": "/express/learn/"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@simple-marquee",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@simple-marquee-premium-start-aligned",
+      "selector": "div.simple-marquee.left-aligned.premium-cta.secondary-cta-link",
+      "path": "/drafts/nala/blocks/simple-marquee/simple-marquee",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Start-aligned premium marquee",
+              "markup": null
+            },
+            {
+              "selector": ".headline p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Premium primary action with a secondary text link.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".express-logo",
+              "nth": 0,
+              "tag": "img"
+            }
+          ],
+          "interactives": [
+            {
+              "selector": "a.con-button.primaryCTA.gradient",
+              "nth": 0,
+              "type": "link",
+              "text": "Try premium",
+              "href": "/express/"
+            },
+            {
+              "selector": "a.con-button.secondaryCTA",
+              "nth": 0,
+              "type": "link",
+              "text": "Learn more",
+              "href": "/express/learn/"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@simple-marquee",
+        "@premium-cta",
+        "@start-aligned",
+        "@secondary-cta-link",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@simple-marquee-dark-end-aligned",
+      "selector": "div.simple-marquee.right-aligned.dark",
+      "path": "/drafts/nala/blocks/simple-marquee/simple-marquee",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "End-aligned dark marquee",
+              "markup": null
+            },
+            {
+              "selector": ".headline p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Localization-ready logical alignment and a white outlined secondary action.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".express-logo",
+              "nth": 0,
+              "tag": "img"
+            }
+          ],
+          "interactives": [
+            {
+              "selector": "a.con-button.primaryCTA",
+              "nth": 0,
+              "type": "link",
+              "text": "Get started",
+              "href": "/express/"
+            },
+            {
+              "selector": "a.con-button.secondaryCTA",
+              "nth": 0,
+              "type": "link",
+              "text": "Learn more",
+              "href": "/express/learn/"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@simple-marquee",
+        "@dark",
+        "@end-aligned",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@simple-marquee-single-cta",
+      "selector": "div.simple-marquee.keep-cta-mobile",
+      "path": "/drafts/nala/blocks/simple-marquee/simple-marquee",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Single CTA marquee",
+              "markup": null
+            },
+            {
+              "selector": ".headline p",
+              "nth": 0,
+              "tag": "p",
+              "text": "The CTA remains available on mobile, including when it matches a floating CTA.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".express-logo",
+              "nth": 0,
+              "tag": "img"
+            }
+          ],
+          "interactives": [
+            {
+              "selector": "a.con-button.primaryCTA",
+              "nth": 0,
+              "type": "link",
+              "text": "Get started",
+              "href": "/express/"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@simple-marquee",
+        "@single-cta",
+        "@keep-cta-mobile",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "4",
+      "name": "@simple-marquee-acrobat-cobrand",
+      "selector": "div.simple-marquee",
+      "path": "/drafts/nala/blocks/simple-marquee/simple-marquee-acrobat",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Create a resume with Adobe Acrobat and Adobe Express.",
+              "markup": null
+            },
+            {
+              "selector": ".headline p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Build a polished resume quickly with professionally designed templates.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": ".express-logo.cobrand-logo",
+              "nth": 0,
+              "tag": "img"
+            }
+          ],
+          "interactives": [
+            {
+              "selector": "a.con-button.primaryCTA",
+              "nth": 0,
+              "type": "link",
+              "text": "Create your resume",
+              "href": "/express/"
+            },
+            {
+              "selector": "a.con-button.secondaryCTA",
+              "nth": 0,
+              "type": "link",
+              "text": "Learn more",
+              "href": "/express/learn/"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@simple-marquee",
+        "@cobrand",
+        "@express"
+      ]
+    }
+  ]
+}
