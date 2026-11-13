@@ -83,7 +83,13 @@ export function identifyICC(bytes) {
 }
 
 async function inflateProfile(bytes) {
-  const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate')).getReader();
+  // Safari/iOS Safari 15 does not provide DecompressionStream. Reject compressed
+  // ICC profiles there instead of surfacing a ReferenceError.
+  // eslint-disable-next-line compat/compat
+  const DecompressionStreamConstructor = window.DecompressionStream;
+  if (!DecompressionStreamConstructor) throw new Error('unsupportedProfile');
+  const reader = new Blob([bytes]).stream()
+    .pipeThrough(new DecompressionStreamConstructor('deflate')).getReader();
   const chunks = [];
   let length = 0;
   try {
