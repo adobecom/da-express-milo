@@ -639,20 +639,30 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   display: none;
 }
 
+/* Accordion tables stay rendered; JS combines/applies height, opacity, and page scroll together. */
 .comparison-table-v2.accordion .table-container table {
   display: grid;
   grid-template-rows: 1fr;
+  height: auto;
+  opacity: 1;
   overflow: hidden;
-  transition: grid-template-rows 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: none;
 }
 
 .comparison-table-v2.accordion .table-container {
-  overflow-anchor: auto;
+  /* Prevents native anchoring/scolling before completion */
+  overflow-anchor: none;
 }
 
-.comparison-table-v2.accordion .table-container table.hide-table {
-  grid-template-rows: 0fr;
+.comparison-table-v2.accordion .table-container table.accordion-collapsed {
+  height: 0;
+  opacity: 0;
   padding: 0;
+  pointer-events: none;
+}
+
+.comparison-table-v2.accordion .table-container table.accordion-animating {
+  will-change: height, opacity;
 }
 
 .comparison-table-v2.accordion .table-container table>* {
@@ -1259,20 +1269,6 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
     font-size: var(--body-font-size-m);
   }
 
-}
-
-@media (min-width: 1024px) {
-  .comparison-table-v2.accordion .table-container table {
-    display: grid;
-    grid-template-rows: 1fr;
-    transition: grid-template-rows 400ms ease-out;
-  }
-
-  .comparison-table-v2.accordion .table-container table.hide-table {
-    grid-template-rows: 0fr;
-    padding: 0;
-    transition: none;
-  }
 }
 
 .comparison-table-v2 .tooltip {
