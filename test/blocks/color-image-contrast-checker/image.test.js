@@ -206,6 +206,21 @@ describe('Image contrast input', () => {
     await expectError(inspectImage(metadataPNG([invalid]), 'image/png'), 'unsupportedProfile');
   });
 
+  it('rejects compressed PNG profiles when streaming decompression is unavailable', async () => {
+    const compressed = await compressedICC(profile('srgb'));
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'DecompressionStream');
+    Object.defineProperty(window, 'DecompressionStream', { configurable: true, value: undefined });
+    try {
+      await expectError(
+        inspectImage(metadataPNG([compressed]), 'image/png'),
+        'unsupportedProfile',
+      );
+    } finally {
+      if (descriptor) Object.defineProperty(window, 'DecompressionStream', descriptor);
+      else delete window.DecompressionStream;
+    }
+  });
+
   it('accepts exactly 4 MiB of ICC data and cancels inflation above that limit', async () => {
     const limit = 4 * 1024 * 1024;
     const valid = new Uint8Array(limit);

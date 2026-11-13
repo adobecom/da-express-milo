@@ -85,6 +85,15 @@ Optional checker rows:
 | background | One decorative collage picture containing the Figma left/right artwork. Use responsive picture sources where needed. Like Color Extract, it stays at its natural size, top-aligned and horizontally centered behind the desktop upload marquee, with overflow cropped rather than stretched to the viewport. A 143px CSS overlay fades the bottom from transparent to white at 80.29%. It is hidden below 1200px and in results, and excluded from assistive technology. |
 | samples | Authored pictures, displayed as 5:7 portrait sample buttons cropped to fill their frames. The Figma row is 343px wide with 6px gaps: four samples are 81.25 x 113.75px each, shrinking proportionally on narrower screens. Links and alt text are optional. When alt text is absent, the button uses the `color-image-contrast-checker-use-this-image` placeholder as its accessible name. Selecting an unlinked DA image fetches its original media URL without image-optimization parameters; an optional wrapping link overrides that URL and should point to the original full-resolution PNG/JPEG/WebP. |
 
+The samples cell also accepts Express template IDs (`urn:aaid:sc:…`) as text, one or more per
+paragraph separated by commas or whitespace, mixed freely with pictures; samples keep authored
+order. IDs are resolved in one Express search API request (`templateIds`) that never blocks
+the block: authored pictures render immediately and template samples slot into their authored
+positions when the search answers (8s timeout). The button shows the template's thumbnail
+rendition, its accessible name uses the template title, and selecting it analyzes the
+native-size JPEG rendition. IDs that are unknown, unapproved, or fail to load are skipped.
+Text of a link wrapping a picture is ignored; any other non-ID text fails explicitly.
+
 No other rows are supported. Duplicate rows, missing headings/accuracy guidance,
 invalid samples, and missing required checker placeholders fail explicitly.
 The previous `hero` and UI-string rows are not an alternate authoring API.
@@ -231,10 +240,10 @@ existing fallback behavior.
 | color-image-contrast-checker-file-too-large | Choose an image no larger than 40 MiB. |
 | color-image-contrast-checker-image-too-large | This image exceeds the analysis limit. Choose a smaller image. |
 | color-image-contrast-checker-unsupported-profile | Export this image in sRGB, Display P3 or Adobe RGB (1998). |
-| color-image-contrast-checker-p3-unavailable | This browser cannot accurately decode Display P3 images. |
 | color-image-contrast-checker-analysis-error | Unable to analyze this image. Check that WebGL is enabled and try again. |
 | color-image-contrast-checker-save-error | Unable to save the analysis. Please try again. |
 | color-image-contrast-checker-saved | Image contrast analysis downloaded. |
+| color-image-contrast-checker-color-space-updated | Color space updated to {colorSpace} (optional; enables the confirmation toast) |
 
 Legend thresholds use the `≥` glyph. Existing authored `>=` operators render
 as `≥`; numeric thresholds and localized descriptions are preserved.
@@ -272,11 +281,11 @@ as `≥`; numeric thresholds and localized descriptions are preserved.
 - Maximum local contrast produces green at >= 4.5:1, blue at >= 3:1, or black
   below 3:1. **Large-text AAA is 4.5:1**, not 7:1. Small-text AAA requires
   7:1 and is not certified by the green classification.
-- Save exports the analyzed canvas as a native-resolution PNG, not the UI.
-  Filenames retain the original basename and include the selected analysis space:
-  `photo-contrast-srgb.png`, `photo-contrast-display-p3.png`, or
-  `photo-contrast-adobe-rgb.png`. This identifies the analysis space,
-  not a conversion or an embedded PNG profile.
+- Save exports one PNG with the analysis and the original side by side (not the UI),
+  at native resolution unless that exceeds iOS Safari's canvas limits
+  (16,777,216 px area, 16,384 px per side), in which case both panes scale down.
+  The file is always named `image-contrast-analysis.png`; the analysis space
+  is not a conversion or an embedded PNG profile.
   Changing the image or analysis space during export discards the stale download.
 
 This is **local pixel-contrast analysis**, not certification that an entire
@@ -310,23 +319,32 @@ headings wrap. Tablet controls share a row from 700px; narrower layouts stack th
 fields and use a full-width Save PNG button. Expanded views remove the card shadow
 and padding, with the compact legend above Save PNG on mobile.
 
-Image panes retain their full width: when the floating view toolbar would cover
-image pixels, the comparison reserves space above the images instead of a side
-gutter. Fill also reserves an 8px token-based clearance from the toolbar.
-Existing empty space is used without changing the layout. If the viewport
-cannot fit that extra space and at least one control-height of image content,
-the toolbar remains layered above the images so Fit/Fill stays usable.
+The comparison surface has an 8px radius. The two panes sit side by side with an
+8px gap and are centered in the surface (horizontally and vertically) in both the
+normal and expanded views. Fit uses 16px padding on desktop; when the floating view
+toolbar would cover image pixels, the panes get a start gutter beside the toolbar
+instead of shrinking below it. Below 900px the surface keeps its toolbar gutter.
 
 Fit is still the initial selection. Fit/Fill retain state across expansion and
-responsive changes. Fit contains the entire image. Fill starts at 150% of the
-image's native pixel dimensions and scales further only if needed to cover the
-available comparison width and height, preserving aspect ratio. The comparison
-area does not grow to browser-screen height in the normal view; expansion uses
-the available screen height. This is display-only zoom, not resampling: analysis
-and PNG exports retain the original resolution.
+responsive changes. Fit contains the entire image. Fill scales each pane to cover
+its half of the comparison height and width and to at least 150% of the Fit size
+(so Fill always zooms, even when Fit already fills the pane), preserving aspect ratio, and runs
+from the toolbar gutter (desktop) or the left edge (mobile/tablet) to the bottom
+edge. The comparison area does not grow to browser-screen height in the normal
+view; expansion uses the available screen height. This is display-only zoom, not
+resampling: analysis and PNG exports retain the original resolution.
 Zoom has one tab stop with arrow/Home/End navigation.
-The contrast and original image panes scroll together horizontally and vertically:
-scrolling either pane updates the other, in both normal and expanded views.
+Expanded views fill the viewport height on mobile and tablet. On desktop they fill the
+viewport with a 40px margin, capped at 1600 x 1000 and centered.
+While the loading overlay or the expanded view is open, page scrolling is locked
+(`html.icc-scroll-lock`), so the content behind them stays frozen above the fold.
+
+Changing the color space shows a spinner overlay over the comparison (100ms fade
+in, 200ms hold, 100ms fade out), disables Save PNG until the new analysis is drawn,
+and, when `color-space-updated` is authored, confirms with a positive toast.
+
+The contrast and original image panes share one scroll container (`.icc-comparison`),
+so a single scrollbar moves both images together in normal and expanded views.
 Desktop/tablet/mobile controls follow
 the annotated DOM focus order; the native modal shows the compact legend, contains
 focus, dismisses an open tooltip before closing on Escape, and restores focus

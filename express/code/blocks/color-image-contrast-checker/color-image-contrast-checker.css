@@ -1,6 +1,24 @@
 @import url('../../scripts/color-shared/components/dropdown/dropdown.css');
 
+/* Set while the loading overlay or expanded view is open (see syncLoadingOverlay). */
+html.icc-scroll-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.icc-scroll-lock body {
+  position: fixed;
+  inset-block-start: calc(-1 * var(--icc-scroll-y));
+  inset-inline: 0;
+  inline-size: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .color-image-contrast-checker {
+  --icc-image-width: 0px;
+  --icc-image-height: 0px;
+
   color: var(--color-gray-950);
   font-family: var(--body-font-family);
   inline-size: 100%;
@@ -187,6 +205,7 @@
   grid-template-columns: minmax(0, 1fr);
   gap: var(--spacing-300);
   max-inline-size: calc(var(--block-wd-max-width) - 2 * var(--spacing-600));
+  inline-size: 100%;
   margin-inline: auto;
   padding-block: var(--spacing-600);
 }
@@ -274,7 +293,12 @@
   border-block-end: 1px dotted currentcolor;
   font: inherit;
   color: var(--Alias-content-typography-Body);
-  cursor: help;
+  cursor: default;
+}
+
+/* Tooltip triggers stay plain text on hover, matching the other Express tooltips. */
+.color-image-contrast-checker .icc-help:hover {
+  background: none;
 }
 
 .color-image-contrast-checker .color-action-button .icon {
@@ -324,17 +348,19 @@
 }
 
 .color-image-contrast-checker .icc-comparison-row {
-  --icc-comparison-padding-block: var(--spacing-100);
-  --icc-image-top-inset: var(--icc-comparison-padding-block);
+  /* Matches the zoom toolbar's top inset so image tops sit flush with it. */
+  --icc-comparison-padding-block: 10px;
 
   position: relative;
   display: flex;
   min-inline-size: 0;
+  /* Keep the aspect ratio authoritative; oversized images scroll inside .icc-comparison. */
+  min-block-size: 0;
   aspect-ratio: 311 / 200;
   padding: var(--spacing-100) var(--spacing-300) var(--spacing-100) var(--spacing-700);
-  padding-block-start: var(--icc-image-top-inset);
+  padding-block-start: var(--icc-comparison-padding-block);
   background: var(--S2AC-Palette-gray-75);
-  border-radius: var(--Radius-corner-radius-200);
+  border-radius: var(--Corner-radius-corner-radius-100);
   outline: 1px solid rgb(82 88 228 / 10%);
 }
 
@@ -384,26 +410,61 @@
   position: relative;
   z-index: 0;
   min-inline-size: 0;
+  min-block-size: 0;
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Tracks hug the scaled images; the pair stays centered and scrolls from the start when larger. */
+  grid-template-columns: repeat(2, var(--icc-image-width));
+  grid-template-rows: var(--icc-image-height);
+  place-content: safe center;
   gap: var(--spacing-100);
+  overflow: auto;
 }
 
 .color-image-contrast-checker .icc-frame {
   position: relative;
   min-block-size: 0;
   min-inline-size: 0;
-  overflow: auto;
 }
 
 .color-image-contrast-checker .icc-frame :is(canvas, img) {
   position: absolute;
-  inset-block-start: max(0%, calc((100% - var(--icc-image-height)) / 2));
-  inset-inline-start: max(0%, calc((100% - var(--icc-image-width)) / 2));
-  inline-size: var(--icc-image-width);
-  block-size: var(--icc-image-height);
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
   max-inline-size: none;
+}
+
+.color-image-contrast-checker .icc-recalc {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: rgb(0 0 0 / 56%);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease-out;
+}
+
+.color-image-contrast-checker .icc-comparison-row.is-recalculating .icc-recalc {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.color-image-contrast-checker .icc-recalc-spinner {
+  inline-size: 79px;
+  block-size: 79px;
+  border: 7px solid var(--color-gray-300-variant);
+  border-block-start-color: var(--S2-Buttons-Accent-Color-Default);
+  border-radius: 50%;
+  animation: icc-spin 1s linear infinite;
+}
+
+@keyframes icc-spin {
+  to { transform: rotate(360deg); }
 }
 
 .color-image-contrast-checker .icc-footer {
@@ -583,8 +644,12 @@
 
 .color-image-contrast-checker .icc-legend-mini {
   display: none;
-  min-inline-size: 0;
-  inline-size: 337px;
+  /* Figma width is the floor; grow to fit the row so font metrics or longer copy
+     don't wrap it, and only wrap once the container itself is too narrow. */
+  --icc-legend-mini-min: 337px;
+
+  min-inline-size: min(var(--icc-legend-mini-min), 100%);
+  inline-size: max-content;
   max-inline-size: 100%;
   justify-self: start;
   align-items: center;
@@ -673,7 +738,20 @@
   min-block-size: 0;
   aspect-ratio: auto;
   padding: var(--spacing-100) var(--spacing-300);
-  padding-block-start: var(--icc-image-top-inset);
+  padding-block-start: var(--icc-comparison-padding-block);
+}
+
+/* Figma zoom-to-fill: the surface has no padding; all offsets live inside the scroller so
+   scrolled content clips against the surface's own edges. resize() sets the start gutter
+   beside the toolbar as scroller padding, so images can still scroll under the toolbar. */
+.color-image-contrast-checker .icc-comparison-row.is-fill {
+  padding: 0;
+}
+
+.color-image-contrast-checker .icc-comparison-row.is-fill .icc-comparison {
+  padding-block: var(--icc-comparison-padding-block);
+  padding-inline-end: var(--icc-comparison-padding-block);
+  border-radius: inherit;
 }
 
 .icc-overlay {
@@ -698,7 +776,14 @@
   }
 
   .color-image-contrast-checker .icc-comparison-row {
+    --icc-comparison-padding-block: var(--spacing-100);
+
     aspect-ratio: 787 / 513;
+  }
+
+  .color-image-contrast-checker .icc-zoom {
+    inset-block-start: var(--spacing-100);
+    inset-inline-start: var(--spacing-100);
   }
 
   .color-image-contrast-checker.icc-dialog {
@@ -785,7 +870,7 @@
 
 @media (min-width: 700px) and (max-width: 899px) {
   .color-image-contrast-checker.icc-dialog .icc-legend-mini {
-    inline-size: 341px;
+    --icc-legend-mini-min: 341px;
     gap: var(--spacing-200);
   }
 
@@ -799,13 +884,22 @@
 }
 
 @media (min-width: 900px) {
+  /* The workspace keeps a 570px floor; the comparison surface absorbs the extra height so
+     resize()'s hugged block-size acts only as a flex basis. */
+  .color-image-contrast-checker .icc-workspace {
+    min-block-size: 570px;
+  }
+
+  .color-image-contrast-checker .icc-workspace > .icc-comparison-row {
+    flex-grow: 1;
+  }
+
   .color-image-contrast-checker .icc-comparison-row {
     --icc-comparison-padding-block: var(--spacing-300);
+    --icc-hug-height: 1;
 
     aspect-ratio: 881 / 516;
     padding: var(--spacing-300);
-    padding-block-start: var(--icc-image-top-inset);
-    border-radius: var(--Corner-radius-corner-radius-100);
   }
 
   .color-image-contrast-checker .icc-zoom {
@@ -818,10 +912,30 @@
     padding: var(--spacing-600);
   }
 
+  /* Figma: expanded fills the viewport with a 40px margin, capped at 1600 x 1000, centered. */
+  .color-image-contrast-checker.icc-dialog[open] {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-panel {
+    inline-size: 100%;
+    max-inline-size: 1600px;
+    max-block-size: 1000px;
+  }
+
   .color-image-contrast-checker.icc-dialog .icc-comparison-row {
+    --icc-hug-height: 0;
+
     padding: var(--spacing-300);
-    padding-block-start: var(--icc-image-top-inset);
-    border-radius: var(--Radius-corner-radius-200);
+  }
+
+  /* Zoom-to-fill: restate the base fill padding over the desktop row/dialog padding; the
+     start gutter beside the toolbar comes from resize(), as on smaller breakpoints. */
+  .color-image-contrast-checker .icc-comparison-row.is-fill {
+    padding: 0;
   }
 }
 
@@ -879,4 +993,11 @@
     max-inline-size: none;
     block-size: auto;
   }
+}
+
+
+@media (min-width: 1440px) {
+  .color-image-contrast-checker .icc-panel { 
+    max-inline-size: 1600px;
+}
 }

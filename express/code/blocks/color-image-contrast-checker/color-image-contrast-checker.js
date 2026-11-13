@@ -8,14 +8,45 @@ import loadColorImageContrastCheckerPlaceholders, { loadColorImageContrastUpload
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { getPictureSource } from '../../scripts/color-shared/utils/imageExtractUtils.js';
 import parseContent from './content.js';
+import resolveTemplates from './templates.js';
 import { decodeImage } from './image.js';
 import createRenderer from './analysis.js';
 import createDropdown from '../../scripts/color-shared/components/dropdown/dropdown.js';
 
 const instances = new WeakMap();
 let nextId = 0;
+const scrollLockOwners = new Set();
+let lockedScrollY = 0;
+
+function setPageScrollLock(owner, locked) {
+  if (locked) scrollLockOwners.add(owner);
+  else scrollLockOwners.delete(owner);
+  const root = document.documentElement;
+  if (scrollLockOwners.size && !root.classList.contains('icc-scroll-lock')) {
+    lockedScrollY = window.scrollY;
+    root.style.setProperty('--icc-scroll-y', `${lockedScrollY}px`);
+    root.classList.add('icc-scroll-lock');
+  } else if (!scrollLockOwners.size && root.classList.contains('icc-scroll-lock')) {
+    root.classList.remove('icc-scroll-lock');
+    root.style.removeProperty('--icc-scroll-y');
+    window.scrollTo(0, lockedScrollY);
+  }
+}
 const HISTORY_KEY = 'colorImageContrastChecker';
-const MIN_FILL_SCALE = 1.5;
+// Figma "Change color space" timing: 100ms ease-out fade in, 200ms hold, 100ms fade out.
+const RECALC_FADE_MS = 100;
+const RECALC_HOLD_MS = 200;
+const COLOR_SPACE_STRINGS = { srgb: 'srgb', 'display-p3': 'p3', 'adobe-rgb': 'adobeRgb' };
+// Figma Fill frames show the image pair at ~150% of its Fit size on mobile and tablet.
+const FILL_OVER_FIT = 1.5;
+const EXPORT_MAX_AREA = 16777216;
+const EXPORT_MAX_SIDE = 16384;
+
+const wait = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+
+function colorSpaceLabel(strings, space) {
+  return strings[COLOR_SPACE_STRINGS[space]];
+}
 
 function label(tag, className, value, attributes = {}) {
   const element = createTag(tag, { class: className, ...attributes });
@@ -114,7 +145,10 @@ function createView(content, strings, id, onColorChange) {
   analysisFrame.append(canvas);
   originalFrame.append(original);
   comparison.append(analysisFrame, originalFrame);
-  comparisonRow.append(zoom, comparison);
+  // Figma "Change color space": spinner overlay over the analysis area only.
+  const recalc = createTag('div', { class: 'icc-recalc', 'aria-hidden': 'true' });
+  recalc.append(createTag('div', { class: 'icc-recalc-spinner' }));
+  comparisonRow.append(zoom, comparison, recalc);
   const footer = createTag('div', { class: 'icc-footer' });
   workspace.append(controls, comparisonRow, footer);
   main.append(copy, workspace);
@@ -151,8 +185,13 @@ function createView(content, strings, id, onColorChange) {
       const smallTrigger = help(strings.smallText, strings.smallTextHelp);
       const largeValue = strings[`${kind}Large`].replace(/>=/g, '\u2265');
       const smallValue = strings[`${kind}Small`].replace(/>=/g, '\u2265');
-      large.append(largeTrigger, label('span', '', largeValue));
-      small.append(smallTrigger, label('span', '', smallValue));
+      // dir=auto keeps "≥ 4.5:1 (AAA)" from being mirrored inside RTL pages.
+      const largeLabel = label('span', '', largeValue);
+      const smallLabel = label('span', '', smallValue);
+      largeLabel.dir = 'auto';
+      smallLabel.dir = 'auto';
+      large.append(largeTrigger, largeLabel);
+      small.append(smallTrigger, smallLabel);
       rows.append(large, small);
     }
     card.append(rows);
@@ -197,8 +236,6 @@ function createView(content, strings, id, onColorChange) {
     footer,
     canvas,
     original,
-    analysisFrame,
-    originalFrame,
     dialog,
     tips,
   };
@@ -215,7 +252,6 @@ export default async function decorate(block) {
   let view;
   let renderer;
   let source;
-  let sourceName;
   let dropzone;
   let loadingOverlay;
   let detachDrag;
@@ -256,12 +292,15 @@ export default async function decorate(block) {
     const parent = active && view.dialog.open ? view.dialog : document.body;
     if (loadingOverlay.parentElement !== parent) parent.append(loadingOverlay);
     loadingOverlay.classList.toggle('is-loading', active);
+    // Freeze the document behind either transition without moving its scroll position.
+    setPageScrollLock(block, active || view.dialog.open);
   };
   const busy = (value) => {
     block.classList.toggle('is-loading', value);
     block.setAttribute('aria-busy', String(value));
     syncLoadingOverlay();
     if (view) {
+      view.comparisonRow.classList.remove('is-recalculating');
       if (value && view.dialog.open
         && (document.activeElement === view.save
           || view.selector.element.contains(document.activeElement))) {
@@ -273,39 +312,76 @@ export default async function decorate(block) {
   };
   const resize = () => {
     if (!source || !view) return;
-    const { comparisonRow, analysisFrame, zoom } = view;
+    const { comparisonRow, comparison, zoom } = view;
+    comparisonRow.classList.toggle('is-fill', mode === 'fill');
+    comparisonRow.style.removeProperty('block-size');
+    comparisonRow.style.removeProperty('padding-inline-start');
+    comparison.style.removeProperty('padding-inline-start');
     const surfaceStyle = getComputedStyle(comparisonRow);
-    const basePadding = parseFloat(surfaceStyle.getPropertyValue('--icc-comparison-padding-block'));
-    const extraPadding = parseFloat(surfaceStyle.paddingTop) - basePadding;
-    const frame = analysisFrame.getBoundingClientRect();
+    const gap = parseFloat(getComputedStyle(comparison).columnGap) || 0;
+    // Measure against the scroller's border box so fill-mode scrollbars never feed back.
+    const measure = () => {
+      const width = (comparison.offsetWidth - gap) / 2;
+      const height = comparison.offsetHeight;
+      // Fit: whole image visible. Fill: cover the pane and zoom at least 150% of Fit
+      // (Figma "Zoomed in toggle"), so Fill always magnifies even when Fit already covers.
+      const fit = Math.min(width / source.width, height / source.height);
+      const scale = mode === 'fit'
+        ? fit
+        : Math.max(width / source.width, height / source.height, FILL_OVER_FIT * fit);
+      return { width, height, scale };
+    };
+    // Desktop minimized: hug the fitted image height, capped by the authored aspect ratio.
+    const hug = () => {
+      if (surfaceStyle.getPropertyValue('--icc-hug-height').trim() !== '1') return;
+      const [ratioWidth, ratioHeight] = surfaceStyle.aspectRatio.split('/').map(parseFloat);
+      const rowWidth = comparisonRow.getBoundingClientRect().width;
+      const chrome = parseFloat(surfaceStyle.paddingTop) + parseFloat(surfaceStyle.paddingBottom);
+      const hugHeight = measure().width * (source.height / source.width) + chrome;
+      // Never shorter than the zoom toolbar plus its inset, so it stays inside the row.
+      const toolbarFloor = zoom.offsetHeight + 2 * zoom.offsetTop;
+      const capped = Math.min(hugHeight, rowWidth * (ratioHeight / ratioWidth));
+      comparisonRow.style.blockSize = `${Math.max(capped, toolbarFloor)}px`;
+    };
+    hug();
+    let { width, height, scale } = measure();
+    if (!width || height <= 0) return;
     const toolbar = zoom.getBoundingClientRect();
-    const width = analysisFrame.clientWidth;
-    const fullHeight = analysisFrame.clientHeight + extraPadding;
-    if (!width || fullHeight <= 0) return;
-    const imageScale = (height) => (mode === 'fit'
-      ? Math.min(width / source.width, height / source.height)
-      : Math.max(MIN_FILL_SCALE, width / source.width, height / source.height));
-    const fullScale = imageScale(fullHeight);
-    const imageLeft = frame.left + Math.max(0, (width - source.width * fullScale) / 2);
-    const imageTop = frame.top - extraPadding
-      + Math.max(0, (fullHeight - source.height * fullScale) / 2);
-    const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
-    const clearance = mode === 'fill' ? toolbarGap : 0;
-    const overlaps = imageLeft < toolbar.right + clearance
-      && imageLeft + Math.min(width, source.width * fullScale) > toolbar.left - clearance
-      && imageTop < toolbar.bottom + clearance
-      && imageTop + Math.min(fullHeight, source.height * fullScale) > toolbar.top - clearance;
-    const topInset = toolbar.bottom - comparisonRow.getBoundingClientRect().top + toolbarGap;
-    // Reserve toolbar clearance only where needed, without narrowing the images.
-    if (overlaps && fullHeight - (topInset - basePadding) >= view.fit.offsetHeight) {
-      comparisonRow.style.setProperty('--icc-image-top-inset', `${topInset}px`);
+    // Inline-start gutter beside the toolbar, measured from the row's start edge either way.
+    const toolbarGutter = () => {
+      const toolbarGap = parseFloat(surfaceStyle.getPropertyValue('--spacing-100'));
+      const row = comparisonRow.getBoundingClientRect();
+      const rtl = surfaceStyle.direction === 'rtl';
+      return (rtl ? row.right - toolbar.left : toolbar.right - row.left) + toolbarGap;
+    };
+    const reserveGutter = (target) => {
+      target.style.paddingInlineStart = `${toolbarGutter()}px`;
+      hug();
+      ({ width, height, scale } = measure());
+    };
+    if (mode === 'fit') {
+      // The pair is centered; only when it would sit under the toolbar does it get a
+      // start gutter beside the toolbar (narrower than the toolbar is tall).
+      const frame = comparison.getBoundingClientRect();
+      const pairWidth = 2 * source.width * scale + gap;
+      const imageLeft = frame.left + (frame.width - pairWidth) / 2;
+      const imageTop = frame.top + (height - source.height * scale) / 2;
+      if (imageLeft < toolbar.right && imageLeft + pairWidth > toolbar.left
+        && imageTop < toolbar.bottom && imageTop + source.height * scale > toolbar.top) {
+        reserveGutter(comparisonRow);
+      }
     } else {
-      comparisonRow.style.removeProperty('--icc-image-top-inset');
+      // Fill: the gutter is scroller padding, so the initial view clears the toolbar while
+      // scrolling still carries the images under it to the surface's start edge.
+      reserveGutter(comparison);
     }
-    const height = analysisFrame.clientHeight;
-    const scale = imageScale(height);
-    view.panel.style.setProperty('--icc-image-width', `${source.width * scale}px`);
-    view.panel.style.setProperty('--icc-image-height', `${source.height * scale}px`);
+    // Floor so fitted images never overflow the shared scroller by a sub-pixel.
+    view.panel.style.setProperty('--icc-image-width', `${Math.floor(source.width * scale)}px`);
+    view.panel.style.setProperty('--icc-image-height', `${Math.floor(source.height * scale)}px`);
+  };
+  const scheduleResize = () => {
+    cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(resize);
   };
   const arrange = () => {
     if (!view) return;
@@ -371,6 +447,7 @@ export default async function decorate(block) {
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
+    setPageScrollLock(block, false);
     generation += 1;
     imageGeneration += 1;
     request?.abort();
@@ -411,6 +488,14 @@ export default async function decorate(block) {
     uploadStrings = await loadColorImageContrastUploadPlaceholders();
     if (destroyed) return;
     content = parseContent(block);
+    const templateIds = content.samples.flatMap(({ templateId }) => templateId ?? []);
+    // Resolve template samples alongside setup; they slot in after the block renders.
+    const templates = templateIds.length
+      ? resolveTemplates(templateIds).catch((error) => {
+        window.lana?.log(`color-image-contrast-checker: template samples failed: ${error.message}`, { tags: 'color-image-contrast-checker' });
+        return new Map();
+      })
+      : null;
     strings = await loadColorImageContrastCheckerPlaceholders();
     if (destroyed) return;
     const { loadStyle } = await import(`${getLibs()}/utils/utils.js`);
@@ -422,12 +507,33 @@ export default async function decorate(block) {
     if (destroyed) return;
     view = createView(content, strings, id, async (value) => {
       generation += 1;
+      const version = generation;
+      const current = () => !destroyed && version === generation;
+      view.save.disabled = true;
+      // Figma: overlay fades in, holds while the new space is applied, then fades out.
+      view.comparisonRow.classList.add('is-recalculating');
+      await wait(RECALC_FADE_MS);
+      // Commit the space only when it is applied, so a superseding load keeps state consistent.
+      if (!current()) return;
       colorSpace = value;
       try {
         analyze();
       } catch (error) {
+        view.comparisonRow.classList.remove('is-recalculating');
         await report(error, strings.analysisError);
+        return;
       }
+      await wait(RECALC_HOLD_MS);
+      if (!current()) return;
+      view.comparisonRow.classList.remove('is-recalculating');
+      await wait(RECALC_FADE_MS);
+      if (!current() || !strings.colorSpaceUpdated) return;
+      const { showExpressToast } = await import('../../scripts/color-shared/spectrum/components/express-toast.js');
+      if (!current()) return;
+      showExpressToast({
+        message: strings.colorSpaceUpdated.replace('{colorSpace}', colorSpaceLabel(strings, colorSpace)),
+        variant: 'positive',
+      });
     });
     const upload = createTag('div', { class: 'icc-upload', role: 'region', 'aria-label': strings.landingAria });
     background = createTag('div', {
@@ -473,7 +579,6 @@ export default async function decorate(block) {
           throw error;
         }
         previous?.destroy();
-        sourceName = file.name.replace(/\.[^.]+$/, '');
         view.original.src = source.url;
         selectSample(selectedSample);
         block.classList.add('has-image');
@@ -487,6 +592,8 @@ export default async function decorate(block) {
         announceReady();
       } catch (error) {
         if (!destroyed && version === imageGeneration) {
+          // A color-space change superseded by this load never applied; resync its selector.
+          if (source) view.selector.setValue(colorSpace);
           await report(error, strings[error.message] || uploadStrings.loadError);
         }
       } finally {
@@ -497,58 +604,83 @@ export default async function decorate(block) {
       strings: uploadStrings, loadingText: strings.analyzingImage, onFileSelected: load,
     });
     upload.append(dropzone.container);
-    if (content.samples) {
-      const suggestions = createTag('div', { class: 'icc-suggestions' });
-      suggestions.append(label('p', '', strings.noImageTryOurs));
-      const samples = createTag('div', { class: 'icc-sample-list' });
-      [...content.samples.querySelectorAll('picture')].forEach((picture) => {
-        const image = picture.querySelector('img');
-        const anchor = picture.closest('a[href]');
-        const src = anchor?.href || getPictureSource(picture);
-        if (!image || !src) throw new Error('Sample requires an authored image source');
-        const url = new URL(src, document.baseURI);
-        if (!anchor && /\/media_[^/]+$/.test(url.pathname)) {
-          ['width', 'height', 'format', 'optimize', 'fit'].forEach((key) => url.searchParams.delete(key));
-        }
-        const description = image.alt.trim();
-        const sample = button(description
-          ? `${strings.useThisImage}: ${description}` : strings.useThisImage);
-        sample.classList.add('icc-sample');
-        sample.setAttribute('aria-pressed', 'false');
-        sampleButtons.push(sample);
-        const preview = picture.cloneNode(true);
-        const previewImage = preview.querySelector('img');
-        previewImage.alt = description;
-        previewImage.draggable = false;
-        sample.replaceChildren(preview);
-        sample.addEventListener('click', async () => {
-          request?.abort();
-          generation += 1;
-          imageGeneration += 1;
-          const version = imageGeneration;
-          busy(true);
-          const controller = new AbortController();
-          request = controller;
-          try {
-            const response = await fetch(url.href, { signal: controller.signal });
-            if (!response.ok) throw new Error(`Sample HTTP ${response.status}`);
-            const blob = await response.blob();
-            if (!destroyed && !controller.signal.aborted && imageGeneration === version) {
-              await load(new File([blob], url.pathname.split('/').pop(), { type: blob.type }), sample);
-            }
-          } catch (error) {
-            if (!controller.signal.aborted && !destroyed && imageGeneration === version) {
-              await report(error, uploadStrings.loadError);
-            }
-          } finally {
-            if (!destroyed && imageGeneration === version) busy(false);
+    const buildSample = ({ picture: authored, template }) => {
+      const picture = authored ?? createTag('picture');
+      if (template) {
+        picture.append(createTag('img', { src: template.preview, alt: template.title, loading: 'lazy' }));
+      }
+      const image = picture.querySelector('img');
+      const anchor = picture.closest('a[href]');
+      const src = template?.src || anchor?.href || getPictureSource(picture);
+      if (!image || !src) throw new Error('Sample requires an authored image source');
+      const url = new URL(src, document.baseURI);
+      if (!template && !anchor && /\/media_[^/]+$/.test(url.pathname)) {
+        ['width', 'height', 'format', 'optimize', 'fit'].forEach((key) => url.searchParams.delete(key));
+      }
+      const description = image.alt.trim();
+      const sample = button(description
+        ? `${strings.useThisImage}: ${description}` : strings.useThisImage);
+      sample.classList.add('icc-sample');
+      sample.setAttribute('aria-pressed', 'false');
+      sampleButtons.push(sample);
+      const preview = picture.cloneNode(true);
+      const previewImage = preview.querySelector('img');
+      previewImage.alt = description;
+      previewImage.draggable = false;
+      sample.replaceChildren(preview);
+      sample.addEventListener('click', async () => {
+        request?.abort();
+        generation += 1;
+        imageGeneration += 1;
+        const version = imageGeneration;
+        busy(true);
+        const controller = new AbortController();
+        request = controller;
+        try {
+          const response = await fetch(url.href, { signal: controller.signal });
+          if (!response.ok) throw new Error(`Sample HTTP ${response.status}`);
+          const blob = await response.blob();
+          if (!destroyed && !controller.signal.aborted && imageGeneration === version) {
+            await load(new File([blob], url.pathname.split('/').pop(), { type: blob.type }), sample);
           }
-        }, { signal });
-        samples.append(sample);
+        } catch (error) {
+          if (!controller.signal.aborted && !destroyed && imageGeneration === version) {
+            await report(error, uploadStrings.loadError);
+          }
+        } finally {
+          if (!destroyed && imageGeneration === version) busy(false);
+        }
+      }, { signal });
+      return sample;
+    };
+    const suggestions = createTag('div', { class: 'icc-suggestions' });
+    suggestions.append(label('p', '', strings.noImageTryOurs));
+    const samples = createTag('div', { class: 'icc-sample-list' });
+    suggestions.append(samples);
+    // Show suggestions only once they hold a sample (template-only rows wait for the search).
+    const showSuggestions = () => {
+      if (samples.querySelector('.icc-sample') && !suggestions.isConnected) upload.append(suggestions);
+    };
+    // Template IDs hold their authored slot until the search resolves after first render.
+    const templateSlots = content.samples.flatMap((entry) => {
+      if (entry.picture) {
+        samples.append(buildSample(entry));
+        return [];
+      }
+      const slot = document.createComment(entry.templateId);
+      samples.append(slot);
+      return [{ slot, templateId: entry.templateId }];
+    });
+    showSuggestions();
+    templates?.then((resolved) => {
+      if (destroyed) return;
+      templateSlots.forEach(({ slot, templateId }) => {
+        const template = resolved.get(templateId);
+        if (template) slot.replaceWith(buildSample({ template }));
+        else slot.remove();
       });
-      suggestions.append(samples);
-      upload.append(suggestions);
-    }
+      showSuggestions();
+    });
     const dragOverlay = buildDragOverlay(strings);
     loadingOverlay = buildLoadingOverlay({ uploadingImage: strings.analyzingImage });
     [dragOverlay, loadingOverlay].forEach((overlay) => overlay.classList.add('icc-overlay'));
@@ -557,20 +689,13 @@ export default async function decorate(block) {
     block.closest('.section').prepend(background);
     detachDrag = attachImageDragHandlers(block, dropzone, dragOverlay, loadingOverlay, destroy);
     arrange();
-    resizeObserver = new ResizeObserver(() => {
-      cancelAnimationFrame(resizeFrame);
-      resizeFrame = requestAnimationFrame(resize);
-    });
-    resizeObserver.observe(view.analysisFrame);
-    const frames = [view.analysisFrame, view.originalFrame];
-    frames.forEach((frame, index) => {
-      frame.addEventListener('scroll', () => {
-        const other = frames[1 - index];
-        if (other.scrollLeft !== frame.scrollLeft) other.scrollLeft = frame.scrollLeft;
-        if (other.scrollTop !== frame.scrollTop) other.scrollTop = frame.scrollTop;
-      }, { passive: true, signal });
-    });
+    resizeObserver = new ResizeObserver(scheduleResize);
+    resizeObserver.observe(view.panel);
+    resizeObserver.observe(view.comparisonRow);
+    resizeObserver.observe(view.comparison);
     media.addEventListener('change', arrange, { signal });
+    window.addEventListener('resize', scheduleResize, { signal });
+    window.visualViewport?.addEventListener('resize', scheduleResize, { signal });
     window.addEventListener('popstate', () => {
       if (window.history.state?.[HISTORY_KEY] !== id) landing();
     }, { signal });
@@ -600,19 +725,35 @@ export default async function decorate(block) {
           control.tabIndex = selected ? 0 : -1;
         });
         resize();
-        if (mode === 'fit') {
-          frames.forEach((frame) => {
-            frame.scrollTop = 0;
-            frame.scrollLeft = 0;
-          });
-        }
+        if (mode === 'fit') view.comparison.scrollTo(0, 0);
       }
       if (action === 'save' && ready && !view.save.disabled) {
         try {
           const version = generation;
-          const filename = `${sourceName}-contrast-${colorSpace}.png`;
+          const filename = 'image-contrast-analysis.png';
+          // The original pane is drawn from the displayed <img>; it may still be decoding.
+          if (!view.original.complete) {
+            await view.original.decode();
+            if (destroyed || version !== generation) return;
+          }
+          const { width, height } = view.canvas;
+          // Side-by-side doubles the width; stay within the strictest browser canvas
+          // limits (iOS Safari: 16,777,216 px area; 16,384 px per side).
+          const fit = Math.min(
+            1,
+            Math.sqrt(EXPORT_MAX_AREA / (2 * width * height)),
+            EXPORT_MAX_SIDE / (2 * width),
+            EXPORT_MAX_SIDE / height,
+          );
+          const pane = Math.floor(width * fit);
+          const paneHeight = Math.floor(height * fit);
+          const output = createTag('canvas', { width: pane * 2, height: paneHeight });
+          const context = output.getContext('2d');
+          if (!context) throw new Error('saveError');
+          context.drawImage(view.canvas, 0, 0, pane, paneHeight);
+          context.drawImage(view.original, pane, 0, pane, paneHeight);
           const blob = await new Promise((resolve) => {
-            view.canvas.toBlob(resolve, 'image/png');
+            output.toBlob(resolve, 'image/png');
           });
           if (destroyed || version !== generation) return;
           if (!blob) throw new Error('saveError');

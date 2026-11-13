@@ -84,6 +84,20 @@ function chooseSpace(space) {
   block.querySelector(`.color-dropdown-option[data-value="${space}"]`).click();
 }
 
+// Color-space changes animate a recalculation overlay; Save re-enables once it settles.
+async function applySpace(space) {
+  chooseSpace(space);
+  await waitFor(() => !block.querySelector('.icc-comparison-row').classList.contains('is-recalculating')
+    && !block.querySelector('[data-action="save"]').disabled);
+}
+
+// Both panes share one scroller; each image is sized against half of its border box.
+const comparisonSlot = (root) => {
+  const comparison = root.querySelector('.icc-comparison');
+  const gap = parseFloat(getComputedStyle(comparison).columnGap);
+  return { width: (comparison.offsetWidth - gap) / 2, height: comparison.offsetHeight };
+};
+
 describe('Color Image Contrast Checker placeholders and composition', () => {
   before(async () => {
     await Promise.all([
@@ -728,14 +742,20 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(getComputedStyle(overlay).opacity).to.equal('1');
     expect(document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2)
       .closest('.color-extract-loading-overlay')).to.equal(overlay);
+    expect(document.documentElement.classList.contains('icc-scroll-lock')).to.equal(true);
+    expect(getComputedStyle(document.body).position).to.equal('fixed');
     expect(block.querySelector('[data-action="save"]').disabled).to.equal(true);
     dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
     expect(dialog.open).to.equal(false);
     expect(overlay.parentElement).to.equal(document.body);
     expect(getComputedStyle(overlay).opacity).to.equal('1');
+    expect(document.documentElement.classList.contains('icc-scroll-lock')).to.equal(true);
+    expect(getComputedStyle(document.body).position).to.equal('fixed');
     finish(bytes);
     await waitFor(() => block.getAttribute('aria-busy') === 'false');
     expect(getComputedStyle(overlay).opacity).to.equal('0');
+    expect(document.documentElement.classList.contains('icc-scroll-lock')).to.equal(false);
+    expect(getComputedStyle(document.body).position).not.to.equal('fixed');
     expect(block.querySelector('[data-action="save"]').disabled).to.equal(false);
   });
 
@@ -819,9 +839,20 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     const original = block.querySelector('.icc-frame img').src;
     let detail;
     block.addEventListener('color-image-contrast-checker:ready', (event) => { detail = event.detail; });
+    const readySpace = () => detail?.colorSpace;
+    const surface = block.querySelector('.icc-comparison-row');
+    const save = block.querySelector('[data-action="save"]');
     for (const space of ['display-p3', 'adobe-rgb', 'srgb']) {
+      detail = null;
       chooseSpace(space);
-      expect(detail.colorSpace).to.equal(space);
+      // Spinner overlay covers the stale analysis and Save waits for the new one.
+      expect(surface.classList.contains('is-recalculating')).to.equal(true);
+      expect(getComputedStyle(surface.querySelector('.icc-recalc')).backdropFilter)
+        .to.equal('blur(6px)');
+      expect(save.disabled).to.equal(true);
+      await waitFor(() => readySpace() === space);
+      await waitFor(() => !surface.classList.contains('is-recalculating'));
+      expect(save.disabled).to.equal(false);
       expect(block.querySelector('.icc-frame img').src).to.equal(original);
     }
     const fit = block.querySelector('[data-action="fit"]');
@@ -970,9 +1001,18 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         let ratio = 311 / 200;
         if (width >= 600) ratio = 787 / 513;
         if (width >= 900) ratio = 881 / 516;
-        expect(surfaceBox.height).to.be.closeTo(surfaceBox.width / ratio, 0.1);
+        if (width >= 900) {
+          // Desktop hugs below the aspect cap, but the workspace never drops under 570px.
+          const workspaceHeight = workspace.getBoundingClientRect().height;
+          expect(workspaceHeight).to.be.at.least(570 - 0.5);
+          if (workspaceHeight > 570 + 0.5) {
+            expect(surfaceBox.height).to.be.at.most(surfaceBox.width / ratio + 0.1);
+          }
+        } else {
+          expect(surfaceBox.height).to.be.closeTo(surfaceBox.width / ratio, 0.1);
+        }
         expect(getComputedStyle(surface).backgroundColor).to.equal('rgb(243, 243, 243)');
-        expect(getComputedStyle(surface).borderRadius).to.equal(width >= 900 ? '8px' : '16px');
+        expect(getComputedStyle(surface).borderRadius).to.equal('8px');
         expect(getComputedStyle(surface).outlineColor).to.equal('rgba(82, 88, 228, 0.1)');
         expect(getComputedStyle(surface).overflow).to.equal('visible');
         expect(cardStyle.borderTopWidth).to.equal('0px');
@@ -981,8 +1021,29 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
           + 'rgba(0, 0, 0, 0.04) 0px 1px 4px 0px, '
           + 'rgba(0, 0, 0, 0.08) 0px 2px 8px 0px',
         );
-        expect(zoomBox.left - surfaceBox.left).to.equal(width >= 900 ? 16 : 10);
-        expect(zoomBox.top - surfaceBox.top).to.equal(width >= 900 ? 16 : 10);
+        let toolbarInset = 10;
+        if (width >= 600) toolbarInset = 8;
+        if (width >= 900) toolbarInset = 16;
+        expect(zoomBox.left - surfaceBox.left).to.equal(toolbarInset);
+        expect(zoomBox.top - surfaceBox.top).to.equal(toolbarInset);
+        const canvas = block.querySelector('.icc-frame canvas');
+        const comparison = block.querySelector('.icc-comparison');
+        // Fit centers the pair vertically in the comparison area.
+        const offCenter = () => {
+          const image = canvas.getBoundingClientRect();
+          const area = comparison.getBoundingClientRect();
+          return (image.top + image.bottom) / 2 - (area.top + area.bottom) / 2;
+        };
+        await waitFor(() => Math.abs(offCenter()) < 0.5);
+        if (width >= 900) {
+          // A start gutter appears only when the centered pair would sit under the toolbar.
+          const image = canvas.getBoundingClientRect();
+          const toolbar = zoom.getBoundingClientRect();
+          expect(image.left >= toolbar.right + 8 - 0.1 || image.top >= toolbar.bottom)
+            .to.equal(true);
+          const maxHeight = surfaceBox.width / ratio;
+          await waitFor(() => parseFloat(surface.style.blockSize) < maxHeight - 1);
+        }
         expect(zoomBox.width).to.equal(width >= 900 ? 40 : 32);
         expect(zoomBox.height).to.equal(width >= 900 ? 68 : 60);
         expect(getComputedStyle(zoom).position).to.equal('absolute');
@@ -999,8 +1060,9 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         });
         block.querySelectorAll('.icc-frame').forEach((frame) => {
           expect(getComputedStyle(frame).backgroundColor).to.equal('rgba(0, 0, 0, 0)');
-          expect(getComputedStyle(frame).overflow).to.equal('auto');
+          expect(getComputedStyle(frame).overflow).to.equal('visible');
         });
+        expect(getComputedStyle(block.querySelector('.icc-comparison')).overflow).to.equal('auto');
         expect(getComputedStyle(block.querySelector('.icc-footer')).display)
           .to.equal(width >= 700 ? 'none' : 'flex');
         if (width >= 1200) {
@@ -1018,22 +1080,67 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     }
   });
 
-  it('retains Fit scaling, minimum 150% Fill, view state and correct maximize/minimize icons', async () => {
+  it('locks page scroll while the expanded view is open', async () => {
+    await setup();
+    await upload();
+    const root = document.documentElement;
+    expect(root.classList.contains('icc-scroll-lock')).to.equal(false);
+    block.querySelector('[data-action="expand"]').click();
+    expect(root.classList.contains('icc-scroll-lock')).to.equal(true);
+    expect(getComputedStyle(root).overflow).to.equal('hidden');
+    expect(getComputedStyle(document.body).position).to.equal('fixed');
+    block.querySelector('[data-action="expand"]').click();
+    expect(root.classList.contains('icc-scroll-lock')).to.equal(false);
+    expect(getComputedStyle(document.body).position).not.to.equal('fixed');
+  });
+
+  it('keeps a 570px desktop workspace floor that the surface fills for short images', async () => {
+    const viewport = { width: window.innerWidth, height: window.innerHeight };
+    try {
+      await setViewport({ width: 1440, height: 1000 });
+      await setup();
+      const workspace = block.querySelector('.icc-workspace');
+      const surface = block.querySelector('.icc-comparison-row');
+      let previous = '';
+      for (const [width, height] of [[1000, 100], [100, 1000]]) {
+        await upload(await imageFile(width, height));
+        const stale = previous;
+        await waitFor(() => surface.style.blockSize && surface.style.blockSize !== stale);
+        previous = surface.style.blockSize;
+        const basis = parseFloat(surface.style.blockSize);
+        const cap = surface.getBoundingClientRect().width / (881 / 516);
+        expect(basis).to.be.at.most(cap + 0.1);
+        expect(workspace.getBoundingClientRect().height).to.be.at.least(570 - 0.5);
+        // The hugged block-size is only a flex basis; the surface grows to the floor.
+        expect(surface.getBoundingClientRect().height).to.be.at.least(basis - 0.5);
+        if (width > height) {
+          expect(basis).to.be.below(240);
+          expect(workspace.getBoundingClientRect().height).to.be.closeTo(570, 0.5);
+          expect(surface.getBoundingClientRect().height).to.be.above(basis + 100);
+        }
+      }
+    } finally {
+      await setViewport(viewport);
+    }
+  });
+
+  it('retains Fit scaling, cover Fill, view state and correct maximize/minimize icons', async () => {
     const viewport = { width: window.innerWidth, height: window.innerHeight };
     try {
       await setup();
       await upload();
       const panel = block.querySelector('.icc-panel');
-      const frame = block.querySelector('.icc-frame');
       const fit = block.querySelector('[data-action="fit"]');
       const fill = block.querySelector('[data-action="fill"]');
       const expand = block.querySelector('[data-action="expand"]');
       const scaleMatches = (mode) => {
+        const slot = comparisonSlot(block);
+        const fitScale = Math.min(slot.width / 13, slot.height / 9);
         const scale = mode === 'fit'
-          ? Math.min(frame.clientWidth / 13, frame.clientHeight / 9)
-          : Math.max(1.5, frame.clientWidth / 13, frame.clientHeight / 9);
-        return Math.abs(parseFloat(panel.style.getPropertyValue('--icc-image-width')) - 13 * scale)
-          < 0.1;
+          ? fitScale
+          : Math.max(slot.width / 13, slot.height / 9, 1.5 * fitScale);
+        return parseFloat(panel.style.getPropertyValue('--icc-image-width'))
+          === Math.floor(13 * scale);
       };
       for (const width of [375, 600, 699, 700, 899, 1440]) {
         await setViewport({ width, height: 1000 });
@@ -1050,7 +1157,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         expect(fill.getAttribute('aria-pressed')).to.equal('true');
         expect(fill.tabIndex).to.equal(0);
         const surface = panel.querySelector('.icc-comparison-row');
-        expect(getComputedStyle(surface).borderRadius).to.equal('16px');
+        expect(getComputedStyle(surface).borderRadius).to.equal('8px');
         expect(getComputedStyle(panel.querySelector('.icc-workspace')).boxShadow).to.equal('none');
         expect(getComputedStyle(panel.querySelector('.icc-save > span:not(.icon)')).fontWeight)
           .to.equal('700');
@@ -1075,12 +1182,14 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     { width: 80, height: 60 },
     { width: 600, height: 400 },
   ].forEach((source) => {
-    it(`fills at least 150% of ${source.width}x${source.height} native pixels with toolbar clearance and unchanged Fit`, async () => {
+    it(`fills ${source.width}x${source.height} to cover the pane with desktop toolbar clearance and unchanged Fit`, async () => {
       const viewport = { width: window.innerWidth, height: window.innerHeight };
       try {
         await setup();
         await upload(await imageFile(source.width, source.height));
         const frames = [...block.querySelectorAll('.icc-frame')];
+        const host = block;
+        const comparison = host.querySelector('.icc-comparison');
         const fit = block.querySelector('[data-action="fit"]');
         const fill = block.querySelector('[data-action="fill"]');
         const expand = block.querySelector('[data-action="expand"]');
@@ -1088,12 +1197,13 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         const zoom = block.querySelector('.icc-zoom');
         const surface = block.querySelector('.icc-comparison-row');
         const scaleFor = (mode) => {
-          const x = frames[0].clientWidth / source.width;
-          const y = frames[0].clientHeight / source.height;
-          return mode === 'fit' ? Math.min(x, y) : Math.max(1.5, x, y);
+          const slot = comparisonSlot(host);
+          const x = slot.width / source.width;
+          const y = slot.height / source.height;
+          return mode === 'fit' ? Math.min(x, y) : Math.max(x, y, 1.5 * Math.min(x, y));
         };
-        const matches = (mode) => Math.abs(canvas.getBoundingClientRect().width
-          - source.width * scaleFor(mode)) < 0.1;
+        const matches = (mode) => canvas.getBoundingClientRect().width
+          === Math.floor(source.width * scaleFor(mode));
         for (const width of [375, 768, 1024, 1199, 1200, 1440]) {
           await setViewport({ width, height: 900 });
           for (const expanded of [false, true]) {
@@ -1101,36 +1211,42 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
             fill.click();
             await waitFor(() => matches('fill'));
             const scale = scaleFor('fill');
-            expect(scale).to.be.at.least(1.5);
             const toolbar = zoom.getBoundingClientRect();
+            const clip = comparison.getBoundingClientRect();
+            if (width >= 900) {
+              const row = surface.getBoundingClientRect();
+              const surfaceStyle = getComputedStyle(surface);
+              expect(parseFloat(surfaceStyle.paddingTop)).to.equal(0);
+              expect(parseFloat(surfaceStyle.paddingBottom)).to.equal(0);
+              expect(clip.top).to.equal(row.top);
+              expect(clip.bottom).to.equal(row.bottom);
+              expect(getComputedStyle(comparison).borderTopRightRadius)
+                .to.equal(surfaceStyle.borderTopRightRadius);
+            }
             for (const frame of frames) {
               const image = frame.firstElementChild.getBoundingClientRect();
-              const clip = frame.getBoundingClientRect();
-              expect(image.width).to.be.closeTo(source.width * scale, 0.1);
-              expect(image.height).to.be.closeTo(source.height * scale, 0.1);
-              expect(image.height).to.be.at.least(frame.clientHeight);
-              expect(Math.max(image.left, clip.left) >= toolbar.right + 8 - 0.1
-                || Math.max(image.top, clip.top) >= toolbar.bottom + 8 - 0.1)
-                .to.equal(true);
+              expect(image.width).to.equal(Math.floor(source.width * scale));
+              expect(image.height).to.equal(Math.floor(source.height * scale));
+              expect(image.height).to.be.at.least(comparisonSlot(host).height - 1);
+            }
+            // Fill sits beside the toolbar with an 8px gap at every breakpoint.
+            for (const frame of frames) {
+              const image = frame.firstElementChild.getBoundingClientRect();
+              expect(Math.max(image.left, clip.left)).to.be.at.least(toolbar.right + 8 - 0.1);
             }
             expect([canvas.width, canvas.height]).to.deep.equal([source.width, source.height]);
-            frames[0].scrollTop = frames[0].scrollHeight;
-            frames[0].scrollLeft = frames[0].scrollWidth;
-            await waitFor(() => frames[1].scrollTop === frames[0].scrollTop
-              && frames[1].scrollLeft === frames[0].scrollLeft);
+            comparison.scrollTo(comparison.scrollWidth, comparison.scrollHeight);
             fit.click();
             await waitFor(() => matches('fit'), () => JSON.stringify({
               width,
               expanded,
               expected: source.width * scaleFor('fit'),
               actual: canvas.getBoundingClientRect().width,
-              frameWidth: frames[0].clientWidth,
-              frameHeight: frames[0].clientHeight,
+              slot: comparisonSlot(host),
               selected: fit.getAttribute('aria-pressed'),
-              inset: surface.style.getPropertyValue('--icc-image-top-inset'),
+              gutter: surface.style.paddingInlineStart,
             }));
-            await waitFor(() => frames.every((frame) => frame.scrollTop === 0
-              && frame.scrollLeft === 0));
+            await waitFor(() => comparison.scrollTop === 0 && comparison.scrollLeft === 0);
             if (expanded) expand.click();
           }
         }
@@ -1141,83 +1257,59 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
   });
 
   [
-    { axis: 'vertical', property: 'scrollTop', extent: 'scrollHeight', client: 'clientHeight', width: 10, height: 100 },
-    { axis: 'horizontal', property: 'scrollLeft', extent: 'scrollWidth', client: 'clientWidth', width: 100, height: 10 },
+    { axis: 'vertical', property: 'scrollTop', extent: 'scrollHeight', client: 'clientHeight', edge: 'top', width: 10, height: 100 },
+    { axis: 'horizontal', property: 'scrollLeft', extent: 'scrollWidth', client: 'clientWidth', edge: 'left', width: 100, height: 10 },
   ].forEach((scenario) => {
-    it(`synchronizes ${scenario.axis} scrolling from either pane across normal and expanded layouts`, async () => {
+    it(`scrolls both panes ${scenario.axis}ly through one shared scroller across normal and expanded layouts`, async () => {
       const viewport = { width: window.innerWidth, height: window.innerHeight };
       try {
         await setup();
         await upload(await imageFile(scenario.width, scenario.height));
-        const frames = [...block.querySelectorAll('.icc-frame')];
+        const comparison = block.querySelector('.icc-comparison');
+        const images = [...block.querySelectorAll('.icc-frame > *')];
         const fit = block.querySelector('[data-action="fit"]');
         const fill = block.querySelector('[data-action="fill"]');
         const expand = block.querySelector('[data-action="expand"]');
-        const panel = block.querySelector('.icc-panel');
-        const scaleMatches = () => {
-          const scale = Math.max(
-            1.5,
-            frames[0].clientWidth / scenario.width,
-            frames[0].clientHeight / scenario.height,
-          );
-          return Math.abs(parseFloat(panel.style.getPropertyValue('--icc-image-width'))
-            - scenario.width * scale) < 0.1;
-        };
         for (const width of [375, 768, 1440]) {
           await setViewport({ width, height: 900 });
           fill.click();
           for (const expanded of [false, true]) {
             if (expanded) expand.click();
-            await waitFor(scaleMatches);
-            const limit = Math.min(...frames.map((frame) => (
-              frame[scenario.extent] - frame[scenario.client]
-            )));
-            expect(limit).to.be.greaterThan(0);
-            for (const index of [0, 1]) {
-              const position = Math.round(limit * (index ? 0.75 : 0.25));
-              frames[index][scenario.property] = position;
-              await waitFor(() => frames[1 - index][scenario.property]
-                === frames[index][scenario.property]);
-              expect(frames[index][scenario.property]).to.equal(position);
-            }
-            expect([block.querySelector('canvas').width, block.querySelector('canvas').height])
-              .to.deep.equal([scenario.width, scenario.height]);
+            await waitFor(
+              () => comparison[scenario.extent] > comparison[scenario.client],
+              () => JSON.stringify({
+                width,
+                expanded,
+                extent: comparison[scenario.extent],
+                client: comparison[scenario.client],
+                image: comparison.closest('.icc-panel').style.cssText,
+              }),
+            );
+            block.querySelectorAll('.icc-frame').forEach((frame) => {
+              expect(frame.scrollHeight).to.equal(frame.clientHeight);
+              expect(getComputedStyle(frame).overflow).to.equal('visible');
+            });
+            comparison[scenario.property] = 0;
+            const before = images.map((image) => image.getBoundingClientRect()[scenario.edge]);
+            const position = Math.round(
+              (comparison[scenario.extent] - comparison[scenario.client]) / 2,
+            );
+            comparison[scenario.property] = position;
+            const after = images.map((image) => image.getBoundingClientRect()[scenario.edge]);
+            expect(before[0] - after[0]).to.be.closeTo(position, 0.5);
+            expect(before[1] - after[1]).to.be.closeTo(position, 0.5);
             if (expanded) expand.click();
           }
           fit.click();
-          await waitFor(() => frames.every((frame) => frame.scrollTop === 0
-            && frame.scrollLeft === 0));
+          await waitFor(() => comparison.scrollTop === 0 && comparison.scrollLeft === 0);
         }
       } finally {
         await setViewport(viewport);
       }
-    });
+    }).timeout(10000);
   });
 
-  it('releases synchronized scroll listeners on teardown and does not duplicate them on redecoration', async () => {
-    await setup();
-    await upload(await imageFile(10, 100));
-    block.querySelector('[data-action="fill"]').click();
-    const frames = [...block.querySelectorAll('.icc-frame')];
-    await waitFor(() => frames.every((frame) => frame.scrollHeight > frame.clientHeight));
-    frames[1].scrollTop = 10;
-    await waitFor(() => frames[0].scrollTop === 10);
-    block.dispatchEvent(new Event('color-image-contrast-checker:destroy'));
-    const write = sinon.spy();
-    Object.defineProperty(frames[1], 'scrollTop', { get: () => 0, set: write });
-    frames[0].dispatchEvent(new Event('scroll'));
-    expect(write.called).to.equal(false);
-    await decorate(block);
-    await upload(await imageFile(10, 100));
-    block.querySelector('[data-action="fill"]').click();
-    const freshFrames = [...block.querySelectorAll('.icc-frame')];
-    await waitFor(() => freshFrames.every((frame) => frame.scrollHeight > frame.clientHeight));
-    freshFrames[0].scrollTop = 15;
-    await waitFor(() => freshFrames[1].scrollTop === 15);
-    expect(write.called).to.equal(false);
-  });
-
-  it('avoids image pixels without a side gutter and keeps controls on top when space is too tight', async () => {
+  it('keeps Fit clear of the toolbar with a start gutter and keeps controls on top when space is too tight', async () => {
     const viewport = { width: window.innerWidth, height: window.innerHeight };
     try {
       await setup();
@@ -1227,32 +1319,32 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       const frame = block.querySelector('.icc-frame');
       const canvas = block.querySelector('canvas');
       const expand = block.querySelector('[data-action="expand"]');
+      const host = block;
       let reservations = 0;
       for (const width of [375, 768, 1440]) {
         await setViewport({ width, height: 1000 });
         for (const expanded of [false, true]) {
           if (expanded) expand.click();
           block.querySelector('.icc-comparison').focus();
-          const style = getComputedStyle(surface);
-          const expectedWidth = (surface.getBoundingClientRect().width
-            - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
-            - parseFloat(getComputedStyle(frame.parentElement).gap)) / 2;
           for (const mode of ['fit', 'fill']) {
             block.querySelector(`[data-action="${mode}"]`).click();
             await waitFor(() => {
+              const slot = comparisonSlot(host);
               const scale = mode === 'fit'
-                ? Math.min(frame.clientWidth / canvas.width, frame.clientHeight / canvas.height)
+                ? Math.min(slot.width / canvas.width, slot.height / canvas.height)
                 : Math.max(
-                  1.5,
-                  frame.clientWidth / canvas.width,
-                  frame.clientHeight / canvas.height,
+                  slot.width / canvas.width,
+                  slot.height / canvas.height,
+                  1.5 * Math.min(slot.width / canvas.width, slot.height / canvas.height),
                 );
-              return Math.abs(canvas.getBoundingClientRect().width - canvas.width * scale) < 0.1;
+              return canvas.getBoundingClientRect().width === Math.floor(canvas.width * scale);
             });
-            expect(frame.getBoundingClientRect().width).to.be.closeTo(expectedWidth, 0.1);
+            // Frames hug the scaled image so the pair can be centered with an 8px gap.
+            expect(frame.getBoundingClientRect().width)
+              .to.equal(canvas.getBoundingClientRect().width);
             const toolbar = zoom.getBoundingClientRect();
+            const clip = frame.parentElement.getBoundingClientRect();
             for (const pane of block.querySelectorAll('.icc-frame')) {
-              const clip = pane.getBoundingClientRect();
               const image = pane.firstElementChild.getBoundingClientRect();
               const overlaps = Math.max(image.left, clip.left) < toolbar.right
                 && Math.min(image.right, clip.right) > toolbar.left
@@ -1260,14 +1352,29 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
                 && Math.min(image.bottom, clip.bottom) > toolbar.top;
               expect(overlaps, `${width}px ${expanded ? 'expanded' : 'normal'} ${mode}`)
                 .to.equal(false);
-              expect(getComputedStyle(pane).overflow).to.equal('auto');
-              if (surface.style.getPropertyValue('--icc-image-top-inset')) {
-                expect(clip.top - toolbar.bottom).to.be.closeTo(8, 0.1);
+              expect(getComputedStyle(pane).overflow).to.equal('visible');
+              const reserved = surface.style.paddingInlineStart
+                || frame.parentElement.style.paddingInlineStart;
+              if (reserved) {
+                expect(image.left - toolbar.right).to.be.at.least(8 - 0.1);
                 reservations += 1;
               }
             }
-            if (mode === 'fit') {
-              expect(surface.style.getPropertyValue('--icc-image-top-inset')).to.equal('');
+            // Fill: the toolbar gutter is scroller padding (not surface padding), the scroller
+            // meets every surface edge, and scrolling past the gutter reaches the start edge.
+            if (mode === 'fill') {
+              const scroller = frame.parentElement;
+              expect(surface.style.paddingInlineStart).to.equal('');
+              expect(scroller.style.paddingInlineStart).to.not.equal('');
+              const edges = surface.getBoundingClientRect();
+              expect(clip.left).to.equal(edges.left);
+              expect(clip.top).to.equal(edges.top);
+              expect(clip.bottom).to.equal(edges.bottom);
+              expect(clip.right).to.equal(edges.right);
+              const gutter = parseFloat(scroller.style.paddingInlineStart);
+              scroller.scrollLeft = gutter;
+              expect(frame.getBoundingClientRect().left).to.be.closeTo(edges.left, 1);
+              scroller.scrollLeft = 0;
             }
           }
           if (expanded) expand.click();
@@ -1275,10 +1382,12 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
       }
       expect(reservations).to.be.greaterThan(0);
       expect([canvas.width, canvas.height]).to.deep.equal([13, 9]);
+      // Below desktop, so the height-hugging resize does not replace the forced block size.
+      await setViewport({ width: 768, height: 1000 });
       surface.style.blockSize = '75px';
       surface.style.aspectRatio = 'auto';
       block.querySelector('[data-action="fill"]').click();
-      await waitFor(() => surface.style.getPropertyValue('--icc-image-top-inset') === '');
+      await waitFor(() => frame.parentElement.style.paddingInlineStart !== '');
       expect(getComputedStyle(zoom).zIndex).to.equal('1');
       expect(getComputedStyle(frame.parentElement).zIndex).to.equal('0');
       zoom.scrollIntoView();
@@ -1430,10 +1539,12 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
         expect(mini.getBoundingClientRect().height).to.equal(40);
         expect(getComputedStyle(mini).boxShadow)
           .to.equal('rgb(233, 233, 233) 0px 0px 0px 1px inset');
+        // Figma widths are the floor; the bar may grow to fit the font's metrics.
         let miniWidth = 337;
         if (viewportWidth < 900) miniWidth = 341;
         if (viewportWidth === 375) miniWidth = 343;
-        expect(mini.getBoundingClientRect().width).to.equal(miniWidth);
+        expect(mini.getBoundingClientRect().width).to.be.at.least(miniWidth);
+        if (viewportWidth === 375) expect(mini.getBoundingClientRect().width).to.equal(343);
         expect(mini.getClientRects()).to.have.length(1);
         expect(full.getClientRects()).to.have.length(0);
         expect(block.querySelector('.icc-accuracy').getClientRects()).to.have.length(0);
@@ -1506,7 +1617,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(block.classList.contains('has-image')).to.equal(true);
   });
 
-  it('exports a full-resolution PNG named for the selected analysis color space', async () => {
+  it('exports a full-resolution side-by-side PNG named for the selected analysis color space', async () => {
     await setup();
     await upload();
     const createUrl = URL.createObjectURL.bind(URL);
@@ -1517,15 +1628,15 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     });
     const click = sinon.stub(HTMLAnchorElement.prototype, 'click');
     for (const space of ['srgb', 'display-p3', 'adobe-rgb']) {
-      chooseSpace(space);
+      await applySpace(space);
       const expectedCalls = click.callCount + 1;
       block.querySelector('[data-action="save"]').click();
       await waitFor(() => click.callCount === expectedCalls);
       const bytes = new Uint8Array(await exported.arrayBuffer());
       expect([...bytes.slice(0, 8)]).to.deep.equal([137, 80, 78, 71, 13, 10, 26, 10]);
       const view = new DataView(bytes.buffer);
-      expect([view.getUint32(16), view.getUint32(20)]).to.deep.equal([13, 9]);
-      expect(click.lastCall.thisValue.download).to.equal(`authored-test-contrast-${space}.png`);
+      expect([view.getUint32(16), view.getUint32(20)]).to.deep.equal([26, 9]);
+      expect(click.lastCall.thisValue.download).to.equal('image-contrast-analysis.png');
     }
   });
 
@@ -1543,8 +1654,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     await setup();
     await upload();
     let finish;
-    const canvas = block.querySelector('canvas');
-    const pending = sinon.stub(canvas, 'toBlob').callsFake((callback) => { finish = callback; });
+    const pending = sinon.stub(HTMLCanvasElement.prototype, 'toBlob').callsFake((callback) => { finish = callback; });
     const click = sinon.stub(HTMLAnchorElement.prototype, 'click');
     block.querySelector('[data-action="save"]').click();
     pending.restore();
@@ -1554,13 +1664,12 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(click.called).to.equal(false);
   });
 
-  it('discards a pending export after a color-space change and names the new analysis correctly', async () => {
+  it('discards a pending export after a color-space change and exports the new analysis', async () => {
     await setup();
     const file = await imageFile();
     await upload(new File([file], 'photograph.v2.PNG', { type: file.type }));
     let finish;
-    const canvas = block.querySelector('canvas');
-    const pending = sinon.stub(canvas, 'toBlob').callsFake((callback) => { finish = callback; });
+    const pending = sinon.stub(HTMLCanvasElement.prototype, 'toBlob').callsFake((callback) => { finish = callback; });
     const click = sinon.stub(HTMLAnchorElement.prototype, 'click');
     block.querySelector('[data-action="save"]').click();
     chooseSpace('adobe-rgb');
@@ -1568,9 +1677,10 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     finish(new Blob(['stale output'], { type: 'image/png' }));
     await new Promise((resolve) => { setTimeout(resolve, 0); });
     expect(click.called).to.equal(false);
+    await applySpace('adobe-rgb');
     block.querySelector('[data-action="save"]').click();
     await waitFor(() => click.called);
-    expect(click.firstCall.thisValue.download).to.equal('photograph.v2-contrast-adobe-rgb.png');
+    expect(click.firstCall.thisValue.download).to.equal('image-contrast-analysis.png');
   });
 
   it('supports redecoration and tears down resources when the whole section is removed', async () => {
@@ -1690,6 +1800,100 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     expect(block.querySelector('canvas').width).to.equal(13);
   });
 
+  it('resolves authored template IDs to samples in authored order, skipping unknown IDs', async () => {
+    const rendition = 'https://design-assets.adobeprojectm.com/content/download/express/public/urn:aaid:sc:VA6C2:a/component?assetType=TEMPLATE{&page,size,type,fragment}';
+    const template = (id, title) => ({
+      id,
+      status: 'approved',
+      behaviors: ['still'],
+      customLinks: { branchUrl: 'https://adobesparkpost.app.link/x' },
+      'dc:title': { 'i-default': title },
+      pages: [{
+        task: { size: { name: '1080x1350px' } },
+        rendition: {
+          image: {
+            thumbnail: { componentId: 't', mediaType: 'image/webp', width: 400, height: 500 },
+            preview: { componentId: 'p', mediaType: 'image/webp', width: 800, height: 1000 },
+          },
+        },
+      }],
+      _links: {
+        'http://ns.adobe.com/adobecloud/rel/rendition': { href: rendition.replace(':a/', `:${id.slice(-1)}/`) },
+        'http://ns.adobe.com/adobecloud/rel/component': { href: 'https://example.com/{&revision,component_id}' },
+      },
+    });
+    const original = await imageFile();
+    let releaseSearch;
+    const fetchStub = sinon.stub(window, 'fetch').callsFake(async (url) => (
+      String(url).includes('express-search-api-v3')
+        ? new Promise((resolve) => { releaseSearch = resolve; })
+        : new Response(original)));
+    await setup((checker) => {
+      authorSamples(checker, `
+        <p>urn:aaid:sc:VA6C2:a</p>
+        <a href="/mock/linked.png">Linked sample<picture><img src="/nala/assets/test-image.jpg" alt="Authored"></picture></a>
+        <p>urn:aaid:sc:VA6C2:missing, urn:aaid:sc:VA6C2:b</p>
+      `);
+    });
+    // The pending search never blocks decoration: the authored sample is already usable.
+    expect(block.querySelector('input[type="file"]')).to.exist;
+    expect([...block.querySelectorAll('.icc-sample img')].map((image) => image.alt))
+      .to.deep.equal(['Authored']);
+    const search = new URL(fetchStub.firstCall.args[0]);
+    expect(search.searchParams.get('filters'))
+      .to.equal('id==urn:aaid:sc:VA6C2:a,urn:aaid:sc:VA6C2:missing,urn:aaid:sc:VA6C2:b');
+    releaseSearch(new Response(JSON.stringify({
+      items: [template('urn:aaid:sc:VA6C2:b', 'Second'), template('urn:aaid:sc:VA6C2:a', 'First')],
+    })));
+    await waitFor(() => block.querySelectorAll('.icc-sample').length === 3);
+    const samples = [...block.querySelectorAll('.icc-sample')];
+    expect(samples.map((sample) => sample.querySelector('img').alt))
+      .to.deep.equal(['First', 'Authored', 'Second']);
+    // Buttons use the small thumbnail (webp via the component link), not the full rendition.
+    expect(samples[0].querySelector('img').getAttribute('src')).to.include('component_id=t');
+    samples[2].click();
+    await waitFor(() => block.classList.contains('has-image')
+      && block.getAttribute('aria-busy') === 'false');
+    expect(fetchStub.lastCall.args[0]).to.include(':b/').and.include('size=1350&type=image/jpeg');
+  });
+
+  it('keeps authored samples and logs when the template search fails', async () => {
+    window.lana = { log: sinon.spy() };
+    sinon.stub(window, 'fetch').callsFake(async (url) => {
+      if (String(url).includes('express-search-api-v3')) throw new Error('offline');
+      return new Response(await imageFile());
+    });
+    try {
+      await setup((checker) => {
+        authorSamples(checker, `
+          <p>urn:aaid:sc:VA6C2:a</p>
+          <picture><img src="/nala/assets/test-image.jpg" alt="Authored"></picture>
+        `);
+      });
+      await waitFor(() => window.lana.log.called);
+      expect(window.lana.log.firstCall.args[0]).to.include('offline');
+      expect([...block.querySelectorAll('.icc-sample img')].map((image) => image.alt))
+        .to.deep.equal(['Authored']);
+      expect(block.querySelector('.icc-sample-list').childNodes).to.have.length(1);
+    } finally {
+      delete window.lana;
+    }
+  });
+
+  it('keeps the applied color space when a superseding upload fails', async () => {
+    await setup();
+    await upload();
+    const trigger = block.querySelector('.color-dropdown-trigger');
+    const save = block.querySelector('[data-action="save"]');
+    expect(trigger.value).to.equal('srgb');
+    chooseSpace('display-p3');
+    await upload(new File(['not an image'], 'broken.png', { type: 'image/png' }));
+    await waitFor(() => block.getAttribute('aria-busy') === 'false');
+    await new Promise((resolve) => { setTimeout(resolve, 500); });
+    expect(trigger.value).to.equal('srgb');
+    expect(save.disabled).to.equal(false);
+  });
+
   it('matches Figma sample dimensions and crops authored images without stretching', async () => {
     const { innerWidth: width, innerHeight: height } = window;
     try {
@@ -1790,7 +1994,7 @@ describe('Color Image Contrast Checker placeholders and composition', () => {
     const originalUrl = block.querySelector('.icc-frame img').src;
     const currentBlock = block;
     const canvas = block.querySelector('canvas');
-    const exportPng = sinon.spy(canvas, 'toBlob');
+    const exportPng = sinon.spy(HTMLCanvasElement.prototype, 'toBlob');
     const save = block.querySelector('[data-action="save"]');
     for (let attempt = 0; attempt < 3; attempt += 1) {
       let render;
