@@ -18,8 +18,18 @@ permissions:
 jobs:
   run-nala-tests:
     name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
-    # Playwright 1.52 supports Ubuntu 24.04, not 26.04.
     runs-on: ubuntu-24.04
+    # Browsers and their OS dependencies are baked into the official image, so
+    # there is no `playwright install --with-deps` step. That step pulled apt
+    # packages from Ubuntu mirrors on every run and was the main cause of red
+    # Nala runs (10-min step timeouts with zero tests executed). The tag MUST
+    # match @playwright/test in package-lock.json; the "Verify Playwright
+    # version" step fails fast if they drift.
+    # --user 1001 is the image's non-root user (Firefox refuses to run as root
+    # under GitHub's container HOME).
+    container:
+      image: mcr.microsoft.com/playwright:v1.52.0-noble
+      options: --user 1001
     timeout-minutes: 30
     strategy:
       # Don't cancel the other lanes when one fails — we want the full picture.
@@ -72,26 +82,24 @@ jobs:
             **/node_modules
           key: npm-${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Cache Playwright browsers
-        if: env.NALA_SKIP_LANE != 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ms-playwright-${{ runner.os }}-${{ matrix.node }}-chromium
-
       - name: Install dependencies
         if: env.NALA_SKIP_LANE != 'true'
         run: npm ci --no-fund --prefer-offline
 
-      - name: Install Playwright (all browsers)
+      - name: Verify container browsers match @playwright/test
         if: env.NALA_SKIP_LANE != 'true'
-        # Normally ~40s, but a slow Ubuntu package mirror (via --with-deps) has
-        # been observed dragging this to ~7min while still succeeding. A truly
-        # hung mirror would otherwise stall until the 30-min job timeout,
-        # wasting a runner and failing the whole PR. Cap above the slow-but-fine
-        # ceiling so a genuine hang fails fast and a re-run recovers.
-        timeout-minutes: 10
-        run: npx playwright install --with-deps
+        shell: bash
+        # Fails in seconds (instead of every test failing on launch) when a
+        # @playwright/test bump lands without bumping the container image tag.
+        run: |
+          missing=0
+          for dir in $(npx playwright install --dry-run | awk '/Install location:/ {print $3}'); do
+            [[ -d "$dir" ]] || { echo "::error::Missing browser $dir"; missing=1; }
+          done
+          if [[ $missing -ne 0 ]]; then
+            echo "::error::Container image does not match @playwright/test $(npx playwright --version). Bump the mcr.microsoft.com/playwright tag in run-nala-default.yml and run-nala-label.yml."
+            exit 1
+          fi
 
       - name: Set execute permission for pr.run.sh
         if: env.NALA_SKIP_LANE != 'true'
