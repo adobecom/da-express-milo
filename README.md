@@ -6,6 +6,49 @@ Official repo for adobe.com/express
 1. Run `aem up` this repo's folder. (opens your browser at `http://localhost:3000`)
 1. Open this repo's folder in your favorite editor and start coding.
 
+### Scout search evaluation
+
+`.scout/scout.config.yaml` contains shared indexing rules. Scout must be installed,
+running, and attached to the current checkout before evaluating search quality:
+
+```sh
+scout admin refresh-config .
+scout admin flush .
+scout evaluate -q .scout/evaluations/autotune-query-set.toml -r . --json
+```
+
+The starter evaluation contains 20 source-reviewed queries: eight identifier,
+seven natural-language, and five path/extension-filtered cases. Tests and mocks
+are explicitly included in retrieval. This is a search benchmark, not a unit or
+browser test; it does not execute the website.
+
+Run the same query set at least twice before and after a configuration change.
+Compare NDCG@5/@10, MRR, and individual queries as well as per-class results.
+Higher relevance scores are better. Unlisted files are unjudged, not necessarily
+irrelevant; inspect unexpected results before changing judgments or tuning.
+Repeated runs can reuse caches, so they do not establish independent statistical
+confidence or a page-performance improvement. Keep Scout version, repository
+revision, and query judgments fixed during a comparison.
+
+This small set is a development baseline, not proof of globally optimal settings.
+Review and extend it as workflows change. Avoid committing experimental tuning,
+local daemon state, or unreviewed session memories.
+
+The configuration uses calibrated learned-ranker blending at 0.75 for
+natural-language queries only; identifier and filtered queries keep the defaults.
+This setting improved the development set without degrading the additional
+validation queries. It is not a guarantee of improvement for every question.
+Re-evaluate after Scout model upgrades or major repository changes.
+
+The eight additional validation queries were not used to select that candidate:
+
+```sh
+scout evaluate -q .scout/evaluations/validation-query-set.toml -r . --json
+```
+
+They share some source files with the development set, so they check additional
+formulations rather than provide an independent whole-repository benchmark.
+
 ### Color Wheel responsive layout
 
 The Color Wheel initializes its layout, tabs, controller, and image panel once.

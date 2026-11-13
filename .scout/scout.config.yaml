@@ -1,0 +1,18 @@
+# Keep dependency-resolution data and generated coverage output out of search.
+# Runtime bundles, authored HTML, unit tests, and Nala remain searchable.
+ignore:
+  - '**/package-lock.json'
+  - '/coverage_report.txt'
+
+dampen:
+  # Retained from the starter config; not a newly tuned value.
+  - factor: 0.3
+    patterns:
+      - '**/package.json'
+
+# Measured improvement on the development set, with no regression on the
+# additional validation set. Keep the bundled model and other classes default.
+tune:
+  learned_ranker_calibrated_blend: true
+  learned_ranker_blend_per_class:
+    natural_language: 0.75

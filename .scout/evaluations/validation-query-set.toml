@@ -1,0 +1,76 @@
+description = "Express Milo validation queries, not used to select the initial tuning candidate"
+
+# Additional source-reviewed formulations and lookups. These share some files
+# with the development set; they are a sanity check, not an independent corpus.
+
+[[queries]]
+id = "validation-nala-args"
+query = "parseArgs"
+class = "identifier"
+include_tests = true
+
+[judgments.validation-nala-args]
+"nala/utils/nala.run.cjs" = 3
+
+[[queries]]
+id = "validation-color-page-object"
+query = "ColorSearchMarqueeBlock"
+class = "identifier"
+include_tests = true
+
+[judgments.validation-color-page-object]
+"nala/blocks/color-search-marquee/color-search-marquee.page.cjs" = 3
+
+[[queries]]
+id = "validation-prompt-encoding"
+query = "where is prompt text URL encoded and spaces replaced with plus signs"
+class = "natural_language"
+include_tests = true
+
+[judgments.validation-prompt-encoding]
+"express/code/blocks/prompt-marquee/prompt-marquee.js" = 3
+
+[[queries]]
+id = "validation-color-lifecycle"
+query = "create an ac-color-swatch element with click callback setColor and destroy"
+class = "natural_language"
+include_tests = true
+
+[judgments.validation-color-lifecycle]
+"express/code/scripts/color-shared/adapters/litComponentAdapters.js" = 3
+
+[[queries]]
+id = "validation-nala-defaults"
+query = "Nala command line argument parsing default browser device environment and mode"
+class = "natural_language"
+include_tests = true
+
+[judgments.validation-nala-defaults]
+"nala/utils/nala.run.cjs" = 3
+
+[[queries]]
+id = "validation-spectrum-icons"
+query = "read Spectrum workflow icon module filenames and strip the js extension for tag names"
+class = "natural_language"
+include_tests = true
+
+[judgments.validation-spectrum-icons]
+"express/code/scripts/widgets/spectrum/build.mjs" = 3
+
+[[queries]]
+id = "validation-martech-gate"
+query = "where does page loading check martech off before importing instrument js"
+class = "natural_language"
+include_tests = true
+
+[judgments.validation-martech-gate]
+"express/code/scripts/scripts.js" = 3
+
+[[queries]]
+id = "validation-nala-test-steps"
+query = "generate Playwright tests with navigation semantic content accessibility and SEO steps"
+class = "natural_language"
+include_tests = true
+
+[judgments.validation-nala-test-steps]
+"nala/utils/test-gen/core/test-generator.cjs" = 3
