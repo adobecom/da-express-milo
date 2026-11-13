@@ -1,10 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../express/code/scripts/utils.js';
-import martechLoadedCB, {
-  trackPrintPdpClick,
-  trackPrintPdpView,
-} from '../../express/code/scripts/instrument.js';
+import martechLoadedCB, { trackPrintPdpView } from '../../express/code/scripts/instrument.js';
 
 const TEST_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
 const TEST_PLATFORM = 'MacIntel';
@@ -226,7 +223,8 @@ describe('instrument mini-editor analytics', () => {
 });
 
 describe('instrument print PDP analytics', () => {
-  const PDP_PATH = '/express/print/flyer/red-and-black-restaurant-opening-flyer';
+  const PDP_PATH = '/express/print/hoodie/red-and-black-restaurant-opening-hoodie';
+  const TEMPLATE_ID = 'urn:aaid:sc:VA6C2:tpl-123';
   let trackStub;
   let fetchStub;
   let originalPath;
@@ -254,55 +252,41 @@ describe('instrument print PDP analytics', () => {
     sinon.restore();
   });
 
-  it('fires view-acom-express-features with the print PDP properties', async () => {
-    await trackPrintPdpView({ productType: 'hoodie', templateId: 'tpl-123' });
+  it('fires an Express-format view-template-page hit with the print PDP properties', async () => {
+    await trackPrintPdpView({ productType: 'zazzle_hoodie', templateId: TEMPLATE_ID });
 
     expect(trackStub.calledOnce).to.be.true;
     const [, payload] = trackStub.firstCall.args;
-    expect(payload.data.web.webInteraction.name).to.equal('view-acom-express-features');
+    expect(payload.data.eventType).to.equal('web.webinteraction.linkClicks');
+    expect(payload.data.web.webInteraction.name).to.equal('view-template-page');
     const { sdm, event: { custom } } = getCorpnewPayload(payload);
-    expect(sdm.event).to.deep.include({ pagename: 'view-acom-express-features', type: 'render' });
-    expect(sdm.custom.link).to.deep.equal({
-      page_url: window.location.href,
-      page_type: 'print-product-detail',
+    expect(sdm.event).to.deep.include({
+      pagename: 'view-template-page',
+      category: 'WEB',
+      subcategory: 'operations',
+      subtype: 'template-page',
+      type: 'load',
+      workflow: 'lifecycle',
     });
-    expect(sdm.custom.ui).to.deep.equal({ location: 'print-pdp' });
-    expect(sdm.custom.print).to.deep.equal({
+    const value = (name) => findProperty(custom, name)?.propertyValue;
+    expect(value('custom.event.is_mau')).to.equal(true);
+    expect(value('custom.link.pdp_page_flag')).to.equal(true);
+    expect(value('custom.link.page_type')).to.equal('print-template-pdp');
+    expect(value('custom.link.use_case')).to.equal('hoodie');
+    expect(value('custom.task.name')).to.equal('hoodie');
+    expect(value('custom.link.page_url')).to.equal(window.location.href);
+    expect(value('custom.link.content_id')).to.equal(TEMPLATE_ID);
+    expect(value('content.id')).to.equal(TEMPLATE_ID);
+    expect(value('source.name')).to.equal('CCEX');
+    expect(findProperty(custom, 'custom.ui.location')).to.equal(undefined);
+    // eslint-disable-next-line no-underscore-dangle
+    expect(window.alloy_all.data._adobe_corpnew.digitalData.page.pageInfo.print).to.deep.equal({
       page_class: 'pdp',
-      category: 'flyer',
-      product_type: 'hoodie',
-      template_id: 'tpl-123',
+      category: 'hoodie',
+      product_type: 'zazzle_hoodie',
+      template_id: TEMPLATE_ID,
       batch: '2',
     });
-    expect(findProperty(custom, 'custom.print.product_type').propertyValue).to.equal('hoodie');
-    expect(findProperty(custom, 'custom.ui.location').propertyValue).to.equal('print-pdp');
-    // eslint-disable-next-line no-underscore-dangle
-    expect(window.alloy_all.data._adobe_corpnew.digitalData.page.pageInfo.print)
-      .to.deep.equal(sdm.custom.print);
-  });
-
-  it('fires the click event with the link name and destination', async () => {
-    await trackPrintPdpClick({
-      linkName: 'customize-and-print',
-      linkUrl: 'https://express.example.com/edit',
-      productType: 'hoodie',
-      templateId: 'tpl-123',
-    });
-
-    const [, payload] = trackStub.firstCall.args;
-    expect(payload.documentUnloading).to.be.true;
-    const { sdm } = getCorpnewPayload(payload);
-    expect(sdm.event).to.deep.include({ pagename: 'click-acom-express-features', type: 'click' });
-    expect(sdm.custom.link).to.deep.include({
-      name: 'customize-and-print',
-      url: 'https://express.example.com/edit',
-      page_type: 'print-product-detail',
-    });
-  });
-
-  it('does not fire a click event without a link name', async () => {
-    await trackPrintPdpClick({ productType: 'hoodie' });
-    expect(trackStub.called).to.be.false;
   });
 
   it('sets category page dimensions in the data layer on print pages', async () => {

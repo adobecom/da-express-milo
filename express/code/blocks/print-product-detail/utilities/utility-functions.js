@@ -241,32 +241,3 @@ export async function createZazzleStore() {
   })();
   return storePromise;
 }
-
-const PDP_INTERACTIVE_SELECTOR = 'a, button, input, select, [role="button"], [role="radio"], [role="option"], [role="combobox"], .pdpx-curtain';
-
-const PDP_CLICK_LINK_NAMES = [
-  ['.pdpx-checkout-button', 'customize-and-print'],
-  ['.pdpx-checkout-button-subhead-link', 'returns-guaranteed'],
-  ['.pdpx-image-thumbnail-carousel-item', 'image-thumbnail'],
-  ['.pdpx-compare-price-info-icon-button', 'compare-value-info'],
-  ['.pdpx-pill-selector-label-compare-link, .picker-link', 'open-drawer'],
-  ['.pdpx-drawer-foot-select-button', 'drawer-select'],
-  ['.pdpx-drawer-head button, .pdpx-curtain', 'drawer-close'],
-  ['.picker-button-wrapper', 'option-picker-open'],
-  ['.pdpx-pill-container, .pdpx-mini-pill-image-container, [role="option"], input[type="radio"], input[type="checkbox"]', 'option-select'],
-  ['.ax-accordion-item-title-container', 'product-details-accordion'],
-];
-
-/**
- * Maps a click target inside the PDP to an analytics link name.
- * @returns {{ linkName: string, linkUrl: (string|undefined) }|null} null if not interactive
- */
-export function getPdpClickTarget(eventTarget) {
-  const element = eventTarget?.closest?.(PDP_INTERACTIVE_SELECTOR);
-  if (!element) return null;
-  const match = PDP_CLICK_LINK_NAMES.find(([selector]) => element.matches(selector));
-  return {
-    linkName: match ? match[1] : 'other',
-    linkUrl: element.href || undefined,
-  };
-}

@@ -2,7 +2,6 @@ import { expect } from '@esm-bundle/chai';
 import {
   createHeroImageSrcset,
   extractInitialImageUrl,
-  getPdpClickTarget,
 } from '../../../../express/code/blocks/print-product-detail/utilities/utility-functions.js';
 
 function makeBlock(rows) {
@@ -103,47 +102,5 @@ describe('extractInitialImageUrl', () => {
   it('returns null for an unparseable URL string', () => {
     const block = makeBlock([['heroImage', 'not a url']]);
     expect(extractInitialImageUrl(block)).to.be.null;
-  });
-});
-
-describe('getPdpClickTarget', () => {
-  function render(markup) {
-    const container = document.createElement('div');
-    container.innerHTML = markup;
-    return container;
-  }
-
-  it('maps the Customize and print CTA, including clicks on its children', () => {
-    const container = render('<a class="pdpx-checkout-button" href="https://express.example.com/edit"><span>CTA</span></a>');
-    expect(getPdpClickTarget(container.querySelector('span'))).to.deep.equal({
-      linkName: 'customize-and-print',
-      linkUrl: 'https://express.example.com/edit',
-    });
-  });
-
-  it('maps option selections and drawer controls', () => {
-    const container = render(`
-      <button class="pdpx-pill-container" role="radio"></button>
-      <input type="radio" name="size" />
-      <div class="pdpx-drawer-head"><button type="button"></button></div>
-      <button class="pdpx-drawer-foot-select-button"></button>
-    `);
-    expect(getPdpClickTarget(container.querySelector('.pdpx-pill-container')).linkName).to.equal('option-select');
-    expect(getPdpClickTarget(container.querySelector('input')).linkName).to.equal('option-select');
-    expect(getPdpClickTarget(container.querySelector('.pdpx-drawer-head button')).linkName).to.equal('drawer-close');
-    expect(getPdpClickTarget(container.querySelector('.pdpx-drawer-foot-select-button')).linkName).to.equal('drawer-select');
-  });
-
-  it('falls back to "other" for unmapped interactive elements', () => {
-    const container = render('<button class="something-new"></button>');
-    expect(getPdpClickTarget(container.querySelector('button'))).to.deep.equal({
-      linkName: 'other',
-      linkUrl: undefined,
-    });
-  });
-
-  it('returns null for non-interactive targets', () => {
-    const container = render('<p><span>text</span></p>');
-    expect(getPdpClickTarget(container.querySelector('span'))).to.equal(null);
   });
 });

@@ -437,11 +437,9 @@ function trackColorPageLoad() {
  * namespaces) shared by trackExpressFeaturePageLoad and trackExportComplete.
  * Callers own anything that legitimately differs between event types
  * (isAuthenticated resolution, pageName resolution, the `custom` block).
- * Pass a prefetched `context` ({ accessCountry, deviceInfo }) to skip the geo/device lookups.
  */
 async function buildExportEventEnvelope({
   eventName, isAuthenticated, category, subcategory, subtype, type, workflow, pageName, custom,
-  context,
 }) {
   const isMobile = isMobileWeb();
   const dtsStart = new Date().toISOString();
@@ -449,10 +447,8 @@ async function buildExportEventEnvelope({
   const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
   const mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID || '';
   const guid = generateGuid();
-  const { accessCountry, deviceInfo } = context || {
-    accessCountry: await getAccessCountry(),
-    deviceInfo: await getDeviceInfo(),
-  };
+  const accessCountry = await getAccessCountry();
+  const deviceInfo = await getDeviceInfo();
 
   let userGuid = '';
   if (isAuthenticated && window.adobeIMS?.getProfile) {
@@ -722,31 +718,9 @@ export async function trackExportComplete({ exportMethod, taskName, uiLocation }
   }
 }
 
-const PRINT_PDP_VIEW_EVENT_NAME = 'view-acom-express-features';
-// TODO(MWPW-213056): confirm the click event name with Express DE.
-const PRINT_PDP_CLICK_EVENT_NAME = 'click-acom-express-features';
-const PRINT_PDP_UI_LOCATION = 'print-pdp';
-const PRINT_PDP_SEO_PAGE_TYPE = 'print-product-detail';
+const PRINT_PDP_EVENT_NAME = 'view-template-page';
+const PRINT_PDP_PAGE_TYPE = 'print-template-pdp';
 const PRINT_PAGE_CLASSES = ['hub', 'category', 'pdp'];
-
-let printPdpContextPromise;
-
-function getPrintPdpContext() {
-  if (!printPdpContextPromise) {
-    printPdpContextPromise = Promise.all([getAccessCountry(), getDeviceInfo()])
-      .then(([accessCountry, deviceInfo]) => ({ accessCountry, deviceInfo }));
-  }
-  return printPdpContextPromise;
-}
-
-function getReferrerInfo() {
-  try {
-    const referrerUrl = new URL(document.referrer);
-    return { refDomain: referrerUrl.hostname, previousPagename: referrerUrl.pathname };
-  } catch {
-    return { refDomain: '', previousPagename: '' };
-  }
-}
 
 function getPrintPathSegments() {
   const segments = window.location.pathname.split('/').filter(Boolean);
@@ -779,92 +753,69 @@ function setPrintPageDimensions(dimensions) {
   set('page.pageInfo.print', { ...existing, ...dimensions });
 }
 
-async function firePrintPdpEvent(eventName, { productType, templateId, link = {} } = {}) {
-  const { refDomain, previousPagename } = getReferrerInfo();
-  const isClick = eventName === PRINT_PDP_CLICK_EVENT_NAME;
-  const sdmPayload = await buildExportEventEnvelope({
-    eventName,
-    isAuthenticated: isAuthenticatedUser(),
-    category: 'WEB',
-    subcategory: 'operations',
-    subtype: 'acom',
-    type: isClick ? 'click' : 'render',
-    workflow: 'lifecycle',
-    pageName: window.alloy_all?.data?._adobe_corpnew?.digitalData?.page?.pageInfo?.pageName
-      || getPageNameFromPathname(),
-    context: await getPrintPdpContext(),
-    custom: {
-      aa: {
-        ref_domain: refDomain,
-        previous_pagename: previousPagename,
-      },
-      link: {
-        page_url: loc.href,
-        page_type: PRINT_PDP_SEO_PAGE_TYPE,
-        ...link,
-      },
-      ui: {
-        location: PRINT_PDP_UI_LOCATION,
-      },
-      print: getPrintPageDimensions({ pageClass: 'pdp', productType, templateId }),
-      displayedLanguage: getLanguage(),
-    },
-  });
-
-  const fireEvent = () => {
-    window._satellite.track('event', {
-      xdm: {},
-      data: {
-        eventType: 'web.webinteraction.linkClicks',
-        web: {
-          webInteraction: {
-            name: eventName,
-            linkClicks: { value: 1 },
-            type: 'other',
-          },
-        },
-        _adobe_corpnew: {
-          sdm: sdmPayload,
-          event: {
-            custom: withAttachedCustomEntries(toAttachedFormatForEnvelope(sdmPayload)),
-          },
-        },
-      },
-      ...(link.url && { documentUnloading: true }),
-    });
-  };
-  safelyFireAnalyticsEvent(fireEvent);
-}
-
 /**
- * Fires `view-acom-express-features` for a print PDP (counts toward Express MAU) and
- * writes the print page dimensions (incl. product type / template ID) to the data layer.
+ * Fires the Express-format `view-template-page` hit for a print PDP so Express DE can ingest it
+ * from AEP and count the view as Express MAU (properties per the "View Template Page" tab of the
+ * A.com Express Instrumentation Requirements sheet). Also writes the print page dimensions to the
+ * data layer. Sent in addition to the existing `trackViewTemplatePage` page-view hit.
  */
 export async function trackPrintPdpView({ productType, templateId } = {}) {
   try {
     setPrintPageDimensions(getPrintPageDimensions({ pageClass: 'pdp', productType, templateId }));
-    await firePrintPdpEvent(PRINT_PDP_VIEW_EVENT_NAME, { productType, templateId });
+
+    const printProductType = getPrintPathSegments()?.[0];
+    const link = {
+      pdp_page_flag: true,
+      page_type: PRINT_PDP_PAGE_TYPE,
+    };
+    addIfDefined(link, 'use_case', printProductType);
+    link.page_url = loc.href;
+    addIfDefined(link, 'content_id', templateId);
+    const custom = {
+      event: { is_mau: true },
+      link,
+      displayedLanguage: getLanguage(),
+    };
+    if (printProductType) custom.task = { name: printProductType };
+
+    const sdmPayload = await buildExportEventEnvelope({
+      eventName: PRINT_PDP_EVENT_NAME,
+      isAuthenticated: isAuthenticatedUser(),
+      category: 'WEB',
+      subcategory: 'operations',
+      subtype: 'template-page',
+      type: 'load',
+      workflow: 'lifecycle',
+      pageName: window.alloy_all?.data?._adobe_corpnew?.digitalData?.page?.pageInfo?.pageName
+        || getPageNameFromPathname(),
+      custom,
+    });
+    if (templateId) sdmPayload.content = { id: templateId };
+
+    const fireEvent = () => {
+      window._satellite.track('event', {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: PRINT_PDP_EVENT_NAME,
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: sdmPayload,
+            event: {
+              custom: withAttachedCustomEntries(toAttachedFormatForEnvelope(sdmPayload)),
+            },
+          },
+        },
+      });
+    };
+    safelyFireAnalyticsEvent(fireEvent);
   } catch (error) {
     window.lana?.log(`Failed to track print PDP view: ${error}`, { tags: 'print-product-detail, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
-  }
-}
-
-/**
- * Fires the print PDP click event for a clickable PDP element.
- * @param {Object} options
- * @param {string} options.linkName - stable element identifier, e.g. 'customize-and-print'
- * @param {string} [options.linkUrl] - destination URL for links
- */
-export async function trackPrintPdpClick({
-  linkName, linkUrl, productType, templateId,
-} = {}) {
-  if (!linkName) return;
-  try {
-    const link = { name: linkName };
-    addIfDefined(link, 'url', linkUrl);
-    await firePrintPdpEvent(PRINT_PDP_CLICK_EVENT_NAME, { productType, templateId, link });
-  } catch (error) {
-    window.lana?.log(`Failed to track print PDP click: ${error}`, { tags: 'print-product-detail, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
   }
 }
 

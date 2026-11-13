@@ -5,7 +5,6 @@ import {
   addPrefetchLinks,
   updateImageUrl,
   createHeroImageSrcset,
-  getPdpClickTarget,
 } from './utilities/utility-functions.js';
 import { getLibs } from '../../scripts/utils.js';
 import {
@@ -156,7 +155,7 @@ export default async function decorate(block) {
     AssuranceLockup,
   } = componentsModule;
   const { CustomizationInputs } = customizationModule;
-  const { trackViewTemplatePage, trackPrintPdpView, trackPrintPdpClick } = instrumentModule;
+  const { trackViewTemplatePage, trackPrintPdpView } = instrumentModule;
   const useSeo = seoModule.default;
 
   function PDPContent({ templateId: tId, authoredImageUrl: authoredUrl }) {
@@ -166,8 +165,6 @@ export default async function decorate(block) {
     const { fetchProduct } = actions;
     const containerRef = useRef(null);
     const hasTrackedPageView = useRef(false);
-    const stateRef = useRef(state);
-    stateRef.current = state;
     const [fetchError, setFetchError] = useState(false);
 
     useSeo(tId);
@@ -201,23 +198,6 @@ export default async function decorate(block) {
         window.lana?.log(`Failed to track PDP pageload: ${error}`, { tags: 'print-product-detail', severity: 'warning' });
       }
     }, [state, tId]);
-
-    useEffect(() => {
-      const container = containerRef.current;
-      if (!container) return undefined;
-      const handleClick = (event) => {
-        const target = getPdpClickTarget(event.target);
-        if (!target) return;
-        trackPrintPdpClick({
-          ...target,
-          productType: stateRef.current?.productType,
-          templateId: tId,
-        });
-      };
-      // Capture phase so clicks are tracked even if a component stops propagation.
-      container.addEventListener('click', handleClick, true);
-      return () => container.removeEventListener('click', handleClick, true);
-    }, [tId, fetchError]);
 
     useEffect(() => {
       if (!containerRef.current || !state) return;
