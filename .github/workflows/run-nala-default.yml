@@ -17,8 +17,49 @@ permissions:
   packages: read
 
 jobs:
+  # Reuse the existing default-branch dispatcher without changing stage/main.
+  unav-diagnostic:
+    name: Diagnose Universal Nav asset delivery
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/all46558-adobe-stage-nala-login-fix'
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/adobecom/da-express-milo-nala@sha256:deb7608a0bd3c1060113c76fbcc5588c5a8c418229e629024a1827587f46bf64
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user 1001
+    timeout-minutes: 10
+    steps:
+      - name: Checkout diagnostic branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
+        with:
+          node-version: 24.x
+
+      - name: Install locked dependencies
+        run: npm ci --no-fund --prefer-offline
+
+      - name: Capture metadata-only HTTP and Chromium diagnostics
+        run: node nala/utils/diagnose-unav.cjs
+        env:
+          UNAV_DIAGNOSTIC_REPORT: ${{ runner.temp }}/nala-unav-diagnostic.json
+
+      - name: Upload metadata-only report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nala-unav-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/nala-unav-diagnostic.json
+          if-no-files-found: error
+          retention-days: 7
+
   run-nala-tests:
     name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
+    if: github.event_name != 'workflow_dispatch' || github.ref != 'refs/heads/all46558-adobe-stage-nala-login-fix'
     runs-on: ubuntu-24.04
     # Chrome and the locked Playwright browsers are baked into this verified
     # private image. Rebuild and update both workflow digests on version changes.
@@ -140,7 +181,7 @@ jobs:
   # without ever touching branch protection again.
   nala-gate:
     name: Nala Tests Gate
-    if: always()
+    if: always() && !(github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/all46558-adobe-stage-nala-login-fix')
     needs: run-nala-tests
     runs-on: ubuntu-latest
     steps:
