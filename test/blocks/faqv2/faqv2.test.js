@@ -319,8 +319,7 @@ describe('FAQv2', () => {
 
     // Verify the header has proper attributes
     expect(firstHeader.hasAttribute('aria-expanded')).to.be.true;
-    expect(firstHeader.tagName).to.equal('BUTTON');
-    expect(firstHeader.closest('h3')).to.exist;
+    expect(firstHeader.hasAttribute('role')).to.be.true;
   });
 
   it('should handle keyboard navigation on accordion headers (longform)', async () => {
@@ -345,8 +344,7 @@ describe('FAQv2', () => {
 
     // Verify the header has proper attributes
     expect(firstHeader.hasAttribute('aria-expanded')).to.be.true;
-    expect(firstHeader.tagName).to.equal('BUTTON');
-    expect(firstHeader.closest('h3')).to.exist;
+    expect(firstHeader.hasAttribute('role')).to.be.true;
   });
 
   it('should test live region announcements for accordion state changes', async () => {
