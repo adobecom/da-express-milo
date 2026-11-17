@@ -582,6 +582,16 @@ function playSusiVideoOnModalOpen(video) {
   );
 }
 
+function toSafeMediaUrl(rawUrl) {
+  if (!rawUrl) return null;
+  try {
+    const url = new URL(rawUrl, window.location.href);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 async function buildSusiMedia(row) {
   const videoLink = row?.querySelector('a[href$=".mp4"]');
   let video = row?.querySelector('video');
@@ -596,9 +606,11 @@ async function buildSusiMedia(row) {
 
   // DA can provide a video element with only data-video-source set.
   const source = video.querySelector('source');
-  const playableSrc = source?.getAttribute('src')
+  const playableSrc = toSafeMediaUrl(
+    source?.getAttribute('src')
     || video.getAttribute('src')
-    || video.getAttribute('data-video-source');
+    || video.getAttribute('data-video-source'),
+  );
 
   if (!source?.getAttribute('src') && !video.getAttribute('src') && playableSrc) {
     if (source) {
@@ -654,8 +666,8 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const mobileTitle = isColor ? rows[3]?.textContent?.trim() : undefined;
   const isDesktopViewport = window.matchMedia('(min-width: 1200px)').matches;
   const media = (isColor && isDesktopViewport)
-  ? await buildSusiMedia(rows[4])
-  : null;
+    ? await buildSusiMedia(rows[4])
+    : null;
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
