@@ -190,9 +190,11 @@ export default async function loadDelayed() {
     addJapaneseSectionHeaderSizing();
     turnContentLinksIntoButtons();
     preloadSUSILight();
-    await loadGoogleLogin();
     prewarmExpress();
-    await loadBlockNotifications();
+    await Promise.all([
+      loadGoogleLogin(),
+      loadBlockNotifications(),
+    ]);
     return null;
   } catch (error) {
     document.body.classList.remove('google-login-prompt-pending');
