@@ -1,4 +1,4 @@
-import { getMetadata } from '../../utils.js';
+import { getMetadata, createSecureUid } from '../../utils.js';
 
 /**
  * Mini Editor Widget
@@ -49,25 +49,8 @@ import { loadButton, loadCoreDeps } from '../../color-shared/spectrum/load-spect
 
 let createTag;
 let getIconElementDeprecated;
-let uidCounter = 0;
 
 const DECO_CARD_COUNT = 8;
-
-function createSecureUid(prefix = 'mini-editor') {
-  const cryptoObj = window.crypto;
-  if (cryptoObj?.randomUUID) {
-    return `${prefix}-${cryptoObj.randomUUID().replace(/-/g, '').slice(0, 12)}`;
-  }
-  if (cryptoObj?.getRandomValues) {
-    const bytes = new Uint8Array(8);
-    cryptoObj.getRandomValues(bytes);
-    const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-    return `${prefix}-${token.slice(0, 12)}`;
-  }
-
-  uidCounter += 1;
-  return `${prefix}-${Date.now().toString(36)}${uidCounter.toString(36)}`;
-}
 const DECO_QUOTE_CHAR_LIMIT = 216;
 const EDITOR_QUOTE_CHAR_LIMIT = 248;
 
