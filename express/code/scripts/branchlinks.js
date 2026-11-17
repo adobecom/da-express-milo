@@ -34,6 +34,20 @@ function getPlacement(btn) {
   return placement;
 }
 
+const eventIntentPaths = [
+  '/express/templates/program/event',
+  '/express/create/poster/event',
+  '/express/create/flyer/event',
+];
+
+export function appendEventIntent(url, pathname = window.location.pathname) {
+  if (!eventIntentPaths.some((path) => pathname.endsWith(path))) return url;
+
+  const destination = new URL(url);
+  destination.searchParams.set('eventIntent', 'true');
+  return destination.toString();
+}
+
 const setBasicBranchMetadata = new Set([
   'search-term',
   'canvas-height',

@@ -29,18 +29,32 @@ test.describe('Comparison Table V2 Block Test Suite', () => {
         await expect(stickyHeader).toBeVisible();
         const planSelectorCount = await block.block.locator('.plan-selector').count();
         expect(planSelectorCount).toBeGreaterThan(0);
-        await expect(block.tableAt(0)).not.toHaveClass(/hide-table/);
-        if (containerCount > 1) {
-          await expect(block.tableAt(1)).toHaveClass(/hide-table/);
+        if (isAccordionVariant) {
+          await expect(block.tableAt(0)).not.toHaveClass(/accordion-collapsed/);
+          await expect(block.tableAt(0)).not.toHaveClass(/hide-table/);
+          await expect(block.toggleAt(0)).toHaveAttribute('aria-expanded', 'true');
+          if (containerCount > 1) {
+            await expect(block.tableAt(1)).toHaveClass(/accordion-collapsed/);
+            await expect(block.tableAt(1)).not.toHaveClass(/hide-table/);
+            await expect(block.toggleAt(1)).toHaveAttribute('aria-expanded', 'false');
+          }
+        } else {
+          await expect(block.tableAt(0)).not.toHaveClass(/hide-table/);
+          if (containerCount > 1) {
+            await expect(block.tableAt(1)).toHaveClass(/hide-table/);
+          }
         }
       });
 
       if (isAccordionVariant) {
         await test.step('Toggle a collapsed section and ensure previous one closes', async () => {
           await block.toggleAt(1).click();
-          await page.waitForTimeout(500);
-          await expect(block.tableAt(1)).not.toHaveClass(/hide-table/);
-          await expect(block.tableAt(0)).toHaveClass(/hide-table/);
+          await expect(block.tableAt(1)).not.toHaveClass(/accordion-collapsed/);
+          await expect(block.tableAt(0)).toHaveClass(/accordion-collapsed/);
+          await expect(block.toggleAt(1)).toHaveAttribute('aria-expanded', 'true');
+          await expect(block.toggleAt(0)).toHaveAttribute('aria-expanded', 'false');
+          await expect(block.tableAt(1)).not.toHaveClass(/accordion-animating/);
+          await expect(block.tableAt(0)).not.toHaveClass(/accordion-animating/);
         });
       } else {
         await test.step('Toggle multiple sections independently in default variant', async () => {

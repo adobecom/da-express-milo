@@ -15,6 +15,7 @@ import {
   MAXIMIZE_ICON,
   MINIMIZE_ICON,
 } from './actionMenuIcons.js';
+import getSafeUrl from '../../utils/safe-url.js';
 
 const TYPES = ['full', 'nav-only', 'controls-only'];
 const ICON_MAP = {
@@ -306,7 +307,13 @@ async function applyNavLinkParamOverrides(navLinks) {
   const params = new URLSearchParams(window.location.search);
   return navLinks.map((link) => {
     const override = params.get(`${link.id}-link`);
-    return override ? { ...link, href: override } : link;
+    if(!override) return link;
+    
+    const safeurl = getSafeUrl(override);
+    if (!safeurl) {
+      return link;
+    }
+    return { ...link, href: safeurl.href };
   });
 }
 

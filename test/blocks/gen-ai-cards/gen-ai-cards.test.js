@@ -13,7 +13,6 @@ const testBody = await readFile({ path: './mocks/body.html' });
 describe('Gen AI Cards', () => {
   let blocks;
   before(async () => {
-    window.isTestEnv = true;
     document.body.innerHTML = testBody;
     window.placeholders = { 'search-branch-links': 'https://adobesparkpost.app.link/c4bWARQhWAb' };
     blocks = [...document.querySelectorAll('.gen-ai-cards')];
