@@ -320,6 +320,7 @@ window.addEventListener('unhandledrejection', (event) => {
  */
 
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
+document.body.classList.add('google-login-prompt-pending');
 preDecorateSections(document);
 // LCP image decoration
 const eagerLoad = (img) => {
@@ -518,7 +519,6 @@ const listenAlloy = () => {
 };
 
 async function loadPage() {
-  if (window.isTestEnv) return;
   const {
     loadArea,
     loadStyle,
@@ -537,11 +537,9 @@ async function loadPage() {
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
 
-  const googleLoginRedirect = createTag('meta', { name: 'google-login', content: 'desktop' });
-  document.head.append(googleLoginRedirect);
-  // end TODO remove metadata after we go live
-
   const config = setConfig({ ...CONFIG, miloLibs });
+  // Unit tests need the shared Milo config, but none of the production page bootstrap below.
+  if (window.isTestEnv) return;
 
   // Legacy color.adobe.com deeplink redirect
   if (/color-theme-\d+\/?$/.test(window.location.pathname)) {
@@ -605,6 +603,17 @@ async function loadPage() {
   stopFixedTopOffsetTracking?.();
   stopFixedTopOffsetTracking = await trackFixedTopOffset(config);
 
+  // Disable Milo's loader so Express owns Google login on every viewport.
+  const miloGoogleLoginMeta = document.head.querySelector('meta[name="google-login"]')
+    || createTag('meta', { name: 'google-login' });
+  miloGoogleLoginMeta.content = 'off';
+  if (!miloGoogleLoginMeta.isConnected) document.head.append(miloGoogleLoginMeta);
+
+  const expressGoogleLoginMeta = document.head.querySelector('meta[name="express-google-login"]')
+    || createTag('meta', { name: 'express-google-login' });
+  expressGoogleLoginMeta.content = 'on';
+  if (!expressGoogleLoginMeta.isConnected) document.head.append(expressGoogleLoginMeta);
+
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
 
@@ -613,7 +622,12 @@ async function loadPage() {
   });
 }
 
-loadPage();
+if (window.isTestEnv) {
+  // Ensure test modules importing scripts.js observe initialized config deterministically.
+  await loadPage();
+} else {
+  loadPage();
+}
 
 (async function loadDa() {
   if (!new URL(window.location.href).searchParams.get('dapreview')) return;
