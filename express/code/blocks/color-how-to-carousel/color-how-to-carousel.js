@@ -397,7 +397,11 @@ function buildGraphic(payload) {
   graphic.innerHTML = getColorSVG(payload.colorGraphName) || '';
 
   const svg = graphic.querySelector('svg');
-  if (svg && payload.secondaryHex) svg.style.fill = payload.secondaryHex;
+  if (svg && payload.secondaryHex) {
+    svg.style.fill = payload.secondaryHex;
+    svg.style.stroke = payload.secondaryHex;
+    svg.style.strokeWidth = '0';
+  }
   if (svg && payload.primaryHex) svg.style.setProperty('--chtc-graph-accent-color', payload.primaryHex);
 
   return graphic;
@@ -455,6 +459,12 @@ function buildHowToCard(block, rows, payload) {
   return card;
 }
 
+function getEnglishColorName(fallback) {
+  const match = window.location.pathname.match(/\/meanings\/([^/]+?)(?:\.html)?\/?$/);
+  const slug = match && decodeURIComponent(match[1]).replace(/-/g, ' ').trim();
+  return slug || fallback;
+}
+
 async function decorateSpecsCard(block) {
   block.classList.add('temporary-specs-card');
   addTempWrapperDeprecated(block, 'color-how-to-carousel');
@@ -497,7 +507,7 @@ async function decorateSpecsCard(block) {
   cursor += 1;
   payload.cta = colorDataRows[cursor]?.querySelector('a') || null;
   payload.cta?.classList.add('button', 'chtc-cta');
-  await applyCreateNowLink(payload.cta, payload.colorName);
+  await applyCreateNowLink(payload.cta, getEnglishColorName(payload.colorName));
 
   colorDataDiv.remove();
 

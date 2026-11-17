@@ -284,6 +284,12 @@ describe('Susi-light', async () => {
       const component = blockWithEduContext.querySelector('susi-sentry-light');
       expect(component.authParams.dctx_id).to.equal(DCTX_ID_MAP['context-edu'].stage);
     });
+    it('has stage and prod ids for every context', () => {
+      Object.entries(DCTX_ID_MAP).forEach(([context, ids]) => {
+        expect(ids.stage, `${context} stage`).to.match(/^v:2,/);
+        expect(ids.prod, `${context} prod`).to.match(/^v:2,/);
+      });
+    });
   });
 
   describe('susi-light simplified color variant', () => {
@@ -304,6 +310,27 @@ describe('Susi-light', async () => {
       expect(url.searchParams.get('feature-enable')).to.equal('colors-product-entry');
       expect(url.searchParams.get('entryPoint')).to.equal('color-explorer');
       expect(component.authParams.redirect_uri).not.to.include('#');
+    });
+
+    it('uses code response type when popup is off', () => {
+      const component = colorBlock.querySelector('susi-sentry-light');
+      expect(component.popup).to.be.false;
+      expect(component.authParams.response_type).to.equal('code');
+    });
+
+    it('uses token response type when popup is on', async () => {
+      const redirectKey = '__susiColorRedirect';
+      const popupBlock = document.createElement('div');
+      popupBlock.className = 'susi-light simplified color popup';
+      popupBlock.innerHTML = '<div><div></div></div><div><div>AdobeExpressWeb</div></div><div><div>Sign in</div></div>';
+      document.body.append(popupBlock);
+      window[redirectKey] = 'https://new.express.adobe.com/?colorPalette=test';
+      await decorate(popupBlock);
+      await delay(310);
+      const component = popupBlock.querySelector('susi-sentry-light');
+      expect(component.popup).to.be.true;
+      expect(component.authParams.response_type).to.equal('token');
+      popupBlock.remove();
     });
   });
 });

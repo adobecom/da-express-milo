@@ -12,6 +12,11 @@
   const LOCALES = ['ae_ar', 'ae_en', 'africa', 'ar', 'ara', 'at', 'au', 'be_en', 'be_fr', 'be_nl', 'bg', 'br', 'ca_fr', 'ca', 'ch_de', 'ch_fr', 'ch_it', 'cl', 'cn', 'co', 'cr', 'cy_en', 'cz', 'de', 'dk', 'ec', 'ee', 'eg_ar', 'eg_en', 'el', 'es', 'fi', 'fr', 'gr_el', 'gr_en', 'gt', 'hk_en', 'hk_zh', 'hu', 'id_en', 'id_id', 'ie', 'il_en', 'il_he', 'in_hi', 'in', 'it', 'jp', 'kr', 'kw_ar', 'kw_en', 'la', 'lt', 'lu_de', 'lu_en', 'lu_fr', 'lv', 'mena_ar', 'mena_en', 'mt', 'mx', 'my_en', 'my_ms', 'ng', 'nl', 'no', 'nz', 'pe', 'ph_en', 'ph_fil', 'pl', 'pr', 'pt', 'qa_ar', 'qa_en', 'ro', 'ru', 'sa_ar', 'sa_en', 'se', 'sg', 'si', 'sk', 'th_en', 'th_th', 'tr', 'tw', 'ua', 'uk', 'vn_en', 'vn_vi', 'za'];
 
   (() => {
+    function log(message, severity) {
+      if (window.lana) window.lana.log(`hreflang: ${message}`, { tags: 'hreflang', severity });
+      else console[severity === 'error' ? 'error' : 'warn'](`hreflang: ${message}`);
+    }
+
     function buildLink(language, url) {
       const link = document.createElement('link');
       link.setAttribute('rel', 'alternate');
@@ -41,7 +46,7 @@
           clearTimeout(timeoutId);
         }
         if (!response.ok) {
-          console.warn('Failed to fetch sitemap:', response.status);
+          log(`fetch failed (${response.status}) ${sitemapPath}`, 'error');
           return;
         }
         
@@ -50,26 +55,36 @@
         const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
         const parseError = xmlDoc.querySelector('parsererror');
         if (parseError) {
+          log(`parse failed ${sitemapPath}`, 'error');
           return;
         }
         
         const urlElements = xmlDoc.querySelectorAll('url');
         let currentUrlElement = null;
-   
-        const isLocalRoot = `${sitemapOrigin}/${localeMatch}/` === `${sitemapOrigin}${pathname}`;
-        const rootPage = isLocalRoot ? `${sitemapOrigin}/${localeMatch}/` : `${sitemapOrigin}/`; 
-        const currentPageUrl = pathname !== '/' && pathname !== `/${localeMatch}/` ? `${sitemapOrigin}${pathname}` : `${rootPage}`;
+        let normalizedMatch = null;
+        const normalizePath = (path) => path.replace(/\/$/, '').replace(/\.html$/, '');
+        const isSitemapOrigin = (loc) => {
+          try { return new URL(loc).origin === sitemapOrigin; } catch { return false; }
+        };
+        const targetPath = normalizePath(pathname);
 
         for (const urlElement of urlElements) {
           const loc = urlElement.querySelector('loc')?.textContent;
-          if (loc === currentPageUrl || loc === currentPageUrl.replace(/\/$/, '')) {
+          if (!loc || !isSitemapOrigin(loc)) continue;
+          const locPath = loc.slice(sitemapOrigin.length) || '/';
+          if (!locPath.startsWith('/')) continue;
+          if (locPath === pathname) {
             currentUrlElement = urlElement;
             break;
           }
+          if (!normalizedMatch && normalizePath(locPath) === targetPath) {
+            normalizedMatch = urlElement;
+          }
         }
+        currentUrlElement = currentUrlElement || normalizedMatch;
         
         if (!currentUrlElement) {
-          console.warn('Current page not found in sitemap');
+          log(`page not found in sitemap ${pathname}`, 'warning');
           return;
         }
         
@@ -90,7 +105,7 @@
           titleElement.after(...linkElements);
         }
       } catch (error) {
-        console.error('Error fetching or parsing sitemap:', error);
+        log(`error fetching or parsing sitemap ${sitemapPath} - ${error.message}`, 'error');
       }
     } 
 

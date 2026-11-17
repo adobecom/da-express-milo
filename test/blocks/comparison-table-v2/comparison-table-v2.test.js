@@ -11,10 +11,6 @@ const { default: decorate } = imports[1];
 const body = await readFile({ path: './mocks/body.html' });
 
 describe('Comparison Table V2', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(() => {
     document.body.innerHTML = body;
   });

@@ -2,7 +2,6 @@ import { readFile, setViewport } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-window.isTestEnv = true;
 
 const imports = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
@@ -14,7 +13,12 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales });
 });
 
-const { default: decorate } = await import('../../../express/code/blocks/verb-express-hero/verb-express-hero.js');
+const {
+  default: decorate,
+  initResumeFork,
+  flagResumeFork,
+  RESUME_FORK_MODAL_ID,
+} = await import('../../../express/code/blocks/verb-express-hero/verb-express-hero.js');
 
 const styleSheets = [
   '/express/code/styles/styles.css',
@@ -46,6 +50,7 @@ describe('verb-express-hero', () => {
     .map((key) => `meta[name="${key}"]`)
     .join(', ');
   let originalMetadata;
+  let originalPlaceholders;
 
   function setLogoMetadata(name, content) {
     const meta = document.createElement('meta');
@@ -55,13 +60,28 @@ describe('verb-express-hero', () => {
   }
 
   beforeEach(() => {
+    originalPlaceholders = window.mph;
+    window.mph = {
+      'verb-dropzone-resume-builder-upload-cta': 'Upload your resume',
+      'verb-widget-resume-builder-file-limit': 'PDF, DOCX, or DOC up to 20 MB.',
+      'verb-dropzone-legal': 'Your file will be securely handled.',
+      'verb-dropzone-legal-2-ai': 'Review the Terms of Use and Privacy Policy.',
+      'verb-widget-terms-of-use': 'Terms of Use',
+      'verb-widget-privacy-policy': 'Privacy Policy',
+      'verb-widget-tool-tip': 'Files are secured.',
+      'verb-dropzone-drag-overlay': 'Drop your file here',
+      'close-dialog': 'Close error',
+    };
     originalMetadata = [...document.head.querySelectorAll(metadataSelector)];
     originalMetadata.forEach((meta) => meta.remove());
   });
 
   afterEach(() => {
+    if (originalPlaceholders === undefined) delete window.mph;
+    else window.mph = originalPlaceholders;
     document.head.querySelectorAll(metadataSelector).forEach((meta) => meta.remove());
     document.head.append(...originalMetadata);
+    document.body.replaceChildren();
   });
 
   it('decorates successfully', async () => {
@@ -145,8 +165,8 @@ describe('verb-express-hero', () => {
     const dropzone = block.querySelector('.cta-dropzone .verb-dropzone-area');
     expect(dropzone).to.exist;
     expect(dropzone.tagName).to.equal('BUTTON');
-    expect(dropzone.querySelector('.verb-dropzone-heading')).to.exist;
-    expect(dropzone.querySelector('.verb-dropzone-sub')).to.exist;
+    expect(dropzone.querySelector('.verb-dropzone-heading').textContent).to.equal('Upload your resume');
+    expect(dropzone.querySelector('.verb-dropzone-sub').textContent).to.equal('PDF, DOCX, or DOC up to 20 MB.');
     expect(block.querySelector('input[type="file"]')).to.exist;
   });
 
@@ -161,5 +181,181 @@ describe('verb-express-hero', () => {
   it('appends a hidden error state to the block', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block.querySelector('.error.hide')).to.exist;
+  });
+});
+
+describe('verb-express-hero resume fork', () => {
+  let element;
+  let responses;
+  let modalOpens;
+  let tracked;
+  let cleanup;
+  const onModalOpen = (e) => modalOpens.push(e.detail);
+  const select = (detail) => window.dispatchEvent(new CustomEvent('resume-upload-fork:select', { detail }));
+  const closeModal = (id) => window.dispatchEvent(new CustomEvent('milo:modal:closed', { detail: { id } }));
+  const loadModal = (id) => window.dispatchEvent(new CustomEvent('milo:modal:loaded', { detail: { id } }));
+  const showFork = () => element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+
+  beforeEach(() => {
+    element = document.createElement('div');
+    const received = [];
+    responses = received;
+    modalOpens = [];
+    tracked = [];
+    element.addEventListener('unity:resume-fork-response', (e) => received.push(e.detail));
+    window.addEventListener('modal:open', onModalOpen);
+    cleanup = initResumeFork(element, (name) => tracked.push(name));
+  });
+
+  afterEach(() => {
+    cleanup();
+    window.removeEventListener('modal:open', onModalOpen);
+  });
+
+  it('opens the fork modal when Unity asks for it', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    expect(modalOpens).to.deep.equal([{ hash: `#${RESUME_FORK_MODAL_ID}` }]);
+  });
+
+  it('forwards continue-fork with the chosen product to Unity', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    select({ action: 'continue-fork', choice: 'refresh' });
+    expect(responses).to.deep.equal([{ action: 'continue-fork', choice: 'refresh' }]);
+  });
+
+  it('forwards cancel-fork to Unity', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    select({ action: 'cancel-fork' });
+    expect(responses).to.deep.equal([{ action: 'cancel-fork' }]);
+  });
+
+  it('treats closing the fork modal without a choice as cancel-fork', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    closeModal('some-other-modal');
+    expect(responses).to.deep.equal([]);
+    closeModal(RESUME_FORK_MODAL_ID);
+    expect(responses).to.deep.equal([{ action: 'cancel-fork' }]);
+  });
+
+  it('sends only one response per request', () => {
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    select({ action: 'continue-fork', choice: 'sharpen' });
+    closeModal(RESUME_FORK_MODAL_ID);
+    select({ action: 'cancel-fork' });
+    expect(responses).to.deep.equal([{ action: 'continue-fork', choice: 'sharpen' }]);
+  });
+
+  it('ignores fork events when Unity has not asked', () => {
+    select({ action: 'continue-fork', choice: 'sharpen' });
+    closeModal(RESUME_FORK_MODAL_ID);
+    expect(responses).to.deep.equal([]);
+  });
+
+  it('stops listening after cleanup', () => {
+    cleanup();
+    element.dispatchEvent(new CustomEvent('unity:show-resume-fork'));
+    select({ action: 'continue-fork', choice: 'sharpen' });
+    expect(modalOpens).to.deep.equal([]);
+    expect(responses).to.deep.equal([]);
+  });
+
+  describe('analytics', () => {
+    it('tracks the modal being shown only for a requested fork modal', () => {
+      loadModal(RESUME_FORK_MODAL_ID);
+      showFork();
+      loadModal('some-other-modal');
+      loadModal(RESUME_FORK_MODAL_ID);
+      expect(tracked).to.deep.equal(['fork-modal:shown']);
+    });
+
+    ['sharpen', 'refresh'].forEach((choice) => {
+      it(`tracks continue on ${choice}`, () => {
+        showFork();
+        select({ action: 'continue-fork', choice });
+        closeModal(RESUME_FORK_MODAL_ID);
+        expect(tracked).to.deep.equal([`fork-modal:continue-${choice}`]);
+      });
+    });
+
+    it('tracks Cancel as a bounce', () => {
+      showFork();
+      select({ action: 'cancel-fork', dismiss: 'cancel' });
+      closeModal(RESUME_FORK_MODAL_ID);
+      expect(tracked).to.deep.equal(['fork-modal:bounce:cancel']);
+    });
+
+    it('tracks the exit method of a bounce without passing it to Unity', () => {
+      showFork();
+      select({ action: 'cancel-fork', dismiss: 'escape' });
+      expect(tracked).to.deep.equal(['fork-modal:bounce:escape']);
+      expect(responses).to.deep.equal([{ action: 'cancel-fork' }]);
+    });
+
+    it('tracks closing the modal with no exit method as a bounce', () => {
+      showFork();
+      closeModal(RESUME_FORK_MODAL_ID);
+      expect(tracked).to.deep.equal(['fork-modal:bounce:other']);
+    });
+
+    it('tracks nothing when Unity has not asked', () => {
+      select({ action: 'continue-fork', choice: 'sharpen' });
+      closeModal(RESUME_FORK_MODAL_ID);
+      expect(tracked).to.deep.equal([]);
+    });
+  });
+});
+
+describe('verb-express-hero flagResumeFork', () => {
+  let element;
+  let meta;
+  let originalIms;
+  const resolvedIms = () => Promise.resolve();
+
+  const setSignedIn = (signedIn) => {
+    window.adobeIMS = { isSignedInUser: () => signedIn };
+  };
+
+  beforeEach(() => {
+    element = document.createElement('div');
+    originalIms = window.adobeIMS;
+    meta = document.createElement('meta');
+    meta.name = `-${RESUME_FORK_MODAL_ID}`;
+    meta.content = '/express/fragments/resume-fork';
+    document.head.append(meta);
+  });
+
+  afterEach(() => {
+    meta.remove();
+    window.adobeIMS = originalIms;
+  });
+
+  it('flags logged-out users when the fork metadata is set', async () => {
+    setSignedIn(false);
+    await flagResumeFork(element, resolvedIms);
+    expect(element.dataset.showResumeFork).to.equal('true');
+  });
+
+  it('does not flag signed-in users', async () => {
+    setSignedIn(true);
+    await flagResumeFork(element, resolvedIms);
+    expect(element.hasAttribute('data-show-resume-fork')).to.be.false;
+  });
+
+  it('does not flag pages without the fork metadata', async () => {
+    meta.remove();
+    setSignedIn(false);
+    let imsRequested = false;
+    await flagResumeFork(element, () => {
+      imsRequested = true;
+      return Promise.resolve();
+    });
+    expect(element.hasAttribute('data-show-resume-fork')).to.be.false;
+    expect(imsRequested).to.be.false;
+  });
+
+  it('does not flag when IMS fails to load', async () => {
+    setSignedIn(false);
+    await flagResumeFork(element, () => Promise.reject(new Error('IMS timeout')));
+    expect(element.hasAttribute('data-show-resume-fork')).to.be.false;
   });
 });

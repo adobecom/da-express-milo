@@ -63,6 +63,15 @@ async function addJapaneseSectionHeaderSizing() {
   }
 }
 
+// Labels Deprecated blocks for authors on preview and local, like Milo's "Obsolete" labels.
+// Deprecated blocks are listed in the DA sheet /consonant.json.
+async function loadBlockNotifications() {
+  const { env } = getConfig();
+  if (env.name !== 'local' && !window.location.host.includes('.page')) return;
+  const { default: blockNotifications } = await import(`${getLibs()}/utils/block-notifications.js`);
+  await blockNotifications('');
+}
+
 /**
  * Executes everything that happens a lot later, without impacting the user experience.
  */
@@ -74,6 +83,7 @@ export default async function loadDelayed() {
     addJapaneseSectionHeaderSizing();
     turnContentLinksIntoButtons();
     preloadSUSILight();
+    await loadBlockNotifications();
     return null;
   } catch (error) {
     window.lana?.log(`Express-Delayed Error: ${error?.message || error?.detail || error}`, { tags: 'express-delayed', severity: 'error' });

@@ -590,7 +590,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
   .font-generator .fg-sidebar {
     position: sticky;
-    top: calc(var(--global-height-nav) + var(--spacing-600));
+    top: calc(var(--express-fixed-top-height) + var(--spacing-600));
     align-self: start;
   }
 

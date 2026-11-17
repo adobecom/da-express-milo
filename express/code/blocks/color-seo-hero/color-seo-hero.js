@@ -8,6 +8,7 @@ import createExpressActionButton from '../../scripts/color-shared/spectrum/compo
 import { createExpressPicker } from '../../scripts/color-shared/spectrum/components/express-picker.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
 import { createSwatchRailAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
 import { createCopyCodeAction, createDownloadAction } from '../../scripts/color-shared/toolbar/colorActionMenus.js';
@@ -29,10 +30,11 @@ function getText(cell) {
 }
 
 async function loadStrings() {
-  const [{ getConfig }, { replaceKeyArray }, railStrings] = await Promise.all([
+  const [{ getConfig }, { replaceKeyArray }, railStrings, editStrings] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
     loadColorSwatchRailPlaceholders(),
+    loadColorEditPlaceholders(),
   ]);
 
   const KEYS = [
@@ -54,6 +56,7 @@ async function loadStrings() {
 
   return {
     railStrings,
+    editStrings,
     ruleLabels: {
       SHADES: v(0, 'Shades'),
       COMPLEMENTARY: v(1, 'Complementary'),
@@ -246,6 +249,7 @@ function closeColorEditor(context) {
 async function openMobileColorEditor(context) {
   await import('../../scripts/color-shared/components/color-edit/index.js');
   const colorEdit = createTag('color-edit');
+  colorEdit.strings = context.strings.editStrings;
   colorEdit.showPalette = false;
   colorEdit.mobile = true;
   colorEdit.palette = [context.hex];
@@ -275,6 +279,7 @@ function createDesktopColorEditorController(context, popoverEl) {
       if (!colorEdit) {
         await import('../../scripts/color-shared/components/color-edit/index.js');
         colorEdit = createTag('color-edit');
+        colorEdit.strings = context.strings.editStrings;
         colorEdit.showPalette = false;
         colorEdit.addEventListener('color-change', (e) => updateColor(context, e.detail.hex));
         popoverEl.append(colorEdit);
@@ -429,6 +434,42 @@ async function buildRuleDropdown(context) {
   return picker.element;
 }
 
+function onSameLine(elA, elB) {
+  const a = elA.getBoundingClientRect();
+  const b = elB.getBoundingClientRect();
+  return a.top < b.bottom && b.top < a.bottom;
+}
+
+function isTextWrapped(el) {
+  const wrappedHeight = el.getBoundingClientRect().height;
+  const { whiteSpace } = el.style;
+  el.style.whiteSpace = 'nowrap';
+  const singleLineHeight = el.getBoundingClientRect().height;
+  el.style.whiteSpace = whiteSpace;
+  return wrappedHeight > singleLineHeight + 1;
+}
+
+const MOBILE_ROW_QUERY = '(max-width: 599px)';
+
+function checkActionsRowWrap(row, dropdownGroup, actionsGroup) {
+  if (row.clientWidth === 0) return;
+  row.classList.remove('is-stacked', 'cta-wraps');
+  const isStacked = !onSameLine(dropdownGroup, actionsGroup);
+  row.classList.toggle('is-stacked', isStacked);
+  if (isStacked && window.matchMedia?.(MOBILE_ROW_QUERY)?.matches) {
+    const buildLink = actionsGroup.querySelector('.color-seo-hero-build-link');
+    row.classList.toggle('cta-wraps', isTextWrapped(buildLink));
+  }
+}
+
+function watchActionsRowWrap(row, dropdownGroup, actionsGroup) {
+  const target = row.parentElement || row;
+  const recheck = () => checkActionsRowWrap(row, dropdownGroup, actionsGroup);
+  const observer = new ResizeObserver(recheck);
+  observer.observe(target);
+  return recheck;
+}
+
 async function buildPreview(context) {
   const { strings } = context;
 
@@ -460,6 +501,12 @@ async function buildPreview(context) {
 
   const actionsRow = createTag('div', { class: 'color-seo-hero-actions-row' });
   actionsRow.append(dropdownGroup, actionsGroup);
+  const recheckActionsRowWrap = watchActionsRowWrap(actionsRow, dropdownGroup, actionsGroup);
+  const recheckAfterPaint = () => {
+    requestAnimationFrame(() => requestAnimationFrame(recheckActionsRowWrap));
+  };
+  context.rulePicker?.waitForReady?.().catch(() => {}).finally(recheckAfterPaint);
+  document.fonts?.ready?.then(recheckAfterPaint);
 
   preview.append(canvas, stripHost, actionsRow);
   return preview;

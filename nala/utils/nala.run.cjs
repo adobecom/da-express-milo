@@ -33,6 +33,7 @@ function displayHelp() {
   | npm run nala local -g=@accordion                       | Runs tests annotated with tag i.e @accordion on local env on chrome browser        |
   | npm run nala local -g=@accordion browser=firefox       | Runs tests annotated with tag i.e @accordion on local env on Firefox browser       |
   | npm run nala <featurebranch> owner='<owner>'           | Runs all nala tests on the specified feature branch for the given repo owner       |        
+  | npm run nala main project=express-login-chromium       | Runs signed-in (@login) tests; needs IMS_EMAIL/IMS_PASS or \`npm run nala:login\`    |
 
 \x1b[1mDebugging:\x1b[0m
 -----------

@@ -1,4 +1,12 @@
-import { getLibs, yieldToMain, fixIcons, decorateButtonsDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
+import {
+  FIXED_TOP_OFFSET_CHANGE_EVENT,
+  getLibs,
+  getFixedTopOffset,
+  yieldToMain,
+  fixIcons,
+  decorateButtonsDeprecated,
+  addTempWrapperDeprecated,
+} from '../../scripts/utils.js';
 import { debounce } from '../../scripts/utils/hofs.js';
 import { splitAndAddVariantsWithDash } from '../../scripts/utils/decorate.js';
 import { formatDynamicCartLink } from '../../scripts/utils/pricing.js';
@@ -395,16 +403,18 @@ export default async function init(el) {
 
   if (el.classList.contains('sticky')) {
     const scrollHandler = () => {
-      if (deviceBySize === 'MOBILE') return;
+      if (defineDeviceByScreenSize() === 'MOBILE') {
+        rows[0].style.removeProperty('top');
+        rows[0].classList.remove('stuck');
+        return;
+      }
       if (el.closest('div.tabpanel')?.getAttribute('hidden')) {
         return;
       }
-      const gnav = document.querySelector('header');
-      const gnavHeight = gnav.offsetHeight;
+      const gnavHeight = getFixedTopOffset();
+      rows[0].style.top = `${gnavHeight}px`;
       const { top } = rows[0].getBoundingClientRect();
-      if (top <= gnavHeight && !rows[0].classList.contains('stuck')) {
-        rows[0].style.top = `${gnavHeight}px`;
-      } else if (rows[0].classList.contains('stuck') && top > gnavHeight) {
+      if (rows[0].classList.contains('stuck') && top > gnavHeight) {
         rows[0].classList.remove('stuck');
       }
       const p = rows[1].getBoundingClientRect();
@@ -412,6 +422,10 @@ export default async function init(el) {
         rows[0].classList.add('stuck');
       }
     };
-    window.addEventListener('scroll', debounce(scrollHandler, 16), { passive: true });
+    const debouncedScrollHandler = debounce(scrollHandler, 16);
+    const resizeStickyHandler = debounce(scrollHandler, 100);
+    window.addEventListener('scroll', debouncedScrollHandler, { passive: true });
+    window.addEventListener('resize', resizeStickyHandler);
+    window.addEventListener(FIXED_TOP_OFFSET_CHANGE_EVENT, scrollHandler);
   }
 }

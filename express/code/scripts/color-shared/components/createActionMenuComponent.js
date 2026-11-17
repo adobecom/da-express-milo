@@ -15,6 +15,7 @@ import {
   MAXIMIZE_ICON,
   MINIMIZE_ICON,
 } from './actionMenuIcons.js';
+import getSafeUrl from '../../utils/safe-url.js';
 
 const TYPES = ['full', 'nav-only', 'controls-only'];
 const ICON_MAP = {
@@ -306,7 +307,13 @@ async function applyNavLinkParamOverrides(navLinks) {
   const params = new URLSearchParams(window.location.search);
   return navLinks.map((link) => {
     const override = params.get(`${link.id}-link`);
-    return override ? { ...link, href: override } : link;
+    if(!override) return link;
+    
+    const safeurl = getSafeUrl(override);
+    if (!safeurl) {
+      return link;
+    }
+    return { ...link, href: safeurl.href };
   });
 }
 
@@ -322,6 +329,7 @@ export async function createActionMenuComponent(options = {}) {
     onRedo,
     onGenerateRandom,
     transformPalette,
+    randomPaletteAnnouncement,
     getName,
     paletteTags,
     paletteId,
@@ -344,7 +352,7 @@ export async function createActionMenuComponent(options = {}) {
   let pushStateFn = null;
   let getCurrentPaletteFn = null;
   if (enableState) {
-    const state = createActionMenuState(stateKey, { transformPalette });
+    const state = createActionMenuState(stateKey, { transformPalette, randomPaletteAnnouncement });
     handleUndoState = state.onUndo;
     handleRedoState = state.onRedo;
     handleGenerateRandomState = state.onGenerateRandom;

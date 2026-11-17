@@ -48,8 +48,8 @@
    height and the backdrop/card get cropped). The block sits after the header in
    flow, so subtracting the nav height fills exactly down to the viewport bottom. */
 .color-explore.color-explore--libraries.color-libraries--signin {
-  min-height: calc(100vh - var(--global-height-nav, 0px)); /* stylelint-disable-line declaration-property-value-disallowed-list */
-  min-height: calc(100svh - var(--global-height-nav, 0px)); /* stylelint-disable-line declaration-property-value-disallowed-list, declaration-block-no-duplicate-properties */
+  min-height: calc(100vh - var(--express-fixed-top-height, 0px)); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  min-height: calc(100svh - var(--express-fixed-top-height, 0px)); /* stylelint-disable-line declaration-property-value-disallowed-list, declaration-block-no-duplicate-properties */
 }
 
 /* Inline sign-in overlay for signed-out users. Rendered inside the block (not a

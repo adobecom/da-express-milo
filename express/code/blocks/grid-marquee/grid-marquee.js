@@ -3,6 +3,7 @@ import {
   yieldToMain,
   getMobileOperatingSystem,
   getIconElementDeprecated,
+  getBrandingLogoElement,
   createTag,
   formatDynamicCartLink,
   getMetadata,
@@ -381,9 +382,7 @@ export default async function init(el) {
     const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
       || (['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
       || null;
-    const logo = brandingLogoName
-      ? getIconElementDeprecated(brandingLogoName)
-      : getIconElementDeprecated('adobe-express-logo');
+    const logo = getBrandingLogoElement(brandingLogoName || 'adobe-express-logo');
 
     logo.classList.add('express-logo');
 

@@ -16,10 +16,6 @@ async function prepBlock(filePath) {
 }
 
 describe('transparent-img-marquee', () => {
-  beforeEach(() => {
-    window.isTestEnv = true;
-  });
-
   it('decorates successfully', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block).to.exist;
@@ -29,6 +25,39 @@ describe('transparent-img-marquee', () => {
   it('creates foreground container', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block.querySelector('.foreground')).to.exist;
+  });
+
+  it('removes the CTA gap when its content is hidden and restores it when shown', async () => {
+    const originalResizeObserver = window.ResizeObserver;
+    const observers = [];
+    window.ResizeObserver = class {
+      constructor(callback) {
+        this.callback = callback;
+      }
+
+      observe(target) {
+        this.target = target;
+        observers.push(this);
+      }
+    };
+
+    try {
+      const block = await prepBlock('./mocks/with-ctas.html');
+      const mainContainer = block.querySelector('.main-container');
+      const ctaContainer = block.querySelector('.cta-container');
+      const ctaObserver = observers.find((observer) => observer.target === ctaContainer);
+      let ctaHeight = 0;
+      ctaContainer.getBoundingClientRect = () => ({ height: ctaHeight });
+
+      ctaObserver.callback();
+      expect(mainContainer.style.rowGap).to.equal('0px');
+
+      ctaHeight = 40;
+      ctaObserver.callback();
+      expect(mainContainer.style.rowGap).to.equal('');
+    } finally {
+      window.ResizeObserver = originalResizeObserver;
+    }
   });
 
   it('creates text-content and text-container', async () => {
@@ -77,10 +106,6 @@ describe('transparent-img-marquee', () => {
 });
 
 describe('transparent-img-marquee / CTAs + disclaimer', () => {
-  beforeEach(() => {
-    window.isTestEnv = true;
-  });
-
   it('builds a cta-container with a button-group', async () => {
     const block = await prepBlock('./mocks/with-ctas.html');
     expect(block.querySelector('.cta-container')).to.exist;

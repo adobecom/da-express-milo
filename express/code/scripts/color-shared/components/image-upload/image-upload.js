@@ -19,22 +19,24 @@ function isImageFile(file) {
   return file && SUPPORTED_TYPES.some((t) => file.type?.startsWith(t));
 }
 
-async function showLoadError(message) {
+async function showLoadError(message, onClose) {
   const { showExpressToast } = await import('../../spectrum/components/express-toast.js');
-  showExpressToast({
+  return showExpressToast({
     message: message || IMAGE_UPLOAD_DEFAULTS.loadError,
     variant: 'negative',
     timeout: 3000,
+    onClose,
   });
 }
 
 /**
  * Create a reusable upload dropzone (dashed-border box with upload button, drag text, file hint).
+ * Repeated load failures share one error toast until it is dismissed.
  *
  * @param {object} options
  * @param {object} [options.strings] - Localized strings (image-upload placeholder bundle).
- *   Supplies defaults for uploadButtonText/dragDropText/fileHintText/loadingText/
- *   ariaLabel/loadError.
+ *   Supplies defaults for uploadButtonText, dragDropText, fileHintText, loadingText,
+ *   ariaLabel, and loadError.
  *   Per-key options on `options` still override `strings`.
  * @param {string} [options.uploadButtonText] - Authorable button label
  * @param {string} [options.dragDropText] - Drag hint text
@@ -45,6 +47,8 @@ async function showLoadError(message) {
  * @param {function(File): void} [options.onFileSelected] - Opt-in original-file handler.
  *   Owns validation, decoding, and loading/error UI instead of the legacy decoder.
  * @param {function(HTMLImageElement, string): void} [options.onImageReady] - Image ready callback
+ * @param {function(): void} [options.onImageError] - Called after loading fails,
+ *   before showing an error toast.
  * @returns {{container: HTMLElement, handleUrl: function, handleFile: function,
  *   input: HTMLInputElement, setLoading: function}}
  */
@@ -144,6 +148,20 @@ export function createUploadDropzone(options = {}) {
     }, 1000);
   };
 
+  let loadErrorToast = null;
+  const handleLoadError = () => {
+    setLoading(false);
+    opts.onImageError?.();
+    if (!loadErrorToast) {
+      loadErrorToast = showLoadError(opts.loadError, () => {
+        loadErrorToast = null;
+      }).catch((error) => {
+        loadErrorToast = null;
+        throw error;
+      });
+    }
+  };
+
   const handleFile = (file) => {
     if (typeof opts.onFileSelected === 'function') {
       opts.onFileSelected(file);
@@ -155,16 +173,10 @@ export function createUploadDropzone(options = {}) {
     reader.onload = () => {
       const image = new Image();
       image.onload = () => processImage(image, image.src);
-      image.onerror = () => {
-        setLoading(false);
-        showLoadError(opts.loadError);
-      };
+      image.onerror = handleLoadError;
       image.src = reader.result;
     };
-    reader.onerror = () => {
-      setLoading(false);
-      showLoadError(opts.loadError);
-    };
+    reader.onerror = handleLoadError;
     reader.readAsDataURL(file);
   };
 
@@ -174,10 +186,7 @@ export function createUploadDropzone(options = {}) {
     const image = new Image();
     image.crossOrigin = 'anonymous';
     image.onload = () => processImage(image, url);
-    image.onerror = () => {
-      setLoading(false);
-      showLoadError(opts.loadError);
-    };
+    image.onerror = handleLoadError;
     image.src = url;
   };
 

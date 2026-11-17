@@ -22,7 +22,6 @@ describe('Color How To Carousel', () => {
 
   describe('with 6 lines in the first row', () => {
     beforeEach(() => {
-      window.isTestEnv = true;
       document.body.innerHTML = redBody;
     });
 
@@ -43,7 +42,6 @@ describe('Color How To Carousel', () => {
 
   describe('with only 4 lines in the first row + is dark', () => {
     beforeEach(() => {
-      window.isTestEnv = true;
       document.body.innerHTML = blackBody;
     });
 
@@ -72,17 +70,79 @@ describe('Color How To Carousel', () => {
   });
 
   describe('specs-card variant (opt-in via pagetype=color metadata)', () => {
-    async function prepBlock(mock = './mocks/specs-basic.html') {
-      window.isTestEnv = true;
+    async function prepBlock(mock = './mocks/specs-basic.html', colorName = '') {
       document.body.innerHTML = await readFile({ path: mock });
       setColorPageType();
       const block = document.querySelector('.color-how-to-carousel');
+      if (colorName) block.querySelector('h2').nextElementSibling.textContent = colorName;
       await decorate(block);
       return block;
     }
 
+    describe('English CTA search terms', () => {
+      let originalUrl;
+
+      beforeEach(() => {
+        originalUrl = window.location.href;
+      });
+
+      afterEach(() => {
+        window.history.replaceState({}, '', originalUrl);
+      });
+
+      ['', 'article'].forEach((pageType) => {
+        it(`preserves the authored CTA when pagetype is ${pageType || 'absent'}`, async () => {
+          window.history.replaceState({}, '', '/it/meanings/hot-pink');
+          document.body.innerHTML = redBody;
+          if (pageType) {
+            setColorPageType();
+            document.head.querySelector('meta[name="pagetype"]').content = pageType;
+          }
+          const block = document.querySelector('.color-how-to-carousel');
+          const cta = block.querySelector('a');
+          const authoredHref = cta.getAttribute('href');
+
+          await decorate(block);
+
+          expect(block.querySelector('.chtc-heading')).to.not.exist;
+          expect(block.querySelector('.img-wrapper')).to.exist;
+          expect(block.querySelector('a')).to.equal(cta);
+          expect(cta.getAttribute('href')).to.equal(authoredHref);
+        });
+      });
+
+      [
+        ['/meanings/red', 'Rosso', 'red'],
+        ['/it/meanings/red', 'Rosso', 'red'],
+        ['/it/meanings/hot-pink', 'Rosa acceso', 'hot pink'],
+        ['/fr/meanings/light-sky-blue', 'Bleu ciel clair', 'light sky blue'],
+        ['/it/meanings/hot-pink/', 'Rosa acceso', 'hot pink'],
+        ['/it/meanings/hot-pink.html', 'Rosa acceso', 'hot pink'],
+        ['/it/meanings/hot-pink.html/', 'Rosa acceso', 'hot pink'],
+        ['/it/meanings/hot%20pink', 'Rosa acceso', 'hot pink'],
+        ['/it/meanings/hot-pink?source=test#steps', 'Rosa acceso', 'hot pink'],
+        ['/express/colors/hot-pink', 'Jade', 'jade'],
+        ['/it/express/colors/hot-pink.html', 'Jade', 'jade'],
+        ['/test/preview', 'Jade', 'jade'],
+      ].forEach(([path, authoredName, englishName]) => {
+        it(`uses "${englishName}" for ${path} without changing authored content`, async () => {
+          window.history.replaceState({}, '', path);
+          const block = await prepBlock(undefined, authoredName);
+          const cta = block.querySelector('.chtc-how-to-card a.chtc-cta');
+          const url = new URL(cta.href);
+
+          expect(url.searchParams.get('q')).to.equal(englishName);
+          expect(url.searchParams.get('searchCategory')).to.equal('templates');
+          expect(url.searchParams.get('category')).to.equal('templates');
+          expect(url.searchParams.get('placement')).to.equal('outside-blocks');
+          expect(block.querySelector('.chtc-heading h2').textContent.trim())
+            .to.equal('How to use jade color.');
+          expect(cta.textContent).to.equal('Create Now');
+        });
+      });
+    });
+
     it('does not activate without pagetype=color metadata (legacy rendering is untouched)', async () => {
-      window.isTestEnv = true;
       document.body.innerHTML = redBody;
       const block = document.querySelector('.color-how-to-carousel');
       await decorate(block);
@@ -239,7 +299,6 @@ describe('Color How To Carousel', () => {
     });
 
     it('schema variant emits a HowTo JSON-LD script with each step in order (combined with temporary-specs-card)', async () => {
-      window.isTestEnv = true;
       document.body.innerHTML = await readFile({ path: './mocks/specs-basic.html' });
       const block = document.querySelector('.color-how-to-carousel');
       block.classList.add('schema');

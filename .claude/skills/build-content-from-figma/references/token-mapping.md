@@ -1,15 +1,53 @@
 # Token Mapping Reference
 
-Visual heuristics for classifying Figma text and interactive elements
-in Express designs. Express Figma files do not use `--s2a-typography-*`
-tokens, so classification relies on font size, weight, position, and
-visual style.
+Map Figma typography tokens and text styles to DA-authored headings, body
+text, and eyebrows. Tokens are classification evidence, not CSS
+to add to the authored HTML.
+
+## Detect typography tokens and styles
+
+Inspect `get_design_context` for direct variable references, text-style
+names, and component properties. If variable names are missing, consult
+`get_variable_defs` when available.
+
+Use this preference order: direct typography token > text-style name >
+component property > visual heuristic. Support both legacy SOT and newer
+S2A designs. Preserve the source name in the extraction output.
+
+For SOT designs, use an explicit heading/body/eyebrow role in the token or
+style name when available. Do not assume an SOT size label such as
+`--heading-font-size-l` specifies an HTML heading level. If the role or
+heading level is unclear, use the content hierarchy and document the
+fallback. Do not infer a token by finding another variable with the same
+numeric value.
+
+## S2A typography classification
+
+| Figma token | Authored classification |
+|---|---|
+| `--s2a-typography-font-size-heading-1` | Heading `<h1>` |
+| `--s2a-typography-font-size-heading-2` | Heading `<h2>` |
+| `--s2a-typography-font-size-heading-3` | Heading `<h3>` |
+| `--s2a-typography-font-size-heading-4` | Heading `<h4>` |
+| `--s2a-typography-font-size-heading-5` | Heading `<h5>` |
+| `--s2a-typography-font-size-heading-6` | Heading `<h6>` |
+| `--s2a-typography-font-size-eyebrow` | Eyebrow `<p>` above the heading |
+
+Matching `--s2a-typography-line-height-*`, `--s2a-typography-letter-spacing-*`,
+and `--s2a-typography-font-weight-*` tokens corroborate the classification.
+If these disagree, prefer the font-size token and flag the discrepancy.
+Recognizable text styles such as "Heading 3", "Body", or "Eyebrow" provide
+the same classification when a direct token reference is unavailable.
+
+Express uses a single set of authored content, not viewport-specific rows.
 
 ---
 
-## Heading level
+## Heading fallback
 
-Determine heading level from font size and visual weight:
+When tokens/styles do not determine a heading level, use the content
+hierarchy in Figma. Use relative font size and visual weight as visual cues
+to classify semantic heading levels, not to reproduce CSS styling:
 
 | Visual cue | Heading level |
 |---|---|
@@ -18,48 +56,19 @@ Determine heading level from font size and visual weight:
 | Medium bold text, section title — typically 18–24px | `<h3>` |
 | Smaller bold text, sub-heading — typically 14–18px | `<h4>` |
 
-When in doubt, default to `<h2>` for hero/marquee blocks and `<h3>` for
-card/detail blocks. Document any fallback used.
-
-Express font size tokens for reference:
-```
---heading-font-size-xxxl: 5rem    (80px)
---heading-font-size-xxl:  3.75rem (60px)
---heading-font-size-xl:   2.8125rem (45px)
---heading-font-size-l:    2.25rem (36px)
---heading-font-size-ml:   2rem    (32px)
---heading-font-size-m:    1.75rem (28px)
---heading-font-size-s:    1.375rem (22px)
---heading-font-size-xs:   1.25rem (20px)
-```
+When Figma does not establish the heading level, default to `<h1>` for
+hero/marquee blocks, `<h3>` for card blocks, and `<h2>` for other blocks.
+Document any fallback used.
 
 ---
 
-## Body size class
+## Body text
 
-| Font size (approx) | Class |
-|---|---|
-| 18px+ | `body-lg` |
-| 14–17px | `body-md` (default) |
-| 12–13px | `body-sm` |
-
-Express font size tokens for reference:
-```
---body-font-size-xxl: 1.5rem   (24px)
---body-font-size-xl:  1.25rem  (20px)
---body-font-size-l:   1.125rem (18px)
---body-font-size-m:   1rem     (16px)  ← default body
---body-font-size-s:   0.875rem (14px)
---body-font-size-xs:  0.75rem  (12px)
-```
-
-`body-md` is the default and needs no class override. Only emit `body-lg`
-or `body-sm` as a block variant when the design explicitly uses a
-non-default size.
+Author body text as paragraphs.
 
 ---
 
-## Eyebrow
+## Eyebrow fallback
 
 Small uppercase or spaced-out text appearing **above** the heading,
 typically 10–13px. Rendered as `<p>`. Optional.
@@ -85,8 +94,8 @@ Multiple CTAs in the same paragraph are space-separated inside a single `<p>`:
 
 | Visual cue | Classification |
 |---|---|
-| Largest, boldest text near top | Heading (`<h2>` default) |
-| Medium text below heading | Body (`body-md` default) |
+| Heading fallback by block type | Hero/marquee `<h1>`, card `<h3>`, other `<h2>` |
+| Text below heading | Body paragraph |
 | Small uppercase above heading | Eyebrow |
 | Text in filled/pill button | Primary CTA |
 | Text in outlined button | Secondary CTA |
