@@ -23,6 +23,7 @@
  * `googleads.g.doubleclick.net` but nothing else.
  */
 const base = require('@playwright/test');
+const { startDiagnostic } = require('./unav-diagnostic.cjs');
 
 const BLOCKED_TRACKER_HOSTS = [
   // Google ads / tag manager (not GA collection the app itself may read back)
@@ -69,7 +70,7 @@ function isBlockedTracker(url) {
 }
 
 const test = base.test.extend({
-  page: async ({ page }, use) => {
+  page: async ({ page }, use, testInfo) => {
     // Registered before the test body, so any test-specific page.route() a block
     // adds later takes precedence for its own URLs and falls through to here for
     // everything else.
@@ -77,7 +78,16 @@ const test = base.test.extend({
       if (isBlockedTracker(route.request().url())) return route.abort();
       return route.continue();
     });
-    await use(page);
+    if (process.env.NALA_UNAV_DIAGNOSTIC === '1') {
+      const finish = await startDiagnostic(page);
+      try {
+        await use(page);
+      } finally {
+        await finish(testInfo);
+      }
+    } else {
+      await use(page);
+    }
   },
 });
 

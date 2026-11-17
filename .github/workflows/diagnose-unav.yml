@@ -1,0 +1,66 @@
+name: Diagnose UniversalNav delivery
+
+# Publishing diagnostic changes on this isolated branch opts into the run.
+# No default-branch registration, release workflow or required-check change.
+on:
+  push:
+    branches:
+      - all46558-adobe-express-login-flow-coverage
+    paths:
+      - '.github/workflows/diagnose-unav.yml'
+      - 'nala/utils/test.cjs'
+      - 'nala/utils/unav-diagnostic.cjs'
+      - 'nala/utils/unav-diagnostic.config.cjs'
+      - 'nala/utils/unav-diagnostic.reporter.cjs'
+      - 'test/nala/unav-diagnostic.test.cjs'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: >-
+      github.event_name == 'push' && !github.event.deleted &&
+      github.ref == 'refs/heads/all46558-adobe-express-login-flow-coverage'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      IMS_EMAIL: ''
+      IMS_PASS: ''
+      MILO_LIBS: ''
+      NALA_DIAGNOSTIC_SHA: ${{ github.sha }}
+      PUSH_SHA: ${{ github.event.after }}
+      CI: 'true'
+    steps:
+      - name: Require immutable diagnostic revision
+        shell: bash
+        run: |
+          [[ "$NALA_DIAGNOSTIC_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$NALA_DIAGNOSTIC_SHA" == "$PUSH_SHA" ]]
+
+      - name: Checkout diagnostic revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
+        with:
+          node-version: 24.x
+
+      - name: Install locked dependencies
+        run: npm ci --no-fund --prefer-offline
+
+      - name: Install existing Chromium version
+        timeout-minutes: 5
+        run: npx --no-install playwright install --with-deps chromium
+
+      - name: Diagnose real signed-out C2 entry
+        timeout-minutes: 4
+        run: >-
+          npx --no-install playwright test
+          --config=nala/utils/unav-diagnostic.config.cjs
+          --project=express-login-chromium
+          --grep '@ims-login-signed-out'
+          --no-deps --workers=1 --retries=0
