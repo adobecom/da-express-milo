@@ -160,6 +160,42 @@ npm run nala help
 #### 4. Nala Documentation
 For detailed guides and documentation on Nala, please visit the [Nala GitHub Wiki](https://github.com/adobecom/milo/wiki/Nala#nala-introduction).
 
+#### CI browser image
+
+Nala needs branded Google Chrome to decode the approved H.264 fixtures, in
+addition to Playwright's bundled Chromium, Firefox and WebKit. The Dockerfile in
+`.github/docker/nala/` installs Chrome as root at build time and runs as UID 1001
+so Firefox remains non-root. No browser installation is needed in test jobs.
+
+Both Nala test workflows pull the verified image by immutable digest using
+their read-only repository token. Before running tests, each lane launches
+all four browsers as UID 1001 and checks actual H.264 frame decoding with
+`node nala/utils/verify-ci-browsers.cjs`.
+
+For same-repository PRs, Nala checks out the PR head SHA to match the code served
+by its AEM preview, rather than testing undeployed base-branch changes from
+GitHub's synthetic merge ref. Fork PRs check out the base branch to match their
+existing base-preview fallback. Push and manual runs use the event's commit SHA.
+
+The **Build Nala Browser Image** workflow runs when its recipe, verifier or
+Playwright lockfile changes are pushed to this repository, including a feature
+branch for first-image bootstrap. Forks never publish images. It uses a
+repository `GITHUB_TOKEN` with `packages: write`, refuses existing non-private
+packages, verifies browser launches and actual H.264 decoding before publishing,
+and confirms private visibility and repository linkage afterward. A separate
+job verifies the image with only `packages: read`.
+
+After a successful build, pin the digest from its job summary in **both**
+`run-nala-default.yml` and `run-nala-label.yml`. Never activate an unpublished
+image or use a mutable `latest` tag. A Playwright upgrade requires rebuilding
+from the new locked version and updating both digests. The CI verifier fails
+early if the image version, browser executables or H.264 decoding no longer
+match. Packages must remain **private** and grant this repository Actions read
+access; if organization policy disables automatic access, a package admin must
+grant that access before updating the consumers. PR jobs use their automatic,
+read-only `GITHUB_TOKEN`, including fork PRs; no custom registry secret or
+write-enabled PR trigger is required.
+
 -----
 
 ## Pull Request Workflow & Labels
