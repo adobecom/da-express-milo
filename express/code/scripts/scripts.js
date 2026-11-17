@@ -35,7 +35,7 @@ const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
   (jarvisVisibleMeta === 'mobile' && !desktopViewport) || (jarvisVisibleMeta === 'desktop' && desktopViewport))) jarvisImmediatelyVisible = true;
 
-const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com', 'helpx.adobe.com'];
+const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com', 'print.adobe.com', 'helpx.adobe.com'];
 
 // Add any config options.
 const CONFIG = {
@@ -51,6 +51,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'www.stage.adobe.com': {
@@ -59,6 +60,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     '--express-color--adobecom.(hlx|aem).(page|live)': {
@@ -67,6 +69,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'color.stage.adobe.com': {
@@ -75,6 +78,25 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
+    },
+    '--express-print--adobecom.(hlx|aem).(page|live)': {
+      'print.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
+    },
+    'print.stage.adobe.com': {
+      'print.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
   },
