@@ -3,6 +3,7 @@ import BlockMediator from './block-mediator.min.js';
 
 let createTag; let getMetadata;
 let getConfig; let loadStyle;
+let loadIms; let loadScript;
 const EXPRESS_ORIGIN = 'https://express.adobe.com';
 const PREWARM_SESSION_KEY = 'express.prewarm.ready';
 const PREWARM_LOCK_KEY = 'express.prewarm.startedAt';
@@ -151,6 +152,24 @@ async function addJapaneseSectionHeaderSizing() {
   }
 }
 
+async function loadGoogleLogin() {
+  const googleLogin = getMetadata('express-google-login')?.trim().toLowerCase();
+  const signedIn = Boolean(window.adobeIMS?.isSignedInUser());
+  const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
+  const supportedMetadata = ['mobile', 'desktop', 'on'].includes(googleLogin);
+  const viewportEligible = googleLogin === 'on'
+    || (googleLogin === 'mobile' && !desktopViewport)
+    || (googleLogin === 'desktop' && desktopViewport);
+  const shouldLoad = !signedIn && supportedMetadata && viewportEligible;
+
+  if (!shouldLoad) {
+    document.body.classList.remove('google-login-prompt-pending');
+    return;
+  }
+
+  const { default: initGoogleLogin } = await import('../libs/features/google-login.js');
+  await initGoogleLogin(loadIms, getMetadata, loadScript);
+}
 // Labels Deprecated blocks for authors on preview and local, like Milo's "Obsolete" labels.
 // Deprecated blocks are listed in the DA sheet /consonant.json.
 async function loadBlockNotifications() {
@@ -166,15 +185,19 @@ async function loadBlockNotifications() {
 export default async function loadDelayed() {
   try {
     await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
-      ({ createTag, getMetadata, getConfig, loadStyle } = utils);
+      ({ createTag, getMetadata, getConfig, loadStyle, loadScript, loadIms } = utils);
     });
     addJapaneseSectionHeaderSizing();
     turnContentLinksIntoButtons();
     preloadSUSILight();
     prewarmExpress();
-    await loadBlockNotifications();
+    await Promise.all([
+      loadGoogleLogin(),
+      loadBlockNotifications(),
+    ]);
     return null;
   } catch (error) {
+    document.body.classList.remove('google-login-prompt-pending');
     window.lana?.log(`Express-Delayed Error: ${error?.message || error?.detail || error}`, { tags: 'express-delayed', severity: 'error' });
     return null;
   }
