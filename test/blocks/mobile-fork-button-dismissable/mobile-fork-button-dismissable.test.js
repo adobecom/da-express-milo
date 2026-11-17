@@ -66,7 +66,6 @@ function setMobileDom() {
 
 describe('Mobile Fork Button', () => {
   beforeEach(async () => {
-    window.isTestEnv = true;
     window.hlx = {};
     sessionStorage.removeItem(FORK_RESOLVED_PATH_KEY);
     window.floatingCta = [

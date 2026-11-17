@@ -1,0 +1,74 @@
+{
+  "block": "mobile-fork-button",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@mobile-fork-button-android-and-fallback",
+      "selector": "main .floating-button-wrapper",
+      "path": "/drafts/nala/blocks/mobile-fork-button",
+      "data": {
+        "pageHeading": "Mobile fork button test page",
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".mobile-gating-header",
+              "text": "Choose how to continue"
+            },
+            {
+              "selector": ".mobile-gating-text",
+              "nth": 0,
+              "text": "App test destination"
+            },
+            {
+              "selector": ".mobile-gating-text",
+              "nth": 1,
+              "text": "Web test destination"
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon-cc-express",
+              "nth": 0
+            },
+            {
+              "selector": "img.icon-cc-express",
+              "nth": 1
+            }
+          ],
+          "interactives": [
+            {
+              "selector": "a.mobile-gating-link",
+              "nth": 0,
+              "text": "Get the app",
+              "href": "#app-destination"
+            },
+            {
+              "selector": "a.mobile-gating-link",
+              "nth": 1,
+              "text": "Continue on web",
+              "href": "#web-destination"
+            }
+          ]
+        },
+        "fallback": {
+          "semantic": {
+            "texts": [],
+            "media": [],
+            "interactives": [
+              {
+                "selector": "a.button",
+                "text": "Continue on web",
+                "href": "#web-destination"
+              }
+            ]
+          }
+        }
+      },
+      "tags": [
+        "@mobile-fork-button",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

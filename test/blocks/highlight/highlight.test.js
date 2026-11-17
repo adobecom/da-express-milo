@@ -9,7 +9,6 @@ document.body.innerHTML = await readFile({ path: './mocks/highlight.html' });
 
 describe('Highlight Block', () => {
   before(async () => {
-    window.isTestEnv = true;
     const highlight = document.querySelector('.highlight');
     await decorate(highlight);
   });
