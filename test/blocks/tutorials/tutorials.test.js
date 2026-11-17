@@ -4,11 +4,6 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
-// Must be set before scripts.js is imported below: it makes loadPage() bail out
-// so its deferred page-init side effects (loadArea, external IMS, getCountry)
-// don't race the test's DOM setup and intermittently clobber the block.
-window.isTestEnv = true;
-
 const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/tutorials/tutorials.js'),

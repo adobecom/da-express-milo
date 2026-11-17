@@ -56,6 +56,53 @@ export const LIMITS = {
   'resume-builder': { maxFileSize: MB20, acceptedFiles: DOC_ONLY, maxNumFiles: 1, genAI: true },
 };
 
+export const RESUME_FORK_MODAL_ID = 'resume-upload-fork';
+// Keep in sync with SELECT_EVENT / ACTIONS in blocks/resume-upload-fork/resume-upload-fork.js
+const FORK_SELECT_EVENT = 'resume-upload-fork:select';
+const FORK_ACTIONS = { continue: 'continue-fork', cancel: 'cancel-fork' };
+
+// Closing the fork modal without choosing counts as cancel.
+export function initResumeFork(element, track = () => {}) {
+  const controller = new AbortController();
+  const { signal } = controller;
+  let awaitingResponse = false;
+  const respond = (detail, dismiss = 'other') => {
+    if (!awaitingResponse) return;
+    awaitingResponse = false;
+    track(detail.action === FORK_ACTIONS.continue
+      ? `fork-modal:continue-${detail.choice}`
+      : `fork-modal:bounce:${dismiss}`);
+    element.dispatchEvent(new CustomEvent('unity:resume-fork-response', { detail }));
+  };
+  element.addEventListener('unity:show-resume-fork', () => {
+    awaitingResponse = true;
+    window.dispatchEvent(new CustomEvent('modal:open', { detail: { hash: `#${RESUME_FORK_MODAL_ID}` } }));
+  }, { signal });
+  window.addEventListener(FORK_SELECT_EVENT, (e) => {
+    const { action, choice, dismiss } = e.detail || {};
+    if (action === FORK_ACTIONS.continue) respond({ action, choice });
+    else respond({ action: FORK_ACTIONS.cancel }, dismiss);
+  }, { signal });
+  window.addEventListener('milo:modal:loaded', (e) => {
+    if (awaitingResponse && e.detail?.id === RESUME_FORK_MODAL_ID) track('fork-modal:shown');
+  }, { signal });
+  window.addEventListener('milo:modal:closed', (e) => {
+    if (e.detail?.id === RESUME_FORK_MODAL_ID) respond({ action: FORK_ACTIONS.cancel });
+  }, { signal });
+  return () => controller.abort();
+}
+
+// Unity reads data-show-resume-fork to decide whether to request the fork modal.
+export async function flagResumeFork(element, loadIms) {
+  if (!getMetadata(`-${RESUME_FORK_MODAL_ID}`)) return;
+  try {
+    await loadIms();
+  } catch {
+    return;
+  }
+  if (!window.adobeIMS?.isSignedInUser()) element.dataset.showResumeFork = 'true';
+}
+
 const miloLibs = setLibs('/libs');
 let createTag;
 let getConfig;
@@ -286,7 +333,8 @@ function getBrandingLogo() {
 }
 
 export default async function decorate(element) {
-  ({ createTag, getConfig } = (await import(`${miloLibs}/utils/utils.js`)));
+  const miloUtils = await import(`${miloLibs}/utils/utils.js`);
+  ({ createTag, getConfig } = miloUtils);
 
   if (isOldBrowser()) {
     window.location.href = EOLBrowserPage;
@@ -774,6 +822,10 @@ export default async function decorate(element) {
     }
     exitFlag = true;
   });
+  initResumeFork(element, (eventName) => (
+    handleAnalyticsEvent(eventName, mergeData({ userAttempts }))
+  ));
+  flagResumeFork(element, miloUtils.loadIms);
   window.addEventListener('beforeunload', (event) => {
     if (exitFlag || tabClosureSent || !isUploading) return;
     tabClosureSent = true;

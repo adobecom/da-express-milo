@@ -82,10 +82,6 @@ describe('Color Libraries — search (signed-in)', () => {
   );
   const librariesEl = () => block.querySelector('.ax-libraries');
 
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(async () => {
     // The block gates on ensureIms(), which resolves window.adobeIMS immediately
     // when it exists, so this satisfies the sign-in check without real auth.

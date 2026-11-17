@@ -12,10 +12,6 @@ const [body, hideFaqSchema] = await Promise.all([
 ]);
 
 describe('FAQ', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(() => {
     document.head.innerHTML = '';
   });

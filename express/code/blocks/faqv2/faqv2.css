@@ -90,6 +90,20 @@
   margin-left: unset;
 }
 
+.faqv2-heading {
+  margin: 0;
+}
+
+button.faqv2-header {
+  appearance: none;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .faqv2-header {
   font-size: var(--body-font-size-m);
   font-style: normal;
