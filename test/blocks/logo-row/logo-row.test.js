@@ -13,7 +13,6 @@ describe('Logo Row', () => {
   let fetchStub;
 
   before(async () => {
-    window.isTestEnv = true;
     blocks = Array.from(document.querySelectorAll('.logo-row'));
     await Promise.all(blocks.map((block) => decorate(block)));
     fetchStub = sinon.stub(window, 'fetch');
