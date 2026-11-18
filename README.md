@@ -160,6 +160,74 @@ npm run nala help
 #### 4. Nala Documentation
 For detailed guides and documentation on Nala, please visit the [Nala GitHub Wiki](https://github.com/adobecom/milo/wiki/Nala#nala-introduction).
 
+#### Automated accessibility regressions (MWPW-177196)
+
+Run the representative, deterministic regression tranche with the existing Nala
+configuration (no AEM server or published fixture is needed):
+
+```sh
+npx playwright test --grep @a11y-regression --project=express-live-chromium --project=express-live-firefox --project=express-live-webkit
+npx eslint nala/libs/accessibility.cjs nala/libs/accessibility.test.cjs nala/libs/text-spacing.cjs nala/blocks/faqv2/faqv2.a11y.test.cjs
+```
+
+The regular three-browser PR matrix discovers these tests automatically. The
+`@a11y-regression` tag also supports a focused run; existing PR-label filtering
+can narrow the normal suite. Mobile-width cases use a 375px desktop-browser
+viewport, not device or assistive-technology emulation. Desktop cases use 1280px.
+
+**Assessment and coverage:** Express already had axe scans and component-specific
+keyboard/ARIA tests, including font-generator arrow-key navigation and accordion
+Enter/Space handling. Several tests established focus with `focus()` rather than
+proving Tab reachability; FAQv2's published-page tests primarily exercised clicks
+and allowed missing blocks/alternate variants. No text-spacing regression checks
+were found in Nala. This tranche supplements, rather than replaces, those tests:
+
+- FAQv2 expandable and longform variants must render the expected controls.
+  Real Tab/Shift+Tab, Enter and Space exercise focus order, activation, return
+  navigation, visible focus outlines, and omission of closed-panel links.
+  Named roles, heading structure, linked ARIA IDs, expanded/hidden states and
+  polite atomic live-region DOM updates are asserted during interaction.
+- Normal and overridden-spacing cases check both variants at both widths.
+  Overrides are applied before decoration: line height 1.5, paragraph-after
+  spacing 2em, letter spacing 0.12em and word spacing 0.16em. Computed values
+  must match before checking clipping, open-panel height, horizontal overflow
+  and continued keyboard/link functionality. Attached screenshots are review
+  evidence, **not** approved visual-diff baselines.
+- The shared axe helper now resolves a single locator (including `nth()` or a
+  filtered locator) to a temporary selector, restoring the original attribute
+  afterward. It keeps existing WCAG 2.0/2.1 A/AA tags, zero-violation default,
+  caller overrides, and the two existing navigation exclusions. Full axe JSON,
+  including `incomplete`, passes and below-threshold findings, is attached on
+  every completed scan, not just threshold failures. The new FAQv2 tests scan
+  all-closed and second-panel-open states. Helper regressions exercise exact
+  scope, failure/threshold reporting, cleanup and spacing-check negative controls.
+
+**Integration boundary and limits:** The HTML fixture loads the checked-out
+FAQv2 JS/CSS, Express stylesheet and actual `createTag` utility via intercepted
+local requests. Only Milo configuration and placeholder-module loading are
+stubbed; unexpected requests fail. This does not cover DA authoring, delayed
+global navigation, production fonts, analytics, services, multiple instances,
+all blocks/variants/locales, or applying spacing/resizing an already-open panel.
+Existing published-page integration tests remain necessary. Axe remains scoped
+to the requested component, not the whole page, and excludes the existing
+`.dynamic-nav-status` and `.feds-navLink--hoverCaret.feds-localnav-title` selectors.
+The existing CI artifact uploads preserve attachments in `test-results/`.
+Incomplete axe findings require human review; no automatic pass is a conformance
+claim. DOM semantics/live-region assertions do not verify actual screen-reader
+speech. Outline checks do not certify focus contrast/obscuration, and conservative
+geometry checks cannot detect every overlap, reading-order or layout problem.
+Manual assistive-technology and visual evaluation remain outside this tranche.
+
+**Sizing:** Allow **3-5 engineering days** for this initial Express-specific
+tranche through review and CI hardening: roughly 0.5-1 day assessment, 0.5-1 day
+shared-helper/reporting corrections, 1-2 days representative interaction and
+spacing coverage, and 1 day cross-browser validation/documentation/review.
+Existing CI and axe dependencies reduce infrastructure work, but Express's broad
+block catalog and live-fixture variability make exhaustive coverage a separate
+estimate. This excludes product accessibility fixes, manual screen-reader
+testing, additional component/locale coverage, the URL-input workflow and the
+PR-comment bot. Jira has not been edited.
+
 #### CI browser image
 
 Nala needs branded Google Chrome to decode the approved H.264 fixtures, in
