@@ -70,10 +70,6 @@ describe('Template X Promo', () => {
   let fetchStub;
   let block;
 
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(async () => {
     // Clean up any existing stubs first
     if (fetchStub) {

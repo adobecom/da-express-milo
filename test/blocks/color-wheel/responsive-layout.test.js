@@ -6,7 +6,6 @@ import { setLibs } from '../../../express/code/scripts/utils.js';
 import { createActionMenuComponent } from '../../../express/code/scripts/color-shared/components/createActionMenuComponent.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
-window.isTestEnv = true;
 const { configureResponsiveLayout } = await import('../../../express/code/blocks/color-wheel/color-wheel.js');
 
 describe('color-wheel responsive layout', () => {

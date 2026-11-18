@@ -7,7 +7,6 @@ import { setLibs } from '../../express/code/scripts/utils.js';
 setLibs('/libs');
 
 // Prevent app bootstrap during tests
-window.isTestEnv = true;
 
 const imports = await Promise.all([import('../../express/code/scripts/utils.js'), import('../../express/code/scripts/scripts.js')]);
 const [{ getLibs }] = imports;
