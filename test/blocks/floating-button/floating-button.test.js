@@ -12,7 +12,6 @@ const { default: decorate } = imports[1];
 
 describe('Floating Button', () => {
   before(() => {
-    window.isTestEnv = true;
     window.hlx = {};
     window.floatingCta = [
       {

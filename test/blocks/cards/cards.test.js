@@ -14,7 +14,6 @@ document.body.innerHTML = await readFile({ path: './mocks/body.html' });
 
 describe('Cards', () => {
   before(async () => {
-    window.isTestEnv = true;
     const cards = document.querySelector('.cards');
     await decorate(cards);
   });

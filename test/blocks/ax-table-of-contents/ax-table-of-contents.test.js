@@ -13,10 +13,6 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 });
 
 describe('table-of-contents', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   beforeEach(async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     const block = document.querySelector('.table-of-contents');
