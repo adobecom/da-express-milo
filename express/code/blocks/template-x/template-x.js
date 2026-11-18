@@ -2210,6 +2210,7 @@ export default async function decorate(block) {
     ({ replaceKey, replaceKeyArray } = placeholders);
   });
   block.dataset.blockName = 'template-x';
+  block.classList.add('pinata-smoke');
   const props = constructProps(block);
   if (getMetadata('template-experiment') && !props.experiment) {
     props.experiment = getMetadata('template-experiment');
