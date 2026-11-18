@@ -47,7 +47,10 @@ export function decorateCategories(block, payload) {
     const categoryImageShadowWrapper = createTag('div', { class: 'browse-by-category-image-shadow-wrapper' });
     const categoryImageShadow = createTag('div', { class: 'browse-by-category-image-shadow' });
     const categoryImage = categoryCard.image;
-    categoryImage?.querySelectorAll('img').forEach((img) => img.setAttribute('alt', ''));
+    categoryImage?.querySelectorAll('img').forEach((img) => {
+      img.setAttribute('alt', '');
+      ['title', 'aria-label', 'aria-labelledby'].forEach((attr) => img.removeAttribute(attr));
+    });
     const categoryTitle = createTag('p', { class: 'browse-by-category-card-title' });
     const categoryAnchor = createTag('a', { class: 'browse-by-category-card-link' });
 

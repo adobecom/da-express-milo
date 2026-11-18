@@ -17,6 +17,9 @@ function expectDecorativeCards(categories, labels) {
   images.forEach((img) => {
     expect(img.hasAttribute('alt')).to.be.true;
     expect(img.getAttribute('alt')).to.equal('');
+    expect(img.hasAttribute('title')).to.be.false;
+    expect(img.hasAttribute('aria-label')).to.be.false;
+    expect(img.hasAttribute('aria-labelledby')).to.be.false;
   });
   expect(categories.querySelectorAll('img[alt="Inserting image..."]').length).to.equal(0);
 
@@ -29,8 +32,16 @@ function expectDecorativeCards(categories, labels) {
 describe('Browse-by-category', () => {
   it('Browse by category exists', async () => {
     const categories = document.querySelector('#browse-by-category-pure');
+    const authored = categories.querySelector('img[title]');
+    expect(authored.hasAttribute('title')).to.be.true;
+    expect(authored.hasAttribute('aria-label')).to.be.true;
+    expect(authored.hasAttribute('aria-labelledby')).to.be.true;
     await decorate(categories);
     expect(categories).to.exist;
+    expect(authored.hasAttribute('title')).to.be.false;
+    expect(authored.hasAttribute('aria-label')).to.be.false;
+    expect(authored.hasAttribute('aria-labelledby')).to.be.false;
+    expect(authored.getAttribute('alt')).to.equal('');
 
     expect(
       categories.querySelector('.browse-by-category-heading').textContent,
