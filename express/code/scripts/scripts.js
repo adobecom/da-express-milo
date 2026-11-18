@@ -348,7 +348,7 @@ function reserveGnavSpace() {
 // Tier 1e: paint an opted-in hero block from authored content before Milo's section
 // pipeline runs. Milo's loadBlock later reuses the same module + stylesheet and calls
 // init(), which skips the already-rendered markup and only runs the async enhancements.
-const FAST_HERO_BLOCKS = new Set(['grid-marquee']);
+const FAST_HERO_BLOCKS = new Set(['grid-marquee', 'ax-marquee-dynamic-hero', 'blog-article-marquee']);
 (function renderFastHero() {
   if (window.isTestEnv) return;
   const heroFast = getMetadata('hero-fast')?.trim().toLowerCase();

@@ -4,7 +4,7 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
-const [, { default: decorate }] = await Promise.all([
+const [, { default: decorate, renderCritical }] = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/blog-article-marquee/blog-article-marquee.js'),
 ]);
@@ -236,5 +236,28 @@ describe('Blog Article Marquee block', () => {
 
     const highlight = block.querySelector('.blog-article-marquee-products');
     expect(highlight).to.not.exist;
+  });
+
+  it('renderCritical paints synchronously and decorate does not re-render it', async () => {
+    const block = document.getElementById('blog-article-marquee-block');
+    expect(renderCritical(block, 'en-US')).to.be.true;
+    expect(block.dataset.heroFast).to.equal('rendered');
+    expect(block.querySelector('h1').textContent.trim()).to.equal(META_FIXTURES.headline);
+    expect(block.querySelector('.blog-article-marquee-product-date').textContent).to.equal('10/20/2025');
+
+    await decorate(block);
+    expect(block.querySelectorAll('.blog-article-marquee-inner').length).to.equal(1);
+    expect(block.querySelectorAll('h1').length).to.equal(1);
+    expect(renderCritical(block)).to.be.true;
+    expect(block.querySelectorAll('.blog-article-marquee-inner').length).to.equal(1);
+  });
+
+  it('decorate re-formats the date with the real locale after an early render', async () => {
+    const block = document.getElementById('blog-article-marquee-block');
+    renderCritical(block, 'en-GB');
+    const dateEl = block.querySelector('.blog-article-marquee-product-date');
+    expect(dateEl.textContent).to.equal('20/10/2025');
+    await decorate(block);
+    expect(dateEl.textContent).to.equal('10/20/2025');
   });
 });

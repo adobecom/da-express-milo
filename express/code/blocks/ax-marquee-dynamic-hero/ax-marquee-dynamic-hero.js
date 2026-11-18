@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getIconElementDeprecated, getMetadata } from '../../scripts/utils.js';
 import { createAccessibilityVideoControls } from '../../scripts/utils/media.js';
 import { addFreePlanWidget } from '../../scripts/widgets/free-plan.js';
 
@@ -20,51 +20,6 @@ const CLASS_NAMES = {
 };
 
 const LOGO_INJECT_VALUES = ['on', 'yes'];
-
-let getMetadata;
-
-/**
- * Adds button styling classes to the CTA link and free plan widget
- * @param {Element} block - The main block element
- */
-async function setupButtonStyling(block) {
-  const heading = block.querySelector('h1,h2,h3:first-of-type');
-  heading?.classList.add('heading');
-  if (!heading) return;
-
-  const pWithLink = block.querySelector('p:has(a)');
-  if (!pWithLink) return;
-
-  pWithLink.classList.add(CLASS_NAMES.BUTTON_CONTAINER);
-
-  const link = pWithLink.querySelector('a');
-  if (link) {
-    link.classList.add(CLASS_NAMES.QUICK_LINK, CLASS_NAMES.BUTTON, CLASS_NAMES.ACCENT);
-
-    // Add free plan widget
-    await addFreePlanWidget(link.parentElement);
-  }
-}
-
-/**
- * Sets up video accessibility controls and container structure
- * @param {Element} block - The main block element
- */
-async function setupVideoControls(block) {
-  const videoElement = block.querySelector('video');
-  if (!videoElement) return;
-
-  try {
-    const videoParent = videoElement.closest('div');
-    if (videoParent) {
-      videoParent.classList.add(CLASS_NAMES.HERO_ANIMATION_OVERLAY);
-    }
-
-    await createAccessibilityVideoControls(videoElement);
-  } catch (error) {
-    window.lana?.log(`Error creating video controls: ${error}`, { tags: 'ax-marquee-dynamic-hero', severity: 'error' });
-  }
-}
 
 /**
  * Places the Adobe Express logo in the appropriate location
@@ -88,16 +43,48 @@ function placeLogo(block) {
 }
 
 /**
+ * Synchronous first paint: heading, CTA and logo styling, built only from authored content and
+ * page metadata. Safe to call before Milo's setConfig (no getConfig, no fetch). The free plan
+ * widget and video controls are async and stay in decorate.
+ * Called early by scripts.js when the page opts in with `hero-fast`, otherwise by decorate.
+ */
+export function renderCritical(block) {
+  if (block.dataset.heroFast === 'rendered') return true;
+  const heading = block.querySelector('h1,h2,h3:first-of-type');
+  heading?.classList.add('heading');
+
+  const pWithLink = heading && block.querySelector('p:has(a)');
+  if (pWithLink) {
+    pWithLink.classList.add(CLASS_NAMES.BUTTON_CONTAINER);
+    pWithLink.querySelector('a')?.classList.add(
+      CLASS_NAMES.QUICK_LINK,
+      CLASS_NAMES.BUTTON,
+      CLASS_NAMES.ACCENT,
+    );
+  }
+
+  block.querySelector('video')?.closest('div')?.classList.add(CLASS_NAMES.HERO_ANIMATION_OVERLAY);
+  placeLogo(block);
+  block.dataset.heroFast = 'rendered';
+  return true;
+}
+
+/**
  * Main decorator function for ax-marquee-dynamic-hero block
  * Handles button styling, video controls, logo placement, and analytics
  * @param {Element} block - The main block element
  */
 export default async function decorate(block) {
-  await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
-    ({ getMetadata } = utils);
-  });
+  renderCritical(block);
 
-  await setupButtonStyling(block);
-  await setupVideoControls(block);
-  placeLogo(block);
+  const link = block.querySelector('h1,h2,h3:first-of-type') && block.querySelector('p:has(a) a');
+  if (link) await addFreePlanWidget(link.parentElement);
+
+  const videoElement = block.querySelector('video');
+  if (!videoElement) return;
+  try {
+    await createAccessibilityVideoControls(videoElement);
+  } catch (error) {
+    window.lana?.log(`Error creating video controls: ${error}`, { tags: 'ax-marquee-dynamic-hero', severity: 'error' });
+  }
 }

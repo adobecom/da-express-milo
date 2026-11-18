@@ -140,11 +140,15 @@
     }
     preload(`${libs}/styles/styles.css`, 'preload', 'style');
     if (meta('theme') !== 'doodlebug') preload('/express/code/styles/styles.css', 'preload', 'style');
-    // Only grid-marquee opts into hero-fast (FAST_HERO_BLOCKS in scripts.js).
+    // Pages that opt into hero-fast name their hero block (FAST_HERO_BLOCKS in scripts.js);
+    // grid-marquee is the default. The block is not in the DOM yet when this script runs.
     if (['on', 'force'].includes(meta('hero-fast'))) {
-      const base = `${origin}/express/code/blocks/grid-marquee/grid-marquee`;
-      preload(`${base}.css`, 'preload', 'style');
-      preload(`${base}.js`, 'modulepreload');
+      const block = meta('hero-fast-block') || 'grid-marquee';
+      if (/^[a-z0-9-]+$/.test(block)) {
+        const base = `${origin}/express/code/blocks/${block}/${block}`;
+        preload(`${base}.css`, 'preload', 'style');
+        preload(`${base}.js`, 'modulepreload');
+      }
     }
   })();
 

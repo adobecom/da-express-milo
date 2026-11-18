@@ -9,6 +9,7 @@ window.isTestEnv = true;
 
 describe('ax-marquee-dynamic-hero', () => {
   let decorate;
+  let renderCritical;
 
   before(async () => {
     // Setup imports
@@ -23,6 +24,7 @@ describe('ax-marquee-dynamic-hero', () => {
     // Import the decorate function
     const module = await import('../../../express/code/blocks/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero.js');
     decorate = module.default;
+    ({ renderCritical } = module);
   });
 
   it('Should load basic HTML mock', async () => {
@@ -157,5 +159,27 @@ describe('ax-marquee-dynamic-hero', () => {
 
     const videoElement = block.querySelector('video');
     expect(videoElement).to.exist;
+  });
+
+  it('renderCritical styles heading and CTA synchronously and decorate does not repeat it', async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/basic.html' });
+    const block = document.querySelector('.ax-marquee-dynamic-hero');
+    expect(renderCritical(block)).to.be.true;
+    expect(block.dataset.heroFast).to.equal('rendered');
+    expect(block.querySelector('h1').classList.contains('heading')).to.be.true;
+    const cta = block.querySelector('p.button-container a');
+    expect(cta.classList.contains('button')).to.be.true;
+    expect(cta.classList.contains('accent')).to.be.true;
+
+    await decorate(block);
+    expect(block.querySelectorAll('p.button-container').length).to.equal(1);
+    expect(block.querySelectorAll('img.express-logo').length).to.be.at.most(1);
+  });
+
+  it('renderCritical leaves a block without a heading unstyled but still marks it rendered', async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/no-h1.html' });
+    const block = document.querySelector('.ax-marquee-dynamic-hero');
+    expect(renderCritical(block)).to.be.true;
+    expect(block.querySelector('.button-container')).to.not.exist;
   });
 });

@@ -1,7 +1,5 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, createTag, getMetadata } from '../../scripts/utils.js';
 
-let createTag;
-let getMetadata;
 let getConfig;
 
 const MOBILE_MAX = 600;
@@ -490,15 +488,23 @@ function prepareStructure(block) {
   };
 }
 
-export default async function decorate(block) {
-  ({ createTag, getMetadata, getConfig } = await import(`${getLibs()}/utils/utils.js`));
-  const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+function getDateElement(block) {
+  return block.querySelector('.blog-article-marquee-product-date');
+}
+
+/**
+ * Synchronous first paint, built only from authored content and page metadata. Safe to call
+ * before Milo's setConfig: no getConfig, no fetch. The publication date is formatted with
+ * `ietf` (page language by default); init re-formats it once the real locale is known.
+ * Called early by scripts.js when the page opts in with `hero-fast`, otherwise by decorate.
+ */
+export function renderCritical(block, ietf = document.documentElement.lang || 'en') {
+  if (block.dataset.heroFast === 'rendered') return true;
   block.classList.add('blog-article-marquee');
 
   const metadata = getBlogArticleMarqueeMetadata();
   if (metadata.date) {
-    const formatter = getDateFormatter(getConfig().locale.ietf);
-    metadata.date = formatPublicationDate(metadata.date, formatter);
+    metadata.date = formatPublicationDate(metadata.date, getDateFormatter(ietf));
   }
 
   const {
@@ -510,11 +516,10 @@ export default async function decorate(block) {
     fallbackNodes,
   } = prepareStructure(block);
 
-  if (!mainRow || !contentColumn) return;
+  if (!mainRow || !contentColumn) return false;
 
   decorateContentColumn(contentColumn, metadata, ctaNode, fallbackNodes);
   if (mediaColumn) decorateMediaColumn(mediaColumn);
-  decorateButtons(block, 'button-xl');
   if (ctaNode) {
     ctaNode.querySelectorAll('a').forEach((link) => {
       link.classList.add('button-xl');
@@ -522,4 +527,23 @@ export default async function decorate(block) {
     });
   }
   wrapper.classList.add('blog-article-marquee-ready');
+  block.dataset.heroFast = 'rendered';
+  return true;
+}
+
+export default async function decorate(block) {
+  const preRendered = block.dataset.heroFast === 'rendered';
+  ({ getConfig } = await import(`${getLibs()}/utils/utils.js`));
+  const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+  const { ietf } = getConfig().locale;
+
+  if (!renderCritical(block, ietf)) return;
+  if (preRendered) {
+    // The early render ran before Milo set the locale; re-format the date with the real one.
+    const raw = getMetadata(METADATA_KEYS.date)?.trim();
+    const dateEl = getDateElement(block);
+    const formatted = raw && formatPublicationDate(raw, getDateFormatter(ietf));
+    if (dateEl && formatted && dateEl.textContent !== formatted) dateEl.textContent = formatted;
+  }
+  decorateButtons(block, 'button-xl');
 }
