@@ -12,6 +12,7 @@ adobe.com/express — AEM Edge Delivery Services + Milo. Vanilla JS, Lit/Spectru
 
 ## Important Conventions
 - No hardcoded text in blocks — all text (including a11y) must come from authored DOM content or placeholders via `replaceKey`/`replaceKeyArray`
+- Block lifecycle: before editing a block, check `BLOCK-STATUS.md`. If it's listed, warn the developer before making changes and follow its status rules (Maintenance: fixes only; Deprecated: critical fixes only, point to the replacement). Never use Deprecated blocks in new work. When removing a block's code, delete its rows from `BLOCK-STATUS.md` and the DA sheet `/consonant.json`
 - `scripts.js` loads on every page — changes require high scrutiny
 - `color.adobe.com` shares this codebase; its blocks are: `color-blindness`, `color-contrast-checker`, `color-explore`, `color-extract`, `color-headline`, `color-wheel`; shared code in `/libs/color-components/` and `/scripts/color-shared/`
 - To run the local dev server against color content (so `color.adobe.com` blocks render real data), use `npm run up:color` instead of plain `aem up`

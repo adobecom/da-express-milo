@@ -1,0 +1,119 @@
+name: Build Nala Browser Image
+
+on:
+  push:
+    paths:
+      - '.github/docker/nala/**'
+      - '.github/workflows/build-nala-image.yml'
+      - 'nala/utils/verify-ci-browsers.cjs'
+      - 'nala/assets/test-video.mp4'
+      - 'package-lock.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nala-image-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'adobecom/da-express-milo'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.publish.outputs.image }}
+    env:
+      IMAGE_NAME: ghcr.io/adobecom/da-express-milo-nala
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
+        with:
+          node-version: 24.x
+
+      - name: Refuse an existing non-private package
+        shell: bash
+        run: |
+          status=$(curl --silent --show-error --output "$RUNNER_TEMP/nala-package.json" --write-out '%{http_code}' \
+            -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            https://api.github.com/orgs/adobecom/packages/container/da-express-milo-nala)
+          if [[ "$status" == 404 ]]; then
+            echo "Bootstrapping a new GHCR package; initial container visibility is private."
+          elif [[ "$status" == 200 ]]; then
+            jq -e '.visibility == "private" and .repository.full_name == "adobecom/da-express-milo"' "$RUNNER_TEMP/nala-package.json"
+          else
+            cat "$RUNNER_TEMP/nala-package.json"
+            echo "::error::Cannot verify GHCR package access (HTTP $status)."
+            exit 1
+          fi
+
+      - name: Build and verify non-root browsers before publication
+        id: build
+        shell: bash
+        run: |
+          version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")
+          image="$IMAGE_NAME:$version-noble-$GITHUB_SHA"
+          docker build --build-arg "PLAYWRIGHT_VERSION=$version" --tag "$image" .github/docker/nala
+          npm install --prefix "$RUNNER_TEMP/nala-image-check" --no-save --package-lock=false --no-audit --no-fund "@playwright/test@$version"
+          docker run --rm --user 1001 --ipc=host \
+            --volume "$GITHUB_WORKSPACE:/work:ro" \
+            --volume "$RUNNER_TEMP/nala-image-check:/opt/nala-check:ro" \
+            --workdir /work --env NODE_PATH=/opt/nala-check/node_modules \
+            "$image" node nala/utils/verify-ci-browsers.cjs
+          echo "tag=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Publish private image and record immutable digest
+        id: publish
+        env:
+          IMAGE_TAG: ${{ steps.build.outputs.tag }}
+        shell: bash
+        run: |
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          docker push "$IMAGE_TAG"
+          image=$(docker inspect --format='{{index .RepoDigests 0}}' "$IMAGE_TAG")
+          [[ "$image" == "$IMAGE_NAME"@sha256:* ]]
+          gh api orgs/adobecom/packages/container/da-express-milo-nala > "$RUNNER_TEMP/nala-package.json"
+          jq -e '.visibility == "private" and .repository.full_name == "adobecom/da-express-milo"' "$RUNNER_TEMP/nala-package.json"
+          jq '{name, visibility, repository: .repository.full_name}' "$RUNNER_TEMP/nala-package.json"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          printf 'Validated private Nala image: `%s`\n' "$image" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Log out of GHCR
+        if: always()
+        run: docker logout ghcr.io
+
+  verify-read-only-pull:
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    container:
+      image: ${{ needs.publish.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user 1001
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
+        with:
+          node-version: 24.x
+
+      - name: Install dependencies
+        run: npm ci --no-fund --prefer-offline
+
+      - name: Verify image using a read-only repository token
+        run: node nala/utils/verify-ci-browsers.cjs
