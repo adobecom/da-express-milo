@@ -1607,7 +1607,11 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 }
 
 .template-x .category-list-wrapper .category-list-heading {
-  margin-bottom: 4px;
+  margin: 0 0 4px;
+  font-family: inherit;
+  line-height: inherit;
+  color: inherit;
+  letter-spacing: inherit;
   height: 24px;
   padding: 4px 7px;
   border-radius: 8px;
