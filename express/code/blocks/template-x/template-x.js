@@ -816,6 +816,34 @@ async function appendCategoryTemplatesCount(block, props) {
   }
 }
 
+export function initCategoryListFocusExpansion(wrapper, toggle) {
+  let prevAriaExpanded = 'false';
+  const setExpanded = (expanded) => {
+    if (expanded === wrapper.classList.contains('expanded')) return;
+    wrapper.classList.toggle('expanded', expanded);
+    if (expanded) prevAriaExpanded = toggle.getAttribute('aria-expanded') || 'false';
+    toggle.setAttribute('aria-expanded', expanded ? 'true' : prevAriaExpanded);
+    if (expanded && wrapper.classList.contains('collapsed')) {
+      wrapper.classList.remove('collapsed');
+      wrapper.style.maxHeight = '1000px';
+      toggle.classList.remove('collapsed');
+      wrapper.dataset.focusExpanded = 'true';
+    } else if (!expanded && wrapper.dataset.focusExpanded) {
+      delete wrapper.dataset.focusExpanded;
+      wrapper.classList.add('collapsed');
+      wrapper.style.maxHeight = '24px';
+      toggle.classList.add('collapsed');
+      toggle.setAttribute('aria-expanded', 'false');
+      prevAriaExpanded = 'false';
+    }
+  };
+
+  wrapper.addEventListener('focusin', () => setExpanded(true));
+  wrapper.addEventListener('focusout', (e) => {
+    if (!e.relatedTarget || !wrapper.contains(e.relatedTarget)) setExpanded(false);
+  });
+}
+
 async function decorateCategoryList(block, props) {
   const { prefix } = getConfig().locale;
   const mobileDrawerWrapper = block.querySelector('.filter-drawer-mobile');
@@ -910,9 +938,20 @@ async function decorateCategoryList(block, props) {
 
   const toggleButton = categoriesMobileWrapper.querySelector('.category-list-toggle-wrapper');
   toggleButton.append(getIconElementDeprecated('drop-down-arrow'));
+
+  categoriesDesktopWrapper.querySelector('.category-list').id = 'template-x-category-list';
+  categoriesMobileWrapper.querySelector('.category-list').id = 'template-x-category-list-mobile';
+  categoriesToggleWrapper.setAttribute('aria-controls', 'template-x-category-list');
+  categoriesToggleWrapper.setAttribute('aria-expanded', 'false');
+  toggleButton.setAttribute('aria-controls', 'template-x-category-list-mobile');
+  toggleButton.setAttribute('aria-expanded', 'true');
+  initCategoryListFocusExpansion(categoriesDesktopWrapper, categoriesToggleWrapper);
+  initCategoryListFocusExpansion(categoriesMobileWrapper, toggleButton);
+
   toggleButton.addEventListener('click', () => {
     const listWrapper = toggleButton.parentElement;
     toggleButton.classList.toggle('collapsed');
+    toggleButton.setAttribute('aria-expanded', String(!toggleButton.classList.contains('collapsed')));
     if (toggleButton.classList.contains('collapsed')) {
       if (listWrapper.classList.contains('desktop-only')) {
         listWrapper.classList.add('collapsed');

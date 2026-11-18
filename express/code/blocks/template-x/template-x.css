@@ -2708,7 +2708,8 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
     transition: transform 0.2s;
   }
 
-  .template-x.with-categories-list .category-list-wrapper:hover .category-list-toggle-wrapper .icon {
+  .template-x.with-categories-list .category-list-wrapper:hover .category-list-toggle-wrapper .icon,
+  .template-x.with-categories-list .category-list-wrapper.expanded .category-list-toggle-wrapper .icon {
     transform: rotate(180deg);
   }
 
@@ -2993,15 +2994,23 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
     background: linear-gradient(180deg, #FFFFFF00 0%, #FFFFFF 59%);
   }
 
-  .template-x.with-categories-list .category-list-wrapper:not(:hover) .category-list::before {
+  .template-x.with-categories-list .category-list-wrapper:not(:hover):not(.expanded) .category-list::before {
     width: 100%;
   }
 
-  .template-x.with-categories-list .category-list-wrapper:hover .category-list::before {
+  .template-x.with-categories-list .category-list-wrapper:hover .category-list::before,
+  .template-x.with-categories-list .category-list-wrapper.expanded .category-list::before {
     width: 0;
   }
 
-  .template-x.with-categories-list .category-list-wrapper:hover::before {
+  .template-x.with-categories-list .category-list-wrapper > .category-list li > a:focus-visible {
+    outline: 2px solid var(--color-info-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .template-x.with-categories-list .category-list-wrapper:hover::before,
+  .template-x.with-categories-list .category-list-wrapper.expanded::before {
     content: '';
     opacity: 1;
     z-index: -1;
@@ -3012,7 +3021,8 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
     background: linear-gradient(90deg, #fff 50%, #ffffff9B 88%, #ffffff00 100%);
   }
 
-  .template-x.with-categories-list .category-list-wrapper:hover {
+  .template-x.with-categories-list .category-list-wrapper:hover,
+  .template-x.with-categories-list .category-list-wrapper.expanded {
     min-width: max-content;
     padding-right: 160px;
     overflow: visible;
