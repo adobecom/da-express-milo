@@ -23,112 +23,55 @@ const POSITIONING = {
 
 const ACCORDION_TRANSITION_DURATION = 400;
 const ACCORDION_SCROLL_TIMEOUT = 1200;
-const SCROLL_COMPLETION_THRESHOLD = 2;
 
 const TOOLTIP_PATTERN = /\[\[([^]+)\]\]([^]+)\[\[\/([^]+)\]\]/g;
 
-const scrollAccordionIntoView = (anchorTarget, comparisonBlock) => {
-  if (!anchorTarget || !comparisonBlock) return Promise.resolve();
+/**
+ * Calculating final page scroll position using the sticky-header and
+ * global-navigation offsets used by the comparison table.
+ * @param {HTMLElement} comparisonBlock - The comparison table block element
+ * @param {number} anchorTop - target header's expected final document top
+ * @param {number} maxScrollPosition - expected final maximum scroll position
+ * @returns {number} - page scroll position to animate toward
+ */
+const getAccordionScrollTarget = (comparisonBlock, anchorTop, maxScrollPosition) => {
+  if (!comparisonBlock) return window.scrollY;
+
   const stickyHeader = comparisonBlock.querySelector('.sticky-header');
   const isStickyActive = stickyHeader?.classList.contains('is-stuck')
     && !stickyHeader.classList.contains('is-retracted');
-
-  const anchorTop = anchorTarget.getBoundingClientRect().top + window.scrollY;
-
   const stickyHeaderHeight = stickyHeader?.offsetHeight || 0;
   const gnavOffset = getFixedTopOffset();
   const tableGap = 16;
-
-  const clampTarget = (offset) => {
-    const calculatedTarget = anchorTop - offset;
-    const maxScrollPosition = document.documentElement.scrollHeight - window.innerHeight;
-    return Math.min(calculatedTarget, maxScrollPosition);
-  };
+  const safeMaxScrollPosition = Math.max(0, maxScrollPosition);
+  const clampTarget = (offset) => Math.min(
+    Math.max(anchorTop - offset, 0),
+    safeMaxScrollPosition,
+  );
 
   let initialOffset = tableGap;
-  const initialBehavior = 'smooth';
-
   if (isStickyActive) {
     initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
   } else if (stickyHeader) {
     const headerSentinel = comparisonBlock.previousElementSibling;
     if (headerSentinel) {
       const headerSentinelTop = headerSentinel.getBoundingClientRect().top;
-      const stickyTriggerOffset = gnavOffset;
-
       const targetScrollPosition = clampTarget(tableGap);
       const scrollDelta = targetScrollPosition - window.scrollY;
-
       const headerSentinelTopAfterScroll = headerSentinelTop - scrollDelta;
 
-      if (headerSentinelTopAfterScroll < stickyTriggerOffset) {
+      if (headerSentinelTopAfterScroll < gnavOffset) {
         initialOffset = stickyHeaderHeight + gnavOffset + tableGap;
       }
     }
   }
 
-  const targetScrollPosition = clampTarget(initialOffset);
-
-  window.scrollTo({
-    top: targetScrollPosition,
-    behavior: initialBehavior,
-  });
-
-  const isSmoothScroll = initialBehavior === 'smooth';
-  if (!isSmoothScroll || Math.abs(
-    window.scrollY - targetScrollPosition,
-  ) <= SCROLL_COMPLETION_THRESHOLD) {
-    return Promise.resolve();
-  }
-
-  return new Promise((resolve) => {
-    let rafId = null;
-    let timeoutId = null;
-
-    const finish = () => {
-      /* eslint-disable-next-line no-use-before-define */
-      cleanup();
-      resolve();
-    };
-
-    const onScroll = () => {
-      if (Math.abs(window.scrollY - targetScrollPosition) <= SCROLL_COMPLETION_THRESHOLD) {
-        finish();
-      }
-    };
-
-    const onUserInteraction = () => {
-      finish();
-    };
-
-    const cleanup = () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-        timeoutId = null;
-      }
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('wheel', onUserInteraction);
-      window.removeEventListener('touchstart', onUserInteraction);
-      window.removeEventListener('keydown', onUserInteraction);
-    };
-
-    const monitorScroll = () => {
-      onScroll();
-      rafId = requestAnimationFrame(monitorScroll);
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('wheel', onUserInteraction, { passive: true });
-    window.addEventListener('touchstart', onUserInteraction, { passive: true });
-    window.addEventListener('keydown', onUserInteraction);
-    timeoutId = window.setTimeout(finish, ACCORDION_SCROLL_TIMEOUT);
-    monitorScroll();
-  });
+  return clampTarget(initialOffset);
 };
+
+const easeInOutCubic = (progress) => (progress < 0.5
+  ? 4 * progress * progress * progress
+  : 1 - ((-2 * progress + 2) ** 3) / 2);
 
 function handleCellIcons(cell) {
   if (cell.tagName.toLowerCase() !== 'td') return;
@@ -515,9 +458,120 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
     suspendStickyRelease,
     resumeStickyRelease,
   } = stickyReleaseControls;
-
-  const tableContainers = comparisonBlock.querySelectorAll('.table-container:not(.no-accordion)');
+  const tableContainers = Array.from(
+    comparisonBlock.querySelectorAll('.table-container:not(.no-accordion)'),
+  );
   if (tableContainers.length === 0) return;
+
+  let activeContainer = null;
+  let currentAnimationId = null;
+  let cancelCurrentAnimation = null;
+
+  const measureExpandedTableHeight = (table) => {
+    const wasCollapsed = table.classList.contains('accordion-collapsed');
+    const previousHeight = table.style.height;
+    const previousOpacity = table.style.opacity;
+
+    if (wasCollapsed) table.classList.remove('accordion-collapsed');
+    table.style.height = 'auto';
+    table.style.opacity = '1';
+    const expandedHeight = table.getBoundingClientRect().height;
+
+    if (wasCollapsed) table.classList.add('accordion-collapsed');
+    table.style.height = previousHeight;
+    table.style.opacity = previousOpacity;
+    return expandedHeight;
+  };
+
+  const animateTablesAndScroll = ({
+    closingTable,
+    closingStartHeight,
+    openingTable,
+    openingEndHeight,
+    startScroll,
+    targetScroll,
+    onComplete,
+  }) => {
+    const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 0
+      : ACCORDION_TRANSITION_DURATION;
+    const startTime = performance.now();
+    const root = document.documentElement;
+    const previousScrollBehavior = root.style.getPropertyValue('scroll-behavior');
+    const previousScrollBehaviorPriority = root.style.getPropertyPriority('scroll-behavior');
+    root.style.setProperty('scroll-behavior', 'auto', 'important');
+
+    const animatedTables = [closingTable, openingTable].filter(Boolean);
+    animatedTables.forEach((table) => table.classList.add('accordion-animating'));
+
+    let finished = false;
+
+    let cancelOnUserInput = () => {};
+    const cleanup = () => {
+      window.removeEventListener('wheel', cancelOnUserInput);
+      window.removeEventListener('touchstart', cancelOnUserInput);
+      window.removeEventListener('keydown', cancelOnUserInput);
+      if (previousScrollBehavior) {
+        root.style.setProperty('scroll-behavior', previousScrollBehavior, previousScrollBehaviorPriority);
+      } else {
+        root.style.removeProperty('scroll-behavior');
+      }
+      animatedTables.forEach((table) => {
+        table.classList.remove('accordion-animating');
+        table.style.height = '';
+        table.style.opacity = '';
+      });
+      currentAnimationId = null;
+      cancelCurrentAnimation = null;
+      if (typeof onComplete === 'function') onComplete();
+    };
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      if (currentAnimationId) cancelAnimationFrame(currentAnimationId);
+      cleanup();
+    };
+
+    cancelOnUserInput = finish;
+    cancelCurrentAnimation = finish;
+    window.addEventListener('wheel', cancelOnUserInput, { passive: true });
+    window.addEventListener('touchstart', cancelOnUserInput, { passive: true });
+    window.addEventListener('keydown', cancelOnUserInput);
+
+    const frame = (now) => {
+      const progress = duration === 0 ? 1 : Math.min((now - startTime) / duration, 1);
+      const eased = easeInOutCubic(progress);
+
+      if (closingTable) {
+        closingTable.style.height = `${Math.max(0, closingStartHeight * (1 - eased))}px`;
+        closingTable.style.opacity = `${1 - eased}`;
+      }
+      if (openingTable) {
+        openingTable.style.height = `${openingEndHeight * eased}px`;
+        openingTable.style.opacity = `${eased}`;
+      }
+
+      const nextScroll = startScroll + ((targetScroll - startScroll) * eased);
+      window.scrollTo(0, nextScroll);
+
+      if (progress < 1) {
+        currentAnimationId = requestAnimationFrame(frame);
+      } else {
+        finish();
+      }
+    };
+
+    if (closingTable) {
+      closingTable.style.height = `${closingStartHeight}px`;
+      closingTable.style.opacity = '1';
+    }
+    if (openingTable) {
+      openingTable.style.height = '0px';
+      openingTable.style.opacity = '0';
+    }
+    currentAnimationId = requestAnimationFrame(frame);
+  };
 
   tableContainers.forEach((container, index) => {
     const table = container.querySelector('table');
@@ -527,41 +581,78 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
     const iconSpan = toggleButton.querySelector('span');
     if (!iconSpan) return;
 
+    table.classList.remove('hide-table');
     if (index === 0) {
-      table.classList.remove('hide-table');
+      table.classList.remove('accordion-collapsed');
+      table.removeAttribute('inert');
+      table.removeAttribute('aria-hidden');
       iconSpan.classList.remove('open');
       toggleButton.setAttribute('aria-expanded', 'true');
-      return;
+      activeContainer = container;
+    } else {
+      table.classList.add('accordion-collapsed');
+      table.setAttribute('inert', '');
+      table.setAttribute('aria-hidden', 'true');
+      iconSpan.classList.add('open');
+      toggleButton.setAttribute('aria-expanded', 'false');
     }
-
-    table.classList.add('hide-table');
-    iconSpan.classList.add('open');
-    toggleButton.setAttribute('aria-expanded', 'false');
   });
 
   tableContainers.forEach((container) => {
     const toggleButton = container.querySelector('.toggle-button');
-    if (!toggleButton) return;
-
     const table = container.querySelector('table');
-    if (!table) return;
-
-    const iconSpan = toggleButton.querySelector('span');
-    if (!iconSpan) return;
+    const iconSpan = toggleButton?.querySelector('span');
+    if (!toggleButton || !table || !iconSpan) return;
 
     toggleButton.onclick = () => {
-      const wasExpanded = !table.classList.contains('hide-table');
+      if (cancelCurrentAnimation) cancelCurrentAnimation();
+      else if (currentAnimationId) cancelAnimationFrame(currentAnimationId);
+
+      const wasExpanded = !table.classList.contains('accordion-collapsed');
       const anchorTarget = container.querySelector('.toggle-button') || container;
+      const startScroll = window.scrollY;
 
-      table.classList.toggle('hide-table');
-      iconSpan.classList.toggle('open');
-      toggleButton.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
+      if (wasExpanded) {
+        const closingStartHeight = table.getBoundingClientRect().height;
+        table.classList.add('accordion-collapsed');
+        table.setAttribute('inert', '');
+        table.setAttribute('aria-hidden', 'true');
+        iconSpan.classList.add('open');
+        toggleButton.setAttribute('aria-expanded', 'false');
+        if (activeContainer === container) activeContainer = null;
 
-      if (wasExpanded) return;
-
-      if (typeof suspendStickyRelease === 'function') {
-        suspendStickyRelease();
+        animateTablesAndScroll({
+          closingTable: table,
+          closingStartHeight,
+          openingTable: null,
+          openingEndHeight: 0,
+          startScroll,
+          targetScroll: startScroll,
+        });
+        return;
       }
+
+      const closingContainer = activeContainer;
+      const closingTable = closingContainer?.querySelector('table') || null;
+      const closingStartHeight = closingTable
+        ? closingTable.getBoundingClientRect().height
+        : 0;
+      const openingEndHeight = measureExpandedTableHeight(table);
+      const currentAnchorTop = anchorTarget.getBoundingClientRect().top + startScroll;
+      const closesAbove = closingContainer
+        ? tableContainers.indexOf(closingContainer) < tableContainers.indexOf(container)
+        : false;
+      const finalAnchorTop = currentAnchorTop - (closesAbove ? closingStartHeight : 0);
+      const finalDocumentHeight = document.documentElement.scrollHeight
+        + openingEndHeight - closingStartHeight;
+      const finalMaxScrollPosition = Math.max(0, finalDocumentHeight - window.innerHeight);
+      const targetScroll = getAccordionScrollTarget(
+        comparisonBlock,
+        finalAnchorTop,
+        finalMaxScrollPosition,
+      );
+
+      if (typeof suspendStickyRelease === 'function') suspendStickyRelease();
 
       let hasResumed = false;
       let fallbackResumeTimeout = null;
@@ -572,49 +663,43 @@ function initializeAccordionBehavior(comparisonBlock, stickyReleaseControls = {}
           window.clearTimeout(fallbackResumeTimeout);
           fallbackResumeTimeout = null;
         }
-        if (typeof resumeStickyRelease === 'function') {
-          resumeStickyRelease();
-        }
+        if (typeof resumeStickyRelease === 'function') resumeStickyRelease();
       };
 
       if (typeof resumeStickyRelease === 'function') {
-        fallbackResumeTimeout = window.setTimeout(() => {
-          resumeOnce();
-        }, ACCORDION_TRANSITION_DURATION + ACCORDION_SCROLL_TIMEOUT);
+        fallbackResumeTimeout = window.setTimeout(
+          resumeOnce,
+          ACCORDION_TRANSITION_DURATION + ACCORDION_SCROLL_TIMEOUT,
+        );
       }
 
-      tableContainers.forEach((otherContainer) => {
-        if (otherContainer === container) return;
+      if (closingContainer && closingTable) {
+        closingTable.classList.add('accordion-collapsed');
+        closingTable.setAttribute('inert', '');
+        closingTable.setAttribute('aria-hidden', 'true');
+        const closingButton = closingContainer.querySelector('.toggle-button');
+        closingButton?.querySelector('span')?.classList.add('open');
+        closingButton?.setAttribute('aria-expanded', 'false');
+      }
 
-        const otherTable = otherContainer.querySelector('table');
-        if (!otherTable) return;
-        if (otherTable.classList.contains('hide-table')) return;
+      table.classList.remove('hide-table', 'accordion-collapsed');
+      iconSpan.classList.remove('open');
+      toggleButton.setAttribute('aria-expanded', 'true');
+      activeContainer = container;
 
-        const otherButton = otherContainer.querySelector('.toggle-button');
-        if (!otherButton) return;
-
-        const otherIcon = otherButton.querySelector('span');
-        if (!otherIcon) return;
-
-        otherTable.classList.add('hide-table');
-        otherIcon.classList.add('open');
-        otherButton.setAttribute('aria-expanded', 'false');
+      animateTablesAndScroll({
+        closingTable,
+        closingStartHeight,
+        openingTable: table,
+        openingEndHeight,
+        startScroll,
+        targetScroll,
+        onComplete: () => {
+          table.removeAttribute('inert');
+          table.removeAttribute('aria-hidden');
+          resumeOnce();
+        },
       });
-
-      if (!anchorTarget) return;
-
-      window.setTimeout(() => {
-        requestAnimationFrame(() => {
-          const scrollPromise = scrollAccordionIntoView(anchorTarget, comparisonBlock);
-          if (scrollPromise && typeof scrollPromise.finally === 'function') {
-            scrollPromise.finally(() => {
-              resumeOnce();
-            });
-          } else {
-            resumeOnce();
-          }
-        });
-      }, ACCORDION_TRANSITION_DURATION);
     };
   });
 }

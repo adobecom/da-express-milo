@@ -25,7 +25,6 @@ function mockPricingPlans() {
 
 describe('Floating buttons', () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     window.placeholders = {};
     window.pricingPlans = {};
   });

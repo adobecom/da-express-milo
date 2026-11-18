@@ -22,7 +22,6 @@ const newAuthoringStaticImage = await readFile({ path: './mocks/new-authoring-st
 describe('Grid Marquee - Legacy vs New Authoring', () => {
   let originalRAF;
   before(() => {
-    window.isTestEnv = true;
     originalRAF = window.requestAnimationFrame;
     window.requestAnimationFrame = (cb) => {
       cb(performance.now());
@@ -211,10 +210,6 @@ describe('Grid Marquee - Ratings store icon localization', () => {
     'app-store-ratings-play-store': 'Download on Google Play',
     'app-store-ratings-apple-store': 'Download on the App Store',
   };
-
-  before(() => {
-    window.isTestEnv = true;
-  });
 
   // renderRatings mutates milo's module-level config; reset it so a later test
   // (or reordering) doesn't inherit this block's locale/placeholders.

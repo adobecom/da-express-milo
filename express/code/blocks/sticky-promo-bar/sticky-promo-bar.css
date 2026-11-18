@@ -46,8 +46,12 @@ body[data-device="mobile"] main .sticky-promo-bar.loadinbody {
     box-sizing: border-box;
 }
 
-main .sticky-promo-bar:not(.rounded) a:any-link {
+main .sticky-promo-bar a:any-link,
+body:not(.blog) main #hero:not(:has(.hero-bg)) .sticky-promo-bar a:any-link {
     color: white;
+}
+
+main .sticky-promo-bar:not(.rounded) a:any-link {
     border: 2px solid white;
     border-radius: var(--spacing-350);
     padding: 3px 10px 5px 10px;
@@ -61,7 +65,6 @@ main .sticky-promo-bar:not(.rounded) a:any-link {
 }
 
 main .sticky-promo-bar.rounded a:any-link {
-    color: white;
     text-decoration: underline;
     font-style: initial;
 }
