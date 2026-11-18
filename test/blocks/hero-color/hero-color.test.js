@@ -12,7 +12,6 @@ const clock = sinon.useFakeTimers({ shouldAdvanceTime: true });
 
 describe('Hero Color', () => {
   before(async () => {
-    window.isTestEnv = true;
     const heroColor = document.querySelector('.hero-color');
     await decorate(heroColor);
   });

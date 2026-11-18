@@ -1,8 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import { readFile } from '@web/test-runner-commands';
 
-window.isTestEnv = true;
-
 const imports = await Promise.all([
   import('../../express/code/scripts/utils.js'),
   import('../../express/code/scripts/scripts.js'),
