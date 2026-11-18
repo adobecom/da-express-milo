@@ -1787,6 +1787,16 @@ export async function decorateTemplateList(block, props) {
   document.dispatchEvent(linksPopulated);
 }
 
+export const LOAD_MORE_ARIA_LABEL = 'Load More templates';
+
+export function labelLoadMoreButton(button) {
+  button.setAttribute('aria-label', LOAD_MORE_ARIA_LABEL);
+  button.querySelectorAll('.icon').forEach((icon) => {
+    icon.setAttribute('aria-hidden', 'true');
+    if (icon.tagName === 'IMG') icon.setAttribute('alt', '');
+  });
+}
+
 async function decorateLoadMoreButton(block, props) {
   const loadMoreDiv = createTag('div', { class: 'load-more' });
   const loadMoreButton = createTag('button', { class: 'load-more-button' });
@@ -1795,6 +1805,7 @@ async function decorateLoadMoreButton(block, props) {
   loadMoreText.textContent = await replaceKey('load-more', getConfig());
   block.insertAdjacentElement('afterend', loadMoreDiv);
   loadMoreButton.append(getIconElementDeprecated('plus-icon'));
+  labelLoadMoreButton(loadMoreButton);
 
   loadMoreButton.addEventListener('click', async () => {
     loadMoreButton.classList.add('disabled');
