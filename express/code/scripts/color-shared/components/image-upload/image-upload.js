@@ -44,6 +44,8 @@ async function showLoadError(message, onClose) {
  * @param {string} [options.loadingText] - Loading overlay text
  * @param {string} [options.ariaLabel] - Accessible name for the dropzone
  * @param {boolean} [options.enabled=true] - Whether the dropzone is interactive
+ * @param {function(File): void} [options.onFileSelected] - Opt-in original-file handler.
+ *   Owns validation, decoding, and loading/error UI instead of the legacy decoder.
  * @param {function(HTMLImageElement, string): void} [options.onImageReady] - Image ready callback
  * @param {function(): void} [options.onImageError] - Called after loading fails,
  *   before showing an error toast.
@@ -161,6 +163,10 @@ export function createUploadDropzone(options = {}) {
   };
 
   const handleFile = (file) => {
+    if (typeof opts.onFileSelected === 'function') {
+      opts.onFileSelected(file);
+      return;
+    }
     if (!isImageFile(file)) return;
     setLoading(true);
     const reader = new FileReader();

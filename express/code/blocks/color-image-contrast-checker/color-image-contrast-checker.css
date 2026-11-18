@@ -1,0 +1,1003 @@
+@import url('../../scripts/color-shared/components/dropdown/dropdown.css');
+
+/* Set while the loading overlay or expanded view is open (see syncLoadingOverlay). */
+html.icc-scroll-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.icc-scroll-lock body {
+  position: fixed;
+  inset-block-start: calc(-1 * var(--icc-scroll-y));
+  inset-inline: 0;
+  inline-size: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.color-image-contrast-checker {
+  --icc-image-width: 0px;
+  --icc-image-height: 0px;
+
+  color: var(--color-gray-950);
+  font-family: var(--body-font-family);
+  inline-size: 100%;
+}
+
+.color-image-contrast-checker *,
+.color-image-contrast-checker *::before,
+.color-image-contrast-checker *::after {
+  box-sizing: border-box;
+}
+
+.section:has(.color-image-contrast-marquee-wrapper) {
+  position: relative;
+  overflow: hidden;
+  padding-inline: var(--spacing-300);
+}
+
+.color-image-contrast-marquee-wrapper:has(.has-image) {
+  inline-size: 100%;
+}
+
+.color-image-contrast-checker .icc-upload {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-500);
+  padding-block-end: var(--spacing-700);
+}
+
+@media (min-width: 600px) {
+  .section:has(.color-image-contrast-marquee-wrapper > .color-image-contrast-checker:not(.has-image, .icc-dialog)) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-block-size: 800px;
+  }
+}
+
+.color-image-contrast-checker .image-upload-dropzone-container::after {
+  border-radius: calc(var(--Radius-corner-radius-200) + var(--spacing-75));
+}
+
+@media (max-width: 600px) {
+  .color-image-contrast-checker .image-upload-dropzone-container {
+    block-size: auto;
+    min-block-size: 200px;
+  }
+
+  .color-image-contrast-checker .image-upload-dropzone-text {
+    display: flex;
+  }
+}
+
+@media (max-width: 1199px) {
+  .color-image-contrast-checker .image-upload-dropzone-title {
+    display: none;
+  }
+}
+
+.color-image-contrast-checker .image-upload-dropzone-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+
+.color-image-contrast-checker .image-upload-dropzone-container:not(.is-disabled):hover::before {
+  opacity: 0.15;
+}
+
+.color-image-contrast-checker.has-image > .icc-upload,
+.color-image-contrast-checker:not(.has-image, .icc-dialog) > .icc-panel {
+  display: none;
+}
+
+.color-image-contrast-checker-background {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.color-image-contrast-checker-background[hidden] {
+  display: none;
+}
+
+.color-image-contrast-checker-background::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 143px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0%) 0%, var(--color-white) 80.29%);
+  z-index: 1;
+}
+
+.color-image-contrast-checker .icc-suggestions {
+  text-align: center;
+  inline-size: 343px;
+  max-inline-size: 100%;
+}
+
+.color-image-contrast-checker .icc-suggestions p {
+  margin: 0;
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight-bold);
+}
+
+.color-image-contrast-checker .icc-sample-list {
+  display: flex;
+  gap: var(--spacing-80);
+  margin-block-start: var(--spacing-200);
+}
+
+.color-image-contrast-checker .icc-sample {
+  position: relative;
+  flex: 1;
+  min-inline-size: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  transition: box-shadow 0.15s ease;
+}
+
+.color-image-contrast-checker .icc-sample::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--color-gray-250);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.color-image-contrast-checker .icc-sample:hover {
+  box-shadow: 0 4px 10px rgb(0 0 0 / 12%);
+}
+
+.color-image-contrast-checker .icc-sample:is(:hover, :focus-visible, :active, .is-selected)::after {
+  border-color: var(--color-gray-950);
+}
+
+.color-image-contrast-checker .icc-sample:is(:active, .is-selected) {
+  box-shadow: 0 0 0 2px var(--color-gray-950);
+}
+
+.color-image-contrast-checker .icc-sample:is(:active, .is-selected)::after {
+  box-shadow: inset 0 0 0 2px var(--color-white);
+}
+
+.color-image-contrast-checker .icc-sample picture {
+  display: block;
+  inline-size: 100%;
+}
+
+.color-image-contrast-checker .icc-sample img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 5 / 7;
+  object-fit: cover;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.color-image-contrast-checker .icc-panel {
+  --icc-image-width: 100%;
+  --icc-image-height: 100%;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-300);
+  max-inline-size: calc(var(--block-wd-max-width) - 2 * var(--spacing-600));
+  inline-size: 100%;
+  margin-inline: auto;
+  padding-block: var(--spacing-600);
+}
+
+.color-image-contrast-checker .icc-main {
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+}
+
+.color-image-contrast-checker .icc-copy .icon {
+  display: block;
+  inline-size: auto;
+  block-size: 29px;
+  padding: 0;
+  margin-block-end: var(--spacing-100);
+}
+
+.color-image-contrast-checker .icc-copy :is(h1, h2) {
+  margin: 0;
+  font-size: var(--ax-heading-xl-size);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 1.16;
+}
+
+.color-image-contrast-checker .icc-copy p {
+  margin-block: var(--spacing-100) 0;
+  font-size: var(--ax-body-s-size);
+  color: var(--Alias-content-typography-Body);
+  line-height: 1.3;
+}
+
+.color-image-contrast-checker .icc-workspace {
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  background: var(--color-white);
+  border-radius: var(--Radius-corner-radius-200);
+  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
+  box-shadow:
+    0 0 1px var(--Alias-drop-shadow-emphasized-key-color),
+    0 1px 4px var(--Alias-drop-shadow-transition-color),
+    0 2px 8px var(--Alias-drop-shadow-ambient-color);
+}
+
+.color-image-contrast-checker .icc-controls,
+.color-image-contrast-checker .icc-controls-left,
+.color-image-contrast-checker .icc-controls-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.color-image-contrast-checker .icc-controls {
+  justify-content: space-between;
+}
+
+.color-image-contrast-checker .icc-workspace > .icc-color {
+  margin-block-start: calc(-1 * var(--spacing-100));
+}
+
+.color-image-contrast-checker .icc-color {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-200);
+  font-size: var(--ax-body-xs-size);
+}
+
+.color-image-contrast-checker .icc-color .color-dropdown {
+  flex: 0 1 auto;
+  inline-size: 224px;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.color-image-contrast-checker .icc-help {
+  display: inline;
+  inline-size: auto;
+  block-size: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  border-block-end: 1px dotted currentcolor;
+  font: inherit;
+  color: var(--Alias-content-typography-Body);
+  cursor: default;
+}
+
+/* Tooltip triggers stay plain text on hover, matching the other Express tooltips. */
+.color-image-contrast-checker .icc-help:hover {
+  background: none;
+}
+
+.color-image-contrast-checker .color-action-button .icon {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.color-image-contrast-checker .icc-save {
+  display: flex;
+  gap: var(--spacing-100);
+  align-items: center;
+  justify-content: center;
+  inline-size: auto;
+  min-block-size: 40px;
+  padding-inline: var(--spacing-300);
+  background: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
+  border-radius: var(--spacing-400);
+  font: inherit;
+  font-weight: var(--ax-body-weight-bold);
+}
+
+.color-image-contrast-checker .icc-save .icon {
+  filter: brightness(0) invert(1);
+  object-fit: none;
+}
+
+.color-image-contrast-checker .icc-save > span:not(.icon) {
+  inline-size: auto;
+  block-size: auto;
+  display: block;
+  white-space: nowrap;
+}
+
+.color-image-contrast-checker .icc-save:hover {
+  background: var(--color-background-accent-hover);
+}
+
+.color-image-contrast-checker .icc-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.color-image-contrast-checker :is(button, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 3px;
+}
+
+.color-image-contrast-checker .icc-comparison-row {
+  /* Matches the zoom toolbar's top inset so image tops sit flush with it. */
+  --icc-comparison-padding-block: 10px;
+
+  position: relative;
+  display: flex;
+  min-inline-size: 0;
+  /* Keep the aspect ratio authoritative; oversized images scroll inside .icc-comparison. */
+  min-block-size: 0;
+  aspect-ratio: 311 / 200;
+  padding: var(--spacing-100) var(--spacing-300) var(--spacing-100) var(--spacing-700);
+  padding-block-start: var(--icc-comparison-padding-block);
+  background: var(--S2AC-Palette-gray-75);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  outline: 1px solid rgb(82 88 228 / 10%);
+}
+
+.color-image-contrast-checker .icc-zoom {
+  position: absolute;
+  inset-block-start: 10px;
+  inset-inline-start: 10px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-75);
+  padding: var(--spacing-75);
+  border-radius: 10px;
+  background: var(--Palette-transparent-white-800);
+  box-shadow: 0 0 10px rgb(0 0 0 / 12%);
+}
+
+.color-image-contrast-checker .icc-zoom .color-action-button {
+  inline-size: 24px;
+  block-size: 24px;
+  padding: var(--spacing-75);
+  border: none;
+  border-radius: 7px;
+  color: var(--Alias-content-neutral-default);
+  background: transparent;
+}
+
+.color-image-contrast-checker .icc-zoom .icon {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.color-image-contrast-checker .icc-zoom .color-action-button:hover {
+  background: var(--color-gray-250);
+}
+
+.color-image-contrast-checker .icc-zoom [aria-pressed="true"] {
+  color: var(--color-white);
+  background: var(--color-black);
+}
+
+.color-image-contrast-checker .icc-zoom [aria-pressed="true"]:hover {
+  background: var(--color-black);
+}
+
+.color-image-contrast-checker .icc-comparison {
+  position: relative;
+  z-index: 0;
+  min-inline-size: 0;
+  min-block-size: 0;
+  flex: 1;
+  display: grid;
+  /* Tracks hug the scaled images; the pair stays centered and scrolls from the start when larger. */
+  grid-template-columns: repeat(2, var(--icc-image-width));
+  grid-template-rows: var(--icc-image-height);
+  place-content: safe center;
+  gap: var(--spacing-100);
+  overflow: auto;
+}
+
+.color-image-contrast-checker .icc-frame {
+  position: relative;
+  min-block-size: 0;
+  min-inline-size: 0;
+}
+
+.color-image-contrast-checker .icc-frame :is(canvas, img) {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  max-inline-size: none;
+}
+
+.color-image-contrast-checker .icc-recalc {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: rgb(0 0 0 / 56%);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease-out;
+}
+
+.color-image-contrast-checker .icc-comparison-row.is-recalculating .icc-recalc {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.color-image-contrast-checker .icc-recalc-spinner {
+  inline-size: 79px;
+  block-size: 79px;
+  border: 7px solid var(--color-gray-300-variant);
+  border-block-start-color: var(--S2-Buttons-Accent-Color-Default);
+  border-radius: 50%;
+  animation: icc-spin 1s linear infinite;
+}
+
+@keyframes icc-spin {
+  to { transform: rotate(360deg); }
+}
+
+.color-image-contrast-checker .icc-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.color-image-contrast-checker .icc-footer:empty {
+  display: none;
+}
+
+.color-image-contrast-checker .icc-footer .icc-save {
+  inline-size: 100%;
+}
+
+.color-image-contrast-checker .icc-legend {
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+}
+
+.color-image-contrast-checker .icc-legend-full {
+  min-inline-size: 0;
+  min-block-size: 444px;
+  padding: var(--spacing-400);
+  border-radius: var(--Radius-corner-radius-200);
+  outline: 1px solid var(--Palette-gray-100);
+  background: var(--color-white);
+}
+
+.color-image-contrast-checker .icc-legend-full h2 {
+  font-size: var(--ax-body-l-size);
+  font-weight: 800;
+  line-height: 24px;
+  margin: 0;
+}
+
+.color-image-contrast-checker .icc-legend-labels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-80);
+  margin-block-start: var(--spacing-200);
+}
+
+.color-image-contrast-checker .icc-legend-card {
+  min-inline-size: 0;
+  padding-block: var(--spacing-400);
+  box-shadow: inset 0 -1px var(--Palette-gray-100);
+}
+
+.color-image-contrast-checker .icc-legend-card:first-child {
+  padding-block-start: var(--spacing-500);
+}
+
+.color-image-contrast-checker .icc-legend-divider {
+  display: none;
+}
+
+.color-image-contrast-checker .icc-legend-card:last-child {
+  padding-block-end: 0;
+  box-shadow: none;
+}
+
+.color-image-contrast-checker .icc-legend-card h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  flex-wrap: wrap;
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--heading-font-weight-medium);
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.color-image-contrast-checker .icc-swatch {
+  display: inline-block;
+  flex: 0 0 24px;
+  inline-size: 24px;
+  block-size: 24px;
+  border: 1px solid rgb(31 31 31 / 20%);
+  border-radius: var(--Radius-corner-radius-75);
+}
+
+.color-image-contrast-checker .icc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-75);
+  min-block-size: 24px;
+  padding-block: var(--spacing-75);
+  padding-inline: 10px;
+  border-radius: 7px;
+  background: var(--Palette-gray-100);
+  color: var(--color-black);
+  font-size: var(--ax-body-xxs-size);
+  font-weight: 500;
+  line-height: 16px;
+  overflow-wrap: anywhere;
+}
+
+.color-image-contrast-checker .icc-badge .icon {
+  flex: 0 0 16px;
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.color-image-contrast-checker .icc-green .icc-swatch {
+  background: #b2ffb0;
+}
+
+.color-image-contrast-checker .icc-blue .icc-swatch {
+  background: #0070d1;
+}
+
+.color-image-contrast-checker .icc-dark .icc-swatch {
+  background: var(--color-black);
+}
+
+.color-image-contrast-checker .icc-legend-card p {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--spacing-75);
+  min-block-size: 20px;
+  margin: 0;
+  color: var(--Alias-content-typography-Body);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--heading-font-weight-regular);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.color-image-contrast-checker .icc-legend-card .icc-help {
+  border-block-end: none;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: start;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.color-image-contrast-checker .icc-dark p {
+  min-block-size: 0;
+}
+
+.color-image-contrast-checker .icc-accuracy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-80);
+  padding-block: var(--spacing-400);
+  padding-inline: var(--spacing-300);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--color-gray-100);
+  color: var(--Alias-content-typography-Body);
+}
+
+.color-image-contrast-checker .icc-accuracy > .icon {
+  inline-size: 20px;
+  block-size: 20px;
+  color: var(--Palette-gray-800);
+}
+
+.color-image-contrast-checker .icc-accuracy-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-80);
+  overflow-wrap: anywhere;
+}
+
+.color-image-contrast-checker .icc-accuracy p {
+  margin: 0;
+  font-size: var(--ax-body-xs-size);
+  line-height: 1.3;
+}
+
+.color-image-contrast-checker .icc-legend-mini {
+  display: none;
+  /* Figma width is the floor; grow to fit the row so font metrics or longer copy
+     don't wrap it, and only wrap once the container itself is too narrow. */
+  --icc-legend-mini-min: 337px;
+
+  min-inline-size: min(var(--icc-legend-mini-min), 100%);
+  inline-size: max-content;
+  max-inline-size: 100%;
+  justify-self: start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-300);
+  padding: var(--spacing-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-shadow: inset 0 0 0 1px var(--Palette-gray-100);
+  background: var(--color-white);
+}
+
+.color-image-contrast-checker .icc-legend-mini h2 {
+  margin: 0;
+  font-size: var(--ax-body-xs-size);
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.color-image-contrast-checker .icc-mini-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-300);
+}
+
+.color-image-contrast-checker .icc-mini-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-75);
+  min-inline-size: 0;
+}
+
+.color-image-contrast-checker .icc-mini-item.icc-green .icc-badge {
+  padding-inline: 9px;
+}
+
+.color-image-contrast-checker.icc-dialog {
+  inline-size: 100%;
+  max-inline-size: none;
+  block-size: 100%;
+  max-block-size: none;
+  border: none;
+  border-radius: 0;
+  padding: var(--spacing-300);
+  overflow: hidden;
+}
+
+.color-image-contrast-checker.icc-dialog::backdrop {
+  background: rgb(0 0 0 / 65%);
+}
+
+.color-image-contrast-checker.icc-dialog .icc-panel {
+  block-size: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--spacing-300);
+  padding: 0;
+}
+
+.color-image-contrast-checker.icc-dialog :is(.icc-copy, .icc-legend) {
+  display: none;
+}
+
+.color-image-contrast-checker.icc-dialog .icc-legend-mini {
+  display: flex;
+}
+
+.color-image-contrast-checker.icc-dialog .icc-main {
+  display: flex;
+  min-block-size: 0;
+}
+
+.color-image-contrast-checker.icc-dialog .icc-workspace {
+  flex: 1;
+  align-self: stretch;
+  min-block-size: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.color-image-contrast-checker.icc-dialog .icc-workspace > .icc-color {
+  margin-block-start: 0;
+}
+
+.color-image-contrast-checker.icc-dialog .icc-comparison-row {
+  flex: 1;
+  min-block-size: 0;
+  aspect-ratio: auto;
+  padding: var(--spacing-100) var(--spacing-300);
+  padding-block-start: var(--icc-comparison-padding-block);
+}
+
+/* Figma zoom-to-fill: the surface has no padding; all offsets live inside the scroller so
+   scrolled content clips against the surface's own edges. resize() sets the start gutter
+   beside the toolbar as scroller padding, so images can still scroll under the toolbar. */
+.color-image-contrast-checker .icc-comparison-row.is-fill {
+  padding: 0;
+}
+
+.color-image-contrast-checker .icc-comparison-row.is-fill .icc-comparison {
+  padding-block: var(--icc-comparison-padding-block);
+  padding-inline-end: var(--icc-comparison-padding-block);
+  border-radius: inherit;
+}
+
+.icc-overlay {
+  --color-extract-text: var(--color-gray-950);
+}
+
+.icc-overlay.color-extract-loading-overlay {
+  transition: none;
+}
+
+@media (min-width: 600px) {
+  .section:has(.color-image-contrast-marquee-wrapper) {
+    padding-inline: var(--spacing-500);
+  }
+
+  .color-image-contrast-checker .icc-color .color-dropdown {
+    inline-size: 208px;
+  }
+
+  .color-image-contrast-checker .icc-workspace {
+    padding: var(--spacing-300) var(--spacing-400) var(--spacing-400);
+  }
+
+  .color-image-contrast-checker .icc-comparison-row {
+    --icc-comparison-padding-block: var(--spacing-100);
+
+    aspect-ratio: 787 / 513;
+  }
+
+  .color-image-contrast-checker .icc-zoom {
+    inset-block-start: var(--spacing-100);
+    inset-inline-start: var(--spacing-100);
+  }
+
+  .color-image-contrast-checker.icc-dialog {
+    padding: var(--spacing-600) var(--spacing-500);
+  }
+}
+
+@media (max-width: 699px) {
+  .color-image-contrast-checker.icc-dialog {
+    inline-size: 100%;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-workspace {
+    display: contents;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-main {
+    display: contents;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-panel {
+    grid-template-rows: auto 8px auto 16px minmax(0, 1fr) 16px auto 16px auto;
+    gap: 0;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-controls {
+    grid-row: 1;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-color {
+    grid-row: 3;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-comparison-row {
+    grid-row: 5;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-footer {
+    grid-row: 9;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-color .color-dropdown {
+    inline-size: 256px;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-legend-mini {
+    grid-row: 7;
+    inline-size: 100%;
+  }
+}
+
+@media (min-width: 700px) and (max-width: 1199px) {
+  .color-image-contrast-checker .icc-legend-full {
+    min-block-size: 0;
+  }
+
+  .color-image-contrast-checker .icc-legend-cards {
+    display: flex;
+    margin-block-start: var(--spacing-400);
+  }
+
+  .color-image-contrast-checker .icc-legend-card {
+    flex: 0 1 auto;
+    padding-block: 0;
+    padding-inline: 0 var(--spacing-600);
+    box-shadow: none;
+  }
+
+  .color-image-contrast-checker .icc-legend-card:first-child {
+    padding-block-start: 0;
+  }
+
+  .color-image-contrast-checker .icc-legend-divider {
+    display: flex;
+    justify-content: center;
+    flex: 1 0 0;
+  }
+
+  .color-image-contrast-checker .icc-legend-divider::after {
+    content: "";
+    border-inline-start: 1px solid var(--Palette-gray-100);
+  }
+}
+
+@media (min-width: 700px) and (max-width: 899px) {
+  .color-image-contrast-checker.icc-dialog .icc-legend-mini {
+    --icc-legend-mini-min: 341px;
+    gap: var(--spacing-200);
+  }
+
+  .color-image-contrast-checker .icc-mini-item {
+    gap: var(--spacing-80);
+  }
+
+  .color-image-contrast-checker .icc-mini-item.icc-green .icc-badge {
+    padding-inline: 10px;
+  }
+}
+
+@media (min-width: 900px) {
+  /* The workspace keeps a 570px floor; the comparison surface absorbs the extra height so
+     resize()'s hugged block-size acts only as a flex basis. */
+  .color-image-contrast-checker .icc-workspace {
+    min-block-size: 570px;
+  }
+
+  .color-image-contrast-checker .icc-workspace > .icc-comparison-row {
+    flex-grow: 1;
+  }
+
+  .color-image-contrast-checker .icc-comparison-row {
+    --icc-comparison-padding-block: var(--spacing-300);
+    --icc-hug-height: 1;
+
+    aspect-ratio: 881 / 516;
+    padding: var(--spacing-300);
+  }
+
+  .color-image-contrast-checker .icc-zoom {
+    inset-block-start: var(--spacing-300);
+    inset-inline-start: var(--spacing-300);
+    padding: var(--spacing-100);
+  }
+
+  .color-image-contrast-checker.icc-dialog {
+    padding: var(--spacing-600);
+  }
+
+  /* Figma: expanded fills the viewport with a 40px margin, capped at 1600 x 1000, centered. */
+  .color-image-contrast-checker.icc-dialog[open] {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-panel {
+    inline-size: 100%;
+    max-inline-size: 1600px;
+    max-block-size: 1000px;
+  }
+
+  .color-image-contrast-checker.icc-dialog .icc-comparison-row {
+    --icc-hug-height: 0;
+
+    padding: var(--spacing-300);
+  }
+
+  /* Zoom-to-fill: restate the base fill padding over the desktop row/dialog padding; the
+     start gutter beside the toolbar comes from resize(), as on smaller breakpoints. */
+  .color-image-contrast-checker .icc-comparison-row.is-fill {
+    padding: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-image-contrast-checker .icc-panel {
+    grid-template-columns: minmax(0, 2.28fr) minmax(0, 1fr);
+    gap: var(--spacing-400);
+  }
+
+  .color-image-contrast-checker .icc-main {
+    display: contents;
+  }
+
+  .color-image-contrast-checker .icc-copy {
+    grid-area: 1 / 1;
+  }
+
+  .color-image-contrast-checker .icc-workspace {
+    grid-area: 2 / 1;
+    align-self: start;
+  }
+
+  .color-image-contrast-checker .icc-legend {
+    grid-area: 2 / 2;
+    align-self: start;
+    gap: var(--spacing-300);
+  }
+
+  .color-image-contrast-checker .icc-legend-full h2 {
+    font-size: var(--ax-body-xl-size);
+    line-height: 26px;
+  }
+
+  .color-image-contrast-checker .icc-legend-card h3 {
+    font-size: var(--ax-body-m-size);
+    line-height: 22px;
+  }
+
+  .color-image-contrast-checker-background:not([hidden]) {
+    display: block;
+  }
+
+  .color-image-contrast-checker-background picture {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .color-image-contrast-checker-background img {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    inline-size: auto;
+    max-inline-size: none;
+    block-size: auto;
+  }
+}
+
+
+@media (min-width: 1440px) {
+  .color-image-contrast-checker .icc-panel { 
+    max-inline-size: 1600px;
+}
+}

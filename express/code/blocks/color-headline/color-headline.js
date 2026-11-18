@@ -19,11 +19,14 @@ export default async function init(el) {
     // Wrap this block and the sibling color-extract in a shared container so
     // the Figma Content-container layout (640px centered flex column) is applied.
     const section = el.closest('.section');
-    const colorExtract = section?.querySelector('.color-extract');
-    if (colorExtract) {
-      const wrapper = createTag('div', { class: 'color-extract-marquee-wrapper' });
+    const isContrast = el.classList.contains('color-image-contrast');
+    const tool = section?.querySelector(isContrast ? '.color-image-contrast-checker' : '.color-extract');
+    if (tool) {
+      const wrapper = createTag('div', {
+        class: isContrast ? 'color-image-contrast-marquee-wrapper' : 'color-extract-marquee-wrapper',
+      });
       el.before(wrapper);
-      wrapper.append(el, colorExtract);
+      wrapper.append(el, tool);
     }
   }
 

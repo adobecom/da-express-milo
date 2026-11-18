@@ -237,6 +237,48 @@ export function getImageThumbnailSrc(renditionLinkHref, componentLinkHref, page)
   );
 }
 
+export function extractImagePreview(page) {
+  return page?.rendition?.image?.preview;
+}
+
+/**
+ * The template's native design size, e.g. `pages[0].task.size.name === '1920x1080px'`.
+ * Falls back to the preview rendition's own pixel size, then undefined.
+ */
+export function getTemplateNativeSize(item) {
+  const page = item.pages?.[0];
+  const match = page?.task?.size?.name?.match(/(\d+)\s*x\s*(\d+)/i);
+  if (match) {
+    return { width: Number(match[1]), height: Number(match[2]) };
+  }
+  const preview = extractImagePreview(page);
+  if (preview?.width && preview?.height) {
+    return { width: preview.width, height: preview.height };
+  }
+  return undefined;
+}
+
+/**
+ * Full-resolution rendition URL, distinct from the light preview/thumbnail renditions.
+ * The preview `fragment` caps output at ~1200 and `type=image/webp` dynamic renders fail
+ * (406), so this drops the fragment and requests JPEG at the native size; the endpoint
+ * renders the page fresh at that size (capping at the native resolution).
+ */
+export function getFullResImageSrc(item) {
+  const renditionHref = extractRenditionLinkHref(item);
+  if (!renditionHref?.includes('{&page,size,type,fragment}')) {
+    return undefined;
+  }
+  const native = getTemplateNativeSize(item);
+  if (!native) {
+    return undefined;
+  }
+  return renditionHref.replace(
+    '{&page,size,type,fragment}',
+    `&size=${Math.max(native.width, native.height)}&type=image/jpeg`,
+  );
+}
+
 const videoMetadataType = 'application/vnd.adobe.ccv.videometadata';
 
 export async function getVideoUrls(renditionLinkHref, componentLinkHref, page) {

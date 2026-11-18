@@ -9,7 +9,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   loadError: 'Unable to load image. Please try again.',
 });
 
-const PLACEHOLDER_KEY_MAP = Object.freeze({
+export const PLACEHOLDER_KEY_MAP = Object.freeze({
   uploadButtonText: 'color-image-upload-button',
   dragDropText: 'color-image-upload-dragdrop',
   fileHintText: 'color-image-upload-file-hint',
