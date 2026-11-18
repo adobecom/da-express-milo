@@ -17,7 +17,6 @@ describe('Prompt Marquee block', () => {
   let originalMatchMedia;
 
   beforeEach(() => {
-    window.isTestEnv = true;
     originalMatchMedia = window.matchMedia;
     window.matchMedia = (query) => ({
       matches: /min-width:\s*900px/.test(query),

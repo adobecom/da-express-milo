@@ -14,12 +14,21 @@ concurrency:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   run-nala-tests:
     name: Running Nala E2E UI Tests (${{ matrix.lane_id }})
-    # Playwright 1.52 supports Ubuntu 24.04, not 26.04.
     runs-on: ubuntu-24.04
+    # Chrome and the locked Playwright browsers are baked into this verified
+    # private image. Rebuild and update both workflow digests on version changes.
+    # Keep browsers non-root; the verifier checks UID, versions and H.264 decoding.
+    container:
+      image: ghcr.io/adobecom/da-express-milo-nala@sha256:deb7608a0bd3c1060113c76fbcc5588c5a8c418229e629024a1827587f46bf64
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      options: --user 1001
     timeout-minutes: 30
     strategy:
       # Don't cancel the other lanes when one fails — we want the full picture.
@@ -55,6 +64,8 @@ jobs:
         if: env.NALA_SKIP_LANE != 'true'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          # Match the deployed preview, not undeployed changes in the merge ref.
+          ref: ${{ github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name && github.event.pull_request.base.ref || github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 2
 
       - name: Set up Node.js ${{ matrix.node }}
@@ -72,26 +83,13 @@ jobs:
             **/node_modules
           key: npm-${{ runner.os }}-${{ matrix.node }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Cache Playwright browsers
-        if: env.NALA_SKIP_LANE != 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ms-playwright-${{ runner.os }}-${{ matrix.node }}-chromium
-
       - name: Install dependencies
         if: env.NALA_SKIP_LANE != 'true'
         run: npm ci --no-fund --prefer-offline
 
-      - name: Install Playwright (all browsers)
+      - name: Verify container browsers and H.264 decoding
         if: env.NALA_SKIP_LANE != 'true'
-        # Normally ~40s, but a slow Ubuntu package mirror (via --with-deps) has
-        # been observed dragging this to ~7min while still succeeding. A truly
-        # hung mirror would otherwise stall until the 30-min job timeout,
-        # wasting a runner and failing the whole PR. Cap above the slow-but-fine
-        # ceiling so a genuine hang fails fast and a re-run recovers.
-        timeout-minutes: 10
-        run: npx playwright install --with-deps
+        run: node nala/utils/verify-ci-browsers.cjs
 
       - name: Set execute permission for pr.run.sh
         if: env.NALA_SKIP_LANE != 'true'

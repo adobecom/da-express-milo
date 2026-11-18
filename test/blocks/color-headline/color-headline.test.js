@@ -22,10 +22,6 @@ function addMeta(name, content) {
 }
 
 describe('Color Headline', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   afterEach(() => {
     document.head.querySelectorAll('meta[name="marquee-inject-logo"], meta[name="marquee-inject-photo-logo"]').forEach((m) => m.remove());
   });
