@@ -593,8 +593,15 @@ async function attachFreeInAppPills(block) {
   }
 }
 
-async function makeTemplateFunctions() {
-  const [templateFilterPremium, templateFilterPremiumIcons, templateFilterAnimated, templateFilterAnimatedIcons, templateXSort, templateXSortIcons] = await replaceKeyArray(['template-filter-premium', 'template-filter-premium-icons', 'template-filter-animated', 'template-filter-animated-icons', 'template-x-sort', 'template-x-sort-icons'], getConfig());
+let labelIdCounter = 0;
+
+export async function makeTemplateFunctions() {
+  const labelKeys = ['template-filter-premium-label', 'template-filter-animated-label', 'template-x-sort-label'];
+  const [templateFilterPremium, templateFilterPremiumIcons, templateFilterAnimated, templateFilterAnimatedIcons, templateXSort, templateXSortIcons, ...labelValues] = await replaceKeyArray(['template-filter-premium', 'template-filter-premium-icons', 'template-filter-animated', 'template-filter-animated-icons', 'template-x-sort', 'template-x-sort-icons', ...labelKeys], getConfig());
+  const labelFallbacks = ['Price', 'Format', 'Sort by'];
+  const [premiumLabel, animatedLabel, sortLabel] = labelValues.map((value, i) => (
+    !value || value === labelKeys[i] || value === labelKeys[i].replace(/-/g, ' ') ? labelFallbacks[i] : value));
+  const labelTexts = { premium: premiumLabel, animated: animatedLabel, sort: sortLabel };
   const functions = {
     premium: {
       placeholders: JSON.parse(templateFilterPremium !== 'template filter premium' ? templateFilterPremium : '{}'),
@@ -617,6 +624,9 @@ async function makeTemplateFunctions() {
   };
 
   Object.entries(functions).forEach((entry) => {
+    labelIdCounter += 1;
+    const labelId = `template-x-${entry[0]}-label-${labelIdCounter}`;
+    const valueId = `template-x-${entry[0]}-value-${labelIdCounter}`;
     entry[1].elements.wrapper = createTag('div', {
       class: `function-wrapper function-${entry[0]}`,
       'data-param': entry[0],
@@ -630,10 +640,11 @@ async function makeTemplateFunctions() {
           tabindex: '0',
           'aria-expanded': 'false',
           'aria-haspopup': 'listbox',
+          'aria-labelledby': `${labelId} ${valueId}`,
         }),
         subElements: {
           iconHolder: createTag('span', { class: 'icon-holder' }),
-          textSpan: createTag('span', { class: `current-option current-option-${entry[0]}` }),
+          textSpan: createTag('span', { class: `current-option current-option-${entry[0]}`, id: valueId }),
           chevIcon: getIconElementDeprecated('drop-down-arrow'),
         },
       },
@@ -657,6 +668,9 @@ async function makeTemplateFunctions() {
 
     const $span = entry[1].elements.wrapper.subElements.button.subElements.textSpan;
     [[$span.textContent]] = Object.entries(entry[1].placeholders);
+
+    entry[1].elements.label = createTag('label', { class: `function-label function-label-${entry[0]}`, id: labelId });
+    entry[1].elements.label.textContent = labelTexts[entry[0]];
   });
 
   return functions;
@@ -678,7 +692,7 @@ function updateFilterIcon(block) {
   });
 }
 
-async function decorateFunctionsContainer(block, functions) {
+export async function decorateFunctionsContainer(block, functions) {
   const functionsContainer = createTag('div', { class: 'functions-container' });
   const functionContainerMobile = createTag('div', { class: 'functions-drawer' });
 
@@ -696,8 +710,17 @@ async function decorateFunctionsContainer(block, functions) {
 
       filterWrapper.append(innerWrapper);
     });
-    functionContainerMobile.append(filterWrapper.cloneNode({ deep: true }));
-    functionsContainer.append(filterWrapper);
+    const mobileCopy = filterWrapper.cloneNode({ deep: true });
+    const { param } = filterWrapper.dataset;
+    labelIdCounter += 1;
+    const mobileValueId = `template-x-${param}-mobile-value-${labelIdCounter}`;
+    mobileCopy.querySelector('.current-option').id = mobileValueId;
+    mobileCopy.querySelector('.button-wrapper').setAttribute('aria-labelledby', mobileValueId);
+    functionContainerMobile.append(mobileCopy);
+
+    const field = createTag('div', { class: `function-field function-field-${param}` });
+    field.append(filter.elements.label, filterWrapper);
+    functionsContainer.append(field);
   });
 
   // restructure drawer for mobile design
@@ -2204,11 +2227,15 @@ function determineTemplateXType(props) {
   return type;
 }
 
-export default async function decorate(block) {
-  await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), fixIcons(block)]).then(([utils, placeholders]) => {
+export async function initDeps(...extra) {
+  await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), ...extra]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
     ({ replaceKey, replaceKeyArray } = placeholders);
   });
+}
+
+export default async function decorate(block) {
+  await initDeps(fixIcons(block));
   block.dataset.blockName = 'template-x';
   const props = constructProps(block);
   if (getMetadata('template-experiment') && !props.experiment) {
