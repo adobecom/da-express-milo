@@ -1,4 +1,5 @@
-import { createTag, getIconElementDeprecated, getLibs } from '../../scripts/utils.js';
+import { createTag, getIconElementDeprecated } from '../../scripts/utils.js';
+import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 import attachImageDragHandlers from '../../scripts/color-shared/components/image-upload/attachImageDragHandlers.js';
@@ -498,12 +499,13 @@ export default async function decorate(block) {
       : null;
     strings = await loadColorImageContrastCheckerPlaceholders();
     if (destroyed) return;
-    const { loadStyle } = await import(`${getLibs()}/utils/utils.js`);
+    // Milo's loadStyle returns before the sheet applies; wait for load so the
+    // body-level overlays aren't appended unstyled (hand-icon flash + CLS).
     await Promise.all([
-      '../../scripts/color-shared/components/image-upload/image-upload.css',
-      '../../scripts/color-shared/components/image-extract/buildExtractOverlays.css',
-      '../../scripts/color-shared/action-menu.css',
-    ].map((path) => loadStyle(new URL(path, import.meta.url).href)));
+      'scripts/color-shared/components/image-upload/image-upload.css',
+      'scripts/color-shared/components/image-extract/buildExtractOverlays.css',
+      'scripts/color-shared/action-menu.css',
+    ].map(loadMiloStyle));
     if (destroyed) return;
     view = createView(content, strings, id, async (value) => {
       generation += 1;
