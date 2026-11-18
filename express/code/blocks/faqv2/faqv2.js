@@ -73,14 +73,18 @@ function buildTableLayout(block) {
       const toggle = createTag('div', { class: 'faqv2-toggle' });
       rowWrapper.appendChild(toggle);
 
-      const headerDiv = createTag('h3', { class: 'faqv2-header' });
+      const heading = createTag('h3', { class: 'faqv2-heading' });
+      const headerDiv = createTag('button', {
+        type: 'button',
+        class: 'faqv2-header',
+      });
       headerDiv.innerHTML = header;
       headerDiv.setAttribute('id', `faqv2-header-${index}`);
       headerDiv.setAttribute('aria-controls', `faqv2-content-${index}`);
       headerDiv.setAttribute('aria-expanded', 'false');
-      headerDiv.setAttribute('tabindex', '0');
-      headerDiv.setAttribute('role', 'button');
-      toggle.appendChild(headerDiv);
+
+      heading.appendChild(headerDiv);
+      toggle.appendChild(heading);
 
       const iconElement = createTag('img', {
         src: `${config.codeRoot}/icons/plus-heavy.svg`,
@@ -177,14 +181,17 @@ function buildTableLayout(block) {
       const toggle = createTag('div', { class: 'faqv2-toggle' });
       rowWrapper.appendChild(toggle);
 
-      const headerDiv = createTag('h3', { class: 'faqv2-header' });
+      const heading = createTag('h3', { class: 'faqv2-heading' });
+      const headerDiv = createTag('button', {
+        type: 'button',
+        class: 'faqv2-header',
+      });
       headerDiv.innerHTML = header;
       headerDiv.setAttribute('id', `faqv2-header-${index}`);
       headerDiv.setAttribute('aria-controls', `faqv2-content-${index}`);
       headerDiv.setAttribute('aria-expanded', 'false');
-      headerDiv.setAttribute('tabindex', '0');
-      headerDiv.setAttribute('role', 'button');
-      toggle.appendChild(headerDiv);
+      heading.appendChild(headerDiv);
+      toggle.appendChild(heading);
 
       const iconElement = createTag('img', {
         src: `${config.codeRoot}/icons/plus-heavy.svg`,

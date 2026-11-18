@@ -11,7 +11,6 @@ const testBody = await readFile({ path: './mocks/body.html' });
 
 describe('Fullscreen Marquee', () => {
   beforeEach(() => {
-    window.isTestEnv = true;
     document.body.innerHTML = testBody;
     window.placeholders = {
       'fullscreen-marquee-desktop-video-app': 'https://main--express--adobecom.aem.page/express/media_11ffe376e21cc1f2437a2c5c9c875a2c478b51d9a.png',

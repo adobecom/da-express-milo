@@ -1,8 +1,6 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
-window.isTestEnv = true;
-
 const { default: decorate } = await import('../../../express/code/blocks/how-to-v2/how-to-v2.js');
 
 describe('How-to-v2', () => {
