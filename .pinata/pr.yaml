@@ -13,11 +13,12 @@ branch_pattern: ['{issue_key}', '{title_slug}']
 page: /express/
 fallbacks:
   issue_key: 'Resolves: <!-- link the Jira ticket, e.g. [MWPW-0000](…) -->'
-  # Keep the template's Before/After shape; the After link is the PR branch's
-  # preview, which the author fills in.
+  # Keep the template's Before/After shape. When a run has no verified visual
+  # evidence, After still links the PR branch's preview and its GitHub branch.
   test_urls: |-
     - Before: https://stage--da-express-milo--adobecom.aem.page/express/?martech=off
-    - After: <!-- https://<branch>--da-express-milo--adobecom.aem.page/express/?martech=off -->
+    - After: https://{branch}--da-express-milo--adobecom.aem.page/express/?martech=off
+    - Branch: https://github.com/adobecom/da-express-milo/tree/{branch}
 template: |
   ## Summary
 
@@ -43,9 +44,16 @@ template: |
   ESLint, Stylelint on the changed files, Web Test Runner unit tests for the
   affected suites, the block-structure check, and an independent review.
 
+  Reviewer checklist, to be completed on the branch preview:
+  - [ ] Steps to reproduce / exercise the change are written out.
+  - [ ] Expected behavior **before** and **after** the change is stated.
+
   ---
 
   ## Potential Regressions
+
+  - [ ] List the pages/blocks that share the changed code and spot-check them
+    on the branch preview (pages using the changed block, shared utils/CSS).
 
   Changed files:
   {files_changed}
