@@ -65,6 +65,12 @@ export default async function decorate(block) {
     img: getIconElementDeprecated(config.img),
   }));
 
+  // Spoken value for the slider: the number followed by the visible label, else the number.
+  const getRatingValueText = (index) => {
+    const text = ratings[index - 1]?.text;
+    return typeof text === 'string' && text.trim() ? `${index} ${text.trim()}` : String(index);
+  };
+
   // Updates the front-end style of the slider.
   function updateSliderStyle(value) {
     const $input = block.querySelector('input[type=range]');
@@ -152,6 +158,7 @@ export default async function decorate(block) {
         updateCommentBoxAndTimer();
       }
       tooltipText.textContent = ratings[index - 1].text;
+      input.setAttribute('aria-valuetext', getRatingValueText(index));
       tooltipImg.innerHTML = '';
       tooltipImg.appendChild(ratings[index - 1].img);
       textareaLabel.textContent = ratings[index - 1].textareaLabel;
@@ -186,18 +193,8 @@ export default async function decorate(block) {
       }
     };
     input.addEventListener('keyup', (e) => {
-      const isRTL = getComputedStyle(block).direction === 'rtl';
-      if (e.code === 'ArrowLeft') {
-        input.value = isRTL ? Number(input.value) + 1 : input.value - 1;
-      } else if (e.code === 'ArrowDown') {
-        input.value -= 1;
-      } else if (e.code === 'ArrowRight') {
-        input.value = isRTL ? Number(input.value) - 1 : input.value + 1;
-      } else if (e.code === 'ArrowUp') {
-        input.value += 1;
-      } else {
-        return;
-      }
+      // The browser already moved the value by one step; only snap and update here.
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.code)) return;
       updateSliderValue();
       scrollToScrollAnchor();
     });
@@ -286,9 +283,10 @@ export default async function decorate(block) {
       id: 'rating',
       min: '1',
       max: '5',
-      step: '0.001',
-      value: '4.5',
+      step: '1',
+      value: '5',
       'aria-labelledby': toClassName(title),
+      'aria-valuetext': getRatingValueText(5),
     });
     slider.appendChild(input);
     // Initial state of the slider:
