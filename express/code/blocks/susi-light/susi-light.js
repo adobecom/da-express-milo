@@ -2,7 +2,10 @@
 /* eslint-disable camelcase */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { getTrackingAppendedURL } from '../../scripts/branchlinks.js';
-import { transformLinkToAnimation } from '../../scripts/utils/media.js';
+import {
+  createAccessibilityVideoControls,
+  transformLinkToAnimation,
+} from '../../scripts/utils/media.js';
 
 let createTag; let loadScript;
 let getConfig; let isStage;
@@ -20,6 +23,10 @@ export const DCTX_ID_MAP = {
   'context-business': {
     stage: 'v:2,s,bg:CCEX2026,fc1e76f0-9167-11f1-a9b0-29d697c01ae6',
     prod: 'v:2,s,bg:CCEX2026,ea8e92e0-9166-11f1-a9b9-d34066769dc6',
+  },
+  'context-color-palette': {
+    stage: 'v:2,s,bg:colorSUSI,ac006510-c872-11f1-bbd0-c169ec4f4554',
+    prod: 'v:2,s,bg:colorSUSI,f30b9580-d144-11f1-b05d-b5538e129034',
   },
 };
 
@@ -575,15 +582,67 @@ function playSusiVideoOnModalOpen(video) {
   );
 }
 
-function buildSusiMedia(row) {
+function toSafeMediaUrl(rawUrl) {
+  if (!rawUrl) return null;
+  try {
+    const url = new URL(rawUrl, window.location.href);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+async function buildSusiMedia(row) {
   const videoLink = row?.querySelector('a[href$=".mp4"]');
-  if (!videoLink) return null;
-  transformLinkToAnimation(videoLink);
-  const video = row.querySelector('video');
-  if (!video) return row;
+  let video = row?.querySelector('video');
+
+  // Keep supporting rows authored as a direct MP4 link. Add the custom
+  // accessibility control here so both input shapes use the same path.
+  if (!video && videoLink) {
+    video = transformLinkToAnimation(videoLink, true, false);
+  }
+
+  if (!video) return null;
+
+  // DA can provide a video element with only data-video-source set.
+  const source = video.querySelector('source');
+  const playableSrc = toSafeMediaUrl(
+    source?.getAttribute('src')
+    || video.getAttribute('src')
+    || video.getAttribute('data-video-source'),
+  );
+
+  if (!source?.getAttribute('src') && !video.getAttribute('src') && playableSrc) {
+    if (source) {
+      source.setAttribute('src', playableSrc);
+      if (!source.hasAttribute('type')) source.setAttribute('type', 'video/mp4');
+    } else {
+      video.setAttribute('src', playableSrc);
+    }
+    video.load();
+  }
+
+  video.controls = false;
+  video.removeAttribute('controls');
+  video.setAttribute('playsinline', '');
+  video.setAttribute('muted', '');
+  video.setAttribute('autoplay', '');
+  video.setAttribute('loop', '');
+  video.muted = true;
+
   video.classList.add('susi-image');
   video.setAttribute('disablepictureinpicture', '');
-  video.play().catch(() => { /* ignore — autoplay may be blocked until visible */ });
+
+  const animationWrapper = video.parentElement?.closest('.hero-animation-overlay')
+    || video.parentElement;
+  if (!animationWrapper) return null;
+  animationWrapper.classList.add('hero-animation-overlay');
+
+  if (!animationWrapper.querySelector('.video-controls-wrapper')) {
+    await createAccessibilityVideoControls(video);
+  }
+
+  video.play().catch(() => { /* ignore — autoplay may be blocked */ });
   playSusiVideoOnModalOpen(video);
   return row;
 }
@@ -606,7 +665,9 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const title = rows[2]?.textContent?.trim();
   const mobileTitle = isColor ? rows[3]?.textContent?.trim() : undefined;
   const isDesktopViewport = window.matchMedia('(min-width: 1200px)').matches;
-  const media = (isColor && isDesktopViewport) ? buildSusiMedia(rows[4]) : null;
+  const media = (isColor && isDesktopViewport)
+    ? await buildSusiMedia(rows[4])
+    : null;
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
@@ -632,8 +693,10 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
       destURL.hash = '';
     } catch { /* ignore — destURL fallback is already set */ }
   }
+  // token hands the session back to the opener page, so it only applies to popup mode;
+  // the same-tab redirect flow uses code, like every other susi-light variant
   const params = buildSUSIParams({
-    client_id, variant, destURL, locale, title, popup, responseType: 'token',
+    client_id, variant, destURL, locale, title, popup, responseType: popup ? 'token' : 'code', el,
   });
   if (!noRedirect && !isColor) {
     redirectIfLoggedIn(params.destURL);
@@ -642,7 +705,7 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const titleDiv = createTag('div', { class: 'title' }, title);
   const susiWrapper = createTag('div', { class: 'susi-wrapper' }, createSUSIComponent({
     ...params,
-    onSuccessfulToken: () => window.location.assign(destURL.toString()),
+    onSuccessfulToken: popup ? () => window.location.assign(destURL.toString()) : undefined,
   }));
   if (mobileTitle) {
     titleDiv.classList.add('desktop-only');

@@ -3,12 +3,6 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { mockRes } from '../test-utilities.js';
 
-// Must be set before scripts.js is imported below: it makes loadPage() bail out
-// so its deferred page-init side effects (external IMS script, a fire-and-forget
-// getCountry() that rejects against the mock config) don't leak into tests and
-// fail unrelated cases under load.
-window.isTestEnv = true;
-
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
 const { setLibs, getLibs } = imports[0];
 // Point getLibs() at the local mocks so dynamic imports inside the block
