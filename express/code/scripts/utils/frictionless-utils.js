@@ -75,11 +75,12 @@ const getBaseVideoCfg = (...types) => {
     group: 'video',
     max_size: 1024 * 1024 * 1024,
     accept: formats.map((type) => `.${type}`).join(', '),
-    input_check: (input) => {
+    input_check: (input, fileName) => {
       const supportedMimeTypes = formats
         .map((type) => VIDEO_MIME_TYPES[type])
         .filter(Boolean);
-      return supportedMimeTypes.includes(input);
+      const hasSupportedExtension = !fileName || formats.includes(fileName.split('.').pop()?.toLowerCase());
+      return supportedMimeTypes.includes(input) && hasSupportedExtension;
     },
   };
 };
@@ -111,12 +112,10 @@ const getMergeVideosCfg = () => ({
   accept: [...VIDEO_FORMATS, JPG, JPEG, PNG]
     .map((type) => `.${type}`)
     .join(', '),
-  input_check: (input) => {
-    const videoMimeTypes = VIDEO_FORMATS.map(
-      (type) => VIDEO_MIME_TYPES[type],
-    ).filter(Boolean);
+  input_check: (input, fileName) => {
     const imageTypes = [JPG, JPEG, PNG].map((type) => `image/${type}`);
-    return [...videoMimeTypes, ...imageTypes].includes(input);
+    return getBaseVideoCfg(VIDEO_FORMATS).input_check(input, fileName)
+      || imageTypes.includes(input);
   },
 });
 

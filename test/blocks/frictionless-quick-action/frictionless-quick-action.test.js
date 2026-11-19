@@ -3,6 +3,11 @@ import { expect } from '@esm-bundle/chai';
 
 import sinon from 'sinon';
 import { mockRes } from '../test-utilities.js';
+import {
+  QA_CONFIGS,
+  processFilesForQuickAction,
+  getErrorMsg,
+} from '../../../express/code/scripts/utils/frictionless-utils.js';
 
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js'), import('../../../express/code/blocks/frictionless-quick-action/frictionless-quick-action.js')]);
 const { getLibs, createTag } = imports[0];
@@ -22,6 +27,43 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 
 document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
 const ogFetch = window.fetch;
+
+describe('Video quick action file validation', () => {
+  const videoActions = Object.keys(QA_CONFIGS).filter(
+    (action) => QA_CONFIGS[action].group === 'video' || action === 'video-to-audio',
+  );
+
+  videoActions.forEach((action) => {
+    it(`rejects unsupported M4V files for ${action}`, async () => {
+      const files = [
+        new File(['video'], 'clip.m4v', { type: 'video/mp4' }),
+        new File(['video'], 'clip.M4V', { type: 'video/mp4' }),
+        new File(['video'], 'clip.m4v', { type: 'video/x-m4v' }),
+        new File(['video'], 'clip.m4v'),
+      ];
+      expect(await processFilesForQuickAction(files, action))
+        .to.deep.equal(files.map(() => undefined));
+
+      const replaceKey = sinon.stub().resolves('File type not supported');
+      const message = await getErrorMsg(files, action, replaceKey, () => ({}));
+      expect(message).to.equal('File type not supported');
+      expect(replaceKey.firstCall.args[0]).to.equal('file-type-not-supported');
+    });
+
+    it(`accepts supported video files for ${action}`, async () => {
+      const files = [
+        new File(['video'], 'clip.mp4', { type: 'video/mp4' }),
+        new File(['video'], 'clip.MOV', { type: 'video/quicktime' }),
+      ];
+      expect(await processFilesForQuickAction(files, action)).to.deep.equal(files);
+    });
+  });
+
+  it('continues to accept images for merge-videos', () => {
+    expect(QA_CONFIGS['merge-videos'].input_check('image/jpeg', 'photo.jpg')).to.be.true;
+    expect(QA_CONFIGS['merge-videos'].input_check('image/png', 'photo.png')).to.be.true;
+  });
+});
 
 describe('Frictionless Quick Action Block', () => {
   afterEach(() => {
