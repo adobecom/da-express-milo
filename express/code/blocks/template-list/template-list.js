@@ -1789,7 +1789,7 @@ export async function decorateTemplateList(block, props) {
 
 async function decorateLoadMoreButton(block, props) {
   const loadMoreDiv = createTag('div', { class: 'load-more' });
-  const loadMoreButton = createTag('button', { class: 'load-more-button' });
+  const loadMoreButton = createTag('button', { class: 'load-more-button', 'aria-label': 'Load More templates' });
   const loadMoreText = createTag('p', { class: 'load-more-text' });
   loadMoreDiv.append(loadMoreButton, loadMoreText);
   loadMoreText.textContent = await replaceKey('load-more', getConfig());
