@@ -2,7 +2,10 @@
 /* eslint-disable camelcase */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { getTrackingAppendedURL } from '../../scripts/branchlinks.js';
-import { transformLinkToAnimation } from '../../scripts/utils/media.js';
+import {
+  createAccessibilityVideoControls,
+  transformLinkToAnimation,
+} from '../../scripts/utils/media.js';
 
 let createTag; let loadScript;
 let getConfig; let isStage;
@@ -579,15 +582,67 @@ function playSusiVideoOnModalOpen(video) {
   );
 }
 
-function buildSusiMedia(row) {
+function toSafeMediaUrl(rawUrl) {
+  if (!rawUrl) return null;
+  try {
+    const url = new URL(rawUrl, window.location.href);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+async function buildSusiMedia(row) {
   const videoLink = row?.querySelector('a[href$=".mp4"]');
-  if (!videoLink) return null;
-  transformLinkToAnimation(videoLink);
-  const video = row.querySelector('video');
-  if (!video) return row;
+  let video = row?.querySelector('video');
+
+  // Keep supporting rows authored as a direct MP4 link. Add the custom
+  // accessibility control here so both input shapes use the same path.
+  if (!video && videoLink) {
+    video = transformLinkToAnimation(videoLink, true, false);
+  }
+
+  if (!video) return null;
+
+  // DA can provide a video element with only data-video-source set.
+  const source = video.querySelector('source');
+  const playableSrc = toSafeMediaUrl(
+    source?.getAttribute('src')
+    || video.getAttribute('src')
+    || video.getAttribute('data-video-source'),
+  );
+
+  if (!source?.getAttribute('src') && !video.getAttribute('src') && playableSrc) {
+    if (source) {
+      source.setAttribute('src', playableSrc);
+      if (!source.hasAttribute('type')) source.setAttribute('type', 'video/mp4');
+    } else {
+      video.setAttribute('src', playableSrc);
+    }
+    video.load();
+  }
+
+  video.controls = false;
+  video.removeAttribute('controls');
+  video.setAttribute('playsinline', '');
+  video.setAttribute('muted', '');
+  video.setAttribute('autoplay', '');
+  video.setAttribute('loop', '');
+  video.muted = true;
+
   video.classList.add('susi-image');
   video.setAttribute('disablepictureinpicture', '');
-  video.play().catch(() => { /* ignore — autoplay may be blocked until visible */ });
+
+  const animationWrapper = video.parentElement?.closest('.hero-animation-overlay')
+    || video.parentElement;
+  if (!animationWrapper) return null;
+  animationWrapper.classList.add('hero-animation-overlay');
+
+  if (!animationWrapper.querySelector('.video-controls-wrapper')) {
+    await createAccessibilityVideoControls(video);
+  }
+
+  video.play().catch(() => { /* ignore — autoplay may be blocked */ });
   playSusiVideoOnModalOpen(video);
   return row;
 }
@@ -610,7 +665,9 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const title = rows[2]?.textContent?.trim();
   const mobileTitle = isColor ? rows[3]?.textContent?.trim() : undefined;
   const isDesktopViewport = window.matchMedia('(min-width: 1200px)').matches;
-  const media = (isColor && isDesktopViewport) ? buildSusiMedia(rows[4]) : null;
+  const media = (isColor && isDesktopViewport)
+    ? await buildSusiMedia(rows[4])
+    : null;
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);

@@ -718,6 +718,116 @@ export async function trackExportComplete({ exportMethod, taskName, uiLocation }
   }
 }
 
+const PRINT_PDP_EVENT_NAME = 'view-template-page';
+const PRINT_PDP_PAGE_TYPE = 'print-template-pdp';
+const PRINT_PAGE_CLASSES = ['hub', 'category', 'pdp'];
+
+function getPrintPathSegments() {
+  const segments = window.location.pathname.split('/').filter(Boolean);
+  const printIndex = segments.findIndex((seg, i) => seg === 'print' && segments[i - 1] === 'express');
+  return printIndex < 0 ? null : segments.slice(printIndex + 1);
+}
+
+/**
+ * Page-level dimensions for print hub, category and PDP pages. Page class and category are
+ * derived from the URL (/express/print[/category[/pdp]]) and can be overridden with the
+ * `print-page-class` / `print-category` metadata; `print-subcategory` and `print-batch`
+ * are authored metadata only.
+ */
+function getPrintPageDimensions({ pageClass, productType, templateId } = {}) {
+  const printSegments = getPrintPathSegments() || [];
+  const dimensions = {};
+  addIfDefined(dimensions, 'page_class', getMetadata('print-page-class') || pageClass
+    || PRINT_PAGE_CLASSES[Math.min(printSegments.length, PRINT_PAGE_CLASSES.length - 1)]);
+  addIfDefined(dimensions, 'category', getMetadata('print-category') || printSegments[0]);
+  addIfDefined(dimensions, 'subcategory', getMetadata('print-subcategory'));
+  addIfDefined(dimensions, 'product_type', productType);
+  addIfDefined(dimensions, 'template_id', templateId);
+  addIfDefined(dimensions, 'batch', getMetadata('print-batch'));
+  return dimensions;
+}
+
+function setPrintPageDimensions(dimensions) {
+  if (!window.alloy_all) window.alloy_all = {};
+  const existing = window.alloy_all.data?._adobe_corpnew?.digitalData?.page?.pageInfo?.print;
+  set('page.pageInfo.print', { ...existing, ...dimensions });
+}
+
+/**
+ * Fires the Express-format `view-template-page` hit for a print PDP so Express DE can ingest it
+ * from AEP and count the view as Express MAU (properties per the "View Template Page" tab of the
+ * A.com Express Instrumentation Requirements sheet). Also writes the print page dimensions to the
+ * data layer. Sent in addition to the existing `trackViewTemplatePage` page-view hit.
+ */
+export async function trackPrintPdpView({ productType, templateId } = {}) {
+  try {
+    setPrintPageDimensions(getPrintPageDimensions({ pageClass: 'pdp', productType, templateId }));
+
+    const printProductType = getPrintPathSegments()?.[0];
+    const link = {
+      pdp_page_flag: true,
+      page_type: PRINT_PDP_PAGE_TYPE,
+    };
+    addIfDefined(link, 'use_case', printProductType);
+    link.page_url = loc.href;
+    addIfDefined(link, 'content_id', templateId);
+    const custom = {
+      event: { is_mau: true },
+      link,
+      displayedLanguage: getLanguage(),
+    };
+    if (printProductType) custom.task = { name: printProductType };
+
+    const sdmPayload = await buildExportEventEnvelope({
+      eventName: PRINT_PDP_EVENT_NAME,
+      isAuthenticated: isAuthenticatedUser(),
+      category: 'WEB',
+      subcategory: 'operations',
+      subtype: 'template-page',
+      type: 'load',
+      workflow: 'lifecycle',
+      pageName: window.alloy_all?.data?._adobe_corpnew?.digitalData?.page?.pageInfo?.pageName
+        || getPageNameFromPathname(),
+      custom,
+    });
+    if (templateId) sdmPayload.content = { id: templateId };
+
+    const fireEvent = () => {
+      window._satellite.track('event', {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: PRINT_PDP_EVENT_NAME,
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: sdmPayload,
+            event: {
+              custom: withAttachedCustomEntries(toAttachedFormatForEnvelope(sdmPayload)),
+            },
+          },
+        },
+      });
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track print PDP view: ${error}`, { tags: 'print-product-detail, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
+}
+
+function trackPrintPageLoad() {
+  try {
+    if (!getPrintPathSegments()) return;
+    setPrintPageDimensions(getPrintPageDimensions());
+  } catch (error) {
+    window.lana?.log(`Failed to set print page dimensions: ${error}`, { tags: 'print, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
+}
+
 export function textToName(text) {
   const splits = text.toLowerCase().split(' ');
   const camelCase = splits.map((s, i) => (i ? s.charAt(0).toUpperCase() + s.substr(1) : s)).join('');
@@ -920,6 +1030,7 @@ export default async function martechLoadedCB() {
   trackTemplatePageLoad();
   trackColorPageLoad();
   trackExpressFeaturePageLoad();
+  trackPrintPageLoad();
 
   // TODO Start of section to be removed after Jingle finishes adding xlg to old express Repo
   // this piece of code is necessary for the ratings block atm so that the right user
