@@ -872,7 +872,7 @@ async function decorateCategoryList(block, section, props) {
   const desktopCategoriesToggleWrapper = createTag('div', { class: 'category-list-toggle-wrapper' });
   const categoriesToggle = createTag('span', { class: 'category-list-toggle' });
   const desktopCategoriesToggle = getIconElementDeprecated('drop-down-arrow');
-  const categoriesListHeading = createTag('div', { class: 'category-list-heading' });
+  const categoriesListHeading = createTag('h3', { class: 'category-list-heading' });
   const categoriesTag = createTag('ul', { class: 'category-list' });
 
   categoriesListHeading.append(getIconElementDeprecated('template-search'), await replaceKey('jump-to-category', getConfig()));
