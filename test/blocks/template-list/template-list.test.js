@@ -1,8 +1,83 @@
 import { expect } from '@esm-bundle/chai';
 import { setLibs } from '../../../express/code/scripts/utils.js';
-import decorate, { decorateTemplateList } from '../../../express/code/blocks/template-list/template-list.js';
+import decorate, {
+  decorateTemplateList,
+  toggleMasonryView,
+  syncViewToggleCurrent,
+} from '../../../express/code/blocks/template-list/template-list.js';
 
 setLibs('/libs');
+
+describe('View toggle aria-current', () => {
+  let wrapper;
+  let block;
+  let links;
+
+  const activate = (name) => toggleMasonryView(block, links[name], Object.values(links), {});
+
+  beforeEach(() => {
+    wrapper = document.createElement('div');
+    wrapper.className = 'template-list-wrapper';
+    block = document.createElement('div');
+    block.className = 'template-list';
+    block.append(document.createElement('div'), document.createElement('div'));
+    block.querySelectorAll(':scope > div').forEach((c) => c.classList.add('template'));
+    wrapper.append(block);
+    links = {};
+    ['sm', 'md', 'lg'].forEach((v) => {
+      const a = document.createElement('a');
+      a.className = `view-toggle-button ${v}-link`;
+      a.dataset.view = v;
+      wrapper.append(a);
+      links[v] = a;
+    });
+    document.body.append(wrapper);
+  });
+
+  afterEach(() => wrapper.remove());
+
+  it('aria-current matches initial active view', () => {
+    activate('md');
+    expect(links.md.classList.contains('active')).to.be.true;
+    expect(links.md.getAttribute('aria-current')).to.equal('true');
+    expect(links.sm.hasAttribute('aria-current')).to.be.false;
+    expect(links.lg.hasAttribute('aria-current')).to.be.false;
+  });
+
+  it('only the active view toggle is aria-current', () => {
+    activate('sm');
+    expect(wrapper.querySelectorAll('[aria-current="true"]').length).to.equal(1);
+    expect(links.md.getAttribute('aria-current')).to.be.null;
+    expect(links.lg.getAttribute('aria-current')).to.be.null;
+  });
+
+  it('aria-current follows the active view toggle', () => {
+    activate('sm');
+    activate('lg');
+    expect(links.lg.getAttribute('aria-current')).to.equal('true');
+    expect(links.sm.hasAttribute('aria-current')).to.be.false;
+    expect(links.md.hasAttribute('aria-current')).to.be.false;
+  });
+
+  it('re-activating the current link mirrors the active class', () => {
+    activate('sm');
+    activate('sm');
+    expect(wrapper.querySelectorAll('.active').length).to.equal(0);
+    expect(wrapper.querySelectorAll('[aria-current]').length).to.equal(0);
+  });
+
+  it('syncViewToggleCurrent clears aria-current when no view is active', () => {
+    Object.values(links).forEach((l) => l.setAttribute('aria-current', 'true'));
+    syncViewToggleCurrent(Object.values(links));
+    expect(wrapper.querySelectorAll('[aria-current]').length).to.equal(0);
+  });
+
+  it('never sets aria-current to false', () => {
+    activate('md');
+    activate('lg');
+    expect(wrapper.querySelectorAll('[aria-current="false"]').length).to.equal(0);
+  });
+});
 
 describe('Template List Block', () => {
   let mockBlock;
