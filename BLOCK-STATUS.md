@@ -24,6 +24,7 @@ Every block in `express/code/blocks/` is **Active** unless it's listed below. Ch
 | `app-banner` | `floating-button` | [DOTCOM-201140](https://jira.corp.adobe.com/browse/DOTCOM-201140) |
 | `quick-action-hub` | Remove instead of replacing | [DOTCOM-201141](https://jira.corp.adobe.com/browse/DOTCOM-201141), [DOTCOM-201435](https://jira.corp.adobe.com/browse/DOTCOM-201435) |
 | `page-list` | Remove instead of replacing | [DOTCOM-201435](https://jira.corp.adobe.com/browse/DOTCOM-201435) |
+| `hero-color` | `color-seo-hero`. Keep the code until remaining legacy color pages and staged default templates are migrated. | [CCEX-335053](https://jira.corp.adobe.com/browse/CCEX-335053) |
 | `tabs-ax` | None | [MWPW-213055](https://jira.corp.adobe.com/browse/MWPW-213055) |
 | `toggle-bar` | None | [MWPW-213055](https://jira.corp.adobe.com/browse/MWPW-213055) |
 | `split-action` | None | [MWPW-213055](https://jira.corp.adobe.com/browse/MWPW-213055) |
