@@ -1059,6 +1059,10 @@ export function hasContent(value) {
 
 export function getContentRoot(location) {
   const { hostname } = location || window.location;
-  if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
+  const rootContentHosts = [
+    '--express-color--', 'color.stage.adobe.com', 'color.adobe.com',
+    '--express-print--', 'print.stage.adobe.com', 'print.adobe.com',
+  ];
+  if (rootContentHosts.some((i) => hostname.includes(i))) return '';
   return '/express';
 }

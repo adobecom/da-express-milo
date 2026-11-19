@@ -35,7 +35,7 @@ const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
   (jarvisVisibleMeta === 'mobile' && !desktopViewport) || (jarvisVisibleMeta === 'desktop' && desktopViewport))) jarvisImmediatelyVisible = true;
 
-const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com', 'helpx.adobe.com'];
+const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com', 'print.adobe.com', 'helpx.adobe.com'];
 
 // Add any config options.
 const CONFIG = {
@@ -51,6 +51,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'www.stage.adobe.com': {
@@ -59,6 +60,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     '--express-color--adobecom.(hlx|aem).(page|live)': {
@@ -67,6 +69,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'color.stage.adobe.com': {
@@ -75,6 +78,25 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
+    },
+    '--express-print--adobecom.(hlx|aem).(page|live)': {
+      'print.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
+    },
+    'print.stage.adobe.com': {
+      'print.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
   },
@@ -320,6 +342,7 @@ window.addEventListener('unhandledrejection', (event) => {
  */
 
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
+document.body.classList.add('google-login-prompt-pending');
 preDecorateSections(document);
 // LCP image decoration
 const eagerLoad = (img) => {
@@ -518,7 +541,6 @@ const listenAlloy = () => {
 };
 
 async function loadPage() {
-  if (window.isTestEnv) return;
   const {
     loadArea,
     loadStyle,
@@ -537,11 +559,9 @@ async function loadPage() {
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
 
-  const googleLoginRedirect = createTag('meta', { name: 'google-login', content: 'desktop' });
-  document.head.append(googleLoginRedirect);
-  // end TODO remove metadata after we go live
-
   const config = setConfig({ ...CONFIG, miloLibs });
+  // Unit tests need the shared Milo config, but none of the production page bootstrap below.
+  if (window.isTestEnv) return;
 
   // Legacy color.adobe.com deeplink redirect
   if (/color-theme-\d+\/?$/.test(window.location.pathname)) {
@@ -605,6 +625,17 @@ async function loadPage() {
   stopFixedTopOffsetTracking?.();
   stopFixedTopOffsetTracking = await trackFixedTopOffset(config);
 
+  // Disable Milo's loader so Express owns Google login on every viewport.
+  const miloGoogleLoginMeta = document.head.querySelector('meta[name="google-login"]')
+    || createTag('meta', { name: 'google-login' });
+  miloGoogleLoginMeta.content = 'off';
+  if (!miloGoogleLoginMeta.isConnected) document.head.append(miloGoogleLoginMeta);
+
+  const expressGoogleLoginMeta = document.head.querySelector('meta[name="express-google-login"]')
+    || createTag('meta', { name: 'express-google-login' });
+  expressGoogleLoginMeta.content = 'on';
+  if (!expressGoogleLoginMeta.isConnected) document.head.append(expressGoogleLoginMeta);
+
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
 
@@ -613,7 +644,12 @@ async function loadPage() {
   });
 }
 
-loadPage();
+if (window.isTestEnv) {
+  // Ensure test modules importing scripts.js observe initialized config deterministically.
+  await loadPage();
+} else {
+  loadPage();
+}
 
 (async function loadDa() {
   if (!new URL(window.location.href).searchParams.get('dapreview')) return;
