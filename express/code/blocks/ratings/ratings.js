@@ -43,6 +43,7 @@ export default async function decorate(block) {
     return;
   }
 
+  let starRatingText = 'star rating';
   let submitButtonText;
   let submissionTitle;
   let submissionText;
@@ -311,11 +312,11 @@ export default async function decorate(block) {
       'beforeend',
       /* html */ `
       <div class="slider-bottom">
-        <div class="vertical-line"><button type="button" aria-label="1" class="stars one-star"></button></div>
-        <div class="vertical-line"><button type="button" aria-label="2" class="stars two-stars"></button></div>
-        <div class="vertical-line"><button type="button" aria-label="3" class="stars three-stars"></button></div>
-        <div class="vertical-line"><button type="button" aria-label="4" class="stars four-stars"></button></div>
-        <div class="vertical-line"><button type="button" aria-label="5" class="stars five-stars"></button></div>
+        <div class="vertical-line"><button type="button" aria-label="1 ${starRatingText}" class="stars one-star"></button></div>
+        <div class="vertical-line"><button type="button" aria-label="2 ${starRatingText}" class="stars two-stars"></button></div>
+        <div class="vertical-line"><button type="button" aria-label="3 ${starRatingText}" class="stars three-stars"></button></div>
+        <div class="vertical-line"><button type="button" aria-label="4 ${starRatingText}" class="stars four-stars"></button></div>
+        <div class="vertical-line"><button type="button" aria-label="5 ${starRatingText}" class="stars five-stars"></button></div>
       </div>
       <div class="slider-comment">
         <label for="comment"></label>
@@ -472,6 +473,12 @@ export default async function decorate(block) {
     alreadySubmittedTitle = await mod.replaceKey('rating-already-submitted-title', getConfig());
     alreadySubmittedText = await mod.replaceKey('rating-already-submitted-text', getConfig());
     votesText = await mod.replaceKey('rating-votes', getConfig());
+    const localizedStarRating = await mod.replaceKey('star-rating-aria-label', getConfig());
+    if (localizedStarRating
+      && localizedStarRating !== 'star-rating-aria-label'
+      && localizedStarRating !== 'star rating aria label') {
+      starRatingText = localizedStarRating;
+    }
     await regenerateBlockState(actionTitle, CTA, headingTag);
   });
 }

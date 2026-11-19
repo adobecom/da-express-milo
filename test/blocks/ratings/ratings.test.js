@@ -232,6 +232,37 @@ describe('Ratings Block - slider interactions', () => {
     expect(block.classList.contains('four-stars')).to.be.true;
   });
 
+  it('star buttons expose "N star rating" accessible names (WCAG 2.4.6)', async () => {
+    await decorate(block);
+    await waitForSlider(block);
+
+    [['.one-star', 1], ['.two-stars', 2], ['.three-stars', 3], ['.four-stars', 4], ['.five-stars', 5]].forEach(([sel, n]) => {
+      const button = block.querySelector(`button.stars${sel}`);
+      expect(button.getAttribute('aria-label')).to.equal(`${n} star rating`);
+    });
+  });
+
+  it('star SVG icons stay hidden from assistive technology', async () => {
+    await decorate(block);
+    await waitForSlider(block);
+
+    const svgs = block.querySelectorAll('button.stars svg.icon-star');
+    expect(svgs.length).to.equal(15);
+    svgs.forEach((svg) => expect(svg.getAttribute('aria-hidden')).to.equal('true'));
+    [['.one-star', 1], ['.two-stars', 2], ['.three-stars', 3], ['.four-stars', 4], ['.five-stars', 5]].forEach(([sel, n]) => {
+      expect(block.querySelectorAll(`button.stars${sel} svg.icon-star`).length).to.equal(n);
+    });
+  });
+
+  it('clicking a star still sets the matching rating value', async () => {
+    await decorate(block);
+    await waitForSlider(block);
+
+    block.querySelector('button.stars.three-stars').click();
+    expect(block.querySelector('input[type=range]').value).to.equal('3');
+    expect(block.classList.contains('three-stars')).to.be.true;
+  });
+
   it('updateSliderStyle: sets tooltip inline-start after slider change', async () => {
     await decorate(block);
     await waitForSlider(block);
