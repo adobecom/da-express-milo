@@ -1,14 +1,13 @@
-/* eslint-disable import/prefer-default-export */
-
-import { test } from '@playwright/test';
-import { AccessibilityError } from './customerrors.cjs';
-
+const { randomUUID } = require('crypto');
+const { writeFile } = require('fs/promises');
+const { test } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
+const { AccessibilityError } = require('./customerrors.cjs');
 
 /**
- * Run accessibility test to meet legal compliance (WCAG 2.0/2.1 A & AA)
+ * Run automated axe checks; a passing scan does not establish WCAG conformance.
  * @param {Object} page - The page object.
- * @param {string} [testScope='body'] - Optional scope for the accessibility test. Default is the entire page ('body').
+ * @param {string|import('@playwright/test').Locator} [testScope='body'] - CSS selector or single-element locator.
  * @param {string[]} [includeTags=['wcag2a', 'wcag2aa']] - Optional tags to include in the accessibility test. Default is WCAG 2.0/2.1 A & AA.
  * @param {number} [maxViolations=0] - Optional maximum number of allowed violations before the test fails. Default is 0 (any violation fails the test).
  * @param {boolean} [skipA11yTest=false] - If true, the test step is logged and skipped.
@@ -24,10 +23,12 @@ async function runAccessibilityTest({
     console.log(
       `[Skipping]: Accessibility test step skipped for this component ${testScope}`,
     );
-    return;
+    return undefined;
   }
 
   let testName;
+  let markedScope;
+  let previousScope;
   try {
     // Retrive the test title (name)
     testName = test.info().title.includes(',')
@@ -46,18 +47,20 @@ async function runAccessibilityTest({
       } else {
         scopeDescription = `section: ${testScope}`;
       }
-    } else if (
-      typeof testScope === 'object'
-      && testScope.constructor.name === 'Locator'
-    ) {
-      const eleHandle = await testScope.elementHandle();
-      if (!eleHandle) {
-        throw new AccessibilityError('Element not found for the given locator');
-      }
-      testElement = eleHandle;
+    } else if (testScope && typeof testScope.evaluate === 'function') {
+      // Axe accepts selectors, not ElementHandles. Mark the exact locator match,
+      // including nth()/filtered locators, without widening the scan.
+      const scopeId = randomUUID();
+      testElement = `[data-nala-a11y-scope="${scopeId}"]`;
+      previousScope = await testScope.evaluate((element, selector) => {
+        const previous = element.getAttribute('data-nala-a11y-scope');
+        element.setAttribute('data-nala-a11y-scope', selector);
+        return previous;
+      }, scopeId);
+      markedScope = testScope;
       scopeDescription = `the provided locator: ${testScope}`;
     } else {
-      scopeDescription = testScope === 'body' ? 'the entire page' : `section: ${testScope}`;
+      throw new AccessibilityError('testScope must be a CSS selector or a single-element locator');
     }
 
     console.log('Scope description:', scopeDescription);
@@ -77,6 +80,13 @@ async function runAccessibilityTest({
     };
 
     const violationCount = enhancedAxeResults.violations.length;
+
+    const reportPath = test.info().outputPath(`accessibility-${randomUUID()}.json`);
+    await writeFile(reportPath, JSON.stringify(enhancedAxeResults, null, 2));
+    await test.info().attach('Accessibility Test Results', {
+      path: reportPath,
+      contentType: 'application/json',
+    });
 
     if (violationCount > maxViolations) {
       // Accessibility violations details
@@ -106,12 +116,6 @@ async function runAccessibilityTest({
         violationsDetails += `   - Fix: ${violation.helpUrl}\n`;
       });
 
-      // attached accessibility voilations details to test results
-      await test.info().attach('Accessibility Test Results', {
-        body: JSON.stringify(enhancedAxeResults, null, 2),
-        contentType: 'application/json',
-      });
-
       throw new AccessibilityError(
         `\nAccessibility test failed : ${violationCount} violation(s) found. \n ${violationsDetails}`,
       );
@@ -124,11 +128,19 @@ async function runAccessibilityTest({
         `[Accessibility Test]: No accessibility violations found for ${testName}.`,
       );
     }
+    return enhancedAxeResults;
   } catch (err) {
     throw new AccessibilityError(
       `[Accessibility Test failed for ${testName}].\n ${err.message}`,
     );
+  } finally {
+    if (markedScope) {
+      await markedScope.evaluate((element, previous) => {
+        if (previous === null) element.removeAttribute('data-nala-a11y-scope');
+        else element.setAttribute('data-nala-a11y-scope', previous);
+      }, previousScope);
+    }
   }
 }
 
-export { runAccessibilityTest };
+module.exports = { runAccessibilityTest };
