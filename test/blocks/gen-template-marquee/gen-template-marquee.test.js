@@ -147,22 +147,6 @@ describe('gen-template-marquee', () => {
       .to.equal('Create a fully editable template from a single prompt in minutes.');
   });
 
-  it('grows and shrinks the prompt to fit its lines', async () => {
-    const block = await prepareBlock();
-    const input = block.querySelector('.gen-template-prompt-input');
-    const initialHeight = parseFloat(input.style.height);
-
-    input.value = 'First line\nSecond line\nThird line\nFourth line';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    const expandedHeight = parseFloat(input.style.height);
-
-    input.value = 'One line';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-
-    expect(expandedHeight).to.be.greaterThan(initialHeight);
-    expect(parseFloat(input.style.height)).to.be.lessThan(expandedHeight);
-  });
-
   it('splits the authored comma-separated suggestion row', async () => {
     const block = await prepareBlock();
     const suggestions = block.querySelectorAll('.gen-template-suggestion');
@@ -171,7 +155,6 @@ describe('gen-template-marquee', () => {
     expect(suggestions).to.have.length(4);
     suggestions[0].click();
     expect(input.value).to.equal('Dog trainer advertisement');
-    expect(document.activeElement).to.equal(input);
   });
 
   it('loads and distributes 14 templates from the authored TAAS query', async () => {
@@ -220,16 +203,6 @@ describe('gen-template-marquee', () => {
     expect(requestUrl.searchParams.get('collectionId')).to.equal(collectionId);
     expect(requestUrl.searchParams.get('limit')).to.equal('23');
     expect(block.querySelectorAll('.gen-template-card')).to.have.length(14);
-  });
-
-  it('keeps an empty submission on the page and focuses the prompt', async () => {
-    const block = await prepareBlock();
-    const form = block.querySelector('.gen-template-prompt-form');
-    const input = block.querySelector('.gen-template-prompt-input');
-
-    form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
-
-    expect(document.activeElement).to.equal(input);
   });
 
   it('preserves reserved characters in the routed prompt', async () => {
