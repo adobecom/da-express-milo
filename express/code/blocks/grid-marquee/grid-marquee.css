@@ -18,7 +18,7 @@
 
 
 
-.grid-marquee .express-logo {
+.grid-marquee .icon.express-logo {
   width: initial;
   height: 30px;
   padding: 2rem 0 1rem;
@@ -436,7 +436,7 @@ main .section .grid-marquee.pricing-page h1 {
 }
 
 @media screen and (min-width: 1280px) {
-  .grid-marquee .express-logo {
+  .grid-marquee .icon.express-logo {
     padding-top: 40px;
   }
   .grid-marquee .background img {
