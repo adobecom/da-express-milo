@@ -294,13 +294,20 @@ function applyDesktopHeader(card) {
   const heading = getCardHeading(card);
   const button = heading?.querySelector('.header-toggle-button');
   if (!button) return;
+  const hadFocus = button.contains(document.activeElement);
   button.replaceWith(...button.childNodes);
+  if (hadFocus) {
+    heading.setAttribute('tabindex', '-1');
+    heading.focus({ preventScroll: true });
+    heading.addEventListener('blur', () => heading.removeAttribute('tabindex'), { once: true });
+  }
 }
 
 function applyMobileHeader(card) {
   const heading = getCardHeading(card);
   if (!heading) return;
   const content = card.querySelector('.card-inner-content');
+  heading.removeAttribute('tabindex');
   let button = heading.querySelector('.header-toggle-button');
   if (!button) {
     button = createTag('button', { class: 'header-toggle-button', type: 'button' });
