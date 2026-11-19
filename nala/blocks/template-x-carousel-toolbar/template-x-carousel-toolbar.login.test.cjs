@@ -77,7 +77,7 @@ test.describe('TemplateXCarouselToolbar signed-in test suite', () => {
       await searchInput.fill(SEARCH_TERM);
       await searchInput.press('Enter');
       const redirect = new URL(await (await page.waitForFunction(() => window.nalaRedirectUrl, null, { timeout: 15000 })).jsonValue());
-      expect(redirect.hostname).toBe('new.express.adobe.com');
+      expect(redirect.hostname).toBe('express.adobe.com');
       expect(redirect.pathname).toBe('/explore/templates');
       expect(redirect.searchParams.get('q')).toBe(SEARCH_TERM);
     });

@@ -375,7 +375,7 @@ const TASK_ID_MAP = {
 
 function buildCheckoutUrl(templateId, expressProductSettings, productType) {
   const taskId = TASK_ID_MAP[productType] || '';
-  const baseUrl = `https://new.express.adobe.com/design-remix/template/${templateId}`;
+  const baseUrl = `https://express.adobe.com/design-remix/template/${templateId}`;
   const params = new URLSearchParams({
     category: 'templates',
     taskId,
@@ -470,7 +470,7 @@ export function CheckoutButton({ templateId }) {
     `;
   }
 
-  const defaultUrl = `https://new.express.adobe.com/design-remix/template/${templateId}`;
+  const defaultUrl = `https://express.adobe.com/design-remix/template/${templateId}`;
   const checkoutUrl = state?.expressProductSettings
     ? buildCheckoutUrl(templateId, state.expressProductSettings, state.productType)
     : defaultUrl;
