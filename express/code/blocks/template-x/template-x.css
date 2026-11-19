@@ -1230,6 +1230,21 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   user-select: none;
 }
 
+.template-x .api-templates-toolbar .wrapper-functions .functions-container .function-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 160px;
+}
+
+.template-x .api-templates-toolbar .wrapper-functions .functions-container .function-label {
+  font-family: var(--body-font-family);
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  text-align: left;
+}
+
 .template-x .api-templates-toolbar .wrapper-functions .functions-container .function-wrapper {
   background-color: var(--color-gray-200);
   padding: 4px 8px;
