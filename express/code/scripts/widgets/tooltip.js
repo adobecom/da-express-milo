@@ -45,6 +45,17 @@ export function getTooltipMatch(elements, tooltipPattern) {
    Legacy Tooltip Functions
    ======================================== */
 
+const SPOTLIGHT_BUSINESS_PATH = /^\/express\/spotlight\/business(?:\/|\.html)?$/;
+
+export function isSpotlightBusinessPage(pathname = window.location.pathname) {
+  return SPOTLIGHT_BUSINESS_PATH.test(pathname || '');
+}
+
+export function getTooltipAriaLabel(content, pathname = window.location.pathname) {
+  if (isSpotlightBusinessPage(pathname)) return `Tooltip: ${String(content).trim()}`;
+  return content;
+}
+
 function buildTooltip(elements, tooltipPattern) {
   let tooltipMatch;
   let tooltipContainer;
@@ -74,7 +85,7 @@ function buildTooltip(elements, tooltipPattern) {
 
   const infoIcon = getIconElementDeprecated('info', 44, 'Info', 'tooltip-icon');
   const tooltipButton = createTag('button');
-  tooltipButton.setAttribute('aria-label', tooltipContent);
+  tooltipButton.setAttribute('aria-label', getTooltipAriaLabel(tooltipContent));
 
   tooltipButton.append(infoIcon);
   tooltipButton.append(tooltipPopup);
