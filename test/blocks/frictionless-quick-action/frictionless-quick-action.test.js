@@ -106,6 +106,10 @@ describe('Frictionless Quick Action Block', () => {
       .to.include('file size not supported');
     expect(errorToast.querySelector('button')).to.not.be.null;
     expect(errorToast.querySelector('svg, img')).to.not.be.null;
+    expect(errorToast.getAttribute('role')).to.equal('status');
+    expect(errorToast.getAttribute('aria-live')).to.equal('polite');
+    expect(errorToast.getAttribute('aria-atomic')).to.equal('true');
+    expect(errorToast.contains(document.activeElement)).to.be.false;
   });
   it('handles popstate event correctly', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });

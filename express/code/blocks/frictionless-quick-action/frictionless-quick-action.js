@@ -124,7 +124,12 @@ function showErrorToast(block, msg) {
   let toast = block.querySelector('.error-toast');
   const hideToast = () => toast.classList.add('hide');
   if (!toast) {
-    toast = createTag('div', { class: 'error-toast hide' });
+    toast = createTag('div', {
+      class: 'error-toast hide',
+      role: 'status',
+      'aria-live': 'polite',
+      'aria-atomic': 'true',
+    });
     toast.append(getIconElementDeprecated('error'));
     // Dedicated text node so updating the message doesn't wipe the icon and
     // close button (setting toast.textContent would remove all children).
