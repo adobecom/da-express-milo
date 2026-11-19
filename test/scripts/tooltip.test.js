@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import { setLibs } from '../../express/code/scripts/utils.js';
 
-import handleTooltip from '../../express/code/scripts/widgets/tooltip.js';
+import handleTooltip, { isSpotlightBusinessPage } from '../../express/code/scripts/widgets/tooltip.js';
 
 setLibs('/libs');
 
@@ -62,5 +62,52 @@ describe('Tooltip widget parsing', () => {
     expect(popup).to.exist;
     expect(popup.textContent.trim()).to.equal(tooltipContent.trim());
     expect(button.getAttribute('aria-label').trim()).to.equal(tooltipContent.trim());
+  });
+});
+
+describe('Tooltip aria-label on Spotlight Business', () => {
+  const message = 'If you cancel after 14 days, your payment is non-refundable, and your service will continue until the end of your contracted term.';
+  let originalBodyHTML;
+  let originalPath;
+
+  const render = async () => {
+    document.body.innerHTML = `<main><section><p>Teams [[tooltip]]  ${message}  [[/tooltip]]</p></section></main>`;
+    await handleTooltip(document.querySelectorAll('p'), TOOLTIP_PATTERN);
+    return document.querySelector('.tooltip');
+  };
+
+  beforeEach(() => {
+    originalBodyHTML = document.body.innerHTML;
+    originalPath = window.location.pathname;
+  });
+
+  afterEach(() => {
+    window.history.replaceState(null, '', originalPath);
+    document.body.innerHTML = originalBodyHTML;
+  });
+
+  it('prefixes and trims the label on Spotlight Business', async () => {
+    window.history.replaceState(null, '', '/express/spotlight/business');
+    const container = await render();
+    const button = container.querySelector('button');
+    expect(button.getAttribute('aria-label')).to.equal(`Tooltip: ${message}`);
+    expect(container.querySelector('.tooltip-text').textContent.trim()).to.equal(message);
+  });
+
+  it('keeps the label unchanged on other pages', async () => {
+    window.history.replaceState(null, '', '/express/pricing');
+    const container = await render();
+    const label = container.querySelector('button').getAttribute('aria-label');
+    expect(label).to.contain(message);
+    expect(label).to.not.contain('Tooltip');
+  });
+
+  it('matches only the Spotlight Business path', () => {
+    expect(isSpotlightBusinessPage('/express/spotlight/business')).to.be.true;
+    expect(isSpotlightBusinessPage('/express/spotlight/business/')).to.be.true;
+    expect(isSpotlightBusinessPage('/express/spotlight/business.html')).to.be.true;
+    expect(isSpotlightBusinessPage('/express/spotlight/education')).to.be.false;
+    expect(isSpotlightBusinessPage('/express/pricing')).to.be.false;
+    expect(isSpotlightBusinessPage('/express/business')).to.be.false;
   });
 });
