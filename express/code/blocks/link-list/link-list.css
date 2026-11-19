@@ -40,7 +40,7 @@ main .section .link-list-wrapper:has(.link-list.link-text),
   overflow: hidden;
   margin: var(--spacing-600) auto;
   width: 100%;
-  text-align: left;
+  text-align: start;
 }
 .section .link-list.fullwidth {
   max-width: 100%;
@@ -63,8 +63,8 @@ main .section .link-list-wrapper:has(.link-list.link-text),
 .section .link-list h2,
 .section .link-list h3,
 .section .link-list h4 {
-  text-align: left;
-  padding-left: var(--spacing-500);
+  text-align: start;
+  padding-inline-start: var(--spacing-500);
 }
 
 .section .link-list h3 {
@@ -276,7 +276,7 @@ main .section .link-list-wrapper:has(.link-list.link-text),
     margin-bottom: 70px;
   }
   .section .link-list.content-group h3 {
-    padding-left: 0;
+    padding-inline-start: 0;
   }
 
   .section div + .link-list-wrapper {
@@ -296,13 +296,13 @@ main .section .link-list-wrapper:has(.link-list.link-text),
   }
 
   .section .link-list {
-    text-align: left;
+    text-align: start;
   }
 
   .section .link-list h2,
   .section .link-list h3,
   .section .link-list h4 {
-    text-align: left;
+    text-align: start;
   }
 
   .section .link-list .carousel-platform {

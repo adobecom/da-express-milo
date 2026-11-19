@@ -5,7 +5,6 @@ import sinon from 'sinon';
 // Set ?nala=ratings so isNalaTestRatings() returns true in ratings-utils.js.
 // This bypasses IMS token validation and returns mock ratings data.
 window.history.replaceState({}, '', '?nala=ratings');
-window.isTestEnv = true;
 window.lana = { log: () => {} };
 
 // Initialize setLibs (same pattern as app-ratings.test.js)
@@ -20,6 +19,13 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 });
 
 const { default: decorate } = await import('../../../express/code/blocks/ratings/ratings.js');
+const RATING_STORAGE_KEYS = [
+  'ccxActionRatings',
+  'ccxActionRatingsFeedbacknalaTestRatings',
+];
+const clearRatingStorage = () => {
+  RATING_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+};
 
 // Poll until the submit button appears (block finishes async decoration)
 async function waitForSlider(block, timeout = 8000) {
@@ -47,7 +53,7 @@ describe('Ratings Block - syncSubmitDisabledState (WCAG 2.4.7)', () => {
   beforeEach(async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     block = document.querySelector('.ratings');
-    localStorage.clear();
+    clearRatingStorage();
   });
 
   afterEach(() => {
@@ -56,6 +62,7 @@ describe('Ratings Block - syncSubmitDisabledState (WCAG 2.4.7)', () => {
       clearInterval(window.ratingSubmitCountdown);
       window.ratingSubmitCountdown = null;
     }
+    clearRatingStorage();
   });
 
   it('renders the slider form after decoration', async () => {
@@ -201,7 +208,7 @@ describe('Ratings Block - slider interactions', () => {
   beforeEach(async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     block = document.querySelector('.ratings');
-    localStorage.clear();
+    clearRatingStorage();
   });
 
   afterEach(() => {
@@ -210,6 +217,7 @@ describe('Ratings Block - slider interactions', () => {
       clearInterval(window.ratingSubmitCountdown);
       window.ratingSubmitCountdown = null;
     }
+    clearRatingStorage();
   });
 
   it('updateSliderValue: change event snaps slider and adds rated + star class to block', async () => {
@@ -224,7 +232,7 @@ describe('Ratings Block - slider interactions', () => {
     expect(block.classList.contains('four-stars')).to.be.true;
   });
 
-  it('updateSliderStyle: sets tooltip left style after slider change', async () => {
+  it('updateSliderStyle: sets tooltip inline-start after slider change', async () => {
     await decorate(block);
     await waitForSlider(block);
 
@@ -233,7 +241,7 @@ describe('Ratings Block - slider interactions', () => {
     input.value = '4';
     input.dispatchEvent(new Event('change'));
 
-    expect(tooltip.style.left).to.not.equal('');
+    expect(tooltip.style.insetInlineStart).to.not.equal('');
   });
 
   it('updateCommentBoxAndTimer: feedback-required rating (3 stars) shows submit section and no countdown', async () => {
@@ -356,7 +364,7 @@ describe('Ratings Block - slider interactions', () => {
     input.dispatchEvent(new MouseEvent('mouseup'));
 
     // Chrome normalizes shorthand decimals: '.3s' → '0.3s'
-    expect(tooltip.style.transition).to.match(/left 0?\.3s, right 0?\.3s/);
+    expect(tooltip.style.transition).to.match(/inset-inline-start 0?\.3s/);
     expect(sliderFill.style.transition).to.match(/width 0?\.3s/);
   });
 
@@ -385,6 +393,35 @@ describe('Ratings Block - slider interactions', () => {
     const input = block.querySelector('input[type=range]');
     expect(input.value).to.equal('1');
     expect(block.classList.contains('one-star')).to.be.true;
+  });
+
+  it('keeps the slider tooltip aligned with RTL values and star clicks', async () => {
+    block.dir = 'rtl';
+    await decorate(block);
+    await waitForSlider(block);
+
+    const input = block.querySelector('input[type=range]');
+    const tooltip = block.querySelector('.tooltip');
+    const sliderFill = block.querySelector('.slider-fill');
+    input.style.width = '200px';
+
+    input.value = '1';
+    input.dispatchEvent(new Event('input'));
+    expect(tooltip.style.insetInlineStart).to.equal('0px');
+    expect(sliderFill.style.width).to.equal('30px');
+
+    block.querySelector('.five-stars').dispatchEvent(
+      new MouseEvent('click', { bubbles: true }),
+    );
+    expect(input.value).to.equal('5');
+    expect(tooltip.style.insetInlineStart).to.equal('140px');
+    expect(sliderFill.style.width).to.equal('170px');
+
+    input.value = '3';
+    input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowLeft' }));
+    expect(input.value).to.equal('4');
+    input.dispatchEvent(new KeyboardEvent('keyup', { code: 'ArrowRight' }));
+    expect(input.value).to.equal('3');
   });
 
   it('textarea focus stops countdown and shows submit section', async () => {

@@ -1,0 +1,118 @@
+# Express's verification gates.
+#
+# When this file is present the harness runs THESE gates in place of its
+# built-in default set. Each gate binds to a platform-owned template and
+# supplies the parameters; the harness substitutes typed file selectors
+# ({js_files}, {css_files}, {test_files}, {changed_files}) and runs the command
+# in the worktree.
+#
+# The command gates mirror what Express's own PR checks enforce
+# (.github/workflows/run-lint.yaml, code-compatibility.yaml, run-tests.yaml).
+# Every command below was run against a clean `stage` checkout after `npm ci`,
+# and each lint gate was also shown to fail on a deliberately broken file.
+#
+# Deliberately NOT declared:
+#
+# - lint:css-vars (scripts/lint-css-vars.js): only inspects files staged in
+#   git, is not run by any workflow, and its husky pre-commit hook is commented
+#   out — CI does not enforce it. Its one hard rule (no var() fallbacks) is
+#   already enforced by .stylelintrc.json, which the stylelint gate runs.
+# - coverage: patch coverage is enforced by codecov on the PR; the harness's
+#   coverage template measures totals, not patches.
+
+# Shared producer-regeneration budget for every gate below that selects
+# failure_route: regenerate. Counts the initial candidate; the acom floor caps
+# this at 5, and Express can tighten it downward without a platform deployment.
+regeneration:
+  max_candidates: 5
+
+# Toolchain provisioning — run once in the worktree before any gate. The lint
+# gates need the pinned devDependencies (eslint 8.11.0 + airbnb-base + compat,
+# stylelint 14.6.0, @web/test-runner); without node_modules `npx` would fetch
+# the latest ESLint, which rejects the legacy .eslintrc.cjs — a false failure.
+provision: npm ci
+
+gates:
+  lint:
+    template: command
+    name: ESLint
+    # Errors only, matching CI's eslint-changed-files step. No
+    # --max-warnings 0: ESLint 8 reports an explicitly passed file that
+    # .eslintrc.cjs ignores (e.g. express/code/scripts/widgets/**, a hot path)
+    # as a warning, so a zero-warning cap fails such changes falsely.
+    cmd: npx eslint {js_files}
+    blocking: true
+    failure_route: repair_loop
+    repair:
+      cmd: npx eslint {js_files} --fix
+
+  # Express's second ESLint config flags APIs unsupported by .browserslistrc
+  # (Safari/iOS >= 15, e.g. Array.prototype.at). The standard lint run does not
+  # pick it up; GitHub CI (code-compatibility.yaml) would red-x the PR after the
+  # fact. --quiet hides the "file ignored" warning that config emits for test/**.
+  compat-lint:
+    template: command
+    name: Browser-compat ESLint
+    cmd: npx --no-install eslint --no-eslintrc -c .eslintrc-code-compatibility.js {js_files} --quiet
+    blocking: true
+    failure_route: repair_loop
+    repair:
+      cmd: npx --no-install eslint --no-eslintrc -c .eslintrc-code-compatibility.js {js_files} --quiet --fix
+
+  stylelint:
+    template: command
+    name: Stylelint
+    # Same as CI: stylelint over every changed CSS file with .stylelintrc.json
+    # (no duplicate properties/selectors, no !important, no var() fallbacks).
+    # No `repair:` command — none of those rules has an autofixer, so
+    # `stylelint --fix` is a no-op here; the repair loop's model fixes them.
+    cmd: npx stylelint {css_files}
+    blocking: true
+    failure_route: repair_loop
+    max_repair_attempts: 3
+
+  unit-tests:
+    template: command
+    name: Web Test Runner unit tests
+    # Express has two test systems side by side: Web Test Runner browser unit
+    # tests under test/, and Nala/Playwright E2E specs under nala/ (which need
+    # live pages and credentials). This gate owns only the unit-test tree;
+    # the harness derives the affected files within it.
+    test_globs: ["test/**/*.test.js"]
+    # Same runner contract as `npm test` (web-test-runner.config.js, which
+    # also guards against un-mocked external fetches; node-resolve; port 2000)
+    # minus --coverage, which codecov owns. Keep --port=2000: suites and mocks
+    # assume the localhost:2000 origin, and an auto-selected port creates
+    # false failures. The harness runs as root, where Chrome will not start
+    # with its sandbox on; .pinata/web-test-runner.config.mjs is the repo
+    # config with the sandbox turned off.
+    cmd: npx wtr {test_files} --config .pinata/web-test-runner.config.mjs --node-resolve --port=2000
+    timeout_s: 900
+    blocking: true
+    failure_route: repair_loop
+
+  block-structure:
+    template: command
+    name: Block structure (.js + .css per changed block)
+    description: >-
+      Every changed express/code/blocks/<name>/ must contain both <name>.js
+      and <name>.css. Catches a block shipped with only one of the pair, which
+      renders broken in production even when tests pass.
+    cmd: node .pinata/scripts/check-block-structure.mjs {changed_files}
+    blocking: true
+    failure_route: repair_loop
+
+  # Keep the independent merge gate last so it reviews the code together with
+  # the results of every deterministic gate.
+  adversary:
+    template: adversary
+    name: Adversarial review — independent merge gate (INV-4)
+    description: >-
+      An independent adversary (different model class, no producer context)
+      reviews the diff and prior gate results before merge — required by the
+      acom org floor (snapshot in .pinata/floor/). Skips honestly when no
+      adversary model is reachable in development.
+    blocking: true
+    # A genuine failure re-enters codegen for a bounded producer rebuild. The
+    # adversary re-adjudicates every round; the producer never self-approves.
+    failure_route: regenerate

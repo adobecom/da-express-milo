@@ -5,7 +5,6 @@ import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-window.isTestEnv = true;
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
 const { getLibs } = imports[0];
 
@@ -27,10 +26,6 @@ const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList,
 const marqueeNoBackground = await readFile({ path: './mocks/marquee-no-background.html' });
 
 describe('Columns', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Columns exists', async () => {
     const body = await readFile({ path: './mocks/body.html' });
     document.body.innerHTML = body;
@@ -229,6 +224,25 @@ describe('Logo injection', () => {
     const logo = block.querySelector('.express-logo');
     expect(logo).to.exist;
     expect(logo.classList.contains('icon-adobe-express-photos-logo')).to.be.true;
+  });
+
+  it('Should select the RTL logo only when logo injection is enabled', async () => {
+    const originalDirection = document.documentElement.dir;
+    document.documentElement.dir = 'rtl';
+    try {
+      document.body.innerHTML = injectLogo;
+      let block = document.querySelector('.ax-columns');
+      await decorate(block);
+      expect(block.querySelector('.express-logo')).to.not.exist;
+
+      document.body.innerHTML = injectLogo;
+      addMeta('marquee-inject-logo', 'on');
+      block = document.querySelector('.ax-columns');
+      await decorate(block);
+      expect(block.querySelector('.express-logo').getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo-rtl.svg');
+    } finally {
+      document.documentElement.dir = originalDirection;
+    }
   });
 
   it('Should inject the acrobat co-brand logo when marquee-inject-acrobat-logo is on', async () => {

@@ -11,7 +11,6 @@ const { default: decorate } = imports[1];
 // Shared test setup
 const setupTest = async (htmlFile) => {
   const testBody = await readFile({ path: htmlFile });
-  window.isTestEnv = true;
   document.body.innerHTML = testBody;
   window.placeholders = { 'search-branch-links': 'https://adobesparkpost.app.link/c4bWARQhWAb' };
   await decorate(document.querySelector('.pricing-table'));

@@ -251,7 +251,7 @@ function decorateInlineVideoPlayer(block, payload) {
     controlsList: 'nodownload',
   });
   const inlinePlayerPlayButton = createTag('a', { class: 'video-player-inline-player-play-button' });
-  const inlinePlayerIcon = createTag('img', { class: 'video-player-inline-player-play-icon' });
+  const inlinePlayerIcon = createTag('img', { class: 'video-player-inline-player-play-icon', alt: '' });
   const inlinePlayerDuration = createTag('div', { class: 'video-player-inline-player-duration' });
   const videoPlayerBody = block.querySelector('.video-player-body');
 
@@ -281,8 +281,8 @@ function decorateVideoPlayerMenu(block, payload) {
   const videoPlayerMenu = createTag('div', { class: 'video-player-menu' });
   const videoTitle = createTag('h3', { class: 'video-player-video-title' });
   const navButtons = createTag('div', { class: 'video-player-buttons' });
-  const buttonPrevious = createTag('a', { class: 'video-player-button-previous', href: '#' });
-  const buttonPreviousImg = createTag('img', { class: 'video-player-button-previous-img', src: '/express/code/icons/adobe-express-video-previous.svg' });
+  const buttonPrevious = createTag('a', { class: 'video-player-button-previous', href: '#', 'aria-label': 'Previous clip' });
+  const buttonPreviousImg = createTag('img', { class: 'video-player-button-previous-img', src: '/express/code/icons/adobe-express-video-previous.svg', alt: '' });
   const buttonNext = createTag('a', { class: 'video-player-button-next button accent', href: '#' });
   const videoListWrapper = createTag('div', { class: 'video-player-video-list-wrapper' });
   const videoListHeading = createTag('p', { class: 'video-player-video-list-heading' });

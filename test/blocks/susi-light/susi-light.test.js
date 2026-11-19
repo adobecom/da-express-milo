@@ -284,6 +284,12 @@ describe('Susi-light', async () => {
       const component = blockWithEduContext.querySelector('susi-sentry-light');
       expect(component.authParams.dctx_id).to.equal(DCTX_ID_MAP['context-edu'].stage);
     });
+    it('has stage and prod ids for every context', () => {
+      Object.entries(DCTX_ID_MAP).forEach(([context, ids]) => {
+        expect(ids.stage, `${context} stage`).to.match(/^v:2,/);
+        expect(ids.prod, `${context} prod`).to.match(/^v:2,/);
+      });
+    });
   });
 
   describe('susi-light simplified color variant', () => {
@@ -304,6 +310,65 @@ describe('Susi-light', async () => {
       expect(url.searchParams.get('feature-enable')).to.equal('colors-product-entry');
       expect(url.searchParams.get('entryPoint')).to.equal('color-explorer');
       expect(component.authParams.redirect_uri).not.to.include('#');
+    });
+
+    it('uses code response type when popup is off', () => {
+      const component = colorBlock.querySelector('susi-sentry-light');
+      expect(component.popup).to.be.false;
+      expect(component.authParams.response_type).to.equal('code');
+    });
+
+    it('uses token response type when popup is on', async () => {
+      const redirectKey = '__susiColorRedirect';
+      const popupBlock = document.createElement('div');
+      popupBlock.className = 'susi-light simplified color popup';
+      popupBlock.innerHTML = '<div><div></div></div><div><div>AdobeExpressWeb</div></div><div><div>Sign in</div></div>';
+      document.body.append(popupBlock);
+      window[redirectKey] = 'https://new.express.adobe.com/?colorPalette=test';
+      await decorate(popupBlock);
+      await delay(310);
+      const component = popupBlock.querySelector('susi-sentry-light');
+      expect(component.popup).to.be.true;
+      expect(component.authParams.response_type).to.equal('token');
+      popupBlock.remove();
+    });
+
+    describe('media row with data-video-source', () => {
+      const redirectKey = '__susiColorRedirect';
+      const buildBlock = async (videoSource) => {
+        const block = document.createElement('div');
+        block.className = 'susi-light simplified color';
+        block.innerHTML = `<div><div></div></div><div><div>AdobeExpressWeb</div></div><div><div>Title</div></div><div><div>Mobile title</div></div><div><div><video data-video-source="${videoSource}"></video></div></div>`;
+        document.body.append(block);
+        window[redirectKey] = 'https://new.express.adobe.com/?colorPalette=test';
+        await decorate(block);
+        await delay(310);
+        return block;
+      };
+
+      let matchMediaStub;
+      before(() => {
+        const original = window.matchMedia.bind(window);
+        matchMediaStub = sinon.stub(window, 'matchMedia').callsFake((query) => (
+          query === '(min-width: 1200px)' ? { matches: true } : original(query)
+        ));
+      });
+      after(() => matchMediaStub.restore());
+
+      it('applies a valid video source and hides native controls', async () => {
+        const block = await buildBlock('https://example.com/susi-palette.mp4');
+        const video = block.querySelector('video');
+        expect(video.getAttribute('src')).to.equal('https://example.com/susi-palette.mp4');
+        expect(video.controls).to.be.false;
+        block.remove();
+      });
+
+      it('rejects non-http(s) video sources', async () => {
+        const block = await buildBlock(`${'java'}script:alert(1)`);
+        const video = block.querySelector('video');
+        expect(video.hasAttribute('src')).to.be.false;
+        block.remove();
+      });
     });
   });
 });

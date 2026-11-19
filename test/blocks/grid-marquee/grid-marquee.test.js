@@ -9,7 +9,7 @@ const imports = await Promise.all([
   import('../../../express/code/blocks/grid-marquee/grid-marquee.js'),
   import('../../../express/code/blocks/grid-marquee-hero/grid-marquee-hero.js'),
 ]);
-const { default: decorateGrid } = imports[1];
+const { default: decorateGrid, renderCritical } = imports[1];
 const { default: decorateHero } = imports[2];
 const { getLibs } = await import('../../../express/code/scripts/utils.js');
 const { setConfig } = await import(`${getLibs()}/utils/utils.js`);
@@ -22,7 +22,6 @@ const newAuthoringStaticImage = await readFile({ path: './mocks/new-authoring-st
 describe('Grid Marquee - Legacy vs New Authoring', () => {
   let originalRAF;
   before(() => {
-    window.isTestEnv = true;
     originalRAF = window.requestAnimationFrame;
     window.requestAnimationFrame = (cb) => {
       cb(performance.now());
@@ -32,6 +31,19 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
 
   after(() => {
     window.requestAnimationFrame = originalRAF;
+  });
+
+  it('Legacy mode selects the RTL logo without branding metadata', async () => {
+    const originalDirection = document.documentElement.dir;
+    document.documentElement.dir = 'rtl';
+    try {
+      document.body.innerHTML = oldAuthoring;
+      const block = document.querySelector('.grid-marquee');
+      await decorateGrid(block);
+      expect(block.querySelector('.express-logo').getAttribute('src')).to.equal('/express/code/icons/adobe-express-logo-rtl.svg');
+    } finally {
+      document.documentElement.dir = originalDirection;
+    }
   });
 
   it('Legacy mode (h1 inside grid-marquee) decorates headline and CTAs', async () => {
@@ -88,6 +100,32 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     expect(headlineInGM).to.not.exist;
     expect(h1InGM).to.not.exist;
     expect(cards).to.exist;
+  });
+
+  it('renderCritical paints legacy markup synchronously and init does not re-render it', async () => {
+    document.body.innerHTML = oldAuthoring;
+    const gm = document.querySelector('.grid-marquee');
+
+    expect(renderCritical(gm)).to.be.true;
+    expect(gm.dataset.heroFast).to.equal('rendered');
+    expect(gm.querySelector('.headline .ctas a.button.primaryCTA')).to.exist;
+    const cardCount = gm.querySelectorAll('.cards-container .card').length;
+    expect(cardCount).to.be.greaterThan(0);
+
+    await decorateGrid(gm);
+    expect(gm.querySelectorAll(':scope > .foreground').length).to.equal(1);
+    expect(gm.querySelectorAll('.headline').length).to.equal(1);
+    expect(gm.querySelectorAll('.cards-container .card').length).to.equal(cardCount);
+    expect(renderCritical(gm)).to.be.true;
+    expect(gm.querySelectorAll(':scope > .foreground').length).to.equal(1);
+  });
+
+  it('renderCritical declines new-mode authoring so init keeps its own path', () => {
+    document.body.innerHTML = newAuthoring;
+    const gm = document.querySelector('.grid-marquee');
+    expect(renderCritical(gm)).to.be.false;
+    expect(gm.dataset.heroFast).to.be.undefined;
+    expect(gm.querySelector('.foreground')).to.not.exist;
   });
 
   const waitForVideo = async (root, timeoutMs = 2000) => {
@@ -198,10 +236,6 @@ describe('Grid Marquee - Ratings store icon localization', () => {
     'app-store-ratings-play-store': 'Download on Google Play',
     'app-store-ratings-apple-store': 'Download on the App Store',
   };
-
-  before(() => {
-    window.isTestEnv = true;
-  });
 
   // renderRatings mutates milo's module-level config; reset it so a later test
   // (or reordering) doesn't inherit this block's locale/placeholders.

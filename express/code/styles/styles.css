@@ -61,6 +61,8 @@
 }
 
 :root {
+  --express-fixed-top-height: var(--global-height-nav, 0px); /* stylelint-disable-line declaration-property-value-disallowed-list */
+
   --color-white: #fff;
 
   --color-light-gray: #E9E9E9;
@@ -563,6 +565,22 @@ body[data-device="mobile"] main .floating-button-wrapper[data-audience="mobile"]
   display: block;
 }
 
+body.google-login-prompt-pending main :is(
+  .floating-button-wrapper,
+  .floating-button,
+  .mobile-fork-button,
+  .mobile-fork-button-dismissable,
+  .mobile-fork-button-frictionless,
+  .mobile-fork-button-os-split,
+  .mobile-fork-button-unity
+):not(.mweb-mobile-fork) {
+  visibility: hidden;
+}
+
+body.google-login-prompt-pending main .mweb-mobile-fork .floating-button {
+  visibility: visible;
+}
+
 /* gnav */
 body>header {
   box-sizing: content-box;
@@ -889,15 +907,15 @@ main .dark a.con-button.outline:any-link:focus {
    `.button`s). Colors follow the Express SoT Background/Primary tokens. Only
    color changes; each block keeps its own button geometry.
    Whitelisted blocks only — add a block to every `:is()` list below to opt in:
-   ax-columns, blog-columns, font-bento, comparison-table-v2. */
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+   ax-columns, blog-columns, font-bento, comparison-table-v2, palette-columns. */
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill:any-link {
   color: var(--color-white);
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
 }
 
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible) {
   color: var(--color-white);
   background-color: var(--Background-Primary-Hover);
@@ -907,11 +925,11 @@ main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
 /* On dark surfaces the fill inverts to white. Covers a `.dark` section
    ancestor, a `.dark` block/inner wrapper, and the button-level `.dark` class. */
 main :is(
-  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2),
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2).dark,
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2) .dark
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns) .dark
 ) a:is(.con-button, .button).fill:any-link,
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill.dark:any-link {
   color: var(--Background-Primary-Default);
   background-color: var(--color-white);
@@ -919,11 +937,11 @@ main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
 }
 
 main :is(
-  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2),
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2).dark,
-  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2) .dark
+  .dark :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns),
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns).dark,
+  :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns) .dark
 ) a:is(.con-button, .button).fill:any-link:is(:hover, :active, :focus-visible),
-main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2)
+main :is(.ax-columns, .blog-columns, .font-bento, .comparison-table-v2, .palette-columns)
   a:is(.con-button, .button).fill.dark:any-link:is(:hover, :active, :focus-visible) {
   color: var(--Background-Primary-Hover);
   background-color: var(--color-gray-100);
@@ -1200,6 +1218,34 @@ main .section .content p.button-container {
 
 main .section #hero {
   color: initial;
+}
+
+/* hero-fast: scripts.js rendered the hero block early; show its section before Milo
+   clears data-status. The doubled attribute outranks Milo's
+   `main .section:is([data-status='decorated'], [data-status='pending'])`. */
+main > div[data-hero-fast][data-hero-fast] {
+  display: block;
+  position: relative;
+}
+
+/* hero-fast: C2 renders a 64px nav inside an 80px shell, plus a 46px integrated
+   localnav row below 900px. Hold the final height until Federal inserts nav.localnav. */
+header.c2-gnav-c1-host[data-reserve-c2-gnav]:not(:has(> nav.localnav)) {
+  height: 80px;
+}
+
+@media (max-width: 899px) {
+  header.c2-gnav-c1-host[data-reserve-c2-gnav]:not(:has(> nav.localnav)) {
+    height: 126px;
+  }
+}
+
+/* hero-fast: hold the localnav's height until Milo inserts .feds-localnav after the header
+   (shown below 900px, see Milo styles.css), so the early hero isn't pushed down. */
+@media (max-width: 899px) {
+  header[data-reserve-localnav]:not(:has(+ .feds-localnav)) {
+    margin-bottom: var(--feds-localnav-height);
+  }
 }
 
 /* jank protection for async blocks/sections */
@@ -1642,7 +1688,7 @@ main .section.long-form.long-form-blog .content :is(h3, h4, h5, h6) {
 
 main .section.long-form .content,
 main .section.long-form .content :is(p:not(.button-container, :has(.con-button)), h1, h2, h3, h4, h5, h6) {
-  text-align: left;
+  text-align: start;
 }
 
 main .section.long-form .content,
@@ -1936,7 +1982,8 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   right: 15px;
 }
 
-.icon.icon-adobe-express-logo {
+.icon.icon-adobe-express-logo,
+.icon.icon-adobe-express-logo-rtl {
   width: initial;
   height: 30px;
   padding: 1rem 0 1rem;

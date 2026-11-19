@@ -5,6 +5,13 @@
     <meta name="template" content="404"/>
     <meta name="404" content="feds"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="gnav-foundation" content="c2">
+    <meta name="universal-nav" content="on">
+    <meta name="gnav-dark-font" content="true">
+    <meta name="gnav-source" content="https://main--federal--adobecom.aem.page/federal/site-redesign/gnav">
+    <meta name="gnav-brand-concierge" content="off">
+    <meta name="acom-assistant" content="on">
+    <meta name="jarvis-surface-id" content="adobedotcombc">
     <script src="/express/code/scripts/scripts.js" type="module"></script>
     <link rel="icon" href="data:,">
     <script type="text/javascript">
@@ -137,16 +144,16 @@
 
         let userLocale, redirectURL, redirectMapping, valueInMap;
         const noop = ()=>{};
-        const isColor = /color(\.(stage))?\.adobe\.com|--express-color--adobecom\.aem\.(page|live)/.test(hostname);
+        const isRootContentSite = /(color|print)(\.(stage))?\.adobe\.com|--express-(color|print)--adobecom\.aem\.(page|live)/.test(hostname);
 
-        if (pathname.includes(eduWithExpressPrefix) && search && !isColor) {
+        if (pathname.includes(eduWithExpressPrefix) && search && !isRootContentSite) {
           [_, userLocale] =   search.split('=');
           valueInMap = redirectMap.get(userLocale);
           redirectMapping =  valueInMap ? `${valueInMap}${eduRedirectPath}` : `/${eduRedirectPath}`;
           redirectURL = `${protocol}${adobeDomain}${redirectMapping}`;
           win.location.replace(redirectURL);
         }
-        else if (pathname.includes(eduWithoutPrefix) && search && !isColor) {
+        else if (pathname.includes(eduWithoutPrefix) && search && !isRootContentSite) {
 
           [_, userLocale] =   search.split('=');
           valueInMap = redirectMap.get(userLocale);
@@ -162,8 +169,14 @@
         else {
           [_, userLocale] = pathname.split('/');
           valueInMap = redirectMap.get(userLocale);
-          if (isColor) {
-            valueInMap ? win.location.replace( href.replace(`/${userLocale}`, valueInMap)) : noop;
+          if (isRootContentSite) {
+            if (valueInMap) {
+              const redirect = new URL(href);
+              const mappedPrefix = valueInMap === '/' ? '' : valueInMap.replace(/\/+$/, '');
+              const localizedPath = pathname.slice(`/${userLocale}`.length);
+              redirect.pathname = `${mappedPrefix}${localizedPath || (mappedPrefix ? '/' : '')}` || '/';
+              win.location.replace(redirect.href);
+            }
           } else {
             valueInMap ? win.location.replace( href.replace(`/${userLocale}/`, valueInMap)) : noop;
           }

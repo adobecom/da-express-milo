@@ -277,7 +277,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-200);
-  height: var(--spacing-500);
+  min-height: var(--spacing-500);
   justify-content: space-between;
 }
 
@@ -303,6 +303,64 @@
   align-items: center;
   display: flex;
   gap: var(--spacing-80);
+}
+
+.color-seo-hero-actions-row.is-stacked {
+  display: grid;
+  grid-template-columns: minmax(min-content, max-content) minmax(0, 1fr);
+  align-items: center;
+}
+
+@media (max-width: 599px) {
+  .color-seo-hero-actions-row.is-stacked {
+    grid-template-columns: fit-content(110px) minmax(0, 1fr);
+  }
+}
+
+.color-seo-hero-actions-row.is-stacked .color-seo-hero-dropdown-group,
+.color-seo-hero-actions-row.is-stacked .color-seo-hero-actions-group {
+  display: contents;
+}
+
+.color-seo-hero-actions-row.is-stacked .color-seo-hero-pick-label {
+  grid-column: 1;
+  grid-row: 1;
+  white-space: normal;
+}
+
+.color-seo-hero-actions-row.is-stacked .color-seo-hero-dropdown-group > sp-theme {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  min-width: 0;
+}
+
+.color-seo-hero-actions-row.is-stacked .color-seo-hero-dropdown-group sp-picker.filter-picker {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.color-seo-hero-actions-row.is-stacked .color-seo-hero-icons {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.color-seo-hero-actions-row.is-stacked .color-seo-hero-build-link {
+  grid-column: 2;
+  grid-row: 2;
+  width: auto;
+  min-width: 0;
+}
+
+.color-seo-hero-actions-row.is-stacked.cta-wraps .color-seo-hero-icons {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.color-seo-hero-actions-row.is-stacked.cta-wraps .color-seo-hero-build-link {
+  grid-column: 1 / -1;
+  grid-row: 3;
 }
 
 /* Copy-as-code / Download dropdown menus (shared library-card action menu) */

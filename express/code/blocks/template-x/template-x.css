@@ -175,6 +175,10 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   justify-content: center;
 }
 
+.template-x.fullwidth > .template-x-inner-wrapper {
+  isolation: isolate;
+}
+
 .template-x.horizontal .template-x-inner-wrapper {
   margin-top: 0;
   transition: opacity 0.2s;
@@ -930,8 +934,7 @@ main.with-holiday-templates-banner {
   background: var(--color-gray-100);
   position: sticky;
   z-index: 1;
-  /* might get overridden by inline style with localnav */
-  top: var(--global-height-nav);
+  top: var(--express-fixed-top-height);
 }
 
 .template-x.print .toolbar-wrapper,
@@ -2625,6 +2628,10 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
 
 @media (max-width: 600px) {
   .template-x .toolbar-wrapper {
+    z-index: 9;
+  }
+
+  .template-x .toolbar-wrapper.filter-drawer-open {
     z-index: 11;
   }
   .template-x-wrapper.horizontal {
@@ -2931,7 +2938,7 @@ nav ol.templates-breadcrumbs li:not(:first-child):before {
     position: absolute;
     left: 28px;
     top: 120px;
-    height: calc(100% - var(--global-height-nav));
+    height: calc(100% - var(--express-fixed-top-height));
     max-height: unset;
     overflow: hidden;
     min-width: unset;

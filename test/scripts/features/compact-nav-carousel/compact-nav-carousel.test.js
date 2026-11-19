@@ -22,7 +22,6 @@ function scrollToRight() {
 describe('Compact Nav Carousel', () => {
   let block;
   before(async () => {
-    window.isTestEnv = true;
     document.body.innerHTML = testBody;
     block = document.querySelector('.gen-ai-cards');
     await buildCompactNavCarousel('.card', block, {});

@@ -19,6 +19,7 @@ import {
   getRedirectUri,
   getIconElementDeprecated,
   getContentRoot,
+  trackFixedTopOffset,
 } from './utils.js';
 
 // Add project-wide style path here.
@@ -28,12 +29,13 @@ const STYLES = [];
 const LIBS = '/libs';
 const miloLibs = setLibs(LIBS);
 let jarvisImmediatelyVisible = false;
+let stopFixedTopOffsetTracking;
 const jarvisVisibleMeta = getMetadata('jarvis-immediately-visible')?.toLowerCase();
 const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
   (jarvisVisibleMeta === 'mobile' && !desktopViewport) || (jarvisVisibleMeta === 'desktop' && desktopViewport))) jarvisImmediatelyVisible = true;
 
-const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com', 'helpx.adobe.com'];
+const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com', 'print.adobe.com', 'helpx.adobe.com'];
 
 // Add any config options.
 const CONFIG = {
@@ -49,6 +51,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'www.stage.adobe.com': {
@@ -57,6 +60,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     '--express-color--adobecom.(hlx|aem).(page|live)': {
@@ -65,6 +69,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'color.stage.adobe.com': {
@@ -73,6 +78,25 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'print.adobe.com': 'print.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
+    },
+    '--express-print--adobecom.(hlx|aem).(page|live)': {
+      'print.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
+    },
+    'print.stage.adobe.com': {
+      'print.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
       'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
   },
@@ -318,7 +342,75 @@ window.addEventListener('unhandledrejection', (event) => {
  */
 
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
+document.body.classList.add('google-login-prompt-pending');
 preDecorateSections(document);
+
+// Milo's decorateHeader only runs after personalization, so a hero shown before it would be
+// pushed down when the nav reserves its height. Mirror its C1/C2 className and localnav
+// behavior before revealing the hero.
+function reserveGnavSpace() {
+  const header = document.querySelector('body > header');
+  const headerMeta = getMetadata('header');
+  if (!header || header.className || headerMeta === 'off') return;
+  header.className = headerMeta || 'global-navigation';
+  const isC2GnavOnC1Host = getMetadata('foundation') !== 'c2'
+    && getMetadata('gnav-foundation') === 'c2';
+  if (isC2GnavOnC1Host) {
+    header.classList.add('c2-gnav-c1-host');
+    header.dataset.reserveC2Gnav = '';
+    return;
+  }
+  const gnavSource = getMetadata('gnav-source') || 'localnav-express';
+  const newNav = new URLSearchParams(window.location.search).get('newNav');
+  const newNavEnabled = newNav ? newNav !== 'false' : getMetadata('mobile-gnav-v2') !== 'off';
+  if (newNavEnabled && gnavSource.split('/').pop().startsWith('localnav-')) {
+    header.dataset.reserveLocalnav = '';
+  }
+}
+
+// Tier 1e: paint an opted-in hero block from authored content before Milo's section
+// pipeline runs. Milo's loadBlock later reuses the same module + stylesheet and calls
+// init(), which skips the already-rendered markup and only runs the async enhancements.
+const FAST_HERO_BLOCKS = new Set(['grid-marquee']);
+(function renderFastHero() {
+  if (window.isTestEnv) return;
+  const heroFast = getMetadata('hero-fast')?.trim().toLowerCase();
+  if (heroFast !== 'on' && heroFast !== 'force') return;
+  if (heroFast === 'on') {
+    // Blocking Target or an MEP preview may rewrite section 1: keep today's behavior.
+    if (getMetadata('target')?.trim().toLowerCase() === 'on') return;
+    if (new URLSearchParams(window.location.search).has('mep')) return;
+  }
+  const section = document.querySelector('body > main > div:first-child');
+  const hero = section?.querySelector(':scope > div[class]');
+  const name = hero?.classList[0];
+  if (!FAST_HERO_BLOCKS.has(name)) return;
+  // Revealing the section early is only safe when nothing else in it is still undecorated.
+  const others = [...section.children].filter((el) => el !== hero && !el.matches('.section-metadata'));
+  if (others.length) return;
+
+  // Same absolute URLs Milo's loadBlock uses (config.codeRoot is origin-prefixed), so its
+  // loadStyle dedupes the stylesheet and its import() hits the same module instance.
+  const base = `${window.location.origin}/express/code/blocks/${name}/${name}`;
+  const cssLoaded = new Promise((resolve) => {
+    const link = document.createElement('link');
+    link.setAttribute('rel', 'stylesheet');
+    link.setAttribute('href', `${base}.css`);
+    link.onload = resolve;
+    link.onerror = resolve;
+    document.head.append(link);
+  });
+  Promise.all([import(`${base}.js`), cssLoaded]).then(([mod]) => {
+    if (!hero.isConnected || !mod.renderCritical?.(hero)) return;
+    // Block CSS is scoped to `main .section`; Milo sets the same className later.
+    section.classList.add('section');
+    section.dataset.heroFast = '';
+    reserveGnavSpace();
+  }).catch((e) => {
+    window.lana?.log(`Fast hero render failed: ${e?.message || e}`, { tags: 'hero-fast', severity: 'error' });
+  });
+}());
+
 // LCP image decoration
 const eagerLoad = (img) => {
   img?.setAttribute('loading', 'eager');
@@ -399,6 +491,9 @@ CONFIG.decorateArea = decorateAreaWithLCP;
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
+  if (!document.querySelector('link[data-s2a-tokens="true"]')) {
+    paths.unshift('https://www.adobe.com/libs/c2/styles/s2a-tokens.css');
+  }
   if (getMetadata('theme') !== 'doodlebug') {
     paths.push('/express/code/styles/styles.css');
   }
@@ -407,9 +502,16 @@ CONFIG.decorateArea = decorateAreaWithLCP;
   }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
+    // Match rel=stylesheet only: head.html may <link rel="preload"> the same href.
+    const existing = document.querySelector(`link[rel="stylesheet"][href="${path}"]`);
+    if (existing) return;
+
     const link = document.createElement('link');
     link.setAttribute('rel', 'stylesheet');
     link.setAttribute('href', path);
+    if (path === 'https://www.adobe.com/libs/c2/styles/s2a-tokens.css') {
+      link.dataset.s2aTokens = 'true';
+    }
     document.head.appendChild(link);
   });
 }());
@@ -506,8 +608,22 @@ const listenAlloy = () => {
   }, 3000);
 };
 
+const CONTENT_REPLACE_MARKERS = /\{\{|%7B%7B|default-create-link|Default template (title|text)|Default top templates/;
+// content-replace.js awaits placeholders before decoration. Under /express/templates/ only run
+// it when the page actually has something for it to replace (see content-replace.js).
+function needsContentReplace(main) {
+  if (getMetadata('sheet-powered') === 'Y') return true;
+  if (!window.location.href.includes('/express/templates/')) return false;
+  if (getMetadata('template-search-page') || getMetadata('live') === 'N') return true;
+  if (window.location.pathname.endsWith('/express/templates/default')) return true;
+  if (!main || document.title.includes('{{')) return true;
+  if (main.querySelector('.browse-by-category')) return true;
+  const hashLinkToMetadata = [...main.querySelectorAll('a[href*="#"]')]
+    .some((a) => a.hash.length > 1 && getMetadata(a.hash.slice(1)));
+  return hashLinkToMetadata || CONTENT_REPLACE_MARKERS.test(main.innerHTML);
+}
+
 async function loadPage() {
-  if (window.isTestEnv) return;
   const {
     loadArea,
     loadStyle,
@@ -526,11 +642,9 @@ async function loadPage() {
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
 
-  const googleLoginRedirect = createTag('meta', { name: 'google-login', content: 'desktop' });
-  document.head.append(googleLoginRedirect);
-  // end TODO remove metadata after we go live
-
   const config = setConfig({ ...CONFIG, miloLibs });
+  // Unit tests need the shared Milo config, but none of the production page bootstrap below.
+  if (window.isTestEnv) return;
 
   // Legacy color.adobe.com deeplink redirect
   if (/color-theme-\d+\/?$/.test(window.location.pathname)) {
@@ -547,7 +661,7 @@ async function loadPage() {
   // TODO remove metadata after we go live
   getMetadata('gnav-source') || document.head.append(createTag('meta', { name: 'gnav-source', content: `${config.locale.prefix}/express/localnav-express` }));
 
-  if (getMetadata('sheet-powered') === 'Y' || window.location.href.includes('/express/templates/')) {
+  if (needsContentReplace(document.querySelector('main'))) {
     const { default: replaceContent } = await import('./utils/content-replace.js');
     await replaceContent(document.querySelector('main'));
   }
@@ -591,6 +705,19 @@ async function loadPage() {
   });
 
   await loadArea();
+  stopFixedTopOffsetTracking?.();
+  stopFixedTopOffsetTracking = await trackFixedTopOffset(config);
+
+  // Disable Milo's loader so Express owns Google login on every viewport.
+  const miloGoogleLoginMeta = document.head.querySelector('meta[name="google-login"]')
+    || createTag('meta', { name: 'google-login' });
+  miloGoogleLoginMeta.content = 'off';
+  if (!miloGoogleLoginMeta.isConnected) document.head.append(miloGoogleLoginMeta);
+
+  const expressGoogleLoginMeta = document.head.querySelector('meta[name="express-google-login"]')
+    || createTag('meta', { name: 'express-google-login' });
+  expressGoogleLoginMeta.content = 'on';
+  if (!expressGoogleLoginMeta.isConnected) document.head.append(expressGoogleLoginMeta);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
@@ -600,7 +727,12 @@ async function loadPage() {
   });
 }
 
-loadPage();
+if (window.isTestEnv) {
+  // Ensure test modules importing scripts.js observe initialized config deterministically.
+  await loadPage();
+} else {
+  loadPage();
+}
 
 (async function loadDa() {
   if (!new URL(window.location.href).searchParams.get('dapreview')) return;

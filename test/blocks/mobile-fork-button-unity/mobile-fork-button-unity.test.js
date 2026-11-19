@@ -57,7 +57,6 @@ async function render(userAgent, metadataOverrides = {}) {
 
 describe('Mobile Fork Button Unity', () => {
   beforeEach(async () => {
-    window.isTestEnv = true;
     window.hlx = {};
     window.floatingCta = [{ path: 'default', live: 'Y' }];
     window.placeholders = { 'see-more': 'See More' };

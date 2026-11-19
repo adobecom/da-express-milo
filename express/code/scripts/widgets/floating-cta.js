@@ -8,6 +8,20 @@ const ACCESSIBILITY_HIDDEN_CLASSES = [
   'floating-button--hero-suppressed',
   'floating-button--mini-editor-suppressed',
 ];
+const INLINE_CLASS = 'floating-button--short-viewport-inline';
+
+// WCAG 1.4.10 Reflow: 256 CSS px tall is the floor; leave headroom for the taller C2 nav.
+export const SHORT_VIEWPORT_QUERY = '(max-height: 480px)';
+
+// Blocks whose section holds the floating CTA back until it has scrolled past.
+// Matched by authored block class, so it doesn't depend on block decoration order.
+const REVEAL_AFTER_BLOCKS = ['color-extract'];
+const REVEAL_AFTER_SELECTOR = REVEAL_AFTER_BLOCKS.map((name) => `.${name}`).join(', ');
+
+function getRevealAfterTarget() {
+  const block = document.querySelector(REVEAL_AFTER_SELECTOR);
+  return block?.closest('.section') || block;
+}
 
 const FOCUSABLE_SELECTOR = 'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]';
 const legacyTabIndexes = new WeakMap();
@@ -50,8 +64,10 @@ function trackViewportChanges(update) {
 }
 
 export function syncFloatingCtaAccessibility(floatButtonWrapper) {
-  const isHidden = ACCESSIBILITY_HIDDEN_CLASSES
-    .some((className) => floatButtonWrapper.classList.contains(className));
+  // Inline (static) CTAs are always visible, regardless of other suppression states.
+  const isHidden = !floatButtonWrapper.classList.contains(INLINE_CLASS)
+    && ACCESSIBILITY_HIDDEN_CLASSES
+      .some((className) => floatButtonWrapper.classList.contains(className));
 
   if (isHidden) {
     if (floatButtonWrapper.contains(document.activeElement)) document.activeElement.blur();
@@ -63,6 +79,25 @@ export function syncFloatingCtaAccessibility(floatButtonWrapper) {
     floatButtonWrapper.removeAttribute('inert');
     restoreLegacyFocusableElements(floatButtonWrapper);
   }
+}
+
+export function initShortViewportInline(floatButtonWrapper, sameCtas = []) {
+  if (!window.matchMedia) return null;
+  const mql = window.matchMedia(SHORT_VIEWPORT_QUERY);
+  const update = () => {
+    const inline = mql.matches && document.body.dataset.device === 'desktop';
+    floatButtonWrapper.classList.toggle(INLINE_CLASS, inline);
+    sameCtas.forEach((cta) => cta.classList.toggle('same-fcta', !inline));
+    // main's last child sits directly above the footer
+    const main = document.querySelector('main');
+    if (inline && main && main.lastElementChild !== floatButtonWrapper) {
+      main.append(floatButtonWrapper);
+    }
+    syncFloatingCtaAccessibility(floatButtonWrapper);
+  };
+  mql.addEventListener('change', update);
+  update();
+  return mql;
 }
 
 export const hideScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
@@ -319,9 +354,10 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   [...block.classList].filter((c) => c === 'closed').forEach((c) => floatButtonWrapper.classList.add(c));
   const floatButtonInnerWrapper = createTag('div', { class: 'floating-button-inner-wrapper' });
 
-  // Apply initial suppression before insertion so the CTA cannot animate out from a visible state.
+  // Keep the CTA hidden before insertion so it cannot animate from a visible state.
+  const delayUntilViewportPassed = data.delayUntilViewportPassed || getRevealAfterTarget();
   const miniEditor = document.querySelector('.mini-editor');
-  const shouldDelayFloatingCta = audience === 'mobile' || !!data.delayUntilViewportPassed;
+  const shouldDelayFloatingCta = audience === 'mobile' || !!delayUntilViewportPassed;
   if (audience === 'mobile' && data.enableSuppressGating
     && document.querySelector('.suppress-until-not-visible')) {
     floatButtonWrapper.classList.add('floating-button--suppressed');
@@ -329,7 +365,7 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   if (shouldDelayFloatingCta && miniEditor) {
     floatButtonWrapper.classList.add('floating-button--mini-editor-suppressed');
   }
-  if (shouldDelayFloatingCta && data.delayUntilViewportPassed) {
+  if (shouldDelayFloatingCta && delayUntilViewportPassed) {
     floatButtonWrapper.classList.add('floating-button--hero-suppressed');
   }
 
@@ -399,7 +435,7 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
     delayFloatingCtaUntilViewportPassed(
       floatButtonWrapper,
       floatButton,
-      data.delayUntilViewportPassed,
+      delayUntilViewportPassed,
       restoreButtonPosition,
     );
   }
@@ -530,6 +566,7 @@ export async function createFloatingButton(block, audience, data, wrapperClasses
   }
 
   decorateLinks(floatButtonWrapper);
+  initShortViewportInline(floatButtonWrapper, sameUrlCTAs);
   return floatButtonWrapper;
 }
 

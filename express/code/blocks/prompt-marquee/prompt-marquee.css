@@ -24,10 +24,10 @@
 .prompt-marquee .column {
   padding-left: 0;
   padding-right: 0;
-  text-align: left;
+  text-align: start;
   display: flex;
   flex-direction: column;
-  justify-content: left;
+  justify-content: flex-start;
   gap: var(--spacing-100);
 }
 
@@ -71,7 +71,7 @@
 }
 
 .prompt-marquee .cta-with-input .prompt-marquee-input {
-  font-family: var(--body-font-family, 'Adobe Clean', 'Helvetica Neue', Helvetica, Arial, sans-serif); /* stylelint-disable-line declaration-property-value-disallowed-list */
+  font-family: var(--body-font-family);
   font-size: var(--body-font-size-m);
   line-height: 1.4;
 }
@@ -132,6 +132,11 @@ main .prompt-marquee  .column .cta-with-input  .con-button {
   text-overflow: ellipsis;
   white-space: nowrap;
   padding: 0 var(--spacing-250);
+}
+
+.prompt-marquee:dir(rtl) .prompt-marquee-input {
+  direction: rtl;
+  text-align: start;
 }
 
 .prompt-marquee-input-wrapper {

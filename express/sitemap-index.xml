@@ -123,34 +123,4 @@
   <sitemap>
     <loc>https://www.adobe.com/uk/express/templates/sitemap.xml</loc>
   </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/br/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/de/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/es/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/fr/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/it/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/jp/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/kr/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/nl/express/colors/sitemap.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>https://www.adobe.com/tw/express/colors/sitemap.xml</loc>
-  </sitemap>
 </sitemapindex>

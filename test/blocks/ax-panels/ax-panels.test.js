@@ -46,6 +46,33 @@ describe('ax-panels', () => {
     expect(isSelected(tabs[2])).to.be.true;
   });
 
+  it('does not append missing icons as text', async () => {
+    const markup = await readFile({ path: './mocks/body.html' });
+    const main = new DOMParser().parseFromString(markup, 'text/html').querySelector('main');
+    main.querySelectorAll('.icon').forEach((icon) => icon.remove());
+    const iconlessBlock = main.querySelector('.ax-panels');
+    await decorate(iconlessBlock);
+    const tabs = [...iconlessBlock.querySelectorAll('[role=tab]')];
+    tabs.forEach((tab) => expect(tab.textContent).to.not.include('null'));
+  });
+
+  it('handles RTL keyboard interactions', () => {
+    const tabs = [...block.querySelectorAll('[role=tab]')];
+    const tablist = block.querySelector('[role=tablist]');
+    tablist.dir = 'rtl';
+    try {
+      tabs[0].click();
+      tablist.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+      expect(isSelected(tabs[1])).to.be.true;
+      tablist.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(isSelected(tabs[0])).to.be.true;
+      tablist.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(isSelected(tabs[tabs.length - 1])).to.be.true;
+    } finally {
+      tablist.removeAttribute('dir');
+    }
+  });
+
   it('handles keyboard interactions', async () => {
     const tabs = [...block.querySelectorAll('[role=tab]')];
     const tablist = block.querySelector('[role=tablist]');

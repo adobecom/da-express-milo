@@ -4,8 +4,6 @@ import sinon from 'sinon';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
 
-window.isTestEnv = true;
-
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
 const { getLibs } = imports[0];
 const { default: BlockMediator } = await import('../../../express/code/scripts/block-mediator.min.js');
@@ -20,7 +18,6 @@ document.body.innerHTML = await readFile({ path: './mocks/body.html' });
 describe('Search Marquee', () => {
   const block = document.querySelector('.search-marquee');
   before(async () => {
-    window.isTestEnv = true;
     await decorate(block);
   });
   it('has a hero h1', () => {
