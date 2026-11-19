@@ -332,5 +332,43 @@ describe('Susi-light', async () => {
       expect(component.authParams.response_type).to.equal('token');
       popupBlock.remove();
     });
+
+    describe('media row with data-video-source', () => {
+      const redirectKey = '__susiColorRedirect';
+      const buildBlock = async (videoSource) => {
+        const block = document.createElement('div');
+        block.className = 'susi-light simplified color';
+        block.innerHTML = `<div><div></div></div><div><div>AdobeExpressWeb</div></div><div><div>Title</div></div><div><div>Mobile title</div></div><div><div><video data-video-source="${videoSource}"></video></div></div>`;
+        document.body.append(block);
+        window[redirectKey] = 'https://new.express.adobe.com/?colorPalette=test';
+        await decorate(block);
+        await delay(310);
+        return block;
+      };
+
+      let matchMediaStub;
+      before(() => {
+        const original = window.matchMedia.bind(window);
+        matchMediaStub = sinon.stub(window, 'matchMedia').callsFake((query) => (
+          query === '(min-width: 1200px)' ? { matches: true } : original(query)
+        ));
+      });
+      after(() => matchMediaStub.restore());
+
+      it('applies a valid video source and hides native controls', async () => {
+        const block = await buildBlock('https://example.com/susi-palette.mp4');
+        const video = block.querySelector('video');
+        expect(video.getAttribute('src')).to.equal('https://example.com/susi-palette.mp4');
+        expect(video.controls).to.be.false;
+        block.remove();
+      });
+
+      it('rejects non-http(s) video sources', async () => {
+        const block = await buildBlock(`${'java'}script:alert(1)`);
+        const video = block.querySelector('video');
+        expect(video.hasAttribute('src')).to.be.false;
+        block.remove();
+      });
+    });
   });
 });

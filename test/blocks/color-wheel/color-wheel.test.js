@@ -2,8 +2,6 @@
 
 import { expect } from '@esm-bundle/chai';
 
-window.isTestEnv = true;
-
 const {
   normalizeSwatchHexes,
   harmonyRulesForSwatchCount,

@@ -14,10 +14,6 @@ const withLogo = await readFile({ path: './mocks/with-logo.html' });
 const coolDarkBg = await readFile({ path: './mocks/cool-dark-bg.html' });
 
 describe('Banner Background', () => {
-  before(() => {
-    window.isTestEnv = true;
-  });
-
   it('Banner background exists', async () => {
     document.body.innerHTML = basic;
     const banner = document.querySelector('.banner-bg');

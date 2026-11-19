@@ -12,7 +12,6 @@ const clock = sinon.useFakeTimers({ shouldAdvanceTime: true });
 
 describe('Collapsible Card', () => {
   before(async () => {
-    window.isTestEnv = true;
     const collapsibleCard = document.querySelector('.collapsible-card');
     await decorate(collapsibleCard);
   });

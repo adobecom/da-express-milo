@@ -2,7 +2,6 @@ import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
-window.isTestEnv = true;
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
 const { getLibs } = imports[0];
 
@@ -16,7 +15,6 @@ describe('App Ratings', () => {
   before(async () => {
     const body = await readFile({ path: './mocks/body.html' });
     document.body.innerHTML = body;
-    window.isTestEnv = true;
     window.placeholders = {
       'app-store-ratings': '4.9, 233.8k ratings; 4.6, 117k ratings; https://adobesparkpost.app.link/GJrBPFUWBBb',
       'app-store-stars': 'Stars',
