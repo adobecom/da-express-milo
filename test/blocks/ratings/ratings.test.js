@@ -466,3 +466,60 @@ describe('Ratings Block - slider interactions', () => {
     expect(block.querySelector('.no-slider')).to.exist;
   });
 });
+
+describe('Ratings Block - hidden comment controls (WCAG 2.4.3)', () => {
+  let block;
+
+  const rate = (value) => {
+    const range = block.querySelector('input[type=range]');
+    range.value = value;
+    range.dispatchEvent(new Event('change'));
+  };
+
+  beforeEach(async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/body.html' });
+    block = document.querySelector('.ratings');
+    localStorage.clear();
+    await decorate(block);
+    await waitForSlider(block);
+  });
+
+  afterEach(() => {
+    sinon.restore();
+    if (window.ratingSubmitCountdown) {
+      clearInterval(window.ratingSubmitCountdown);
+      window.ratingSubmitCountdown = null;
+    }
+  });
+
+  it('starts with the comment box and submit inert', () => {
+    const commentBox = block.querySelector('.slider-comment');
+    const submit = block.querySelector('input[type=submit]');
+    expect(commentBox.hasAttribute('inert')).to.be.true;
+    expect(submit.hasAttribute('inert')).to.be.true;
+    block.querySelector('textarea').focus();
+    expect(document.activeElement).to.not.equal(block.querySelector('textarea'));
+  });
+
+  it('reveals both controls for a feedback-required rating', () => {
+    rate(3);
+    expect(block.querySelector('.slider-comment').hasAttribute('inert')).to.be.false;
+    expect(block.querySelector('input[type=submit]').hasAttribute('inert')).to.be.false;
+  });
+
+  it('keeps submit inert during the countdown state and re-inerts after 3 to 4', () => {
+    rate(4);
+    expect(block.querySelector('.slider-comment').hasAttribute('inert')).to.be.false;
+    expect(block.querySelector('input[type=submit]').hasAttribute('inert')).to.be.true;
+    rate(3);
+    expect(block.querySelector('input[type=submit]').hasAttribute('inert')).to.be.false;
+    rate(4);
+    expect(block.querySelector('input[type=submit]').hasAttribute('inert')).to.be.true;
+  });
+
+  it('reveals submit when the textarea receives focus', () => {
+    rate(4);
+    block.querySelector('textarea').dispatchEvent(new Event('focus'));
+    expect(block.querySelector('input[type=submit]').hasAttribute('inert')).to.be.false;
+  });
+});
