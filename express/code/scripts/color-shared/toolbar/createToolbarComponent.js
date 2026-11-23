@@ -146,12 +146,12 @@ async function openInExpress(palette, prodBaseUrl) {
   window.open(await buildExpressUrl(palette, prodBaseUrl), '_blank', 'noopener noreferrer');
 }
 
-async function handleOpenInExpress({ id, name, colors }, prodBaseUrl, inModal) {
+async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
   const isSignedIn = await checkIsSignedIn();
   if (!isSignedIn) {
     const { setSusiColorRedirect } = await import('../utils/susiRedirect.js');
     setSusiColorRedirect(await buildExpressUrl({ id, name, colors }, prodBaseUrl));
-    const susiTarget = inModal ? null : getMetadata('color-palette-susi-target');
+    const susiTarget = getMetadata('color-palette-susi-target');
     await triggerSignInFlow(susiTarget ? { susiTarget } : {});
     return;
   }
@@ -717,7 +717,6 @@ export function createToolbar(options) {
     editPaletteLink = null,
     getLibraryContext,
     onCTA,
-    inModal = false,
     onEditClick: customOnEditClick,
     showEditLabel = false,
     actionButtons: customActionButtons,
@@ -844,7 +843,7 @@ export function createToolbar(options) {
   main.appendChild(actionContainer);
 
   const ctaBtn = buildCTAButton(getCTAText, () => {
-    (onCTA ?? ((p) => handleOpenInExpress(p, t.ctaBaseUrl, inModal)))(getPaletteWithName());
+    (onCTA ?? ((p) => handleOpenInExpress(p, t.ctaBaseUrl)))(getPaletteWithName());
     emit('cta', { palette: getPaletteWithName() });
   });
   main.appendChild(ctaBtn);

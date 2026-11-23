@@ -719,12 +719,34 @@ describe('createToolbar', () => {
       consumeSusiColorRedirect();
     });
 
-    async function clickCTA() {
-      const toolbar = createToolbar(defaultOptions({ onCTA: undefined }));
+    async function clickCTA(options = {}) {
+      const toolbar = createToolbar(defaultOptions({ onCTA: undefined, ...options }));
       document.body.appendChild(toolbar.element);
       toolbar.element.querySelector('sp-button[variant="accent"]').click();
       await new Promise((r) => setTimeout(r, 100));
     }
+
+    [false, true].forEach((inModal) => {
+      it(`opens the contextual color SUSI ${inModal ? 'from a modal' : 'outside a modal'}`, async () => {
+        window.adobeIMS = {
+          isSignedInUser: sinon.stub().returns(false),
+        };
+        const meta = document.createElement('meta');
+        meta.name = 'color-palette-susi-target';
+        meta.content = '/express/fragments/susi-modals/color-palette-susi#susi-color-palette';
+        document.head.appendChild(meta);
+        window.mockGetModalCalls = [];
+
+        await clickCTA({ inModal });
+
+        expect(window.mockGetModalCalls).to.deep.equal([{
+          id: 'susi-color-palette',
+          path: '/express/fragments/susi-modals/color-palette-susi',
+        }]);
+        meta.remove();
+        delete window.mockGetModalCalls;
+      });
+    });
 
     it('does not open Express when user is not signed in', async () => {
       window.adobeIMS = {
