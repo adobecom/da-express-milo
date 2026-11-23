@@ -185,27 +185,6 @@ export async function getRedirectUri() {
 
 export const yieldToMain = () => new Promise((resolve) => { setTimeout(resolve, 0); });
 
-let secureUidCounter = 0;
-
-// Crypto-backed unique IDs for DOM id/aria wiring. Math.random() trips CodeQL's
-// insecure-randomness rule even in non-security contexts like this one.
-export function createSecureUid(prefix = 'uid') {
-  const cryptoObj = window.crypto;
-  if (cryptoObj?.randomUUID) {
-    return `${prefix}-${cryptoObj.randomUUID().replace(/-/g, '').slice(0, 12)}`;
-  }
-  if (cryptoObj?.getRandomValues) {
-    const bytes = new Uint8Array(8);
-    cryptoObj.getRandomValues(bytes);
-    const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-    return `${prefix}-${token.slice(0, 12)}`;
-  }
-
-  // Last-resort fallback for unusual runtimes that do not expose Web Crypto.
-  secureUidCounter += 1;
-  return `${prefix}-${Date.now().toString(36)}${secureUidCounter.toString(36)}`;
-}
-
 export function createTag(tag, attributes, html, options = {}) {
   const el = document.createElement(tag);
   if (html) {
@@ -1080,6 +1059,10 @@ export function hasContent(value) {
 
 export function getContentRoot(location) {
   const { hostname } = location || window.location;
-  if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
+  const rootContentHosts = [
+    '--express-color--', 'color.stage.adobe.com', 'color.adobe.com',
+    '--express-print--', 'print.stage.adobe.com', 'print.adobe.com',
+  ];
+  if (rootContentHosts.some((i) => hostname.includes(i))) return '';
   return '/express';
 }

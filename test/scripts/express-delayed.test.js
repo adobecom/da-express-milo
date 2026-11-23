@@ -46,6 +46,7 @@ describe('Express delayed pre-warm', () => {
     window.dispatchEvent(new Event('load'));
     clock.tick(65000);
     document.querySelectorAll(frameSelector).forEach((element) => element.remove());
+    document.querySelectorAll('meta[name="express-google-login"]').forEach((element) => element.remove());
     metadata.remove();
     sessionStorage.removeItem(sessionKey);
     localStorage.removeItem(lockKey);
@@ -98,6 +99,17 @@ describe('Express delayed pre-warm', () => {
 
   it('does not wait for load when the page has already loaded', async () => {
     await loadDelayed();
+    expect(getFrame()).not.to.equal(null);
+  });
+
+  it('still pre-warms when Google login fails to load', async () => {
+    const googleMetadata = document.createElement('meta');
+    googleMetadata.name = 'express-google-login';
+    googleMetadata.content = 'on';
+    document.head.append(googleMetadata);
+
+    await loadDelayed();
+
     expect(getFrame()).not.to.equal(null);
   });
 
