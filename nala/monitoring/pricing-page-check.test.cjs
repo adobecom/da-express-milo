@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 
 /**
  * Page: https://www.adobe.com/express/pricing?martech=off
- * Purpose: Assert the pricing fields in Pricing Cards have valid values.
+ * Purpose: Wait for visible merch-card or legacy pricing fields to render valid values.
  */
 
 const BASE_URL = 'https://www.adobe.com';
@@ -39,24 +39,16 @@ test.describe('Pricing Page Check Synthetic Monitoring', () => {
         await expect(pageLoadIndicator).toBeAttached({ timeout: 30000 });
       });
 
-      await test.step('Validate pricing fields are not undefined', async () => {
-        // Find all price elements
-        const priceElements = page.locator('.pricing-price');
+      await test.step('Wait for pricing to render and validate values', async () => {
+        // Check placeholders in displayed cards, not hidden alternate offers.
+        const priceElements = page.locator('merch-card:visible [is="inline-price"][data-template="price"], .pricing-price');
+        await expect(priceElements.first()).toBeAttached({ timeout: 30000 });
         const count = await priceElements.count();
 
-        // Ensure at least some price elements exist
-        expect(count).toBeGreaterThan(0);
-
-        // Check each price field
         for (let i = 0; i < count; i++) {
           const element = priceElements.nth(i);
-          const innerText = await element.innerText();
-
-          // Assert that the value is not "undefined"
-          expect(innerText).not.toBe('undefined');
-
-          // Additional validation: ensure the text is not empty
-          expect(innerText.trim()).not.toBe('');
+          await expect(element).toHaveText(/\d/, { timeout: 30000 });
+          await expect(element).not.toContainText(/undefined/i);
         }
       });
     });
